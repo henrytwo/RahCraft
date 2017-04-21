@@ -107,7 +107,7 @@ while True:
                 block_size += 4
 
             elif e.button == 5:
-                block_size -= 4
+                block_size = max(8, block_size-4)
 
 
 
