@@ -25,7 +25,7 @@ itemLib = {}
 #If world doesn't exist
 if not os.path.isfile('world.pkl'):
     # Generate a new world with the function
-    world = generate_world(input("Seed:\n"),1,3,10,10000,100)
+    world = generate_world(input("Seed:\n"), 1, 3, 10, 10000, 100)
 
     #Dumps world to file
     with open('world.pkl', 'wb') as file:
@@ -129,6 +129,7 @@ if __name__ == '__main__':
         config = config.read().split("\n")
         host = config[0]
         port = int(config[1])
+
 
     #world = World()
 
