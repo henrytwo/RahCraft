@@ -76,7 +76,7 @@ while True:
         # Clear the screen
         #screen.fill((30,144,255))
         for y in range(500):
-            draw.line(screen,(max(30-y,0),max(144-y,0),max(255-y,0)),(0,y),(800,0))
+            draw.line(screen,(max(30-y,0),max(144-y,100),max(255-y,100)),(0,y),(800,y))
 
         # Redraw the level onto the screen
         for x in range(0,800,block_size): #Render blocks
@@ -91,7 +91,7 @@ while True:
                     draw_block(x,y,block_size,(150,150,150),(100,100,100))
 
 
-        clock.tick()
+        clock.tick(120)
         display.update()
         continue
 
