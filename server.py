@@ -6,6 +6,8 @@ from collections import deque
 from numpy import *
 import pickle
 import glob
+from generation import *
+import os.path
 
 players = {}
 playernumber = 1
@@ -19,16 +21,20 @@ PlayerUUID = {}
 sendQueue = Queue()
 messageQueue = Queue()
 itemLib = {}
-'''
-while True:
-    command = input("Do you want to create a new world?[Y/N]:").lower()
-    #generate_world(world_seed, maxHeight, minX, maxX, w, h)
-    #world = generate_world(input("Seed:\n"), 1, 3, 10, 10000, 100)
-    if command == 'y':
-        seed = input("Enter a seed[Don't enter a seed to randomize]: ")
-        try:
-            height = int(input("Enter the max world height[Default]: "))
-'''
+
+#If world doesn't exist
+if not os.path.isfile('world.pkl'):
+    # Generate a new world with the function
+    world = generate_world(input("Seed:\n"),1,3,10,10000,100)
+
+    #Dumps world to file
+    with open('world.pkl', 'wb') as file:
+        dump(world, file)
+
+else:
+    world = pickle.load(open('world.pkl', 'rb'))
+
+
 
 class Player(object):
     global PlayerData, PlayerUUID, itemLib
@@ -117,8 +123,12 @@ def recieveMessage(messageQueue, server):
 
 
 if __name__ == '__main__':
-    host = "127.0.0.1"
-    port = 4909
+
+    with open("config","r") as config:
+
+        config = config.read().split("\n")
+        host = config[0]
+        port = int(config[1])
 
     #world = World()
 
