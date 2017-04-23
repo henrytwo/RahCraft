@@ -140,11 +140,15 @@ if __name__ == '__main__':
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
 
+    print("Server binded to %s:%i"%(host,port))
+
     reciever = Process(target=recieveMessage, args=(messageQueue, server))
     reciever.start()
 
     sender = Process(target=playerSender, args=(sendQueue,server))
     sender.start()
+
+
 
     while True:
         pickledmessage = messageQueue.get()
