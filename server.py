@@ -91,10 +91,13 @@ class Player(object):
 
     def save(self):
         self.PlayerData[self.UUID] = [(self.x, self.y), self.inventory, self.health, self.hunger, self.satura]
-'''
+
+
 class World:
-    def __init__(self):
-        self.overworld = self.loadworld()
+    def __init__(self, worldname):
+        self.overworld = self.loadworld(worldname)
+
+    def loadworld(self, worldn):
 
     def getworld(self, x, y):
         return self.overworld[x-10:x+10, y-10,y+10]
@@ -104,7 +107,8 @@ class World:
 
     def placeblock(self, x, y, blocktype):
         slef.overworld[x, y] = blocktype
-'''
+
+
 def playerSender(sendQueue, server):
     print('Sender running...')
 
