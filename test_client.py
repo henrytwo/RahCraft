@@ -11,8 +11,8 @@ clock = time.Clock()
 # ----- Pre-Gameloop Preparation
 # Make the block size and block offset
 block_size = 20
-y_offset = 0
-x_offset = 0
+y_offset = 20 * block_size
+x_offset = 5000 * block_size
 
 def draw_block(x,y,size,colour,colourIn):
     draw.rect(screen,colour,(x - x_offset%20,y - y_offset%20,block_size,block_size))
@@ -43,10 +43,10 @@ while True:
 
 
         if keys[K_w] and y_offset//block_size>0:
-                y_offset -= 80//block_size
+                y_offset -= 100//block_size
                 
         if keys[K_s] and y_offset//block_size<75:
-                y_offset += 80//block_size
+                y_offset += 100//block_size
 
 
         mb = mouse.get_pressed()

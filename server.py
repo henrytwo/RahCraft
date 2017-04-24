@@ -98,7 +98,7 @@ class World:
         self.overworld = self.loadworld(worldname)
 
     def loadworld(self, worldn):
-
+        pass
     def getworld(self, x, y):
         return self.overworld[x-10:x+10, y-10,y+10]
 
