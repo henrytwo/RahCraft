@@ -1,6 +1,8 @@
 import pickle
 import socket
 from multiprocessing import *
+import sys
+import numpy as np
 
 sendQueue = Queue()
 
@@ -16,8 +18,9 @@ def recieveMessage(server):
     print('Client is ready for connection!')
 
     while True:
-        msg = server.recvfrom(1024)
-        print((pickle.loads(msg[0]), msg[1]))
+        msg = server.recvfrom(4096)
+        print('Recieved data:')
+        print(pickle.loads(msg[0]), msg[1])
 
 
 if __name__ == '__main__':
@@ -28,17 +31,17 @@ if __name__ == '__main__':
         worldname = config[2]
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    server.bind((host, port))
 
     print("Server binded to %s:%i" % (host, port))
+    
+    server.sendto(pickle.dumps([0, 'Henry']), (host, port))
 
-    reciever = Process(target=recieveMessage, args=server)
+    reciever = Process(target=recieveMessage, args=(server,))
     reciever.start()
 
     sender = Process(target=playerSender, args=(sendQueue, server))
     sender.start()
-    sendQueue.put(pickle.dumps([0, 'Henry']))
 
     while True:
-        msg = input("Enter command seperated by space: ")
+        msg = input()
         sendQueue.put((msg.split(), (host, port)))

@@ -1,6 +1,5 @@
 import socket
 import uuid
-from threading import *
 from multiprocessing import *
 from collections import deque
 from numpy import *
