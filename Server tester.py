@@ -1,8 +1,9 @@
 import pickle
 import socket
+from threading import *
 from multiprocessing import *
 import sys
-import numpy as np
+from numpy import *
 
 sendQueue = Queue()
 
@@ -18,9 +19,10 @@ def recieveMessage(server):
     print('Client is ready for connection!')
 
     while True:
-        msg = server.recvfrom(4096)
+        msg = server.recvfrom(2048)
         print('Recieved data:')
         print(pickle.loads(msg[0]), msg[1])
+        sys.stdout.flush()
 
 
 if __name__ == '__main__':
@@ -44,4 +46,4 @@ if __name__ == '__main__':
 
     while True:
         msg = input()
-        sendQueue.put((msg.split(), (host, port)))
+        sendQueue.put((list(map(int, msg.split())), (host, port)))

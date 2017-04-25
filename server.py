@@ -114,6 +114,7 @@ def playerSender(sendQueue, server):
 
     while True:
         tobesent = sendQueue.get()
+        print("sent to",tobesent[1])
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
