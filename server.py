@@ -114,7 +114,6 @@ def playerSender(sendQueue, server):
 
     while True:
         tobesent = sendQueue.get()
-        print("sent to",tobesent[1])
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
@@ -124,7 +123,6 @@ def recieveMessage(messageQueue, server):
     while True:
         msg = server.recvfrom(1024)
         messageQueue.put((pickle.loads(msg[0]),msg[1]))
-        print(messageQueue)
 
 
 if __name__ == '__main__':
