@@ -80,7 +80,7 @@ if __name__ == '__main__':
             display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(block_size))
 
             keys = key.get_pressed()
-S
+
             if keys[K_d]:
                 x_offset += 80 // block_size
                 updated = True
