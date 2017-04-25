@@ -24,9 +24,6 @@ class Player(object):
     def movement(self):
         pass
 
-    def update(self):
-        pass
-
     def senddata(self):
         pass
 

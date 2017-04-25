@@ -20,7 +20,7 @@ def draw_block(x,y,size,colour,colourIn):
 
 # Create the game screen
 display.set_caption("SquareRoot")
-screen = display.set_mode((800, 500))
+screen = display.set_mode((800, 520))
 
 # ----- Gameloop
 while True:

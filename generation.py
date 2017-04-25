@@ -1,5 +1,6 @@
 from random import *
 from pickle import *
+import numpy as np
 
 def generate_tree(bx,by,world):
 
@@ -7,13 +8,13 @@ def generate_tree(bx,by,world):
 
         
     for y in range(height):
-        world[bx][by-y] = "2"
+        world[bx][by-y] = 2
 
 
     for x in range(randint(3,5)):
         for y in range(randint(2,4)):
-            world[bx - x//2][by - y - height] = "1"
-            world[bx + x//2][by - y - height] = "1"
+            world[bx - x//2][by - y - height] = 1
+            world[bx + x//2][by - y - height] = 1
 
     return world
 
@@ -29,7 +30,7 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
     seed(world_seed)
     
     # Create a blank map (2D list filled with '0' strings (50 x 5000 list))
-    world = [["0" for y in range(h)] for x in range(w)]
+    world = [[0 for y in range(h)] for x in range(w)]
     # Generates the random values for the terrain construction
     terrain = [randrange(30)+10 for _ in range(w)]
 
@@ -66,18 +67,18 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
             # Generates structures
             if y > terrain[x]:
                 if y - terrain[x] == 1:
-                    world[x][y] = "1"
+                    world[x][y] = 1
 
                     if randint(0,10) == 0 and x + 10 < w:
                         world = generate_tree(x,y - 1,world)
 
                 elif y - terrain[x] < randint(3,8):
-                    world[x][y] = "2"
+                    world[x][y] = 2
 
                 else:
-                    world[x][y] = "3"
+                    world[x][y] = 3
 
 
     # Return the world object for use
-    return world
+    return np.array(world)
 

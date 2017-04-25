@@ -1,6 +1,5 @@
 import socket
 import uuid
-from threading import *
 from multiprocessing import *
 from collections import deque
 from numpy import *
@@ -98,15 +97,16 @@ class World:
         self.overworld = self.loadworld(worldname)
 
     def loadworld(self, worldn):
-        pass
+        return pickle.load(open(worldn+".pkl","rb"))
+
     def getworld(self, x, y):
-        return self.overworld[x-10:x+10, y-10,y+10]
+        return self.overworld[x-20:x+20, y-13:y+13]
 
     def breakblock(self, x, y):
         self.overworld[x, y] = 0
 
     def placeblock(self, x, y, blocktype):
-        slef.overworld[x, y] = blocktype
+        self.overworld[x, y] = blocktype
 
 
 def playerSender(sendQueue, server):
@@ -114,6 +114,7 @@ def playerSender(sendQueue, server):
 
     while True:
         tobesent = sendQueue.get()
+        print("sent to",tobesent[1])
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
@@ -133,9 +134,10 @@ if __name__ == '__main__':
         config = config.read().split("\n")
         host = config[0]
         port = int(config[1])
+        worldname = config[2]
 
 
-    #world = World()
+    world = World(worldname)
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
@@ -193,7 +195,7 @@ if __name__ == '__main__':
             # Data: [4, <cordx>, <cordy>]
             world.placeblock(message[1], message[2], message[3])
 
-            for i in player:
+            for i in players:
                 sendQueue.put((message, i))
 
         elif command == 5:
