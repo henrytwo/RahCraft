@@ -57,7 +57,7 @@ if __name__ == '__main__':
     updated = False
 
     sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
-    world = pickle.loads(server.recvfrom(8192)[0])
+    world = pickle.loads(server.recvfrom(16384)[0])
 
     # ----- Gameloop
 
@@ -97,7 +97,7 @@ if __name__ == '__main__':
 
             if updated:
                 sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
-                world = pickle.loads(server.recvfrom(8192)[0])
+                world = pickle.loads(server.recvfrom(16384)[0])
 
             mb = mouse.get_pressed()
 
