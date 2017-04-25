@@ -17,8 +17,8 @@ def playerSender(sendQueue, server):
 
 
 def draw_block(x, y, size, colour, colourIn, screen):
-    draw.rect(screen, colour, (x, y, block_size, block_size))
-    draw.rect(screen, colourIn, (x, y, block_size, block_size), 1)
+    draw.rect(screen,colour,(x - x_offset%20,y - y_offset%20,block_size,block_size))
+    draw.rect(screen,colourIn,(x - x_offset%20,y - y_offset%20,block_size,block_size),1)
 
 
 # Create the game screen
@@ -56,8 +56,8 @@ if __name__ == '__main__':
     sender.start()
     updated = False
 
-    sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], ('127.0.0.1', 5175)])
-    world = pickle.loads(server.recvfrom(8192)[0])
+    sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
+    world = pickle.loads(server.recvfrom(16384)[0])
 
     # ----- Gameloop
 
@@ -82,28 +82,29 @@ if __name__ == '__main__':
             keys = key.get_pressed()
 
             if keys[K_d]:
-                x_offset += 80 // block_size
+                x_offset += 160 // block_size
                 updated = True
             if keys[K_a]:
-                x_offset -= 80 // block_size
+                x_offset -= 160 // block_size
                 updated = True
 
             if keys[K_w]:
-                y_offset -= 80 // block_size
+                y_offset -= 160 // block_size
                 updated = True
             if keys[K_s]:
-                y_offset += 80 // block_size
+                y_offset += 160 // block_size
                 updated = True
 
             if updated:
-                sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], ('127.0.0.1', 5175)])
-                world = pickle.loads(server.recvfrom(8192)[0])
+                sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
+                world = pickle.loads(server.recvfrom(16384)[0])
 
             mb = mouse.get_pressed()
 
             mx, my = mouse.get_pos()
 
-            screen.fill((30, 144, 255))
+            for y in range(500):
+                draw.line(screen, (max(30 - y, 0), max(144 - y, 100), max(255 - y, 100)), (0, y), (800, y))
 
             # Clear the screen
             # Redraw the level onto the screen
