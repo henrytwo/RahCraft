@@ -15,8 +15,8 @@ y_offset = 0
 x_offset = 0
 
 def draw_block(x,y,size,colour,colourIn):
-    draw.rect(screen,colour,(x,y,block_size,block_size))
-    draw.rect(screen,colourIn,(x,y,block_size,block_size),1)
+    draw.rect(screen,colour,(x - x_offset%20,y - y_offset%20,block_size,block_size))
+    draw.rect(screen,colourIn,(x - x_offset%20,y - y_offset%20,block_size,block_size),1)
 
 # Create the game screen
 display.set_caption("SquareRoot")
@@ -29,18 +29,7 @@ while True:
         if e.type == QUIT:
             with open('world.pkl', 'wb') as f:
                 pickle.dump(world, f)
-
             break
-
-        '''
-            elif e.type == MOUSEBUTTONDOWN:
-                if e.button == 4:
-                    block_size += 4
-                    
-                elif e.button == 5:
-                    block_size -= 4
-
-         '''   
 
     else:
         display.set_caption("SquareRoot Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(x_offset//block_size) + " Y:" +str(y_offset//block_size) + " Size:" + str(block_size))
@@ -48,9 +37,9 @@ while True:
         keys = key.get_pressed()
 
         if keys[K_d]:
-            x_offset += 80//block_size
+            x_offset += 100//block_size
         if keys[K_a]:
-            x_offset -= 80//block_size
+            x_offset -= 100//block_size
 
 
         if keys[K_w] and y_offset//block_size>0:
