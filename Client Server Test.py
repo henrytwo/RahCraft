@@ -56,7 +56,7 @@ if __name__ == '__main__':
     sender.start()
     updated = False
 
-    sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], ('127.0.0.1', 5175)])
+    sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
     world = pickle.loads(server.recvfrom(8192)[0])
 
     # ----- Gameloop
@@ -96,7 +96,7 @@ if __name__ == '__main__':
                 updated = True
 
             if updated:
-                sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], ('127.0.0.1', 5175)])
+                sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
                 world = pickle.loads(server.recvfrom(8192)[0])
 
             mb = mouse.get_pressed()
