@@ -1,12 +1,12 @@
-from pygame import *
-import pickle
 import socket
-from threading import *
 from multiprocessing import *
-import sys
+import pickle
 from numpy import *
+from pygame import *
 
 sendQueue = Queue()
+messageQueue = Queue()
+
 
 def playerSender(sendQueue, server):
     print('Client running...')
@@ -15,10 +15,17 @@ def playerSender(sendQueue, server):
         tobesent = sendQueue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
+def recieveMessage(messageQueue, server):
+    print('Client is ready for connection!')
+
+    while True:
+        msg = server.recvfrom(16384)
+        messageQueue.put(pickle.loads(msg[0]))
+
 
 def draw_block(x, y, size, colour, colourIn, screen):
-    draw.rect(screen,colour,(x - x_offset%20,y - y_offset%20,block_size,block_size))
-    draw.rect(screen,colourIn,(x - x_offset%20,y - y_offset%20,block_size,block_size),1)
+    draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
+    draw.rect(screen, colourIn, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)
 
 
 # Create the game screen
@@ -29,7 +36,6 @@ with open("config", "r") as config:
     host = config[0]
     port = int(config[1])
     worldname = config[2]
-
 
 if __name__ == '__main__':
     clock = time.Clock()
@@ -54,10 +60,13 @@ if __name__ == '__main__':
 
     sender = Process(target=playerSender, args=(sendQueue, server))
     sender.start()
+
+    reciever = Process(target=recieveMessage, args=(messageQueue, server))
+    reciever.start()
     updated = False
 
     sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
-    world = pickle.loads(server.recvfrom(16384)[0])
+    world = messageQueue.get()
 
     # ----- Gameloop
 
@@ -97,7 +106,11 @@ if __name__ == '__main__':
 
             if updated:
                 sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
-                world = pickle.loads(server.recvfrom(16384)[0])
+                while True:
+                    try:
+                        world = messageQueue.get_nowait()
+                    except:
+                        break
 
             mb = mouse.get_pressed()
 
@@ -110,13 +123,13 @@ if __name__ == '__main__':
             for x in range(len(world)):  # Render blocks
                 for y in range(len(world[0])):
                     if world[x][y] == 1:
-                        draw_block(x*block_size, y*block_size, block_size, (0, 150, 0), (0, 100, 0), screen)
+                        draw_block(x * block_size, y * block_size, block_size, (0, 150, 0), (0, 100, 0), screen)
 
                     elif world[x][y] == 2:
-                        draw_block(x*block_size, y*block_size, block_size, (129, 68, 32), (99, 38, 12),  screen)
+                        draw_block(x * block_size, y * block_size, block_size, (129, 68, 32), (99, 38, 12), screen)
 
                     elif world[x][y] == 3:
-                        draw_block(x*block_size, y*block_size, block_size, (150, 150, 150), (100, 100, 100),  screen)
+                        draw_block(x * block_size, y * block_size, block_size, (150, 150, 150), (100, 100, 100), screen)
 
             clock.tick()
             display.update()
