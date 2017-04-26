@@ -116,7 +116,8 @@ if __name__ == '__main__':
 
             mx, my = mouse.get_pos()
 
-            screen.fill((30, 144, 255))
+            for y in range(500):
+                draw.line(screen, (max(30 - y, 0), max(144 - y, 100), max(255 - y, 100)), (0, y), (800, y))
 
             # Clear the screen
             # Redraw the level onto the screen
