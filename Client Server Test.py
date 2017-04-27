@@ -4,6 +4,9 @@ from multiprocessing import *
 from collections import *
 import numpy as np
 from pygame import *
+import os
+
+#os.environ['SDL_VIDEO_WINDOW_POS'] = '1925,30'
 
 sendQueue = Queue()
 messageQueue = Queue()
@@ -74,7 +77,7 @@ if __name__ == '__main__':
 
     sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
     wmsg = messageQueue.get()
-    world[wmsg[0]:wmsg[0]+40, wmsg[1]:wmsg[1]+26] = np.array(wmsg[2], copy=True)
+    world[wmsg[0]-5:wmsg[0]+45, wmsg[1]-5:wmsg[1]+31] = np.array(wmsg[2], copy=True)
 
     # ----- Gameloop
 
@@ -112,15 +115,15 @@ if __name__ == '__main__':
                 y_offset += 160 // block_size
                 updated = True
 
-            DispingWorld = world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26]
+            DispingWorld = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
             updateCost = DispingWorld.flatten()
             updateCost = np.count_nonzero(updateCost == -1)
-            if updated and updateCost > 10:
+            if updated and updateCost > 3:
                 sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
             try:
                 wmsg = messageQueue.get_nowait()
-                world[wmsg[0]:wmsg[0] + 40, wmsg[1]:wmsg[1] + 26] = np.array(wmsg[2], copy=True)
+                world[wmsg[0]-5:wmsg[0] + 45, wmsg[1]-5:wmsg[1] + 31] = np.array(wmsg[2], copy=True)
             except:
                 pass
 
@@ -133,8 +136,8 @@ if __name__ == '__main__':
 
             # Clear the screen
             # Redraw the level onto the screen
-            for x in range(0, 800, block_size):  # Render blocks
-                for y in range(0, 500, block_size):
+            for x in range(0, 821, block_size):  # Render blocks
+                for y in range(0, 521, block_size):
                     if world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 1:
                         draw_block(x, y, block_size, (0, 150, 0), (0, 100, 0), screen)
 
