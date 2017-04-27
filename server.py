@@ -100,7 +100,7 @@ class World:
         return pickle.load(open(worldn+".pkl","rb"))
 
     def getworld(self, x, y):
-        return self.overworld[x-20:x+20, y-13:y+13]
+        return self.overworld[x:x+40, y:y+26]
 
     def breakblock(self, x, y):
         self.overworld[x, y] = 0
@@ -167,6 +167,7 @@ if __name__ == '__main__':
                 PN = playerNDisconnect.popleft()
 
             players[address] = (Player(PN, message[0]), message[1])
+            sendQueue.put(((10000, 100),address))
             print('Connection established!')
 
         elif command == 1:

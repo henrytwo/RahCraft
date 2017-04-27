@@ -1,7 +1,8 @@
+import pickle
 import socket
 from multiprocessing import *
-import pickle
-from numpy import *
+from collections import *
+import numpy as np
 from pygame import *
 
 sendQueue = Queue()
@@ -14,6 +15,7 @@ def playerSender(sendQueue, server):
     while True:
         tobesent = sendQueue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
+
 
 def recieveMessage(messageQueue, server):
     print('Client is ready for connection!')
@@ -63,10 +65,16 @@ if __name__ == '__main__':
 
     reciever = Process(target=recieveMessage, args=(messageQueue, server))
     reciever.start()
+
+    Worldsize = messageQueue.get()
+
+    world = np.array([[-1 for y in range(Worldsize[1])] for x in range(Worldsize[0])])
+
     updated = False
 
-    sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
-    world = messageQueue.get()
+    sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
+    world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26] = messageQueue.get()
+    loadQueue = []
 
     # ----- Gameloop
 
@@ -81,7 +89,7 @@ if __name__ == '__main__':
                     block_size += 4
 
                 elif e.button == 5:
-                    block_size -= 4
+                    block_size -= max(8, block_size-4)
 
 
 
@@ -104,13 +112,16 @@ if __name__ == '__main__':
                 y_offset += 160 // block_size
                 updated = True
 
-            if updated:
-                sendQueue.put([[2, x_offset // block_size + 20, y_offset // block_size + 20], (host, port)])
-                while True:
-                    try:
-                        world = messageQueue.get_nowait()
-                    except:
-                        break
+            DispingWorld = world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26]
+            updateCost = DispingWorld.flatten()
+            updateCost = np.count_nonzero(updateCost == -1)
+            if updated and updateCost > 30:
+                sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
+
+            try:
+                world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26] = messageQueue.get_nowait()
+            except:
+                pass
 
             mb = mouse.get_pressed()
 
@@ -121,16 +132,16 @@ if __name__ == '__main__':
 
             # Clear the screen
             # Redraw the level onto the screen
-            for x in range(len(world)):  # Render blocks
-                for y in range(len(world[0])):
-                    if world[x][y] == 1:
-                        draw_block(x * block_size, y * block_size, block_size, (0, 150, 0), (0, 100, 0), screen)
+            for x in range(0, 800, block_size):  # Render blocks
+                for y in range(0, 500, block_size):
+                    if world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 1:
+                        draw_block(x, y, block_size, (0, 150, 0), (0, 100, 0), screen)
 
-                    elif world[x][y] == 2:
-                        draw_block(x * block_size, y * block_size, block_size, (129, 68, 32), (99, 38, 12), screen)
+                    elif world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 2:
+                        draw_block(x, y, block_size, (129, 68, 32), (99, 38, 12), screen)
 
-                    elif world[x][y] == 3:
-                        draw_block(x * block_size, y * block_size, block_size, (150, 150, 150), (100, 100, 100), screen)
+                    elif world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 3:
+                        draw_block(x, y, block_size, (150, 150, 150), (100, 100, 100), screen)
 
             clock.tick()
             display.update()
