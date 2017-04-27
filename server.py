@@ -21,18 +21,17 @@ sendQueue = Queue()
 messageQueue = Queue()
 itemLib = {}
 
-#If world doesn't exist
+# If world doesn't exist
 if not os.path.isfile('world.pkl'):
     # Generate a new world with the function
     world = generate_world(input("Seed:\n"), 1, 3, 10, 10000, 100)
 
-    #Dumps world to file
+    # Dumps world to file
     with open('world.pkl', 'wb') as file:
         dump(world, file)
 
 else:
     world = pickle.load(open('world.pkl', 'rb'))
-
 
 
 class Player(object):
@@ -56,7 +55,7 @@ class Player(object):
         try:
             return PlayerData[self.UUID]
         except:
-            PlayerData[self.UUID] = [(0,0), (0,0), [[0] * 2 for _ in range(36)], 10, 10, 10]
+            PlayerData[self.UUID] = [(0, 0), (0, 0), [[0] * 2 for _ in range(36)], 10, 10, 10]
             return PlayerData[self.UUID]
 
     def changeLocation(self, cordx):
@@ -97,10 +96,10 @@ class World:
         self.overworld = self.loadworld(worldname)
 
     def loadworld(self, worldn):
-        return pickle.load(open(worldn+".pkl","rb"))
+        return pickle.load(open(worldn + ".pkl", "rb"))
 
     def getworld(self, x, y):
-        return self.overworld[x:x+40, y:y+26]
+        return self.overworld[x:x + 41, y:y + 27]
 
     def breakblock(self, x, y):
         self.overworld[x, y] = 0
@@ -122,38 +121,34 @@ def recieveMessage(messageQueue, server):
 
     while True:
         msg = server.recvfrom(1024)
-        messageQueue.put((pickle.loads(msg[0]),msg[1]))
+        messageQueue.put((pickle.loads(msg[0]), msg[1]))
 
 
 if __name__ == '__main__':
 
-    with open("config","r") as config:
+    with open("config", "r") as config:
 
         config = config.read().split("\n")
         host = config[0]
         port = int(config[1])
         worldname = config[2]
 
-
     world = World(worldname)
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
 
-    print("Server binded to %s:%i"%(host,port))
+    print("Server binded to %s:%i" % (host, port))
 
     reciever = Process(target=recieveMessage, args=(messageQueue, server))
     reciever.start()
 
-    sender = Process(target=playerSender, args=(sendQueue,server))
+    sender = Process(target=playerSender, args=(sendQueue, server))
     sender.start()
-
-
 
     while True:
         pickledmessage = messageQueue.get()
         message, address = pickledmessage
-        print(message, address)
         command = message[0]
 
         if command == 0:
@@ -167,19 +162,18 @@ if __name__ == '__main__':
                 PN = playerNDisconnect.popleft()
 
             players[address] = (Player(PN, message[0]), message[1])
-            sendQueue.put(((10000, 100),address))
+            sendQueue.put(((10000, 100), address))
             print('Connection established!')
 
         elif command == 1:
             # Player movement
             # Data: [1, <cordx>, <cordy>]
             players[address][0].changeLocation((message[1], message[2]))
-            print(address, message[1], message[2])
 
         elif command == 2:
             # Render world
             # Data: [2, <cordx>, <cordy>]
-            sendQueue.put(((message[1], message[2], world.getworld(message[1],message[2])), address))
+            sendQueue.put(((message[1], message[2], world.getworld(message[1], message[2])), address))
 
         elif command == 3:
             # Break block
@@ -202,8 +196,6 @@ if __name__ == '__main__':
 
         elif command == 100:
 
-            sendQueue.put(('helo',address))
-
-
+            sendQueue.put(('helo', address))
 
     reciever.terminate()
