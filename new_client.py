@@ -2,8 +2,7 @@ from pygame import *
 from random import *
 import pickle
 
-with open('world.pkl', 'rb') as f:
-    world = pickle.load(f)
+world = [[[1 for z in range(4)] for y in range(15)] for x in range(15)]
 
 clock = time.Clock()
 
@@ -45,6 +44,7 @@ while True:
 
             for x in range(0,300,20):
                 x += offset_x
+                
                 for y in range(0,200,15):
                     y += offset_y
 

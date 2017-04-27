@@ -29,10 +29,6 @@ def draw_block(x, y, size, colour, colourIn, screen):
     draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
     draw.rect(screen, colourIn, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)
 
-
-# Create the game screen
-
-
 with open("config", "r") as config:
     config = config.read().split("\n")
     host = config[0]
@@ -54,11 +50,9 @@ if __name__ == '__main__':
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    print("Server binded to %s:%i" % (host, port))
+    print("Client connecting to %s:%i" % (host, port))
 
     server.sendto(pickle.dumps([0, 'Henry']), (host, port))
-
-    # Generate a new world with the function
 
     sender = Process(target=playerSender, args=(sendQueue, server))
     sender.start()
@@ -115,7 +109,7 @@ if __name__ == '__main__':
             DispingWorld = world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26]
             updateCost = DispingWorld.flatten()
             updateCost = np.count_nonzero(updateCost == -1)
-            if updated and updateCost > 30:
+            if updated and updateCost > 10:
                 sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
             try:
@@ -128,8 +122,10 @@ if __name__ == '__main__':
 
             mx, my = mouse.get_pos()
 
-            for y in range(500):
-                draw.line(screen, (max(30 - y, 0), max(144 - y, 100), max(255 - y, 100)), (0, y), (800, y))
+            screen.fill((0,0,255))
+
+            #for y in range(500):
+            #    draw.line(screen, (max(30 - y, 0), max(144 - y, 100), max(255 - y, 100)), (0, y), (800, y))
 
             # Clear the screen
             # Redraw the level onto the screen
