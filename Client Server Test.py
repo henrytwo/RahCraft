@@ -115,7 +115,7 @@ if __name__ == '__main__':
             DispingWorld = world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26]
             updateCost = DispingWorld.flatten()
             updateCost = np.count_nonzero(updateCost == -1)
-            if updated and updateCost > 30:
+            if updated and updateCost > 10:
                 sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
             try:
