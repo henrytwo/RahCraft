@@ -29,13 +29,13 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
     # Set the initial seed for the random module (random.seed())
     seed(world_seed)
     
-    # Create a blank map (2D list filled with '0' strings (50 x 5000 list))
+    # Create a blank map (2D list filled with '0' strings
     world = [[0 for y in range(h)] for x in range(w)]
     # Generates the random values for the terrain construction
-    terrain = [randrange(30)+10 for _ in range(w)]
+    terrain = [randrange(20) + 10 for _ in range(w)]
 
 
-
+    print(terrain[0:100])
     # ----- Construct the Terrain
     # Counter that changes dynamically to check through all blocks in the terrain list
     cur_pos = 0

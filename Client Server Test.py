@@ -4,6 +4,9 @@ from multiprocessing import *
 from collections import *
 import numpy as np
 from pygame import *
+import os
+
+#os.environ['SDL_VIDEO_WINDOW_POS'] = '1925,30'
 
 sendQueue = Queue()
 messageQueue = Queue()
@@ -42,8 +45,8 @@ if __name__ == '__main__':
 
     # Make the block size and block offset
     block_size = 20
-    y_offset = 0
-    x_offset = 0
+    y_offset = 10 * block_size
+    x_offset = 5000 * block_size
 
     display.set_caption("Random World Generator!")
     screen = display.set_mode((800, 500))
@@ -68,7 +71,7 @@ if __name__ == '__main__':
 
     sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
     wmsg = messageQueue.get()
-    world[wmsg[0]:wmsg[0]+40, wmsg[1]:wmsg[1]+26] = np.array(wmsg[2], copy=True)
+    world[wmsg[0]-5:wmsg[0]+45, wmsg[1]-5:wmsg[1]+31] = np.array(wmsg[2], copy=True)
 
     # ----- Gameloop
 
@@ -92,29 +95,33 @@ if __name__ == '__main__':
 
             keys = key.get_pressed()
 
-            if keys[K_d]:
-                x_offset += 160 // block_size
+            if keys[K_d] and x_offset // block_size < 9950:
+                x_offset += 60 // block_size
                 updated = True
-            if keys[K_a]:
-                x_offset -= 160 // block_size
-                updated = True
-
-            if keys[K_w]:
-                y_offset -= 160 // block_size
-                updated = True
-            if keys[K_s]:
-                y_offset += 160 // block_size
+            elif keys[K_a] and x_offset // block_size > 0:
+                x_offset -= 60 // block_size
                 updated = True
 
-            DispingWorld = world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26]
+            if keys[K_w] and y_offset // block_size > 5:
+                y_offset -= 80 // block_size
+                updated = True
+            elif keys[K_s] and y_offset // block_size < 70:
+                y_offset += 80 // block_size
+                updated = True
+
+            DispingWorld = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
             updateCost = DispingWorld.flatten()
             updateCost = np.count_nonzero(updateCost == -1)
-            if updated and updateCost > 10:
+
+            if updated and updateCost > 3:
+
                 sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
+
+            #screen.fill((0,0,255))
 
             try:
                 wmsg = messageQueue.get_nowait()
-                world[wmsg[0]:wmsg[0] + 40, wmsg[1]:wmsg[1] + 26] = np.array(wmsg[2], copy=True)
+                world[wmsg[0]-5:wmsg[0] + 45, wmsg[1]-5:wmsg[1] + 31] = np.array(wmsg[2], copy=True)
             except:
                 pass
 
@@ -122,15 +129,18 @@ if __name__ == '__main__':
 
             mx, my = mouse.get_pos()
 
-            screen.fill((0,0,255))
+            if mb[0] == 1:
+                sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
 
-            #for y in range(500):
-            #    draw.line(screen, (max(30 - y, 0), max(144 - y, 100), max(255 - y, 100)), (0, y), (800, y))
+            #print((mx + x_offset) // block_size, (my + y_offset) // block_size)
+
+            for y in range(500):
+                draw.line(screen, (max(30 - y, 0), max(144 - y, 100), max(255 - y, 100)), (0, y), (800, y))
 
             # Clear the screen
             # Redraw the level onto the screen
-            for x in range(0, 800, block_size):  # Render blocks
-                for y in range(0, 500, block_size):
+            for x in range(0, 821, block_size):  # Render blocks
+                for y in range(0, 521, block_size):
                     if world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 1:
                         draw_block(x, y, block_size, (0, 150, 0), (0, 100, 0), screen)
 
@@ -140,7 +150,7 @@ if __name__ == '__main__':
                     elif world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 3:
                         draw_block(x, y, block_size, (150, 150, 150), (100, 100, 100), screen)
 
-            clock.tick()
+            clock.tick(120)
             display.update()
             continue
 

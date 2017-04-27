@@ -100,7 +100,7 @@ class World:
         return pickle.load(open(worldn+".pkl","rb"))
 
     def getworld(self, x, y):
-        return self.overworld[x:x+40, y:y+26]
+        return self.overworld[x-5:x+45, y-5:y+31]
 
     def breakblock(self, x, y):
         self.overworld[x, y] = 0
@@ -175,7 +175,6 @@ if __name__ == '__main__':
             # Data: [1, <cordx>, <cordy>]
             players[address][0].changeLocation((message[1], message[2]))
             print(address, message[1], message[2])
-
         elif command == 2:
             # Render world
             # Data: [2, <cordx>, <cordy>]
@@ -186,16 +185,18 @@ if __name__ == '__main__':
             # Data: [3, <cordx>, <cordy>]
             world.breakblock(message[1], message[2])
 
-            for i in player:
+            for i in players:
                 sendQueue.put((message, i))
 
         elif command == 4:
             # Place block
-            # Data: [4, <cordx>, <cordy>]
+            # Data: [4, <cordx>, <cordy>, <block type>]
             world.placeblock(message[1], message[2], message[3])
 
             for i in players:
                 sendQueue.put((message, i))
+
+            sendQueue.put(((message[1], message[2], world.getworld(message[1],message[2])), address))
 
         elif command == 5:
             player[address][0].changeInventory
