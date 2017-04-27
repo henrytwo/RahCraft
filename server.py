@@ -179,7 +179,7 @@ if __name__ == '__main__':
         elif command == 2:
             # Render world
             # Data: [2, <cordx>, <cordy>]
-            sendQueue.put((world.getworld(message[1],message[2]), address))
+            sendQueue.put(((message[1], message[2], world.getworld(message[1],message[2])), address))
 
         elif command == 3:
             # Break block

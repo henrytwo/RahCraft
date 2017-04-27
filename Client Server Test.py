@@ -73,8 +73,8 @@ if __name__ == '__main__':
     updated = False
 
     sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
-    world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26] = messageQueue.get()
-    loadQueue = []
+    wmsg = messageQueue.get()
+    world[wmsg[0]:wmsg[0]+40, wmsg[1]:wmsg[1]+26] = np.array(wmsg[2], copy=True)
 
     # ----- Gameloop
 
@@ -119,7 +119,8 @@ if __name__ == '__main__':
                 sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
             try:
-                world[x_offset // block_size:x_offset // block_size + 40, y_offset // block_size:y_offset // block_size + 26] = messageQueue.get_nowait()
+                wmsg = messageQueue.get_nowait()
+                world[wmsg[0]:wmsg[0] + 40, wmsg[1]:wmsg[1] + 26] = np.array(wmsg[2], copy=True)
             except:
                 pass
 
