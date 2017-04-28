@@ -137,6 +137,7 @@ if __name__ == '__main__':
                 if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0:
                     sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
 
+
             #print((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
             for y in range(500):
