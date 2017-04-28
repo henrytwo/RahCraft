@@ -71,7 +71,7 @@ if __name__ == '__main__':
 
     sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
     wmsg = messageQueue.get()
-    world[wmsg[0]-5:wmsg[0]+45, wmsg[1]-5:wmsg[1]+31] = np.array(wmsg[2], copy=True)
+    world[wmsg[1]-5:wmsg[1]+45, wmsg[2]-5:wmsg[2]+31] = np.array(wmsg[3], copy=True)
 
     # ----- Gameloop
 
@@ -123,7 +123,10 @@ if __name__ == '__main__':
 
             try:
                 wmsg = messageQueue.get_nowait()
-                world[wmsg[0]-5:wmsg[0] + 45, wmsg[1]-5:wmsg[1] + 31] = np.array(wmsg[2], copy=True)
+                if wmsg[0] == 2:
+                    world[wmsg[1]-5:wmsg[1] + 45, wmsg[2]-5:wmsg[2] + 31] = np.array(wmsg[3], copy=True)
+                elif wmsg[0] == 3:
+                    world[wmsg[1], wmsg[2]] = 0
             except:
                 pass
 
