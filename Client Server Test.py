@@ -109,6 +109,8 @@ if __name__ == '__main__':
                 y_offset += 80 // block_size
                 updated = True
 
+            print(x_offset // block_size)
+
             DispingWorld = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
             updateCost = DispingWorld.flatten()
             updateCost = np.count_nonzero(updateCost == -1)
@@ -131,6 +133,7 @@ if __name__ == '__main__':
 
             if mb[0] == 1:
                 sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
+
 
             #print((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
