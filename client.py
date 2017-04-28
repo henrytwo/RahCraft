@@ -72,6 +72,7 @@ if __name__ == '__main__':
     sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
     wmsg = messageQueue.get()
     world[wmsg[1]-5:wmsg[1]+45, wmsg[2]-5:wmsg[2]+31] = np.array(wmsg[3], copy=True)
+    block_Select = 1
 
     # ----- Gameloop
 
@@ -83,15 +84,15 @@ if __name__ == '__main__':
 
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 4:
-                    block_size += 4
+                    block_Select = min(3, block_Select + 1)
 
                 elif e.button == 5:
-                    block_size -= max(8, block_size-4)
+                    block_Select = max(0, block_Select - 1)
 
 
 
         else:
-            display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(block_size))
+            display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(block_size) + "Block Selected:" + str(block_Select))
 
             keys = key.get_pressed()
 
@@ -109,8 +110,6 @@ if __name__ == '__main__':
                 y_offset += 80 // block_size
                 updated = True
 
-            print(x_offset // block_size)
-
             DispingWorld = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
             updateCost = DispingWorld.flatten()
             updateCost = np.count_nonzero(updateCost == -1)
@@ -127,6 +126,8 @@ if __name__ == '__main__':
                     world[wmsg[1]-5:wmsg[1] + 45, wmsg[2]-5:wmsg[2] + 31] = np.array(wmsg[3], copy=True)
                 elif wmsg[0] == 3:
                     world[wmsg[1], wmsg[2]] = 0
+                elif wmsg[0] == 4:
+                    world[wmsg[1], wmsg[2]] = wmsg[3]
             except:
                 pass
 
@@ -137,6 +138,9 @@ if __name__ == '__main__':
             if mb[0] == 1:
                 if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0:
                     sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
+            if mb[2] == 1:
+                if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0:
+                    sendQueue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, block_Select], (host, port)])
 
 
             #print((mx + x_offset) // block_size, (my + y_offset) // block_size)
