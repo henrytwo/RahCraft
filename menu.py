@@ -11,13 +11,10 @@ def center(x,y,canvas_w,canvas_h,object_w,object_h):
 
 
 class Button:
-    def __init__(self,x,y,w,h,text):
+    def __init__(self,x,y,w,h,function,text):
         self.rect = Rect(x,y,w,h)
         self.text = text
-
-
-    def trigger(self):
-        print("hi")
+        self.trigger = function
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
@@ -57,15 +54,22 @@ def menu(screen,unclick):
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper,(0,0))
 
+    logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
+    screen.blit(logo,(400 - logo.get_width()//2,100))
+
+    
+
     mx,my = mouse.get_pos()
     mb = mouse.get_pressed()
 
-    connect_button = Button(200,180,400,40,"Connect to server")
-    help_button = Button(200,230,400,40,"Help")
-    menu_button = Button(200,280,400,40,"Options")
+    connect_button = Button(200,175,400,40,print('hi'),"Connect to server")
+    help_button = Button(200,225,400,40,print('hi'),"Help")
+    about_button = Button(200,275,400,40,print('hi'),"About")
+    menu_button = Button(200,325,400,40,print('hi'),"Options")
     
     connect_button.update(mx,my,mb,10,unclick)
     help_button.update(mx,my,mb,10,unclick)
+    about_button.update(mx,my,mb,10,unclick)
     menu_button.update(mx,my,mb,10,unclick)
 
 
