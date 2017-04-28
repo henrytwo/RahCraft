@@ -153,7 +153,7 @@ if __name__ == '__main__':
     while True:
         pickledmessage = messageQueue.get()
         message, address = pickledmessage
-        print(message, address)
+        #print(message, address)
         command = message[0]
 
         if command == 0:
