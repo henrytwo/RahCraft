@@ -135,7 +135,8 @@ if __name__ == '__main__':
             mx, my = mouse.get_pos()
 
             if mb[0] == 1:
-                sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
+                if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0:
+                    sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
 
 
             #print((mx + x_offset) // block_size, (my + y_offset) // block_size)
