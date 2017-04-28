@@ -194,9 +194,7 @@ if __name__ == '__main__':
             world.placeblock(message[1], message[2], message[3])
 
             for i in players:
-                sendQueue.put((message, i))
-
-            sendQueue.put(((message[1], message[2], world.getworld(message[1],message[2])), address))
+                sendQueue.put(((4, message[1], message[2], message[3]), i))
 
         elif command == 5:
             player[address][0].changeInventory
