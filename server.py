@@ -178,7 +178,7 @@ if __name__ == '__main__':
         elif command == 2:
             # Render world
             # Data: [2, <cordx>, <cordy>]
-            sendQueue.put(((message[1], message[2], world.getworld(message[1],message[2])), address))
+            sendQueue.put(((2, message[1], message[2], world.getworld(message[1],message[2])), address))
 
         elif command == 3:
             # Break block
@@ -186,7 +186,7 @@ if __name__ == '__main__':
             world.breakblock(message[1], message[2])
 
             for i in players:
-                sendQueue.put((message, i))
+                sendQueue.put(((3, message[1], message[2]), i))
 
         elif command == 4:
             # Place block
