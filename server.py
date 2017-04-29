@@ -7,6 +7,7 @@ import pickle
 import glob
 from generation import *
 import os.path
+import sys
 
 players = {}
 playernumber = 1
@@ -19,6 +20,7 @@ PlayerUUID = {}
 
 sendQueue = Queue()
 messageQueue = Queue()
+commandlineQueue = Queue()
 itemLib = {}
 
 #If world doesn't exist
@@ -117,12 +119,20 @@ def playerSender(sendQueue, server):
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
-def recieveMessage(messageQueue, server):
+def receiveMessage(messageQueue, server):
     print('Server is ready for connection!')
 
     while True:
         msg = server.recvfrom(1024)
         messageQueue.put((pickle.loads(msg[0]),msg[1]))
+
+def commandlineIn(commandlineQueue, fn):
+    print('Ready for input.')
+    sys.stdin = os.fdopen(fn)
+
+    while True:
+        command = input()
+        commandlineQueue.put(command)
 
 
 if __name__ == '__main__':
@@ -142,16 +152,36 @@ if __name__ == '__main__':
 
     print("Server binded to %s:%i"%(host,port))
 
-    reciever = Process(target=recieveMessage, args=(messageQueue, server))
-    reciever.start()
+    receiver = Process(target=receiveMessage, args=(messageQueue, server))
+    receiver.start()
 
     sender = Process(target=playerSender, args=(sendQueue,server))
     sender.start()
 
-
+    fn = sys.stdin.fileno()
+    commandline = Process(target=commandlineIn, args=(commandlineQueue, fn))
+    commandline.start()
+    cmdIn = ""
 
     while True:
-        pickledmessage = messageQueue.get()
+        try:
+            cmdIn = commandlineQueue.get_nowait()
+        except:
+            pass
+
+        if cmdIn.lower() == "quit":
+            receiver.terminate()
+            sender.terminate()
+            commandline.terminate()
+            server.close()
+            break
+
+        cmdIn = ""
+
+        try:
+            pickledmessage = messageQueue.get_nowait()
+        except:
+            continue
         message, address = pickledmessage
         #print(message, address)
         command = message[0]
@@ -174,7 +204,6 @@ if __name__ == '__main__':
             # Player movement
             # Data: [1, <cordx>, <cordy>]
             players[address][0].changeLocation((message[1], message[2]))
-            print(address, message[1], message[2])
         elif command == 2:
             # Render world
             # Data: [2, <cordx>, <cordy>]
@@ -202,7 +231,3 @@ if __name__ == '__main__':
         elif command == 100:
 
             sendQueue.put(('helo',address))
-
-
-
-    reciever.terminate()

@@ -6,8 +6,6 @@ import numpy as np
 from pygame import *
 import os
 
-def center(x,y,canvas_w,canvas_h,object_w,object_h):
-    return (x + canvas_w//2 - object_w//2, y + canvas_h//2 - object_h//2)
 
 def start():
     print('start game ;)')
@@ -33,27 +31,27 @@ class Button:
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
-        screen.blit(button_hover,(self.rect.x,self.rect.y))
-        
+        screen.blit(button_hover, (self.rect.x, self.rect.y))
+
     def mouse_down(self):
         button_pressed = transform.scale(image.load("textures/menu/button_pressed.png"), (self.rect.w, self.rect.h))
-        screen.blit(button_pressed,(self.rect.x,self.rect.y))
+        screen.blit(button_pressed, (self.rect.x, self.rect.y))
 
     def idle(self):
         button_idle = transform.scale(image.load("textures/menu/button_idle.png"), (self.rect.w, self.rect.h))
-        screen.blit(button_idle,(self.rect.x,self.rect.y))
-        
-    def update(self,mx,my,mb,size,unclick):
+        screen.blit(button_idle, (self.rect.x, self.rect.y))
+
+    def update(self, mx, my, mb, size, unclick):
 
         minecraft_font = font.Font("fonts/minecraft.ttf", size)
-        
-        if self.rect.collidepoint(mx,my):
+
+        if self.rect.collidepoint(mx, my):
             if unclick:
-                 self.trigger()
+                self.trigger()
 
             if mb[0] == 1:
                 self.mouse_down()
-                
+
             else:
                 self.highlight()
 
@@ -68,9 +66,7 @@ class Button:
         textPos = center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height())
         screen.blit(text_shadow, (textPos[0] + 2, textPos[1] + 2))
         screen.blit(text_surface, textPos)
-             
 
-def menu(screen):
 
 
 
@@ -112,16 +108,12 @@ def menu(screen):
             menu_button.update(mx, my, mb, 10, unclick)
             exit_button.update(mx, my, mb, 10, unclick)
 
-
             clock.tick(120)
             display.update()
 
             continue
 
         break
-
-    
-
 
 
 if __name__ == '__main__':

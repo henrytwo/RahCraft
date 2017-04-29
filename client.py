@@ -20,7 +20,7 @@ def playerSender(sendQueue, server):
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
-def recieveMessage(messageQueue, server):
+def receiveMessage(messageQueue, server):
     print('Client is ready for connection!')
 
     while True:
@@ -60,8 +60,8 @@ if __name__ == '__main__':
     sender = Process(target=playerSender, args=(sendQueue, server))
     sender.start()
 
-    reciever = Process(target=recieveMessage, args=(messageQueue, server))
-    reciever.start()
+    receiver = Process(target=receiveMessage, args=(messageQueue, server))
+    receiver.start()
 
     Worldsize = messageQueue.get()
 
@@ -80,6 +80,8 @@ if __name__ == '__main__':
         updated = False
         for e in event.get():
             if e.type == QUIT:
+                sender.terminate()
+                receiver.terminate()
                 break
 
             elif e.type == MOUSEBUTTONDOWN:
