@@ -4,10 +4,6 @@ from multiprocessing import *
 import numpy as np
 from pygame import *
 
-sendQueue = Queue()
-messageQueue = Queue()
-
-
 def playerSender(sendQueue, server):
     print('Client running...')
 
@@ -139,15 +135,30 @@ def menu():
 
 
 def game():
+    sendQueue = Queue()
+    messageQueue = Queue()
 
-    screen.fill(0)
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    minecraft_font = font.Font("fonts/minecraft.ttf", 30)
+
+    text_surface = minecraft_font.render("Connecting to server...", True, (255, 255, 255))
+    text_shadow = minecraft_font.render("Connecting to server...", True, (0, 0, 0))
+    shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
+    shadow_surface.blit(text_shadow, (0, 0))
+    shadow_surface.set_alpha(100)
+    textPos = center(0, 0, 800, 500, text_surface.get_width(),
+                     text_surface.get_height())
+    screen.blit(text_shadow, (textPos[0] + 2, textPos[1] + 2))
+    screen.blit(text_surface, textPos)
+
     display.flip()
 
     with open("config", "r") as config:
         config = config.read().split("\n")
         host = config[0]
         port = int(config[1])
-        worldname = config[2]
 
     clock = time.Clock()
 
@@ -181,7 +192,6 @@ def game():
     block_highlight = Surface((block_size, block_size))
     block_highlight.fill((255, 255, 0))
     block_highlight.set_alpha(100)
-    # ----- Gameloop
 
     while True:
         updated = False
