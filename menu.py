@@ -61,8 +61,9 @@ def menu(screen):
 
     connect_button = Button(200, 175, 400, 40, "Connect to server")
     help_button = Button(200, 225, 400, 40, "Help")
-    about_button = Button(200, 275, 400, 40, "About")
-    menu_button = Button(200, 325, 400, 40, "Options")
+    menu_button = Button(200, 275, 400, 40, "Options")
+    about_button = Button(200, 325, 195, 40, "About")
+    exit_button = Button(404, 325, 195, 40, "Exit")
 
     while True:
 
@@ -88,6 +89,8 @@ def menu(screen):
             help_button.update(mx, my, mb, 10, unclick)
             about_button.update(mx, my, mb, 10, unclick)
             menu_button.update(mx, my, mb, 10, unclick)
+            exit_button.update(mx, my, mb, 10, unclick)
+
 
             clock.tick(120)
             display.update()
