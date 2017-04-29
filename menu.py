@@ -7,6 +7,9 @@ from pygame import *
 import os
 
 
+def center(x,y,canvas_w,canvas_h,object_w,object_h):
+    return (x + canvas_w//2 - object_w//2, y + canvas_h//2 - object_h//2)
+
 def start():
     print('start game ;)')
 
@@ -68,7 +71,7 @@ class Button:
         screen.blit(text_surface, textPos)
 
 
-
+def menu(screen):
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))

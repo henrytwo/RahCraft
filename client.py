@@ -1,12 +1,8 @@
 import pickle
 import socket
 from multiprocessing import *
-from collections import *
 import numpy as np
 from pygame import *
-import os
-
-#os.environ['SDL_VIDEO_WINDOW_POS'] = '1925,30'
 
 sendQueue = Queue()
 messageQueue = Queue()
@@ -32,21 +28,134 @@ def draw_block(x, y, size, colour, colourIn, screen):
     draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
     draw.rect(screen, colourIn, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)
 
-with open("config", "r") as config:
-    config = config.read().split("\n")
-    host = config[0]
-    port = int(config[1])
-    worldname = config[2]
+def center(x,y,canvas_w,canvas_h,object_w,object_h):
+    return (x + canvas_w//2 - object_w//2, y + canvas_h//2 - object_h//2)
+
+def start():
+    print('start game ;)')
+
+def help_menu():
+    print('help')
+
+def options():
+    print('options')
+
+def about():
+    print('about')
+
+
+class Button:
+    def __init__(self,x,y,w,h,function,text):
+        self.rect = Rect(x,y,w,h)
+        self.text = text
+        self.function = function
+
+    def trigger(self):
+        function_dictionary = {'start': start, 'help': help_menu, 'options': options, 'about': about, 'exit': exit}
+        function_dictionary[self.function]()
+
+    def highlight(self):
+        button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
+        screen.blit(button_hover, (self.rect.x, self.rect.y))
+
+    def mouse_down(self):
+        button_pressed = transform.scale(image.load("textures/menu/button_pressed.png"), (self.rect.w, self.rect.h))
+        screen.blit(button_pressed, (self.rect.x, self.rect.y))
+
+    def idle(self):
+        button_idle = transform.scale(image.load("textures/menu/button_idle.png"), (self.rect.w, self.rect.h))
+        screen.blit(button_idle, (self.rect.x, self.rect.y))
+
+    def update(self, mx, my, mb, size, unclick):
+
+        minecraft_font = font.Font("fonts/minecraft.ttf", size)
+
+        if self.rect.collidepoint(mx, my):
+            if unclick:
+                self.trigger()
+
+            if mb[0] == 1:
+                self.mouse_down()
+
+            else:
+                self.highlight()
+
+        else:
+            self.idle()
+
+        text_surface = minecraft_font.render(self.text, True, (255, 255, 255))
+        text_shadow = minecraft_font.render(self.text, True, (0, 0, 0))
+        shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
+        shadow_surface.blit(text_shadow, (0, 0))
+        shadow_surface.set_alpha(100)
+        textPos = center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height())
+        screen.blit(text_shadow, (textPos[0] + 2, textPos[1] + 2))
+        screen.blit(text_surface, textPos)
+
+
+def menu(screen):
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
+    screen.blit(logo, (400 - logo.get_width() // 2, 100))
+
+    connect_button = Button(200, 175, 400, 40, 'start',"Connect to server")
+    help_button = Button(200, 225, 400, 40, 'help', "Help")
+    menu_button = Button(200, 275, 400, 40, 'options', "Options")
+    about_button = Button(200, 325, 195, 40, 'about', "About")
+    exit_button = Button(404, 325, 195, 40, 'exit',"Exit")
+
+    while True:
+
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                break
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+
+        else:
+
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            connect_button.update(mx, my, mb, 10, unclick)
+            help_button.update(mx, my, mb, 10, unclick)
+            about_button.update(mx, my, mb, 10, unclick)
+            menu_button.update(mx, my, mb, 10, unclick)
+            exit_button.update(mx, my, mb, 10, unclick)
+
+            clock.tick(120)
+            display.update()
+
+            continue
+
+        break
+
+def game(screen):
+    pass
 
 if __name__ == '__main__':
+    with open("config", "r") as config:
+        config = config.read().split("\n")
+        host = config[0]
+        port = int(config[1])
+        worldname = config[2]
+
     clock = time.Clock()
 
-    # ----- Pre-Gameloop Preparation
-
-    # Make the block size and block offset
     block_size = 20
     y_offset = 10 * block_size
     x_offset = 5000 * block_size
+
 
     display.set_caption("Random World Generator!")
     screen = display.set_mode((800, 500))
@@ -73,6 +182,8 @@ if __name__ == '__main__':
     wmsg = messageQueue.get()
     world[wmsg[1]-5:wmsg[1]+45, wmsg[2]-5:wmsg[2]+31] = np.array(wmsg[3], copy=True)
     block_Select = 1
+
+
 
     # ----- Gameloop
 
