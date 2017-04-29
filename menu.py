@@ -4,23 +4,13 @@ from multiprocessing import *
 from collections import *
 import numpy as np
 from pygame import *
+from random import *
 import os
 
 
 def center(x,y,canvas_w,canvas_h,object_w,object_h):
     return (x + canvas_w//2 - object_w//2, y + canvas_h//2 - object_h//2)
 
-def start():
-    print('start game ;)')
-
-def help_menu():
-    print('help')
-
-def options():
-    print('options')
-
-def about():
-    print('about')
 
 class Button:
     def __init__(self,x,y,w,h,function,text):
@@ -29,8 +19,7 @@ class Button:
         self.function = function
 
     def trigger(self):
-        function_dictionary = {'start': start, 'help': help_menu, 'options': options, 'about': about, 'exit': exit}
-        function_dictionary[self.function]()
+        return self.function
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
@@ -50,7 +39,7 @@ class Button:
 
         if self.rect.collidepoint(mx, my):
             if unclick:
-                self.trigger()
+                return self.trigger()
 
             if mb[0] == 1:
                 self.mouse_down()
@@ -71,7 +60,7 @@ class Button:
         screen.blit(text_surface, textPos)
 
 
-def menu(screen):
+def menu():
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
@@ -79,11 +68,13 @@ def menu(screen):
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
     screen.blit(logo, (400 - logo.get_width() // 2, 100))
 
-    connect_button = Button(200, 175, 400, 40, 'start',"Connect to server")
-    help_button = Button(200, 225, 400, 40, 'help', "Help")
-    menu_button = Button(200, 275, 400, 40, 'options', "Options")
-    about_button = Button(200, 325, 195, 40, 'about', "About")
-    exit_button = Button(404, 325, 195, 40, 'exit',"Exit")
+    button_list = []
+
+    button_list.append(Button(200, 175, 400, 40, 'game',"Connect to server"))
+    button_list.append(Button(200, 225, 400, 40, 'help', "Help"))
+    button_list.append(Button(200, 275, 400, 40, 'options', "Options"))
+    button_list.append(Button(200, 325, 195, 40, 'about', "About"))
+    button_list.append(Button(404, 325, 195, 40, 'exit',"Exit"))
 
     while True:
 
@@ -92,7 +83,7 @@ def menu(screen):
 
         for e in event.get():
             if e.type == QUIT:
-                break
+                exit()
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 click = True
 
@@ -105,11 +96,11 @@ def menu(screen):
             mx, my = mouse.get_pos()
             mb = mouse.get_pressed()
 
-            connect_button.update(mx, my, mb, 10, unclick)
-            help_button.update(mx, my, mb, 10, unclick)
-            about_button.update(mx, my, mb, 10, unclick)
-            menu_button.update(mx, my, mb, 10, unclick)
-            exit_button.update(mx, my, mb, 10, unclick)
+            for button in button_list:
+                nav_update = button.update(mx, my, mb, 10, unclick)
+
+                if nav_update != None:
+                    return nav_update
 
             clock.tick(120)
             display.update()
@@ -117,6 +108,61 @@ def menu(screen):
             continue
 
         break
+
+
+def game():
+    '''
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
+    screen.blit(logo, (400 - logo.get_width() // 2, 100))
+
+    button_list = []
+
+    button_list.append(Button(200, 175, 400, 40, 'game',"Connect to server"))
+    button_list.append(Button(200, 225, 400, 40, 'help', "Help"))
+    button_list.append(Button(200, 275, 400, 40, 'options', "Options"))
+    button_list.append(Button(200, 325, 195, 40, 'about', "About"))
+    button_list.append(Button(404, 325, 195, 40, 'exit',"Exit"))
+    '''
+    while True:
+
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                exit()
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+
+        else:
+
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            '''
+            for button in button_list:
+                nav_update = button.update(mx, my, mb, 10, unclick)
+
+                if nav_update != None:
+                    return nav_update
+            '''
+
+            screen.fill(randint(0,15777216))
+
+            clock.tick(120)
+            display.update()
+
+            continue
+
+        break
+
 
 
 if __name__ == '__main__':
@@ -129,8 +175,11 @@ if __name__ == '__main__':
 
     font.init()
 
-    if navigation == 'menu':
-        menu(screen)
+    while True:
+        if navigation == 'menu':
+            navigation = menu()
+        if navigation == 'game':
+            navigation = game()
 
     display.quit()
     raise SystemExit
