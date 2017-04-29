@@ -110,6 +110,9 @@ class World:
     def placeblock(self, x, y, blocktype):
         self.overworld[x, y] = blocktype
 
+    def save(self):
+        pickle.dump(self.overworld, open('world.pkl', 'wb'))
+
 
 def playerSender(sendQueue, server):
     print('Sender running...')
@@ -123,7 +126,10 @@ def receiveMessage(messageQueue, server):
     print('Server is ready for connection!')
 
     while True:
-        msg = server.recvfrom(1024)
+        try:
+            msg = server.recvfrom(1024)
+        except:
+            continue
         messageQueue.put((pickle.loads(msg[0]),msg[1]))
 
 def commandlineIn(commandlineQueue, fn):
@@ -174,6 +180,7 @@ if __name__ == '__main__':
             sender.terminate()
             commandline.terminate()
             server.close()
+            world.save()
             break
 
         cmdIn = ""
