@@ -110,7 +110,8 @@ def menu():
 
         for e in event.get():
             if e.type == QUIT:
-                exit()
+                return 'exit'
+
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 click = True
 
@@ -188,7 +189,8 @@ def game():
             if e.type == QUIT:
                 sender.terminate()
                 receiver.terminate()
-                break
+
+                return 'menu'
 
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 4:
@@ -290,7 +292,7 @@ if __name__ == '__main__':
 
     font.init()
 
-    while True:
+    while navigation != 'exit':
         if navigation == 'menu':
             navigation = menu()
         if navigation == 'game':
