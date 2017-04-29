@@ -9,20 +9,6 @@ from generation import *
 import os.path
 import sys
 
-players = {}
-playernumber = 1
-
-playerNDisconnect = deque([])
-move = ''
-
-PlayerData = {}
-PlayerUUID = {}
-
-sendQueue = Queue()
-messageQueue = Queue()
-commandlineQueue = Queue()
-itemLib = {}
-
 #If world doesn't exist
 if not os.path.isfile('world.pkl'):
     # Generate a new world with the function
@@ -142,6 +128,19 @@ def commandlineIn(commandlineQueue, fn):
 
 
 if __name__ == '__main__':
+    players = {}
+    playernumber = 1
+
+    playerNDisconnect = deque([])
+    move = ''
+
+    PlayerData = {}
+    PlayerUUID = {}
+
+    sendQueue = Queue()
+    messageQueue = Queue()
+    commandlineQueue = Queue()
+    itemLib = {}
 
     with open("config","r") as config:
 

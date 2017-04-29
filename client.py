@@ -157,7 +157,7 @@ def server_picker():
         port = int(config[1])
 
     print("What server do you want to connect to?")
-    print("1) Localhost (%s:%i)"%(host,port))
+    print("1) Localhost")
     print("2) Remote (Enter custom)")
 
     selection  = int(input("[Selection]: "))
@@ -165,7 +165,11 @@ def server_picker():
     while selection != 1 and selection != 2:
         selection = int(input("[Selection] <Pick 1-2>: "))
 
-    if selection == 2:
+    if selection == 1:
+        import server
+
+
+    elif selection == 2:
         port_selection = input()
 
         host = port_selection[:port_selection.find(":")]
