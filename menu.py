@@ -47,8 +47,14 @@ class Button:
         else:
             self.idle()
 
-        text_surface = minecraft_font.render(self.text, True, (255,255,255))
-        screen.blit(text_surface, center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height()))
+        text_surface = minecraft_font.render(self.text, True, (255, 255, 255))
+        text_shadow = minecraft_font.render(self.text, True, (0, 0, 0))
+        shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
+        shadow_surface.blit(text_shadow, (0, 0))
+        shadow_surface.set_alpha(100)
+        textPos = center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height())
+        screen.blit(text_shadow, (textPos[0] + 2, textPos[1] + 2))
+        screen.blit(text_surface, textPos)
              
 
 def menu(screen):
