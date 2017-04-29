@@ -11,10 +11,12 @@ def center(x,y,canvas_w,canvas_h,object_w,object_h):
 
 
 class Button:
-    def __init__(self,x,y,w,h,function,text):
+    def __init__(self,x,y,w,h,text):
         self.rect = Rect(x,y,w,h)
         self.text = text
-        self.trigger = function
+
+    def trigger(self):
+        pass
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
@@ -34,7 +36,7 @@ class Button:
         
         if self.rect.collidepoint(mx,my):
             if unclick:
-                self.trigger()
+                 self.trigger()
 
             if mb[0] == 1:
                 self.mouse_down()
@@ -49,44 +51,22 @@ class Button:
         screen.blit(text_surface, center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height()))
              
 
-def menu(screen,unclick):
-    
+def menu(screen):
+
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
-    screen.blit(wallpaper,(0,0))
+    screen.blit(wallpaper, (0, 0))
 
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
-    screen.blit(logo,(400 - logo.get_width()//2,100))
+    screen.blit(logo, (400 - logo.get_width() // 2, 100))
 
-    
-
-    mx,my = mouse.get_pos()
-    mb = mouse.get_pressed()
-
-    connect_button = Button(200,175,400,40,print('hi'),"Connect to server")
-    help_button = Button(200,225,400,40,print('hi'),"Help")
-    about_button = Button(200,275,400,40,print('hi'),"About")
-    menu_button = Button(200,325,400,40,print('hi'),"Options")
-    
-    connect_button.update(mx,my,mb,10,unclick)
-    help_button.update(mx,my,mb,10,unclick)
-    about_button.update(mx,my,mb,10,unclick)
-    menu_button.update(mx,my,mb,10,unclick)
-
-
-
-if __name__ == '__main__':
-    clock = time.Clock()
-
-    navigation = 'menu'
-
-    display.set_caption("Nothing here")
-    screen = display.set_mode((800, 500))
-
-    font.init()
+    connect_button = Button(200, 175, 400, 40, "Connect to server")
+    help_button = Button(200, 225, 400, 40, "Help")
+    about_button = Button(200, 275, 400, 40, "About")
+    menu_button = Button(200, 325, 400, 40, "Options")
 
     while True:
 
-        click = False 
+        click = False
         unclick = False
 
         for e in event.get():
@@ -101,8 +81,13 @@ if __name__ == '__main__':
 
         else:
 
-            if navigation == 'menu':
-                menu(screen,unclick)
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            connect_button.update(mx, my, mb, 10, unclick)
+            help_button.update(mx, my, mb, 10, unclick)
+            about_button.update(mx, my, mb, 10, unclick)
+            menu_button.update(mx, my, mb, 10, unclick)
 
             clock.tick(120)
             display.update()
@@ -110,6 +95,23 @@ if __name__ == '__main__':
             continue
 
         break
+
+    
+
+
+
+if __name__ == '__main__':
+    clock = time.Clock()
+
+    navigation = 'menu'
+
+    display.set_caption("Nothing here")
+    screen = display.set_mode((800, 500))
+
+    font.init()
+
+    if navigation == 'menu':
+        menu(screen)
 
     display.quit()
     raise SystemExit
