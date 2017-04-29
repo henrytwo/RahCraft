@@ -9,14 +9,27 @@ import os
 def center(x,y,canvas_w,canvas_h,object_w,object_h):
     return (x + canvas_w//2 - object_w//2, y + canvas_h//2 - object_h//2)
 
+def start():
+    print('start game ;)')
+
+def help_menu():
+    print('help')
+
+def options():
+    print('options')
+
+def about():
+    print('about')
 
 class Button:
-    def __init__(self,x,y,w,h,text):
+    def __init__(self,x,y,w,h,function,text):
         self.rect = Rect(x,y,w,h)
         self.text = text
+        self.function = function
 
     def trigger(self):
-        pass
+        function_dictionary = {'start': start, 'help': help_menu, 'options': options, 'about': about, 'exit': exit}
+        function_dictionary[self.function]()
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
@@ -59,17 +72,19 @@ class Button:
 
 def menu(screen):
 
+
+
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
     screen.blit(logo, (400 - logo.get_width() // 2, 100))
 
-    connect_button = Button(200, 175, 400, 40, "Connect to server")
-    help_button = Button(200, 225, 400, 40, "Help")
-    menu_button = Button(200, 275, 400, 40, "Options")
-    about_button = Button(200, 325, 195, 40, "About")
-    exit_button = Button(404, 325, 195, 40, "Exit")
+    connect_button = Button(200, 175, 400, 40, 'start',"Connect to server")
+    help_button = Button(200, 225, 400, 40, 'help', "Help")
+    menu_button = Button(200, 275, 400, 40, 'options', "Options")
+    about_button = Button(200, 325, 195, 40, 'about', "About")
+    exit_button = Button(404, 325, 195, 40, 'exit',"Exit")
 
     while True:
 
