@@ -33,15 +33,19 @@ def center(x,y,canvas_w,canvas_h,object_w,object_h):
 
 def start():
     print('start game ;)')
+    return 0
 
 def help_menu():
     print('help')
+    return 0
 
 def options():
     print('options')
+    return 0
 
 def about():
     print('about')
+    return 0
 
 
 class Button:
@@ -49,10 +53,13 @@ class Button:
         self.rect = Rect(x,y,w,h)
         self.text = text
         self.function = function
+        self.Lbreak = False
 
     def trigger(self):
         function_dictionary = {'start': start, 'help': help_menu, 'options': options, 'about': about, 'exit': exit}
-        function_dictionary[self.function]()
+        execCode = function_dictionary[self.function]()
+        if execCode == 0:
+            self.Lbreak = True
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
@@ -114,7 +121,7 @@ def menu(screen):
 
         for e in event.get():
             if e.type == QUIT:
-                break
+                raise SystemExit
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 click = True
 
@@ -128,6 +135,8 @@ def menu(screen):
             mb = mouse.get_pressed()
 
             connect_button.update(mx, my, mb, 10, unclick)
+            if connect_button.Lbreak:
+                return 0
             help_button.update(mx, my, mb, 10, unclick)
             about_button.update(mx, my, mb, 10, unclick)
             menu_button.update(mx, my, mb, 10, unclick)
@@ -143,7 +152,12 @@ def menu(screen):
 def game(screen):
     pass
 
+def get_neighbours(x, y, world):
+    return [world[x+1,y], world[x-1,y], world[x,y+1], world[x,y-1]]
+
 if __name__ == '__main__':
+    init()
+
     with open("config", "r") as config:
         config = config.read().split("\n")
         host = config[0]
@@ -159,6 +173,8 @@ if __name__ == '__main__':
 
     display.set_caption("Random World Generator!")
     screen = display.set_mode((800, 500))
+
+    menu(screen)
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -183,7 +199,8 @@ if __name__ == '__main__':
     world[wmsg[1]-5:wmsg[1]+45, wmsg[2]-5:wmsg[2]+31] = np.array(wmsg[3], copy=True)
     block_Select = 1
 
-
+    block_highlight = Surface((block_size, block_size))
+    block_highlight.fill((255,255,0))
 
     # ----- Gameloop
 
@@ -252,7 +269,7 @@ if __name__ == '__main__':
                 if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0:
                     sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
             if mb[2] == 1:
-                if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0:
+                if  world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size, world)) > 0:
                     sendQueue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, block_Select], (host, port)])
 
 
@@ -274,6 +291,9 @@ if __name__ == '__main__':
                     elif world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 3:
                         draw_block(x, y, block_size, (150, 150, 150), (100, 100, 100), screen)
 
+
+
+            screen.blit(block_highlight, ((mx-x_offset%block_size)//block_size*block_size, (my-y_offset%block_size)//block_size*block_size))
             clock.tick(120)
             display.update()
             continue

@@ -123,7 +123,10 @@ def receiveMessage(messageQueue, server):
     print('Server is ready for connection!')
 
     while True:
-        msg = server.recvfrom(1024)
+        try:
+            msg = server.recvfrom(1024)
+        except:
+            continue
         messageQueue.put((pickle.loads(msg[0]),msg[1]))
 
 def commandlineIn(commandlineQueue, fn):
