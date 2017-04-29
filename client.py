@@ -11,14 +11,12 @@ def playerSender(sendQueue, server):
         tobesent = sendQueue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
-
 def receiveMessage(messageQueue, server):
     print('Client is ready for connection!')
 
     while True:
         msg = server.recvfrom(16384)
         messageQueue.put(pickle.loads(msg[0]))
-
 
 def draw_block(x, y, x_offset, y_offset, block_size, colour, colourIn, screen):
     draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
@@ -27,11 +25,8 @@ def draw_block(x, y, x_offset, y_offset, block_size, colour, colourIn, screen):
 def get_neighbours(x, y, world):
     return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
-
-
 def center(x,y,canvas_w,canvas_h,object_w,object_h):
     return (x + canvas_w//2 - object_w//2, y + canvas_h//2 - object_h//2)
-
 
 class Button:
     def __init__(self,x,y,w,h,function,text):
@@ -93,7 +88,7 @@ def menu():
 
     button_list = []
 
-    button_list.append(Button(200, 175, 400, 40, 'game',"Connect to server"))
+    button_list.append(Button(200, 175, 400, 40, 'server_picker',"Connect to server"))
     button_list.append(Button(200, 225, 400, 40, 'help', "Help"))
     button_list.append(Button(200, 275, 400, 40, 'options', "Options"))
     button_list.append(Button(200, 325, 195, 40, 'about', "About"))
@@ -133,8 +128,94 @@ def menu():
 
         break
 
+def server_picker():
+    clock = time.Clock()
 
-def game():
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    '''
+        wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+        screen.blit(wallpaper, (0, 0))
+
+        minecraft_text(text, (100,100))
+
+
+        button_list = []
+
+        button_list.append(Button(200, 175, 400, 40, 'server_picker', "Connect to server"))
+        button_list.append(Button(200, 225, 400, 40, 'help', "Help"))
+        button_list.append(Button(200, 275, 400, 40, 'options', "Options"))
+        button_list.append(Button(200, 325, 195, 40, 'about', "About"))
+        button_list.append(Button(404, 325, 195, 40, 'exit', "Exit"))
+
+    '''
+
+    with open("config", "r") as config:
+        config = config.read().split("\n")
+        host = config[0]
+        port = int(config[1])
+
+    print("What server do you want to connect to?")
+    print("1) Localhost (%s:%i)"%(host,port))
+    print("2) Remote (Enter custom)")
+
+    selection  = int(input("[Selection]: "))
+
+    while selection != 1 and selection != 2:
+        selection = int(input("[Selection] <Pick 1-2>: "))
+
+    if selection == 2:
+        port_selection = input()
+
+        host = port_selection[:port_selection.find(":")]
+        port = int(port_selection[port_selection.find(":") + 1:])
+
+    print(host,port)
+
+    game(host,port)
+
+    return 'menu'
+
+    '''
+    while True:
+
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+
+        else:
+
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            for button in button_list:
+                nav_update = button.update(mx, my, mb, 10, unclick)
+
+                if nav_update != None:
+                    return nav_update
+
+            clock.tick(120)
+            display.update()
+
+            continue
+
+        break
+
+        '''
+
+
+def game(host,port):
     sendQueue = Queue()
     messageQueue = Queue()
 
@@ -143,8 +224,8 @@ def game():
 
     minecraft_font = font.Font("fonts/minecraft.ttf", 30)
 
-    text_surface = minecraft_font.render("Connecting to server...", True, (255, 255, 255))
-    text_shadow = minecraft_font.render("Connecting to server...", True, (0, 0, 0))
+    text_surface = minecraft_font.render("Connecting to %s:%i..."%(host,port), True, (255, 255, 255))
+    text_shadow = minecraft_font.render("Connecting to %s:%i..."%(host,port), True, (0, 0, 0))
     shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
     shadow_surface.blit(text_shadow, (0, 0))
     shadow_surface.set_alpha(100)
@@ -154,11 +235,6 @@ def game():
     screen.blit(text_surface, textPos)
 
     display.flip()
-
-    with open("config", "r") as config:
-        config = config.read().split("\n")
-        host = config[0]
-        port = int(config[1])
 
     clock = time.Clock()
 
@@ -305,8 +381,8 @@ if __name__ == '__main__':
     while navigation != 'exit':
         if navigation == 'menu':
             navigation = menu()
-        if navigation == 'game':
-            navigation = game()
+        if navigation == 'server_picker':
+            navigation = server_picker()
 
     display.quit()
     raise SystemExit
