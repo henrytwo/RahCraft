@@ -4,12 +4,14 @@ from multiprocessing import *
 import numpy as np
 from pygame import *
 
+
 def playerSender(sendQueue, server):
     print('Client running...')
 
     while True:
         tobesent = sendQueue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
+
 
 def receiveMessage(messageQueue, server):
     print('Client is ready for connection!')
@@ -18,19 +20,23 @@ def receiveMessage(messageQueue, server):
         msg = server.recvfrom(16384)
         messageQueue.put(pickle.loads(msg[0]))
 
+
 def draw_block(x, y, x_offset, y_offset, block_size, colour, colourIn, screen):
     draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
     draw.rect(screen, colourIn, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)
 
+
 def get_neighbours(x, y, world):
     return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
-def center(x,y,canvas_w,canvas_h,object_w,object_h):
-    return (x + canvas_w//2 - object_w//2, y + canvas_h//2 - object_h//2)
+
+def center(x, y, canvas_w, canvas_h, object_w, object_h):
+    return (x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2)
+
 
 class Button:
-    def __init__(self,x,y,w,h,function,text):
-        self.rect = Rect(x,y,w,h)
+    def __init__(self, x, y, w, h, function, text):
+        self.rect = Rect(x, y, w, h)
         self.text = text
         self.function = function
 
@@ -77,7 +83,6 @@ class Button:
 
 
 def menu():
-
     clock = time.Clock()
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -88,11 +93,11 @@ def menu():
 
     button_list = []
 
-    button_list.append(Button(200, 175, 400, 40, 'server_picker',"Connect to server"))
+    button_list.append(Button(200, 175, 400, 40, 'server_picker', "Connect to server"))
     button_list.append(Button(200, 225, 400, 40, 'help', "Help"))
     button_list.append(Button(200, 275, 400, 40, 'options', "Options"))
     button_list.append(Button(200, 325, 195, 40, 'about', "About"))
-    button_list.append(Button(404, 325, 195, 40, 'exit',"Exit"))
+    button_list.append(Button(404, 325, 195, 40, 'exit', "Exit"))
 
     while True:
 
@@ -128,6 +133,7 @@ def menu():
 
         break
 
+
 def server_picker():
     clock = time.Clock()
 
@@ -135,8 +141,6 @@ def server_picker():
     screen.blit(wallpaper, (0, 0))
 
     '''
-        wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
-        screen.blit(wallpaper, (0, 0))
 
         minecraft_text(text, (100,100))
 
@@ -156,28 +160,64 @@ def server_picker():
         host = config[0]
         port = int(config[1])
 
-    print("What server do you want to connect to?")
-    print("1) Localhost")
-    print("2) Remote (Enter custom)")
+    normal_font = font.Font("fonts/Text font.ttf", 14)
 
-    selection  = int(input("[Selection]: "))
+    IpText = normal_font.render("IP address", True, (255, 255, 255))
+    PortText = normal_font.render("Port", True, (255, 255, 255))
+    sizeChar = normal_font.render("SHZ", True, (255, 255, 255))
 
-    while selection != 1 and selection != 2:
-        selection = int(input("[Selection] <Pick 1-2>: "))
+    ipfieldRect = (size[0] // 2 - 150, size[1] // 2 - 100, 300, 40)
+    portRect = (size[0] // 2 - 150, size[1] // 2 - 30, 300, 40)
 
-    if selection == 1:
-        import server
+    fields = {"ip":"",
+              "port": ""}
 
+    currentField = "none"
+    allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
+               '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
-    elif selection == 2:
-        port_selection = input()
+    while True:
+        for e in event.get():
+            if e.type == QUIT:
+                return 0
+            if e.type == KEYDOWN:
+                if e.unicode in allowed:
+                    fields[currentField] += e.unicode
+                elif e.key == K_RETURN:
+                    inputField = "none"
+                elif e.key == K_BACKSPACE:
+                    try:
+                         fields[currentField] = fields[currentField][:-1]
+                    except:
+                        pass
 
-        host = port_selection[:port_selection.find(":")]
-        port = int(port_selection[port_selection.find(":") + 1:])
+        screen.blit(IpText, (ipfieldRect[0], ipfieldRect[1] - IpText.get_height() - 2))
+        screen.blit(PortText, (portRect[0], portRect[1] - PortText.get_height()))
+        draw.rect(screen, (0, 0, 0), ipfieldRect)
+        draw.rect(screen, (151, 151, 151), ipfieldRect, 2)
+        draw.rect(screen, (0, 0, 0), portRect)
+        draw.rect(screen, (151, 151, 151), portRect, 2)
 
-    print(host,port)
+        screen.blit(normal_font.render(fields["ip"], True, (255, 255, 255)), (ipfieldRect[0] + 3, ipfieldRect[1] + ipfieldRect[3] // 2 - sizeChar.get_height() // 2))
+        screen.blit(normal_font.render(fields["port"], True, (255, 255, 255)), (portRect[0] + 3, portRect[1] + portRect[3] // 2 - sizeChar.get_height() // 2))
 
-    game(host,port)
+        mx, my = mouse.get_pos()
+        ml, mm, mr = mouse.get_pressed()
+
+        if  Rect(ipfieldRect).collidepoint(mx, my) and ml == 1:
+            currentField = "ip"
+
+        elif Rect(portRect).collidepoint(mx, my) and ml == 1:
+            currentField = "port"
+
+        elif ml == 1:
+            inputField = "none"
+
+        display.flip()
+
+    print(host, port)
+
+    game(host, port)
 
     return 'menu'
 
@@ -219,7 +259,7 @@ def server_picker():
         '''
 
 
-def game(host,port):
+def game(host, port):
     sendQueue = Queue()
     messageQueue = Queue()
 
@@ -228,8 +268,8 @@ def game(host,port):
 
     minecraft_font = font.Font("fonts/minecraft.ttf", 30)
 
-    text_surface = minecraft_font.render("Connecting to %s:%i..."%(host,port), True, (255, 255, 255))
-    text_shadow = minecraft_font.render("Connecting to %s:%i..."%(host,port), True, (0, 0, 0))
+    text_surface = minecraft_font.render("Connecting to %s:%i..." % (host, port), True, (255, 255, 255))
+    text_shadow = minecraft_font.render("Connecting to %s:%i..." % (host, port), True, (0, 0, 0))
     shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
     shadow_surface.blit(text_shadow, (0, 0))
     shadow_surface.set_alpha(100)
@@ -371,13 +411,12 @@ def game(host,port):
         break
 
 
-
-
 if __name__ == '__main__':
 
     navigation = 'menu'
 
     display.set_caption("Nothing here")
+    size = (800, 500)
     screen = display.set_mode((800, 500))
 
     font.init()
