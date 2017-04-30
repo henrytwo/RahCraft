@@ -87,6 +87,14 @@ def menu():
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
     screen.blit(logo, (400 - logo.get_width() // 2, 100))
 
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    version_text = normal_font.render("Minecrap 0.0.1 Beta", True, (255, 255, 255))
+    screen.blit(version_text, (10, 480))
+
+    about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
+    screen.blit(about_text, (800 - about_text.get_width(), 480))
+
     button_list = []
 
     button_list.append(Button(200, 175, 400, 40, 'server_picker', "Connect to server"))
@@ -242,6 +250,7 @@ def help():
     back_button = Button(200, 370, 400, 40, 'menu', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
+
 
     about_list = '''HELP
 ------------------------------------
