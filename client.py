@@ -3,6 +3,8 @@ import socket
 from multiprocessing import *
 import numpy as np
 from pygame import *
+import time as t
+from random import randint
 
 host = ""
 port = 0
@@ -127,6 +129,8 @@ def menu():
 
         break
 
+
+
 def server_picker():
 
     global host,port
@@ -171,7 +175,7 @@ def server_picker():
 
         for e in event.get():
             if e.type == QUIT:
-                return 0
+                return 'exit'
             if e.type == KEYDOWN:
                 if e.unicode in allowed:
                     fields[currentField] += e.unicode
@@ -556,6 +560,14 @@ if __name__ == '__main__':
     display.set_caption("Nothing here")
     size = (800, 500)
     screen = display.set_mode((800, 500))
+
+
+    screen.fill((255,255,255))
+    splash  = image.load('textures/menu/splash.png')
+    screen.blit(splash,center(0,0,800,500,splash.get_width(),splash.get_height()))
+    display.flip()
+
+    t.sleep(randint(1,3))
 
     font.init()
 
