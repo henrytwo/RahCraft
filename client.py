@@ -278,6 +278,26 @@ def about():
 
     back_button = Button(200, 370, 400, 40, 'menu', "Back")
 
+    normal_font = font.Font("fonts/Text font.ttf", 14)
+
+    about_list = '''The Zen of Python, by Tim Peters
+Beautiful is better than ugly.
+Explicit is better than implicit.
+Simple is better than complex.
+Complex is better than complicated.
+Flat is better than nested.
+Sparse is better than dense.
+Readability counts.
+Special cases aren't special enough to break the rules.
+...
+If the implementation is hard to explain, it's a bad idea.
+If the implementation is easy to explain, it may be a good idea.
+Namespaces are one honking great idea -- let's do more of those!
+
+Developed by: Henry Tu, Ryan Zhang, Syed Safwaan
+ICS3U 2017
+                    '''.split('\n')
+
     while True:
 
         click = False
@@ -297,6 +317,11 @@ def about():
 
             mx, my = mouse.get_pos()
             mb = mouse.get_pressed()
+
+            for y in range(0,len(about_list)):
+                about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+                screen.blit(about_text,(400 - about_text.get_width()//2, 50 + y*20))
+
 
             nav_update = back_button.update(mx, my, mb, 10, unclick)
 
@@ -523,7 +548,6 @@ if __name__ == '__main__':
             navigation = help()
         if navigation == 'game':
             navigation = game()
-
 
     display.quit()
     raise SystemExit
