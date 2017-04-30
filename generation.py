@@ -8,13 +8,13 @@ def generate_tree(bx,by,world):
 
         
     for y in range(height):
-        world[bx][by-y] = 2
+        world[bx][by-y] = 4
 
 
     for x in range(randint(3,5)):
         for y in range(randint(2,4)):
-            world[bx - x//2][by - y - height] = 1
-            world[bx + x//2][by - y - height] = 1
+            world[bx - x//2][by - y - height] = 5
+            world[bx + x//2][by - y - height] = 5
 
     return world
 
@@ -34,8 +34,6 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
     # Generates the random values for the terrain construction
     terrain = [randrange(20) + 10 for _ in range(w)]
 
-
-    print(terrain[0:100])
     # ----- Construct the Terrain
     # Counter that changes dynamically to check through all blocks in the terrain list
     cur_pos = 0

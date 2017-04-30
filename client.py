@@ -438,6 +438,16 @@ def game():
 
     clock = time.Clock()
 
+    #Code to trigger Syed
+    with open('block','r') as block_lookup:
+        block_list = block_lookup.read().strip().split('\n')
+
+    block_list = [block.split(' // ') for block in block_list]
+
+    for index in range(len(block_list)):
+        block_list[index][1] = list(map(int,block_list[index][1].split(', ')))
+        block_list[index][2] = list(map(int,block_list[index][2].split(', ')))
+
     block_size = 20
     y_offset = 10 * block_size
     x_offset = 5000 * block_size
@@ -547,14 +557,10 @@ def game():
             # Redraw the level onto the screen
             for x in range(0, 821, block_size):  # Render blocks
                 for y in range(0, 521, block_size):
-                    if world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 1:
-                        draw_block(x, y, x_offset, y_offset, block_size, (0, 150, 0), (0, 100, 0), screen)
+                    block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
-                    elif world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 2:
-                        draw_block(x, y, x_offset, y_offset, block_size, (129, 68, 32), (99, 38, 12), screen)
-
-                    elif world[(x + x_offset) // block_size][(y + y_offset) // block_size] == 3:
-                        draw_block(x, y, x_offset, y_offset, block_size, (150, 150, 150), (100, 100, 100), screen)
+                    if block != 0:
+                        draw_block(x, y, x_offset, y_offset, block_size, block_list[block][1], block_list[block][2], screen)
 
             clock.tick(120)
             display.update()
