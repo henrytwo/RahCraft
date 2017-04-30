@@ -140,21 +140,6 @@ def server_picker():
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
-    '''
-
-        minecraft_text(text, (100,100))
-
-
-        button_list = []
-
-        button_list.append(Button(200, 175, 400, 40, 'server_picker', "Connect to server"))
-        button_list.append(Button(200, 225, 400, 40, 'help', "Help"))
-        button_list.append(Button(200, 275, 400, 40, 'options', "Options"))
-        button_list.append(Button(200, 325, 195, 40, 'about', "About"))
-        button_list.append(Button(404, 325, 195, 40, 'exit', "Exit"))
-
-    '''
-
     with open("config", "r") as config:
         config = config.read().split("\n")
         host = config[0]
@@ -175,6 +160,8 @@ def server_picker():
     currentField = "none"
     allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
                '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
+
+    currentField = "ip"
 
     while True:
         for e in event.get():
@@ -220,43 +207,6 @@ def server_picker():
     game(host, port)
 
     return 'menu'
-
-    '''
-    while True:
-
-        click = False
-        unclick = False
-
-        for e in event.get():
-            if e.type == QUIT:
-                return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
-
-            if e.type == MOUSEBUTTONUP and e.button == 1:
-                unclick = True
-
-
-        else:
-
-            mx, my = mouse.get_pos()
-            mb = mouse.get_pressed()
-
-            for button in button_list:
-                nav_update = button.update(mx, my, mb, 10, unclick)
-
-                if nav_update != None:
-                    return nav_update
-
-            clock.tick(120)
-            display.update()
-
-            continue
-
-        break
-
-        '''
 
 
 def game(host, port):
