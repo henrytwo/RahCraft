@@ -115,7 +115,7 @@ def menu():
             mb = mouse.get_pressed()
 
             for button in button_list:
-                nav_update = button.update(mx, my, mb, 10, unclick)
+                nav_update = button.update(mx, my, mb, 15, unclick)
 
                 if nav_update != None:
                     return nav_update
@@ -141,7 +141,7 @@ def server_picker():
         host = config[0]
         port = int(config[1])
 
-    normal_font = font.Font("fonts/Text font.ttf", 14)
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
 
     IpText = normal_font.render("IP address", True, (255, 255, 255))
     PortText = normal_font.render("Port", True, (255, 255, 255))
@@ -159,7 +159,6 @@ def server_picker():
                '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
     currentField = "ip"
-    connectButton = Button(200, 175, 400, 40, 'server_picker', "Connect to server")
 
     button_list = []
 
@@ -206,7 +205,7 @@ def server_picker():
         mb = mouse.get_pressed()
 
         for button in button_list:
-            nav_update = button.update(mx, my, mb, 10, unclick)
+            nav_update = button.update(mx, my, mb, 15, unclick)
 
             if nav_update != None:
                 if nav_update == "game":
@@ -238,7 +237,7 @@ def help():
 
     back_button = Button(200, 370, 400, 40, 'menu', "Back")
 
-    normal_font = font.Font("fonts/Text font.ttf", 14)
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
 
     about_list = '''HELP
 ------------------------------------
@@ -283,7 +282,7 @@ LONG LIVE THE RAHMISH EMPIRE
                 about_text = normal_font.render(about_list[y], True, (255, 255, 255))
                 screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
 
-            nav_update = back_button.update(mx, my, mb, 10, unclick)
+            nav_update = back_button.update(mx, my, mb, 15, unclick)
 
             if nav_update != None:
                 return nav_update
@@ -303,7 +302,7 @@ def about():
 
     back_button = Button(200, 370, 400, 40, 'menu', "Back")
 
-    normal_font = font.Font("fonts/Text font.ttf", 14)
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
 
     about_list = '''The Zen of Python, by Tim Peters
 Beautiful is better than ugly.
@@ -348,7 +347,7 @@ ICS3U 2017
                 screen.blit(about_text,(400 - about_text.get_width()//2, 50 + y*20))
 
 
-            nav_update = back_button.update(mx, my, mb, 10, unclick)
+            nav_update = back_button.update(mx, my, mb, 15, unclick)
 
             if nav_update != None:
                 return nav_update
@@ -388,7 +387,7 @@ def options():
             mx, my = mouse.get_pos()
             mb = mouse.get_pressed()
 
-            nav_update = back_button.update(mx, my, mb, 10, unclick)
+            nav_update = back_button.update(mx, my, mb, 15, unclick)
 
             if nav_update != None:
                 return nav_update
