@@ -238,6 +238,27 @@ def help():
 
     back_button = Button(200, 370, 400, 40, 'menu', "Back")
 
+    normal_font = font.Font("fonts/Text font.ttf", 14)
+
+    about_list = '''HELP
+------------------------------------
+BOIII
+SO YOU WANNA PLAY DIS GAME HUH?
+WELL ITS RLLY EZ ACTUALLY
+LEGIT
+YOU TAKE UR FAT FINGERS
+PRESS DOWN
+ON UR KEYBOARD
+AND UR DONE.
+DO U SEE THAT PERIOD????
+IT MEANS *MIC DROP*
+
+THATS RIGHT
+ANYWAYS, GOD SAVE THE QUEEN
+LONG LIVE THE RAHMISH EMPIRE
+'''.split('\n')
+
+
     while True:
 
         click = False
@@ -257,6 +278,10 @@ def help():
 
             mx, my = mouse.get_pos()
             mb = mouse.get_pressed()
+
+            for y in range(0, len(about_list)):
+                about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+                screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
 
             nav_update = back_button.update(mx, my, mb, 10, unclick)
 
