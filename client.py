@@ -4,6 +4,9 @@ from multiprocessing import *
 import numpy as np
 from pygame import *
 
+host = ""
+port = 0
+
 
 def playerSender(sendQueue, server):
     print('Client running...')
@@ -40,8 +43,6 @@ class Button:
         self.text = text
         self.function = function
 
-    def trigger(self):
-        return self.function
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
@@ -61,7 +62,7 @@ class Button:
 
         if self.rect.collidepoint(mx, my):
             if unclick:
-                return self.trigger()
+                return self.function
 
             if mb[0] == 1:
                 self.mouse_down()
@@ -135,6 +136,9 @@ def menu():
 
 
 def server_picker():
+
+    global host,port
+
     clock = time.Clock()
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -163,10 +167,18 @@ def server_picker():
 
     currentField = "ip"
 
+    button_list = []
+
+    button_list.append(Button(200, 370, 400, 40, 'menu', "Back"))
+    button_list.append(Button(200, 320, 400, 40, 'game', "Connect to server"))
+
     while True:
+        click = False
+        unclick = False
+
         for e in event.get():
             if e.type == QUIT:
-                return 0
+                return 'exit'
             if e.type == KEYDOWN:
                 if e.unicode in allowed:
                     fields[currentField] += e.unicode
@@ -174,9 +186,16 @@ def server_picker():
                     inputField = "none"
                 elif e.key == K_BACKSPACE:
                     try:
-                         fields[currentField] = fields[currentField][:-1]
+                        fields[currentField] = fields[currentField][:-1]
                     except:
                         pass
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
 
         screen.blit(IpText, (ipfieldRect[0], ipfieldRect[1] - IpText.get_height() - 2))
         screen.blit(PortText, (portRect[0], portRect[1] - PortText.get_height()))
@@ -190,6 +209,13 @@ def server_picker():
 
         mx, my = mouse.get_pos()
         ml, mm, mr = mouse.get_pressed()
+        mb = mouse.get_pressed()
+
+        for button in button_list:
+            nav_update = button.update(mx, my, mb, 10, unclick)
+
+            if nav_update != None:
+                return nav_update
 
         if  Rect(ipfieldRect).collidepoint(mx, my) and ml == 1:
             currentField = "ip"
@@ -200,16 +226,139 @@ def server_picker():
         elif ml == 1:
             inputField = "none"
 
+        clock.tick(120)
+
         display.flip()
 
-    print(host, port)
+def help():
+    clock = time.Clock()
 
-    game(host, port)
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
 
-    return 'menu'
+    back_button = Button(200, 370, 400, 40, 'menu', "Back")
+
+    while True:
+
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+        else:
+
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            nav_update = back_button.update(mx, my, mb, 10, unclick)
+
+            if nav_update != None:
+                return nav_update
+
+            clock.tick(120)
+            display.update()
+
+            continue
+
+        break
 
 
-def game(host, port):
+def about():
+    clock = time.Clock()
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    back_button = Button(200, 370, 400, 40, 'menu', "Back")
+
+    while True:
+
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+        else:
+
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            nav_update = back_button.update(mx, my, mb, 10, unclick)
+
+            if nav_update != None:
+                return nav_update
+
+            clock.tick(120)
+            display.update()
+
+            continue
+
+        break
+
+
+
+def options():
+    clock = time.Clock()
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    back_button = Button(200, 370, 400, 40, 'menu', "Back")
+
+    while True:
+
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+        else:
+
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            nav_update = back_button.update(mx, my, mb, 10, unclick)
+
+            if nav_update != None:
+                return nav_update
+
+            clock.tick(120)
+            display.update()
+
+            continue
+
+        break
+
+
+
+def game():
+
+    global host,port
+
     sendQueue = Queue()
     messageQueue = Queue()
 
@@ -376,6 +525,14 @@ if __name__ == '__main__':
             navigation = menu()
         if navigation == 'server_picker':
             navigation = server_picker()
+        if navigation == 'about':
+            navigation = about()
+        if navigation == 'options':
+            navigation = options()
+        if navigation == 'help':
+            navigation = help()
+        if navigation == 'game':
+            navigation = game()
 
     display.quit()
     raise SystemExit
