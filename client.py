@@ -7,14 +7,12 @@ from pygame import *
 host = ""
 port = 0
 
-
 def playerSender(sendQueue, server):
     print('Client running...')
 
     while True:
         tobesent = sendQueue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
-
 
 def receiveMessage(messageQueue, server):
     print('Client is ready for connection!')
@@ -23,15 +21,12 @@ def receiveMessage(messageQueue, server):
         msg = server.recvfrom(16384)
         messageQueue.put(pickle.loads(msg[0]))
 
-
 def draw_block(x, y, x_offset, y_offset, block_size, colour, colourIn, screen):
     draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
     draw.rect(screen, colourIn, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)
 
-
 def get_neighbours(x, y, world):
     return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
-
 
 def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return (x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2)
@@ -42,7 +37,6 @@ class Button:
         self.rect = Rect(x, y, w, h)
         self.text = text
         self.function = function
-
 
     def highlight(self):
         button_hover = transform.scale(image.load("textures/menu/button_hover.png"), (self.rect.w, self.rect.h))
@@ -69,7 +63,6 @@ class Button:
 
             else:
                 self.highlight()
-
         else:
             self.idle()
 
@@ -133,7 +126,6 @@ def menu():
             continue
 
         break
-
 
 def server_picker():
 
@@ -278,7 +270,6 @@ def help():
 
         break
 
-
 def about():
     clock = time.Clock()
 
@@ -319,8 +310,6 @@ def about():
 
         break
 
-
-
 def options():
     clock = time.Clock()
 
@@ -360,8 +349,6 @@ def options():
             continue
 
         break
-
-
 
 def game():
 
@@ -436,8 +423,6 @@ def game():
                 elif e.button == 5:
                     block_Select = max(0, block_Select - 1)
 
-
-
         else:
             display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
                 x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
@@ -466,8 +451,6 @@ def game():
 
             if updated and updateCost > 3:
                 sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
-
-            # screen.fill((0,0,255))
 
             try:
                 wmsg = messageQueue.get_nowait()
@@ -516,7 +499,6 @@ def game():
             continue
 
         break
-
 
 if __name__ == '__main__':
 
