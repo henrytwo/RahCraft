@@ -151,13 +151,15 @@ def server_picker():
     portRect = (size[0] // 2 - 150, size[1] // 2 - 30, 300, 40)
 
     fields = {"ip":"",
-              "port": ""}
+              "port": "",
+              "none": ""}
 
     currentField = "none"
     allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
                '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
     currentField = "ip"
+    connectButton = Button(200, 175, 400, 40, 'server_picker', "Connect to server")
 
     button_list = []
 
@@ -170,12 +172,12 @@ def server_picker():
 
         for e in event.get():
             if e.type == QUIT:
-                return 'exit'
+                return 0
             if e.type == KEYDOWN:
                 if e.unicode in allowed:
                     fields[currentField] += e.unicode
                 elif e.key == K_RETURN:
-                    inputField = "none"
+                    currentField = "none"
                 elif e.key == K_BACKSPACE:
                     try:
                         fields[currentField] = fields[currentField][:-1]
@@ -207,6 +209,12 @@ def server_picker():
             nav_update = button.update(mx, my, mb, 10, unclick)
 
             if nav_update != None:
+                if nav_update == "game":
+                    try:
+                        host = fields["ip"]
+                        port = int(fields["port"])
+                    except:
+                        pass
                 return nav_update
 
         if  Rect(ipfieldRect).collidepoint(mx, my) and ml == 1:
@@ -216,7 +224,7 @@ def server_picker():
             currentField = "port"
 
         elif ml == 1:
-            inputField = "none"
+            currentField = "none"
 
         clock.tick(120)
 
@@ -418,7 +426,7 @@ def game():
         else:
             display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
                 x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
-                block_size) + "Block Selected:" + str(block_Select))
+                block_size) + " Block Selected:" + str(block_Select))
 
             keys = key.get_pressed()
 
@@ -505,7 +513,7 @@ if __name__ == '__main__':
     while navigation != 'exit':
         if navigation == 'menu':
             navigation = menu()
-        if navigation == 'server_picker':
+        elif navigation == 'server_picker':
             navigation = server_picker()
         if navigation == 'about':
             navigation = about()
@@ -515,6 +523,7 @@ if __name__ == '__main__':
             navigation = help()
         if navigation == 'game':
             navigation = game()
+
 
     display.quit()
     raise SystemExit
