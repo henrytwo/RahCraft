@@ -4,10 +4,12 @@ from multiprocessing import *
 import numpy as np
 from pygame import *
 import time as t
+import os
 from random import randint
 
 host = ""
 port = 0
+
 
 def playerSender(sendQueue, server):
     print('Client running...')
@@ -16,6 +18,7 @@ def playerSender(sendQueue, server):
         tobesent = sendQueue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
+
 def receiveMessage(messageQueue, server):
     print('Client is ready for connection!')
 
@@ -23,12 +26,15 @@ def receiveMessage(messageQueue, server):
         msg = server.recvfrom(16384)
         messageQueue.put(pickle.loads(msg[0]))
 
+
 def draw_block(x, y, x_offset, y_offset, block_size, colour, colourIn, screen):
     draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
     draw.rect(screen, colourIn, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)
 
+
 def get_neighbours(x, y, world):
     return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
+
 
 def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return (x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2)
@@ -73,7 +79,8 @@ class Button:
         shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
         shadow_surface.blit(text_shadow, (0, 0))
         shadow_surface.set_alpha(100)
-        textPos = center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height())
+        textPos = center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(),
+                         text_surface.get_height())
         screen.blit(text_shadow, (textPos[0] + 2, textPos[1] + 2))
         screen.blit(text_surface, textPos)
 
@@ -138,10 +145,8 @@ def menu():
         break
 
 
-
 def server_picker():
-
-    global host,port
+    global host, port
 
     clock = time.Clock()
 
@@ -162,13 +167,16 @@ def server_picker():
     ipfieldRect = (size[0] // 2 - 150, size[1] // 2 - 100, 300, 40)
     portRect = (size[0] // 2 - 150, size[1] // 2 - 30, 300, 40)
 
-    fields = {"ip":"",
+    fields = {"ip": "",
               "port": "",
               "none": ""}
 
     currentField = "none"
-    allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
-               '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
+    allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+               'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
+               '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/',
+               ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
     currentField = "ip"
 
@@ -201,7 +209,6 @@ def server_picker():
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 unclick = True
 
-
         screen.blit(IpText, (ipfieldRect[0], ipfieldRect[1] - IpText.get_height() - 2))
         screen.blit(PortText, (portRect[0], portRect[1] - PortText.get_height()))
         draw.rect(screen, (0, 0, 0), ipfieldRect)
@@ -209,8 +216,10 @@ def server_picker():
         draw.rect(screen, (0, 0, 0), portRect)
         draw.rect(screen, (151, 151, 151), portRect, 2)
 
-        screen.blit(normal_font.render(fields["ip"], True, (255, 255, 255)), (ipfieldRect[0] + 3, ipfieldRect[1] + ipfieldRect[3] // 2 - sizeChar.get_height() // 2))
-        screen.blit(normal_font.render(fields["port"], True, (255, 255, 255)), (portRect[0] + 3, portRect[1] + portRect[3] // 2 - sizeChar.get_height() // 2))
+        screen.blit(normal_font.render(fields["ip"], True, (255, 255, 255)),
+                    (ipfieldRect[0] + 3, ipfieldRect[1] + ipfieldRect[3] // 2 - sizeChar.get_height() // 2))
+        screen.blit(normal_font.render(fields["port"], True, (255, 255, 255)),
+                    (portRect[0] + 3, portRect[1] + portRect[3] // 2 - sizeChar.get_height() // 2))
 
         mx, my = mouse.get_pos()
         ml, mm, mr = mouse.get_pressed()
@@ -228,7 +237,7 @@ def server_picker():
                         pass
                 return nav_update
 
-        if  Rect(ipfieldRect).collidepoint(mx, my) and ml == 1:
+        if Rect(ipfieldRect).collidepoint(mx, my) and ml == 1:
             currentField = "ip"
 
         elif Rect(portRect).collidepoint(mx, my) and ml == 1:
@@ -241,6 +250,7 @@ def server_picker():
 
         display.flip()
 
+
 def help():
     clock = time.Clock()
 
@@ -250,7 +260,6 @@ def help():
     back_button = Button(200, 370, 400, 40, 'menu', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
-
 
     about_list = '''HELP
 ------------------------------------
@@ -269,7 +278,6 @@ THATS RIGHT
 ANYWAYS, GOD SAVE THE QUEEN
 LONG LIVE THE RAHMISH EMPIRE
 '''.split('\n')
-
 
     while True:
 
@@ -306,6 +314,7 @@ LONG LIVE THE RAHMISH EMPIRE
             continue
 
         break
+
 
 def about():
     clock = time.Clock()
@@ -355,10 +364,9 @@ ICS3U 2017
             mx, my = mouse.get_pos()
             mb = mouse.get_pressed()
 
-            for y in range(0,len(about_list)):
+            for y in range(0, len(about_list)):
                 about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-                screen.blit(about_text,(400 - about_text.get_width()//2, 50 + y*20))
-
+                screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
 
             nav_update = back_button.update(mx, my, mb, 15, unclick)
 
@@ -371,6 +379,7 @@ ICS3U 2017
             continue
 
         break
+
 
 def options():
     clock = time.Clock()
@@ -412,9 +421,9 @@ def options():
 
         break
 
-def game():
 
-    global host,port
+def game():
+    global host, port
 
     sendQueue = Queue()
     messageQueue = Queue()
@@ -438,15 +447,15 @@ def game():
 
     clock = time.Clock()
 
-    #Code to trigger Syed
-    with open('block','r') as block_lookup:
+    # Code to trigger Syed
+    with open('block', 'r') as block_lookup:
         block_list = block_lookup.read().strip().split('\n')
 
     block_list = [block.split(' // ') for block in block_list]
 
     for index in range(len(block_list)):
-        block_list[index][1] = list(map(int,block_list[index][1].split(', ')))
-        block_list[index][2] = list(map(int,block_list[index][2].split(', ')))
+        block_list[index][1] = list(map(int, block_list[index][1].split(', ')))
+        block_list[index][2] = list(map(int, block_list[index][2].split(', ')))
 
     block_size = 20
     y_offset = 10 * block_size
@@ -485,6 +494,7 @@ def game():
     glob_texture = glob.glob("textures/blocks/*.png")
 
     block_texture = [transform.scale(image.load(texture), (20, 20)) for texture in glob_texture]
+    grounded = False
 
     while True:
         updated = False
@@ -510,18 +520,28 @@ def game():
             keys = key.get_pressed()
 
             if keys[K_d] and x_offset // block_size < 9950:
-                x_offset += 60 // block_size
-                updated = True
+                if world[(size[0] // 2 + 10 + x_offset) // block_size][(size[1] // 2 + y_offset) // block_size] == 0:
+                    x_offset += 60 // block_size
+                    updated = True
             elif keys[K_a] and x_offset // block_size > 0:
-                x_offset -= 60 // block_size
-                updated = True
+                if world[(size[0] // 2-10 + x_offset) // block_size][(size[1] // 2 + y_offset) // block_size] == 0:
+                    x_offset -= 60 // block_size
+                    updated = True
 
-            if keys[K_w] and y_offset // block_size > 5:
-                y_offset -= 80 // block_size
-                updated = True
+            if keys[K_w] and y_offset // block_size > 5 and grounded:
+                if world[(size[0] // 2-10 + x_offset) // block_size][(size[1] // 2 - 8 + y_offset) // block_size] == 0:
+                    y_offset -= 80
+                    updated = True
+                    grounded = False
             elif keys[K_s] and y_offset // block_size < 70:
-                y_offset += 80 // block_size
-                updated = True
+                if world[(size[0]//2-10 + x_offset) // block_size][(size[1]//2+10 + y_offset) // block_size] == 0:
+                    y_offset += 80 // block_size
+                    updated = True
+
+            if world[(size[0]//2-10 + x_offset) // block_size][(size[1]//2+10 + y_offset) // block_size] == 0:
+                y_offset += 1
+            else:
+                grounded = True
 
             DispingWorld = world[x_offset // block_size:x_offset // block_size + 41,
                            y_offset // block_size:y_offset // block_size + 26]
@@ -568,20 +588,22 @@ def game():
 
                     if block > 0:
                         if not advanced_graphics:
-                            draw_block(x, y, x_offset, y_offset, block_size, block_list[block][1], block_list[block][2], screen)
+                            draw_block(x, y, x_offset, y_offset, block_size, block_list[block][1], block_list[block][2],
+                                       screen)
                         else:
                             screen.blit(block_texture[block], (x - x_offset % 20, y - y_offset % 20))
 
                     elif block == -1:
-                        draw_block(x, y, x_offset, y_offset, block_size, (0,0,0), (0,0,0), screen)
+                        draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
-
+            draw.rect(screen, (0, 0, 0), (size[0]//2-10, size[1]//2-10, block_size, block_size))
 
             clock.tick(120)
             display.update()
             continue
 
         break
+
 
 if __name__ == '__main__':
 
@@ -591,13 +613,12 @@ if __name__ == '__main__':
     size = (800, 500)
     screen = display.set_mode((800, 500))
 
-
-    screen.fill((255,255,255))
-    splash  = image.load('textures/menu/splash.png')
-    screen.blit(splash,center(0,0,800,500,splash.get_width(),splash.get_height()))
+    screen.fill((255, 255, 255))
+    splash = image.load('textures/menu/splash.png')
+    screen.blit(splash, center(0, 0, 800, 500, splash.get_width(), splash.get_height()))
     display.flip()
 
-    t.sleep(randint(1,3))
+    t.sleep(randint(1, 3))
 
     font.init()
 
