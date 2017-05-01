@@ -479,6 +479,13 @@ def game():
     block_highlight.fill((255, 255, 0))
     block_highlight.set_alpha(100)
 
+    advanced_graphics = True
+
+    import glob
+    glob_texture = glob.glob("textures/blocks/*.png")
+
+    block_texture = [transform.scale(image.load(texture), (20, 20)) for texture in glob_texture]
+
     while True:
         updated = False
         for e in event.get():
@@ -559,8 +566,16 @@ def game():
                 for y in range(0, 521, block_size):
                     block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
-                    if block != 0:
-                        draw_block(x, y, x_offset, y_offset, block_size, block_list[block][1], block_list[block][2], screen)
+                    if block > 0:
+                        if not advanced_graphics:
+                            draw_block(x, y, x_offset, y_offset, block_size, block_list[block][1], block_list[block][2], screen)
+                        else:
+                            screen.blit(block_texture[block], (x - x_offset % 20, y - y_offset % 20))
+
+                    elif block == -1:
+                        draw_block(x, y, x_offset, y_offset, block_size, (0,0,0), (0,0,0), screen)
+
+
 
             clock.tick(120)
             display.update()
