@@ -570,7 +570,7 @@ def game():
                         if not advanced_graphics:
                             draw_block(x, y, x_offset, y_offset, block_size, block_list[block][1], block_list[block][2], screen)
                         else:
-                            screen.blit(block_texture[block], (x - x_offset % 20, y - y_offset % 20))
+                            screen.blit(block_texture[block + 320], (x - x_offset % 20, y - y_offset % 20))
 
                     elif block == -1:
                         draw_block(x, y, x_offset, y_offset, block_size, (0,0,0), (0,0,0), screen)
