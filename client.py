@@ -425,7 +425,7 @@ def options():
 
 
 def game():
-    global host, port
+    global host, port, username
 
     sendQueue = Queue()
     messageQueue = Queue()
@@ -468,8 +468,6 @@ def game():
 
     print("Client connecting to %s:%i" % (host, port))
 
-    username = 'Henry2'
-
     server.sendto(pickle.dumps([0, username, x_offset, y_offset]), (host, port))
 
     sender = Process(target=playerSender, args=(sendQueue, server))
@@ -499,6 +497,13 @@ def game():
 
     block_texture = [transform.scale(image.load("textures/blocks/"+block_list[block][3]), (20, 20)) for block in range(len(block_list))]
     players = {}
+
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    highlight = Surface((20,20))
+    highlight.fill((255,255,255))
+    highlight.set_alpha(50)
+
 
     while True:
         moved = False
@@ -560,6 +565,7 @@ def game():
                 wmsg = messageQueue.get_nowait()
                 if wmsg[0] == 1:
                     players[wmsg[1]] = (wmsg[2], wmsg[3])
+
                 elif wmsg[0] == 2:
                     world[wmsg[1] - 5:wmsg[1] + 45, wmsg[2] - 5:wmsg[2] + 31] = np.array(wmsg[3], copy=True)
                 elif wmsg[0] == 3:
@@ -602,11 +608,24 @@ def game():
                     elif block == -1:
                         draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
+            screen.blit(highlight,(mx - mx%20 - x_offset % 20, my - my%20 - y_offset % 20))
+
+
             draw.rect(screen, (0, 0, 0), (size[0] // 2 - 10, size[1] // 2 - 10, block_size, block_size))
             draw.circle(screen, (0, 0, 0), (size[0]//2, size[1]//2), reach, 2)
 
+            player_name = normal_font.render(username, True, (255, 255, 255))
+            screen.blit(player_name, center(size[0] // 2 - 10, size[1] // 2 - 10, 20, 20,
+                                            player_name.get_width(), player_name.get_height()))
+
             for wmsg in players:
+
                 draw.rect(screen, (0, 0, 0), (players[wmsg][0] - x_offset + size[0] // 2 - 10, players[wmsg][1] - y_offset + size[1] // 2 - 10, block_size, block_size))
+
+                player_name = normal_font.render(wmsg, True, (255, 255, 255))
+                screen.blit(player_name, center(players[wmsg][0] - x_offset + size[0] // 2 - 10,
+                                                players[wmsg][1] - y_offset + size[1] // 2 - 10, 20, 20,
+                                                player_name.get_width(), player_name.get_height()))
 
             clock.tick(120)
             display.update()
@@ -628,9 +647,11 @@ if __name__ == '__main__':
     screen.blit(splash, center(0, 0, 800, 500, splash.get_width(), splash.get_height()))
     display.flip()
 
-    t.sleep(randint(1, 3))
+    #t.sleep(randint(1, 3))
 
     font.init()
+
+    username = input("Name: ")
 
     while navigation != 'exit':
         if navigation == 'menu':

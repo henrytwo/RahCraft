@@ -201,7 +201,11 @@ if __name__ == '__main__':
 
             players[address] = (Player(PN, message[1], message[2], message[3]), message[1])
             sendQueue.put(((10000, 100, players[address][0].cord[0], players[address][0].cord[1]), address))
-            print('Connection established!')
+            print('Player %s has connected from %s'%(message[1],address))
+
+            for i in players:
+                if players[i][1] != players[address][1]:
+                    sendQueue.put(((1, players[address][1], x, y), i))
 
         elif command == 1:
             # Player movement
