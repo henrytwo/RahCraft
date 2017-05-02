@@ -699,7 +699,7 @@ def game():
                     elif block == -1:
                         draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
-            screen.blit(highlight,(mx - mx%20 - x_offset % 20, my - my%20 - y_offset % 20))
+            screen.blit(highlight,((mx + x_offset) // block_size*block_size - x_offset, (my + y_offset) // block_size * block_size - y_offset))
 
 
             draw.rect(screen, (0, 0, 0), (size[0] // 2 - 10, size[1] // 2 - 10, block_size, block_size))
