@@ -232,7 +232,7 @@ def server_picker():
             if nav_update != None:
                 if nav_update == "game":
                     try:
-                        if fields["ip"]:
+                        if fields["ip"] != "":
                             host = fields["ip"]
                         port = int(fields["port"])
                     except:

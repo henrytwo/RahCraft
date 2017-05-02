@@ -115,6 +115,7 @@ def receiveMessage(messageQueue, server):
             continue
         messageQueue.put((pickle.loads(msg[0]),msg[1]))
 
+
 def commandlineIn(commandlineQueue, fn):
     print('Ready for input.')
     sys.stdin = os.fdopen(fn)
