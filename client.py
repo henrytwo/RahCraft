@@ -300,7 +300,8 @@ def login():
                     fields[currentField] += e.unicode
                 elif e.key == K_RETURN:
                     username = fields["username"]
-                    return "menu"
+                    if username != "":
+                        return "menu"
 
                 elif e.key == K_BACKSPACE:
                     try:
@@ -328,7 +329,7 @@ def login():
         for button in button_list:
             nav_update = button.update(mx, my, mb, 15, unclick)
 
-            if nav_update == "game":
+            if nav_update == "menu" and fields["username"] != "":
                 username = fields["username"]
 
                 return nav_update
