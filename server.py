@@ -26,29 +26,26 @@ else:
 class Player(object):
     global PlayerData, PlayerUUID, itemLib
 
-    def __init__(self, PlayerNumber, PlayerUsername):
+    def __init__(self, PlayerNumber, PlayerUsername, xOffset, yOffset):
         self.username = PlayerUsername
-        self.UUID = self.get_UUID()
         self.number = PlayerNumber
 
-        self.cord, self.spawnCord, self.inventory, self.health, self.hunger, self.satura = self.get_playerInfo()
+        self.cord, self.spawnCord, self.inventory, self.health, self.hunger = self.get_playerInfo()
 
-    def get_UUID(self):
-        try:
-            return PlayerUUID[self.username]
-        except:
-            PlayerUUID[self.username] = uuid.uuid1()
-            return PlayerUUID[self.username]
+        if self.cord == (0, 0):
+            self.cord = [xOffset, yOffset]
 
     def get_playerInfo(self):
         try:
-            return PlayerData[self.UUID]
+            return PlayerData[self.username]
         except:
-            PlayerData[self.UUID] = [(0,0), (0,0), [[0] * 2 for _ in range(36)], 10, 10, 10]
-            return PlayerData[self.UUID]
+            PlayerData[self.username] = [(0,0), (0,0), [[0] * 2 for _ in range(36)], 10, 10]
+            return PlayerData[self.username]
 
-    def changeLocation(self, cordx):
-        self.cord = cordx[:]
+    def changeLocation(self, cordChange):
+        self.cord = cordChange[:]
+
+        return self.cord[0], self.cord[1]
 
     def changeInventory(self, item, slot, amount):
         self.inventory[slot][0] = self.itemLib[item]
@@ -71,13 +68,13 @@ class Player(object):
         self.x = self.spawnx
         self.y = self.spawny
 
-        self.inventory = [[0] * 2] * 36
+        self.inventory = [[0] * 2 for _ in range(36)]
         self.hunger = 10
         self.health = 10
         self.satura = 10
 
     def save(self):
-        self.PlayerData[self.UUID] = [(self.x, self.y), self.inventory, self.health, self.hunger, self.satura]
+        self.PlayerData[self.username] = [(self.x, self.y), self.inventory, self.health, self.hunger]
 
 
 class World:
@@ -194,7 +191,7 @@ if __name__ == '__main__':
 
         if command == 0:
             # Create player/login
-            # Data: [0,<username>]
+            # Data: [0,<username>,<x_offset>,<y_offset>]
 
             if not playerNDisconnect:
                 PN = playernumber
@@ -202,14 +199,20 @@ if __name__ == '__main__':
             else:
                 PN = playerNDisconnect.popleft()
 
-            players[address] = (Player(PN, message[0]), message[1])
-            sendQueue.put(((10000, 100),address))
+            players[address] = (Player(PN, message[1], message[2], message[3]), message[1])
+            sendQueue.put(((10000, 100, players[address][0].cord[0], players[address][0].cord[1]),address))
             print('Connection established!')
 
         elif command == 1:
             # Player movement
             # Data: [1, <cordx>, <cordy>]
-            players[address][0].changeLocation((message[1], message[2]))
+            x, y = players[address][0].changeLocation((message[1], message[2]))
+
+            for i in players:
+                if players[i][1] != players[address][1]:
+                    print(i)
+                    sendQueue.put(((1, players[address][1], x, y), i))
+
         elif command == 2:
             # Render world
             # Data: [2, <cordx>, <cordy>]
