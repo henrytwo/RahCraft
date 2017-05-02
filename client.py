@@ -103,6 +103,11 @@ def menu():
     about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
     screen.blit(about_text, (800 - about_text.get_width(), 480))
 
+    global username
+
+    user_text = normal_font.render("Logged in as: %s"%username, True, (255, 255, 255))
+    screen.blit(user_text, (20, 20))
+
     button_list = []
 
     button_list.append(Button(200, 175, 400, 40, 'server_picker', "Connect to server"))
@@ -252,6 +257,91 @@ def server_picker():
 
         display.flip()
 
+def login():
+    global username
+
+    clock = time.Clock()
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    UsernameText = normal_font.render("Username", True, (255, 255, 255))
+
+    sizeChar = normal_font.render("SHZ", True, (255, 255, 255))
+
+    usernamefieldRect = (size[0] // 2 - 150, size[1] // 2 - 100, 300, 40)
+
+    fields = {"username": ""}
+
+    currentField = "none"
+    allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+               'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
+               '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/',
+               ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
+
+    currentField = "username"
+
+    button_list = []
+
+    button_list.append(Button(200, 370, 400, 40, 'menu', "Login"))
+
+    while True:
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+            if e.type == KEYDOWN:
+                if e.unicode in allowed:
+                    fields[currentField] += e.unicode
+                elif e.key == K_RETURN:
+                    username = fields["username"]
+                    return "menu"
+
+                elif e.key == K_BACKSPACE:
+                    try:
+                        fields[currentField] = fields[currentField][:-1]
+                    except:
+                        pass
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+        screen.blit(UsernameText, (usernamefieldRect[0], usernamefieldRect[1] - UsernameText.get_height() - 2))
+        draw.rect(screen, (0, 0, 0), usernamefieldRect)
+        draw.rect(screen, (151, 151, 151), usernamefieldRect, 2)
+
+        screen.blit(normal_font.render(fields["username"], True, (255, 255, 255)),
+                    (usernamefieldRect[0] + 3, usernamefieldRect[1] + usernamefieldRect[3] // 2 - sizeChar.get_height() // 2))
+
+        mx, my = mouse.get_pos()
+        ml, mm, mr = mouse.get_pressed()
+        mb = mouse.get_pressed()
+
+        for button in button_list:
+            nav_update = button.update(mx, my, mb, 15, unclick)
+
+            if nav_update == "game":
+                username = fields["username"]
+
+                return nav_update
+
+        if Rect(usernamefieldRect).collidepoint(mx, my) and ml == 1:
+            currentField = "username"
+
+        elif ml == 1:
+            currentField = "none"
+
+        clock.tick(120)
+
+        display.flip()
 
 def help():
     clock = time.Clock()
@@ -636,7 +726,7 @@ def game():
 
 if __name__ == '__main__':
 
-    navigation = 'menu'
+    navigation = 'login'
 
     display.set_caption("Nothing here")
     size = (800, 500)
@@ -651,20 +741,20 @@ if __name__ == '__main__':
 
     font.init()
 
-    username = input("Name: ")
-
     while navigation != 'exit':
-        if navigation == 'menu':
+        if navigation == "login":
+            navigation = login()
+        elif navigation == 'menu':
             navigation = menu()
         elif navigation == 'server_picker':
             navigation = server_picker()
-        if navigation == 'about':
+        elif navigation == 'about':
             navigation = about()
-        if navigation == 'options':
+        elif navigation == 'options':
             navigation = options()
-        if navigation == 'help':
+        elif navigation == 'help':
             navigation = help()
-        if navigation == 'game':
+        elif navigation == 'game':
             navigation = game()
 
     display.quit()
