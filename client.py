@@ -490,9 +490,8 @@ def game():
 
     advanced_graphics = True
 
-
     block_texture = [transform.scale(image.load("textures/blocks/"+block_list[block][3]), (20, 20)) for block in range(len(block_list))]
-    players = {}
+    grounded = False
 
     while True:
         updated = False
@@ -505,10 +504,17 @@ def game():
 
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 4:
-                    block_Select = min(3, block_Select + 1)
+                    block_Select = min(len(block_list) - 1, block_Select + 1)
 
                 elif e.button == 5:
                     block_Select = max(0, block_Select - 1)
+
+            elif e.type == KEYDOWN:
+                if e.key == K_t:
+                    if advanced_graphics:
+                        advanced_graphics = False
+                    else:
+                        advanced_graphics = True
 
         else:
             display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
@@ -584,7 +590,7 @@ def game():
                 for y in range(0, 521, block_size):
                     block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
-                    if block > 0:
+                    if len(block_list) > block > 0:
                         if not advanced_graphics:
                             draw_block(x, y, x_offset, y_offset, block_size, block_list[block][1], block_list[block][2],
                                        screen)
