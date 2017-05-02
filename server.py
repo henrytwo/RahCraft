@@ -200,7 +200,7 @@ if __name__ == '__main__':
                 PN = playerNDisconnect.popleft()
 
             players[address] = (Player(PN, message[1], message[2], message[3]), message[1])
-            sendQueue.put(((10000, 100, players[address][0].cord[0], players[address][0].cord[1]),address))
+            sendQueue.put(((10000, 100, players[address][0].cord[0], players[address][0].cord[1]), address))
             print('Connection established!')
 
         elif command == 1:
@@ -210,7 +210,6 @@ if __name__ == '__main__':
 
             for i in players:
                 if players[i][1] != players[address][1]:
-                    print(i)
                     sendQueue.put(((1, players[address][1], x, y), i))
 
         elif command == 2:

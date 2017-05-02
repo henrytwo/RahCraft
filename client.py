@@ -7,7 +7,7 @@ import time as t
 import os
 from random import randint
 
-host = ""
+host = "127.0.0.1"
 port = 0
 
 
@@ -196,7 +196,7 @@ def server_picker():
                 if e.unicode in allowed:
                     fields[currentField] += e.unicode
                 elif e.key == K_RETURN:
-                    currentField = "none"
+                    return "game"
                 elif e.key == K_BACKSPACE:
                     try:
                         fields[currentField] = fields[currentField][:-1]
@@ -231,7 +231,8 @@ def server_picker():
             if nav_update != None:
                 if nav_update == "game":
                     try:
-                        host = fields["ip"]
+                        if fields["ip"]:
+                            host = fields["ip"]
                         port = int(fields["port"])
                     except:
                         pass
@@ -465,7 +466,9 @@ def game():
 
     print("Client connecting to %s:%i" % (host, port))
 
-    server.sendto(pickle.dumps([0, 'Henry']), (host, port))
+    username = 'Henry3'
+
+    server.sendto(pickle.dumps([0, username, x_offset, y_offset]), (host, port))
 
     sender = Process(target=playerSender, args=(sendQueue, server))
     sender.start()
@@ -473,14 +476,15 @@ def game():
     receiver = Process(target=receiveMessage, args=(messageQueue, server))
     receiver.start()
 
-    Worldsize = messageQueue.get()
+    worldSizeX, worldSizeY, x_offset, y_offset = messageQueue.get()
 
-    world = np.array([[-1 for y in range(Worldsize[1])] for x in range(Worldsize[0])])
+    world = np.array([[-1 for y in range(worldSizeY)] for x in range(worldSizeX)])
 
     updated = False
 
     sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
     wmsg = messageQueue.get()
+
     world[wmsg[1] - 5:wmsg[1] + 45, wmsg[2] - 5:wmsg[2] + 31] = np.array(wmsg[3], copy=True)
     block_Select = 1
 
@@ -491,10 +495,10 @@ def game():
     advanced_graphics = True
 
     block_texture = [transform.scale(image.load("textures/blocks/"+block_list[block][3]), (20, 20)) for block in range(len(block_list))]
-    grounded = False
+    players = {}
 
     while True:
-        updated = False
+        moved = False
         for e in event.get():
             if e.type == QUIT:
                 sender.terminate()
@@ -524,40 +528,36 @@ def game():
             keys = key.get_pressed()
 
             if keys[K_d] and x_offset // block_size < 9950:
-                if world[(size[0] // 2 + 10 + x_offset) // block_size][(size[1] // 2 + y_offset) // block_size] == 0:
-                    x_offset += 60 // block_size
-                    updated = True
+                x_offset += 60 // block_size
+                moved = True
             elif keys[K_a] and x_offset // block_size > 0:
-                if world[(size[0] // 2-10 + x_offset) // block_size][(size[1] // 2 + y_offset) // block_size] == 0:
-                    x_offset -= 60 // block_size
-                    updated = True
+                x_offset -= 60 // block_size
+                moved = True
 
-            if keys[K_w] and y_offset // block_size > 5 and grounded:
-                if world[(size[0] // 2-10 + x_offset) // block_size][(size[1] // 2 - 8 + y_offset) // block_size] == 0:
-                    y_offset -= 80
-                    updated = True
-                    grounded = False
+            if keys[K_w] and y_offset // block_size > 5:
+                y_offset -= 80 // block_size
+                moved = True
             elif keys[K_s] and y_offset // block_size < 70:
-                if world[(size[0]//2-10 + x_offset) // block_size][(size[1]//2+10 + y_offset) // block_size] == 0:
-                    y_offset += 80 // block_size
-                    updated = True
+                y_offset += 80 // block_size
+                moved = True
 
-            if world[(size[0]//2-10 + x_offset) // block_size][(size[1]//2+10 + y_offset) // block_size] == 0:
-                y_offset += 1
-            else:
-                grounded = True
+            if moved:
+                sendQueue.put([[1, x_offset, y_offset], (host, port)])
+
 
             DispingWorld = world[x_offset // block_size:x_offset // block_size + 41,
                            y_offset // block_size:y_offset // block_size + 26]
             updateCost = DispingWorld.flatten()
             updateCost = np.count_nonzero(updateCost == -1)
 
-            if updated and updateCost > 3:
+            if updateCost > 3:
                 sendQueue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
             try:
                 wmsg = messageQueue.get_nowait()
-                if wmsg[0] == 2:
+                if wmsg[0] == 1:
+                    players[wmsg[1]] = (wmsg[2], wmsg[3])
+                elif wmsg[0] == 2:
                     world[wmsg[1] - 5:wmsg[1] + 45, wmsg[2] - 5:wmsg[2] + 31] = np.array(wmsg[3], copy=True)
                 elif wmsg[0] == 3:
                     world[wmsg[1], wmsg[2]] = 0
@@ -600,7 +600,10 @@ def game():
                     elif block == -1:
                         draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
-            draw.rect(screen, (0, 0, 0), (size[0]//2-10, size[1]//2-10, block_size, block_size))
+            draw.rect(screen, (0, 0, 0), (size[0] // 2 - 10, size[1] // 2 - 10, block_size, block_size))
+
+            for wmsg in players:
+                draw.rect(screen, (0, 0, 0), (players[wmsg][0] - x_offset + size[0] // 2 - 10, players[wmsg][1] - y_offset + size[1] // 2 - 10, block_size, block_size))
 
             clock.tick(120)
             display.update()
