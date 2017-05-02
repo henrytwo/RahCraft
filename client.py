@@ -5,6 +5,7 @@ import numpy as np
 from pygame import *
 import time as t
 import os
+from math import *
 from random import randint
 
 host = "127.0.0.1"
@@ -461,12 +462,13 @@ def game():
     block_size = 20
     y_offset = 10 * block_size
     x_offset = 5000 * block_size
+    reach = 5 * block_size
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     print("Client connecting to %s:%i" % (host, port))
 
-    username = 'Henry3'
+    username = 'Henry2'
 
     server.sendto(pickle.dumps([0, username, x_offset, y_offset]), (host, port))
 
@@ -477,6 +479,7 @@ def game():
     receiver.start()
 
     worldSizeX, worldSizeY, x_offset, y_offset = messageQueue.get()
+
 
     world = np.array([[-1 for y in range(worldSizeY)] for x in range(worldSizeX)])
 
@@ -535,10 +538,10 @@ def game():
                 moved = True
 
             if keys[K_w] and y_offset // block_size > 5:
-                y_offset -= 80 // block_size
+                y_offset -= 60 // block_size
                 moved = True
             elif keys[K_s] and y_offset // block_size < 70:
-                y_offset += 80 // block_size
+                y_offset += 60 // block_size
                 moved = True
 
             if moved:
@@ -571,13 +574,12 @@ def game():
             mx, my = mouse.get_pos()
 
             if mb[0] == 1:
-                if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0:
+                if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx-size[0]//2, my-size[1]//2) <= reach:
                     sendQueue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
             if mb[2] == 1:
                 if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(
-                        get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size, world)) > 0:
-                    sendQueue.put(
-                        [[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, block_Select], (host, port)])
+                        get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size, world)) > 0 and hypot(mx-size[0]//2, my-size[1]//2) <= reach:
+                    sendQueue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, block_Select], (host, port)])
 
             # print((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
@@ -601,6 +603,7 @@ def game():
                         draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
             draw.rect(screen, (0, 0, 0), (size[0] // 2 - 10, size[1] // 2 - 10, block_size, block_size))
+            draw.circle(screen, (0, 0, 0), (size[0]//2, size[1]//2), reach, 2)
 
             for wmsg in players:
                 draw.rect(screen, (0, 0, 0), (players[wmsg][0] - x_offset + size[0] // 2 - 10, players[wmsg][1] - y_offset + size[1] // 2 - 10, block_size, block_size))
