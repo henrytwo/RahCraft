@@ -651,7 +651,14 @@ def game():
     receiver = Process(target=receiveMessage, args=(messageQueue, server))
     receiver.start()
 
-    worldSizeX, worldSizeY, x_offset, y_offset = messageQueue.get()
+    firstMessage = messageQueue.get()
+    print(firstMessage)
+    if firstMessage == (400,):
+        sender.terminate()
+        receiver.terminate()
+        return "login"
+
+    worldSizeX, worldSizeY, x_offset, y_offset = firstMessage
 
 
     world = np.array([[-1 for y in range(worldSizeY)] for x in range(worldSizeX)])
@@ -782,7 +789,6 @@ def game():
 
 
             for y in range(200):
-
                 draw.line(screen, sky_list[y], (0, y*4), (800, y*4), 4)
 
             # Clear the screen

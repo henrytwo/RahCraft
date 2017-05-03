@@ -1,5 +1,4 @@
 import socket
-import uuid
 from multiprocessing import *
 from collections import deque
 from numpy import *
@@ -39,7 +38,7 @@ class Player(object):
         try:
             return PlayerData[self.username]
         except:
-            PlayerData[self.username] = [(0,0), (0,0), [[0] * 2 for _ in range(36)], 10, 10]
+            PlayerData[self.username] = [(0, 0), (0, 0), [[0] * 2 for _ in range(36)], 10, 10]
             return PlayerData[self.username]
 
     def changeLocation(self, cordChange):
@@ -122,7 +121,7 @@ def commandlineIn(commandlineQueue, fn):
 
     while True:
         command = input()
-        commandlineQueue.put(command)
+        commandlineQueue.put(((10, command), ('127.0.0.1',)))
 
 
 if __name__ == '__main__':
@@ -139,6 +138,7 @@ if __name__ == '__main__':
     messageQueue = Queue()
     commandlineQueue = Queue()
     itemLib = {}
+    username = set()
 
     with open("config","r") as config:
 
@@ -162,30 +162,13 @@ if __name__ == '__main__':
     sender.start()
 
     fn = sys.stdin.fileno()
-    commandline = Process(target=commandlineIn, args=(commandlineQueue, fn))
+    commandline = Process(target=commandlineIn, args=(messageQueue, fn))
     commandline.start()
     cmdIn = ""
 
     while True:
-        try:
-            cmdIn = commandlineQueue.get_nowait()
-        except:
-            pass
 
-        if cmdIn.lower() == "quit":
-            receiver.terminate()
-            sender.terminate()
-            commandline.terminate()
-            server.close()
-            world.save()
-            break
-
-        cmdIn = ""
-
-        try:
-            pickledmessage = messageQueue.get_nowait()
-        except:
-            continue
+        pickledmessage = messageQueue.get()
         message, address = pickledmessage
         #print(message, address)
         command = message[0]
@@ -194,19 +177,26 @@ if __name__ == '__main__':
             # Create player/login
             # Data: [0,<username>,<x_offset>,<y_offset>]
 
-            if not playerNDisconnect:
-                PN = playernumber
-                playernumber += 1
+            if message[1] not in username:
+
+                if not playerNDisconnect:
+                    PN = playernumber
+                    playernumber += 1
+                else:
+                    PN = playerNDisconnect.popleft()
+
+                players[address] = (Player(PN, message[1], message[2], message[3]), message[1])
+                sendQueue.put(((10000, 100, players[address][0].cord[0], players[address][0].cord[1]), address))
+                print('Player %s has connected from %s'%(message[1],address))
+                username.add(message[1])
+
+                for i in players:
+                    if players[i][1] != players[address][1]:
+                        sendQueue.put(((1, players[address][1], players[address][0].cord[0], players[address][0].cord[1]), i))
+
             else:
-                PN = playerNDisconnect.popleft()
+                sendQueue.put(((400,), address))
 
-            players[address] = (Player(PN, message[1], message[2], message[3]), message[1])
-            sendQueue.put(((10000, 100, players[address][0].cord[0], players[address][0].cord[1]), address))
-            print('Player %s has connected from %s'%(message[1],address))
-
-            for i in players:
-                if players[i][1] != players[address][1]:
-                    sendQueue.put(((1, players[address][1], x, y), i))
 
         elif command == 1:
             # Player movement
@@ -240,6 +230,15 @@ if __name__ == '__main__':
 
         elif command == 5:
             player[address][0].changeInventory
+
+        elif command == 10:
+            if message[1].lower() == "quit":
+                receiver.terminate()
+                sender.terminate()
+                commandline.terminate()
+                server.close()
+                world.save()
+                break
 
         elif command == 100:
 
