@@ -675,10 +675,20 @@ def game():
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    highlight = Surface((20,20))
-    highlight.fill((255,255,255))
-    highlight.set_alpha(50)
+    highlight_good = Surface((20,20))
+    highlight_good .fill((255,255,255))
+    highlight_good .set_alpha(50)
 
+    highlight_bad = Surface((20,20))
+    highlight_bad.fill((255,0,0))
+    highlight_bad.set_alpha(90)
+
+    inventory = [[-1 for y in range(6)] for x in range(7)]
+
+    toolbar = image.load("textures/gui/toolbar/toolbar.png")
+    selected = image.load("textures/gui/toolbar/selected.png")
+
+    inventory_slot = 0
 
     while True:
         moved = False
@@ -691,9 +701,13 @@ def game():
 
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 4:
+                    inventory_slot = min(7, inventory_slot + 1)
+
                     block_Select = min(len(block_list) - 1, block_Select + 1)
 
                 elif e.button == 5:
+                    inventory_slot = max(0, inventory_slot - 1)
+
                     block_Select = max(0, block_Select - 1)
 
             elif e.type == KEYDOWN:
@@ -787,8 +801,12 @@ def game():
                     elif block == -1:
                         draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
-            screen.blit(highlight,((mx + x_offset) // block_size*block_size - x_offset, (my + y_offset) // block_size * block_size - y_offset))
-
+            if hypot(mx - size[0] // 2, my - size[1] // 2) <= reach:
+                screen.blit(highlight_good, ((mx + x_offset) // block_size * block_size - x_offset,
+                                             (my + y_offset) // block_size * block_size - y_offset))
+            else:
+                screen.blit(highlight_bad, ((mx + x_offset) // block_size * block_size - x_offset,
+                                             (my + y_offset) // block_size * block_size - y_offset))
 
             draw.rect(screen, (0, 0, 0), (size[0] // 2 - 10, size[1] // 2 - 10, block_size, block_size))
             draw.circle(screen, (0, 0, 0), (size[0]//2, size[1]//2), reach, 2)
@@ -805,6 +823,13 @@ def game():
                 screen.blit(player_name, center(players[wmsg][0] - x_offset + size[0] // 2 - 10,
                                                 players[wmsg][1] - y_offset + size[1] // 2 - 10, 20, 20,
                                                 player_name.get_width(), player_name.get_height()))
+
+            screen.blit(toolbar,(400 - toolbar.get_width()//2,456))
+
+            screen.blit(selected, (400 - toolbar.get_width()//2 + 40 * inventory_slot,456))
+
+            for item in range(0, 352, 40):
+                draw.rect(screen,(255,0,0),(400 - toolbar.get_width()//2 + item + 6, 462,32,32))
 
             clock.tick(120)
             display.update()
@@ -826,7 +851,7 @@ if __name__ == '__main__':
     screen.blit(splash, center(0, 0, 800, 500, splash.get_width(), splash.get_height()))
     display.flip()
 
-    #t.sleep(randint(1, 3))
+    t.sleep(1)
 
     font.init()
 
