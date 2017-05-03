@@ -150,8 +150,19 @@ def menu():
 
         break
 
+def rahmish_server():
+    global host, port
+    host = "159.203.176.100"
+    port = 5175
+    return 'game'
 
-def server_picker():
+def local_server():
+    global host, port
+    host = "127.0.0.1"
+    port = 5175
+    return 'game'
+
+def custom_server_picker():
     global host, port
 
     clock = time.Clock()
@@ -273,6 +284,62 @@ def server_picker():
         clock.tick(120)
 
         display.flip()
+
+
+def server_picker():
+    global host,port
+
+    clock = time.Clock()
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    version_text = normal_font.render("Click on server to join", True, (255, 255, 255))
+    screen.blit(version_text, (200, 155))
+
+    button_list = []
+
+    button_list.append(Button(200, 175, 400, 40, 'local_server', "Start local server"))
+    button_list.append(Button(200, 225, 400, 40, 'rahmish_server', "*Official* Rahmish Server"))
+    button_list.append(Button(200, 275, 400, 40, 'custom_server_picker', "Custom server"))
+
+
+    while True:
+
+        click = False
+        unclick = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                unclick = True
+
+
+        else:
+
+            mx, my = mouse.get_pos()
+            mb = mouse.get_pressed()
+
+            for button in button_list:
+                nav_update = button.update(mx, my, mb, 15, unclick)
+
+                if nav_update != None:
+                    return nav_update
+
+            clock.tick(120)
+            display.update()
+
+            continue
+
+        break
+
 
 def login():
     global username
@@ -768,8 +835,6 @@ if __name__ == '__main__':
             navigation = login()
         elif navigation == 'menu':
             navigation = menu()
-        elif navigation == 'server_picker':
-            navigation = server_picker()
         elif navigation == 'about':
             navigation = about()
         elif navigation == 'options':
@@ -778,6 +843,15 @@ if __name__ == '__main__':
             navigation = help()
         elif navigation == 'game':
             navigation = game()
+
+        elif navigation == 'server_picker':
+            navigation = server_picker()
+        elif navigation == 'custom_server_picker':
+            navigation = custom_server_picker()
+        elif navigation == 'local_server':
+            navigation = local_server()
+        elif navigation == 'rahmish_server':
+            navigation = rahmish_server()
 
     display.quit()
     raise SystemExit
