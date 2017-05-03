@@ -202,12 +202,29 @@ def server_picker():
                 if e.unicode in allowed:
                     fields[currentField] += e.unicode
                 elif e.key == K_RETURN:
-                    return "game"
+                    try:
+                        if fields["ip"] != "":
+                            host = fields["ip"]
+                        port = int(fields["port"])
+                        return 'game'
+                    except:
+                        pass
+
                 elif e.key == K_BACKSPACE:
                     try:
                         fields[currentField] = fields[currentField][:-1]
                     except:
                         pass
+
+                if e.key == K_z:
+                    host = "159.203.176.100"
+                    port = 5175
+                    return "game"
+
+                if e.key == K_x:
+                    host = "127.0.0.1"
+                    port = 5175
+                    return "game"
 
             if e.type == MOUSEBUTTONDOWN and e.button == 1:
                 click = True
