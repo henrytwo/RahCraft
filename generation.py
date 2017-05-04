@@ -2,19 +2,28 @@ from random import *
 from pickle import *
 import numpy as np
 
+# Code to trigger Syed
+with open('block', 'r') as block_lookup:
+    block_list = block_lookup.read().strip().split('\n')
+
+block_list = [block.split(' // ') for block in block_list]
+
+block_lookup = {block_list[i][0]: (i) for i in range(len(block_list))}
+
+
 def generate_tree(bx,by,world):
 
     height = randint(4,6)
 
         
     for y in range(height):
-        world[bx][by-y] = 4
+        world[bx][by-y] = block_lookup["Wood"]
 
 
     for x in range(randint(3,5)):
         for y in range(randint(2,4)):
-            world[bx - x//2][by - y - height] = 5
-            world[bx + x//2][by - y - height] = 5
+            world[bx - x//2][by - y - height] = block_lookup["Leaves"]
+            world[bx + x//2][by - y - height] = block_lookup["Leaves"]
 
     return world
 
@@ -64,17 +73,17 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
 
             # Generates structures
             if y > terrain[x]:
-                if y - terrain[x] == 1:
-                    world[x][y] = 1
+                if y - terrain[x] == block_lookup["Dirt"]:
+                    world[x][y] = block_lookup["Grass"]
 
                     if randint(0,10) == 0 and x + 10 < w:
                         world = generate_tree(x,y - 1,world)
 
                 elif y - terrain[x] < randint(3,8):
-                    world[x][y] = 2
+                    world[x][y] = block_lookup["Dirt"]
 
                 else:
-                    world[x][y] = 3
+                    world[x][y] = block_lookup["Stone"]
 
 
     # Return the world object for use

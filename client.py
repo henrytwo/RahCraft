@@ -669,7 +669,7 @@ def game():
     wmsg = messageQueue.get()
 
     world[wmsg[1] - 5:wmsg[1] + 45, wmsg[2] - 5:wmsg[2] + 31] = np.array(wmsg[3], copy=True)
-    block_Select = 1
+    inventory_slot = 1
 
     block_highlight = Surface((block_size, block_size))
     block_highlight.fill((255, 255, 0))
@@ -708,26 +708,25 @@ def game():
 
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 4:
-                    inventory_slot = min(7, inventory_slot + 1)
-
-                    block_Select = min(len(block_list) - 1, block_Select + 1)
+                    inventory_slot = min(9, inventory_slot + 1)
 
                 elif e.button == 5:
-                    inventory_slot = max(0, inventory_slot - 1)
+                    inventory_slot = max(-1, inventory_slot - 1)
 
-                    block_Select = max(0, block_Select - 1)
+                if inventory_slot == -1: inventory_slot = 8
+                if inventory_slot == 9: inventory_slot = 0
 
             elif e.type == KEYDOWN:
-                if e.key == K_t:
-                    if advanced_graphics:
-                        advanced_graphics = False
-                    else:
-                        advanced_graphics = True
+                    if e.key == K_t:
+                        if advanced_graphics:
+                            advanced_graphics = False
+                        else:
+                            advanced_graphics = True
 
         else:
             display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
                 x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
-                block_size) + " Block Selected:" + str(block_Select))
+                block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0])
 
             keys = key.get_pressed()
 
@@ -781,7 +780,7 @@ def game():
             if mb[2] == 1:
                 if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(
                         get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size, world)) > 0 and hypot(mx-size[0]//2, my-size[1]//2) <= reach:
-                    sendQueue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, block_Select], (host, port)])
+                    sendQueue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot], (host, port)])
 
             # print((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
@@ -835,7 +834,9 @@ def game():
             screen.blit(selected, (400 - toolbar.get_width()//2 + 40 * inventory_slot,456))
 
             for item in range(0, 352, 40):
-                draw.rect(screen,(255,0,0),(400 - toolbar.get_width()//2 + item + 6, 462,32,32))
+                icon_x, icon_y = 225 + item, 462
+                if item//40 < len(block_texture):
+                    screen.blit(transform.scale(block_texture[item//40], (32, 32)),(icon_x, icon_y))
 
             clock.tick(120)
             display.update()
