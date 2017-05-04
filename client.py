@@ -748,12 +748,12 @@ def game():
                     moved = True
 
             if keys[K_w]:
-                if y_offset // block_size > 5 and player_y == 0:
+                if y_offset // block_size > 5:# and player_y == 0:
                     y_offset -= 60 // block_size
                     moved = True
 
-                elif player_y > -250:
-                    player_y -= 10
+                #elif player_y > -250:
+                #    player_y -= 10
 
 
 
