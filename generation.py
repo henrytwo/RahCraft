@@ -73,7 +73,7 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
 
             # Generates structures
             if y > terrain[x]:
-                if y - terrain[x] == block_lookup["Dirt"]:
+                if y - terrain[x] == 1:
                     world[x][y] = block_lookup["Grass"]
 
                     if randint(0,10) == 0 and x + 10 < w:

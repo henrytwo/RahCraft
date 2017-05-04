@@ -730,19 +730,25 @@ def game():
 
             keys = key.get_pressed()
 
-            if keys[K_d] and x_offset // block_size < 9950:
-                x_offset += 60 // block_size
-                moved = True
-            elif keys[K_a] and x_offset // block_size > 0:
-                x_offset -= 60 // block_size
-                moved = True
+            if keys[K_d]:
+                if x_offset // block_size < 9950:
+                    x_offset += 60 // block_size
+                    moved = True
 
-            if keys[K_w] and y_offset // block_size > 5:
-                y_offset -= 60 // block_size
-                moved = True
-            elif keys[K_s] and y_offset // block_size < 70:
-                y_offset += 60 // block_size
-                moved = True
+            elif keys[K_a]:
+                if x_offset // block_size > 0:
+                    x_offset -= 60 // block_size
+                    moved = True
+
+            if keys[K_w]:
+                if y_offset // block_size > 5:
+                    y_offset -= 60 // block_size
+                    moved = True
+
+            elif keys[K_s]:
+                if y_offset // block_size < 70:
+                    y_offset += 60 // block_size
+                    moved = True
 
             if moved:
                 sendQueue.put([[1, x_offset, y_offset], (host, port)])
