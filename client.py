@@ -693,6 +693,9 @@ def game():
     highlight_bad.set_alpha(90)
 
     inventory = [[-1 for y in range(6)] for x in range(7)]
+    INVENTORY_KEYS = {str(x) for x in range(1, 10)}
+    SERVER = (host, port)
+
 
     toolbar = image.load("textures/gui/toolbar/toolbar.png")
     selected = image.load("textures/gui/toolbar/selected.png")
@@ -703,6 +706,8 @@ def game():
         moved = False
         for e in event.get():
             if e.type == QUIT:
+                sendQueue.put(((9,), SERVER))
+                time.wait(50)
                 sender.terminate()
                 receiver.terminate()
 
@@ -710,25 +715,25 @@ def game():
 
             elif e.type == MOUSEBUTTONDOWN:
                 if e.button == 4:
-                    inventory_slot = min(9, inventory_slot + 1)
+                    inventory_slot = max(-1, inventory_slot - 1)
 
                 elif e.button == 5:
-                    inventory_slot = max(-1, inventory_slot - 1)
+                    inventory_slot = min(9, inventory_slot + 1)
 
                 if inventory_slot == -1: inventory_slot = 8
                 if inventory_slot == 9: inventory_slot = 0
 
             elif e.type == KEYDOWN:
-                    if e.key == K_t:
-                        if advanced_graphics:
-                            advanced_graphics = False
-                        else:
-                            advanced_graphics = True
+                if e.key == K_t:
+                    if advanced_graphics:
+                        advanced_graphics = False
+                    else:
+                        advanced_graphics = True
+                elif e.unicode in INVENTORY_KEYS:
+                    inventory_slot = int(e.unicode)-1
 
         else:
-            display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
-                x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
-                block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0])
+            display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0])
 
             keys = key.get_pressed()
 
@@ -780,6 +785,8 @@ def game():
                     world[wmsg[1], wmsg[2]] = 0
                 elif wmsg[0] == 4:
                     world[wmsg[1], wmsg[2]] = wmsg[3]
+                elif wmsg[0] == 9:
+                    del players[wmsg[1]]
             except:
                 pass
 
