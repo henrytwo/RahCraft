@@ -639,6 +639,8 @@ def game():
     x_offset = 5000 * block_size
     reach = 5 * block_size
 
+    player_x, player_y = 0,0
+
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
     print("Client connecting to %s:%i" % (host, port))
@@ -741,9 +743,14 @@ def game():
                     moved = True
 
             if keys[K_w]:
-                if y_offset // block_size > 5:
+                if y_offset // block_size > 5 and player_y == 0:
                     y_offset -= 60 // block_size
                     moved = True
+
+                elif player_y > -250:
+                    player_y -= 10
+
+
 
             elif keys[K_s]:
                 if y_offset // block_size < 70:
