@@ -9,3 +9,7 @@ Cobble Stone // 150, 150, 150 // 100, 100, 100 // cobblestone.png
 Crafting Bench // 119, 58, 22 // 89, 28, 2 // crafting_table_front.png
 Glass // 10, 160, 10 // 10, 110, 10 // glass_silver.png
 Bed Rock // 150, 150, 150 // 100, 100, 100 // bedrock.png
+Diamond Ore // 0, 0, 0 // 0, 0, 0 // diamond_ore.png
+Gold Ore // 0, 0, 0 // 0, 0, 0 // gold_ore.png
+Coal Ore // 0, 0, 0 // 0, 0, 0 // coal_ore.png
+Iron Ore // 0, 0, 0 // 0, 0, 0 // iron_ore.png

@@ -11,6 +11,15 @@ from random import randint
 host = "127.0.0.1"
 port = 0
 
+def block_to_pixel(block):
+    block_int = int(block)
+    block_pixel = int((block - block_int) * 20)
+
+    player_x =
+    player_y =
+
+    world_x =
+    world_y =
 
 def playerSender(sendQueue, server):
     print('Client running...')
