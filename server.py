@@ -23,6 +23,7 @@ else:
     world = pickle.load(open('world.pkl', 'rb'))
 
 
+
 class Player(object):
     global PlayerData, PlayerUUID, itemLib
 
@@ -226,8 +227,8 @@ if __name__ == '__main__':
             for i in players:
                 sendQueue.put(((4, message[1], message[2], message[3]), i))
 
-        elif command == 5:
-            player[address][0].changeInventory
+        # elif command == 5:
+        #     player[address][0].changeInventory
 
         elif command == 9:
 
