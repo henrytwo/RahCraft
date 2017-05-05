@@ -41,9 +41,9 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
     # Create a blank map (2D list filled with '0' strings
     world = [[0 for y in range(h)] for x in range(w)]
     # Generates the random values for the terrain construction
-    terrain = [randrange(20) + 10 for _ in range(w)]
+    terrain = [randrange(10) + 40 for _ in range(w)]
 
-    # ----- Construct the Terrain
+    # ----- Construct tdsadhe Terrain
     # Counter that changes dynamically to check through all blocks in the terrain list
     cur_pos = 0
     # Runs through all the generated numbers in a while loop
@@ -84,6 +84,9 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
 
                 else:
                     world[x][y] = block_lookup["Stone"]
+
+                if y > 92 or y > 87 and randint(0,3) == 0:
+                    world[x][y] = block_lookup["Bed Rock"]
 
 
     # Return the world object for use

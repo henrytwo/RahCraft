@@ -6,11 +6,13 @@ import pickle
 import glob
 from generation import *
 import os.path
+import os
 import sys
 
 # If world doesn't exist
 if not os.path.isfile('world.pkl'):
     # Generate a new world with the function
+    #world_seed,maxHeight,minX,maxX,w,h
     world = generate_world(input("Seed:\n"), 1, 3, 10, 10000, 100)
 
     # Dumps world to file
@@ -228,6 +230,9 @@ if __name__ == '__main__':
             player[address][0].changeInventory
 
         elif command == 9:
+
+            print('Player %s has disconnected from the game. %s' % (players[address][1], address))
+
             playerNDisconnect.append(players[address][0].number)
             PlayerData[players[address][1]] = players[address][0].save()
             offPlayer = players[address][1]
@@ -247,6 +252,21 @@ if __name__ == '__main__':
                 world.save()
                 break
 
+            if message[1].lower() == "del world":
+                if input("<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: ").lower() == "y":
+                    os.remove("world.pkl")
+                    print("World deleted successfully\nServer will shutdown")
+                    receiver.terminate()
+                    sender.terminate()
+                    commandline.terminate()
+                    server.close()
+
+                    break
+
+                else:
+                    print("Command aborted")
+
+
         elif command == 100:
 
-            sendQueue.put(('helo', address))
+            sendQueue.put(('hello', address))
