@@ -123,7 +123,7 @@ while True:
         for shift in surrounding_shifts:
             try:
                 surrounding_blocks.append(gameWorld[player.rect.y // b_height + shift[1], player.rect.x // b_width + shift[0]])
-            except IndexError : pass
+            except IndexError: pass
 
         for s in surrounding_blocks:
             s.around = True
