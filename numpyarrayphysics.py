@@ -37,16 +37,20 @@ class Player:
 
         self.controls = controls
 
+        self.standing = False
+
     def control(self):
 
         if key.get_pressed()[self.controls[0]]:
-            self.vx = -5
+            self.vx = -8
         if key.get_pressed()[self.controls[1]]:
-            self.vx = 5
-        if key.get_pressed()[self.controls[2]]:
-            self.vy = -5
-        if key.get_pressed()[self.controls[3]]:
-            self.vy = 5
+            self.vx = 8
+        if key.get_pressed()[self.controls[2]] and self.standing:
+            self.vy = -23
+        # if key.get_pressed()[self.controls[3]]:
+        #     self.vy = 5
+
+        self.standing = False
 
     def detect(self, blocks):
 
@@ -54,12 +58,9 @@ class Player:
 
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):
-                print("hello")
                 if self.vx > 0:
-                    print("moved left")
                     self.rect.right = block.rect.left
                 if self.vx < 0:
-                    print("moved right")
                     self.rect.left = block.rect.right
 
         self.rect.y = (self.rect.y + self.vy) % screenSize[1]
@@ -67,27 +68,25 @@ class Player:
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):
                 if self.vy > 0:
-                    print("moved up")
                     self.rect.bottom = block.rect.top
+                    self.vy = 0
+                    self.standing = True
                 if self.vy < 0:
-                    print("moved down")
                     self.rect.top = block.rect.bottom
+                    self.vy = 1
 
         self.vx = 0
-        self.vy = 0
+
+        self.vy += 2 if self.vy + 1 < b_height else 0
 
     def update(self):
         draw.rect(screen, (255, 0, 0), self.rect)
 
 
 def make_world(columns, rows):
-    space_x = screenSize[0] // columns
-    space_y = screenSize[1] // rows
 
-    print(specs, space_x, space_y)
-
-    world_list = [[(Air((space_x * x, space_y * y, space_x, space_y)) if randrange(5)
-                    else Block((space_x * x, space_y * y, space_x, space_y))) for x in range(columns)] for y in range(rows)]
+    world_list = [[(Air((b_width * x, b_height * y, b_width, b_height)) if randrange(8)
+                    else Block((b_width * x, b_height * y, b_width, b_height))) for x in range(columns)] for y in range(rows)]
 
     world_array = np.array(world_list)
 
@@ -137,7 +136,7 @@ while True:
         player.detect(surrounding_blocks)
         player.update()
 
-        clock.tick()
+        clock.tick(60)
 
         display.set_caption("New Physics Idea! // FPS - {0:.0f}".format(clock.get_fps()))
 
