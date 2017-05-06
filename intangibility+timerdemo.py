@@ -13,9 +13,10 @@ hurtDict = {0: (0, 255, 0),
             1: (255, 0, 0)}
 
 INVULNERABILITYEVENT = USEREVENT + 1
-invulnerabilityTimer = time.set_timer(INVULNERABILITYEVENT, 3000)
+invulnerabilityTimer = time.set_timer(INVULNERABILITYEVENT, 50)
 
 while True:
+
     for e in event.get():
         if e.type == QUIT:
             break
@@ -30,7 +31,7 @@ while True:
                 sTime = t.time()
 
                 event.clear(INVULNERABILITYEVENT)
-                invulnerabilityTimer = time.set_timer(INVULNERABILITYEVENT, 3000)
+                invulnerabilityTimer = time.set_timer(INVULNERABILITYEVENT, 50)
 
         elif e.type == INVULNERABILITYEVENT:
             if hurt:

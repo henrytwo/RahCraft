@@ -665,7 +665,6 @@ def game():
 
     block_texture = [transform.scale(image.load("textures/blocks/" + block_list[block][3]), (20, 20)) for block in
                      range(len(block_list))]
-    players = {}
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -687,8 +686,19 @@ def game():
 
     inventory_slot = 0
 
+    players = {}
+    current_tick = 0
+
+    INVULNERABILITYEVENT = USEREVENT + 1
+    invulnerabilityTimer = time.set_timer(INVULNERABILITYEVENT, 50)
+
+    block_queue = set()
+    render_queue = set()
+
+    moved = False
+
     while True:
-        moved = False
+        on_tick = False
         for e in event.get():
             if e.type == QUIT:
                 send_queue.put(((9,), _server))
@@ -719,6 +729,16 @@ def game():
                 elif e.unicode in _inventory_keys:
                     inventory_slot = int(e.unicode) - 1
 
+            elif e.type == INVULNERABILITYEVENT:
+                event.clear(INVULNERABILITYEVENT)
+                invulnerabilityTimer = time.set_timer(INVULNERABILITYEVENT, 50)
+
+                on_tick = True
+                current_tick += 1
+                if current_tick == 20:
+                    current_tick = 0
+
+
         keys = key.get_pressed()
 
         if keys[K_d]:
@@ -736,6 +756,7 @@ def game():
 
             elif player_offset_x > -400:
                 player_offset_x -= 60 // block_size
+                moved = True
 
         if keys[K_w]:
             if y_offset // block_size > 5 and player_offset_y == 0:
@@ -744,6 +765,7 @@ def game():
 
             elif player_offset_y > -250:
                 player_offset_y -= 60 // block_size
+                moved = True
 
         elif keys[K_s]:
             if y_offset // block_size < 73 and player_offset_y == 0:
@@ -755,16 +777,19 @@ def game():
 
         player_x, player_y = size[0] // 2 - 10 + player_offset_x, size[1] // 2 - 10 + player_offset_y,
 
-        if moved:
+        if moved and on_tick:
             send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
+            moved = False
 
         disping_world = world[x_offset // block_size:x_offset // block_size + 41,
                         y_offset // block_size:y_offset // block_size + 26]
         update_cost = disping_world.flatten()
         update_cost = np.count_nonzero(update_cost == -1)
 
-        if update_cost > 3:
+        if update_cost > 10 and on_tick and (x_offset // block_size, y_offset // block_size) not in render_queue:
             send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
+
+            render_queue.add((x_offset // block_size, y_offset // block_size))
 
         try:
             world_msg = message_queue.get_nowait()
@@ -772,12 +797,23 @@ def game():
                 players[world_msg[1]] = (world_msg[2], world_msg[3])
 
             elif world_msg[0] == 2:
-                world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(
-                    world_msg[3], copy=True)
+                world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
+                try:
+                    render_queue.remove((world_msg[1], world_msg[2]))
+                except:
+                    pass
             elif world_msg[0] == 3:
                 world[world_msg[1], world_msg[2]] = 0
+                try:
+                    block_queue.remove((world_msg[1], world_msg[2]))
+                except:
+                    pass
             elif world_msg[0] == 4:
                 world[world_msg[1], world_msg[2]] = world_msg[3]
+                try:
+                    block_queue.remove((world_msg[1], world_msg[2]))
+                except:
+                    pass
             elif world_msg[0] == 9:
                 del players[world_msg[1]]
         except:
@@ -793,15 +829,13 @@ def game():
                             "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
 
         if mb[0] == 1:
-            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x,
-                                                                                                  my - player_y) <= reach:
+            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x, my - player_y) <= reach and ((mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
                 send_queue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
+                block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
         if mb[2] == 1:
-            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(
-                    get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size,
-                                   world)) > 0 and hypot(mx - player_x, my - player_y) <= reach:
-                send_queue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot],
-                                (host, port)])
+            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size, world)) > 0 and hypot(mx - player_x, my - player_y) <= reach and ((mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
+                send_queue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot], (host, port)])
+                block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
 
         # print((mx + x_offset) // block_size, (my + y_offset) // block_size)
 

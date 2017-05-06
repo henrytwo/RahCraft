@@ -174,6 +174,7 @@ if __name__ == '__main__':
 
         pickled_message = messageQueue.get()
         message, address = pickled_message
+        print(message)
         # print(message, address)
         command = message[0]
 
