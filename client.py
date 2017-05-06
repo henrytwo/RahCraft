@@ -120,7 +120,7 @@ def menu():
     screen.blit(user_text, (20, 20))
 
     button_list = [Button(200, 175, 400, 40, 'server_picker', "Connect to server"),
-                   Button(200, 225, 400, 40, 'help', "Help"),
+                   Button(200, 225, 400, 40, 'assistance', "Help"),
                    Button(200, 275, 400, 40, 'options', "Options"),
                    Button(200, 325, 195, 40, 'about', "About"),
                    Button(404, 325, 195, 40, 'exit', "Exit")]
@@ -630,20 +630,19 @@ def game():
 
     world_size_x, world_size_y, x_offset, y_offset = first_message
 
-    if player_offset_x//block_size < 50:
+    if player_offset_x // block_size < 50:
         player_offset_x = x_offset - 50 * block_size
         x_offset -= player_offset_x
-    elif player_offset_x//block_size > 9950:
+    elif player_offset_x // block_size > 9950:
         player_offset_x = x_offset - 9950 * block_size
         x_offset -= player_offset_x
 
-    if player_offset_y//block_size < 5:
+    if player_offset_y // block_size < 5:
         player_offset_y = y_offset - 5 * block_size
         y_offset -= player_offset_y
-    elif player_offset_y//block_size > 73:
+    elif player_offset_y // block_size > 73:
         player_offset_y = y_offset - 73 * block_size
         y_offset -= player_offset_y
-
 
     print(x_offset, y_offset, player_offset_x, player_offset_y)
 
@@ -755,7 +754,6 @@ def game():
 
         player_x, player_y = size[0] // 2 - 10 + player_offset_x, size[1] // 2 - 10 + player_offset_y,
 
-
         if moved:
             send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
 
@@ -791,11 +789,11 @@ def game():
         display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
             x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
             block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0] +
-            "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
-
+                            "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
 
         if mb[0] == 1:
-            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x, my - player_y) <= reach:
+            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x,
+                                                                                                  my - player_y) <= reach:
                 send_queue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
         if mb[2] == 1:
             if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(
@@ -886,8 +884,7 @@ def game():
             screen.blit(highlight_bad, ((mx + x_offset) // block_size * block_size - x_offset,
                                         (my + y_offset) // block_size * block_size - y_offset))
 
-
-        draw.rect(screen, (0, 0, 0), (player_x - block_size//2, player_y - block_size//2, block_size, block_size))
+        draw.rect(screen, (0, 0, 0), (player_x - block_size // 2, player_y - block_size // 2, block_size, block_size))
         draw.circle(screen, (0, 0, 0), (player_x, player_y), reach, 2)
 
         player_name = normal_font.render(username, True, (255, 255, 255))
@@ -940,28 +937,41 @@ if __name__ == '__main__':
 
     font.init()
 
-    while navigation != 'exit':
-        if navigation == "login":
-            navigation = login()
-        elif navigation == 'menu':
-            navigation = menu()
-        elif navigation == 'about':
-            navigation = about()
-        elif navigation == 'options':
-            navigation = options()
-        elif navigation == 'help':
-            navigation = assistance()
-        elif navigation == 'game':
-            navigation = game()
+    UI = {'login': login,
+          'menu': menu,
+          'about': about,
+          'options': options,
+          'assistance': assistance,
+          'game': game,
+          'server_picker': server_picker,
+          'custom_server_picker': custom_server_picker,
+          'local_server': local_server,
+          'rahmish_server': rahmish_server}
 
-        elif navigation == 'server_picker':
-            navigation = server_picker()
-        elif navigation == 'custom_server_picker':
-            navigation = custom_server_picker()
-        elif navigation == 'local_server':
-            navigation = local_server()
-        elif navigation == 'rahmish_server':
-            navigation = rahmish_server()
+    while navigation != 'exit':
+        # if navigation == "login":
+        #     navigation = login()
+        # elif navigation == 'menu':
+        #     navigation = menu()
+        # elif navigation == 'about':
+        #     navigation = about()
+        # elif navigation == 'options':
+        #     navigation = options()
+        # elif navigation == 'assistance':
+        #     navigation = assistance()
+        # elif navigation == 'game':
+        #     navigation = game()
+
+        # elif navigation == 'server_picker':
+        #     navigation = server_picker()
+        # elif navigation == 'custom_server_picker':
+        #     navigation = custom_server_picker()
+        # elif navigation == 'local_server':
+        #     navigation = local_server()
+        # elif navigation == 'rahmish_server':
+        #     navigation = rahmish_server()
+
+        navigation = UI[navigation]()
 
     display.quit()
     raise SystemExit
