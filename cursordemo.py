@@ -1,26 +1,27 @@
 from pygame import *
+from random import *
 
 init()
 
 display.set_caption("Cursors!")
 screen = display.set_mode((250, 250))
 
-cursor = ["       oo       ",
+cursor = ["       o        ",
           "       oo       ",
           "       oo       ",
           "       oo       ",
           "       oo       ",
           "        o       ",
           "                ",
-          "oooooo     ooooo",
-          "ooooo     oooooo",
+          " ooooo     ooooo",
+          "ooooo     ooooo ",
           "                ",
           "       o        ",
           "       oo       ",
           "       oo       ",
           "       oo       ",
           "       oo       ",
-          "       oo       "]
+          "        o       "]
 
 print(len(cursor), len(cursor[0]))
 
@@ -33,7 +34,8 @@ while True:
             break
 
     else:
-        ##        screen.fill((255, 255, 255))
+
+        screen.fill((randrange(256), randrange(256), randrange(256)))
 
         display.update()
         continue
