@@ -630,6 +630,7 @@ def game():
 
     world_size_x, world_size_y, x_offset, y_offset = first_message
 
+    '''
     if player_offset_x // block_size < 50:
         player_offset_x = x_offset - 50 * block_size
         x_offset -= player_offset_x
@@ -643,7 +644,7 @@ def game():
     elif player_offset_y // block_size > 73:
         player_offset_y = y_offset - 73 * block_size
         y_offset -= player_offset_y
-
+    '''
     print(x_offset, y_offset, player_offset_x, player_offset_y)
 
     world = np.array([[-1 for y in range(world_size_y)] for x in range(world_size_x)])
