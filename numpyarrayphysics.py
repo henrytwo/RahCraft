@@ -85,12 +85,12 @@ class Player:
 
 def make_world(columns, rows):
 
-    world_list = [[(Air((b_width * x, b_height * y, b_width, b_height)) if randrange(8)
-                    else Block((b_width * x, b_height * y, b_width, b_height))) for x in range(columns)] for y in range(rows)]
+    wrld_list = [[(Air((b_width * x, b_height * y, b_width, b_height)) if randrange(8) else
+                   Block((b_width * x, b_height * y, b_width, b_height))) for x in range(columns)] for y in range(rows)]
 
-    world_array = np.array(world_list)
+    wrld_array = np.array(wrld_list)
 
-    return world_array
+    return wrld_array
 
 
 display.set_caption("New Physics Idea!")
@@ -125,8 +125,8 @@ while True:
                 surrounding_blocks.append(gameWorld[player.rect.y // b_height + shift[1], player.rect.x // b_width + shift[0]])
             except IndexError: pass
 
-        for s in surrounding_blocks:
-            s.around = True
+        for block in surrounding_blocks:
+            block.around = True
 
         for c in range(columns):
             for r in range(rows):
