@@ -607,7 +607,7 @@ def game():
     x_offset = 5000 * block_size
     reach = 5 * block_size
 
-    # player_x, player_y = 0, 0
+    player_offset_x, player_offset_y = 0, 0
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -629,6 +629,23 @@ def game():
         return "login"
 
     world_size_x, world_size_y, x_offset, y_offset = first_message
+
+    if player_offset_x//block_size < 50:
+        player_offset_x = x_offset - 50 * block_size
+        x_offset -= player_offset_x
+    elif player_offset_x//block_size > 9950:
+        player_offset_x = x_offset - 9950 * block_size
+        x_offset -= player_offset_x
+
+    if player_offset_y//block_size < 5:
+        player_offset_y = y_offset - 5 * block_size
+        y_offset -= player_offset_y
+    elif player_offset_y//block_size > 73:
+        player_offset_y = y_offset - 73 * block_size
+        y_offset -= player_offset_y
+
+
+    print(x_offset, y_offset, player_offset_x, player_offset_y)
 
     world = np.array([[-1 for y in range(world_size_y)] for x in range(world_size_x)])
 
@@ -702,37 +719,45 @@ def game():
                 elif e.unicode in _inventory_keys:
                     inventory_slot = int(e.unicode) - 1
 
-        display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
-            x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
-            block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0])
-
         keys = key.get_pressed()
 
         if keys[K_d]:
-            if x_offset // block_size < 9950:
+            if x_offset // block_size < 9950 and player_offset_x == 0:
                 x_offset += 60 // block_size
                 moved = True
 
+            elif player_offset_x < 400:
+                player_offset_x += 60 // block_size
+
         elif keys[K_a]:
-            if x_offset // block_size > 0:
+            if x_offset // block_size > 0 and player_offset_x == 0:
                 x_offset -= 60 // block_size
                 moved = True
 
+            elif player_offset_x > -400:
+                player_offset_x -= 60 // block_size
+
         if keys[K_w]:
-            if y_offset // block_size > 5:  # and player_y == 0:
+            if y_offset // block_size > 5 and player_offset_y == 0:
                 y_offset -= 60 // block_size
                 moved = True
 
-                # elif player_y > -250:
-                #    player_y -= 10
+            elif player_offset_y > -250:
+                player_offset_y -= 60 // block_size
 
         elif keys[K_s]:
-            if y_offset // block_size < 70:
+            if y_offset // block_size < 73 and player_offset_y == 0:
                 y_offset += 60 // block_size
                 moved = True
 
+            elif player_offset_y < 250:
+                player_offset_y += 60 // block_size
+
+        player_x, player_y = size[0] // 2 - 10 + player_offset_x, size[1] // 2 - 10 + player_offset_y,
+
+
         if moved:
-            send_queue.put([[1, x_offset, y_offset], (host, port)])
+            send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
 
         disping_world = world[x_offset // block_size:x_offset // block_size + 41,
                         y_offset // block_size:y_offset // block_size + 26]
@@ -763,15 +788,19 @@ def game():
 
         mx, my = mouse.get_pos()
 
+        display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
+            x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
+            block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0] +
+            "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
+
+
         if mb[0] == 1:
-            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - size[0] // 2,
-                                                                                                  my - size[
-                                                                                                      1] // 2) <= reach:
+            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x, my - player_y) <= reach:
                 send_queue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
         if mb[2] == 1:
             if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(
                     get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size,
-                                   world)) > 0 and hypot(mx - size[0] // 2, my - size[1] // 2) <= reach:
+                                   world)) > 0 and hypot(mx - player_x, my - player_y) <= reach:
                 send_queue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot],
                                 (host, port)])
 
@@ -850,22 +879,24 @@ def game():
                 elif block == -1:
                     draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
-        if hypot(mx - size[0] // 2, my - size[1] // 2) <= reach:
+        if hypot(mx - player_x, my - player_y) <= reach:
             screen.blit(highlight_good, ((mx + x_offset) // block_size * block_size - x_offset,
                                          (my + y_offset) // block_size * block_size - y_offset))
         else:
             screen.blit(highlight_bad, ((mx + x_offset) // block_size * block_size - x_offset,
                                         (my + y_offset) // block_size * block_size - y_offset))
 
-        draw.rect(screen, (0, 0, 0), (size[0] // 2 - 10, size[1] // 2 - 10, block_size, block_size))
-        draw.circle(screen, (0, 0, 0), (size[0] // 2, size[1] // 2), reach, 2)
+
+        draw.rect(screen, (0, 0, 0), (player_x - block_size//2, player_y - block_size//2, block_size, block_size))
+        draw.circle(screen, (0, 0, 0), (player_x, player_y), reach, 2)
 
         player_name = normal_font.render(username, True, (255, 255, 255))
         player_name_back = Surface((player_name.get_width() + 10, player_name.get_height() + 10), SRCALPHA)
         player_name_back.fill(Color(75, 75, 75, 150))
-        screen.blit(player_name_back, center(size[0] // 2 - 10, size[1] // 2 - 40, 20, 20,
+        screen.blit(player_name_back, center(player_x - 10, player_y - 40, 20, 20,
                                              player_name_back.get_width(), player_name_back.get_height()))
-        screen.blit(player_name, center(size[0] // 2 - 10, size[1] // 2 - 40, 20, 20,
+
+        screen.blit(player_name, center(player_x - 10, player_y - 40, 20, 20,
                                         player_name.get_width(), player_name.get_height()))
 
         for world_msg in players:
