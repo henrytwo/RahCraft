@@ -116,7 +116,10 @@ gameWorld = make_world(columns, rows)
 
 player = Player((b_width, b_height, b_width, b_height), [K_a, K_d, K_w, K_s])
 
-surrounding_shifts = [(0, 0), (1, 0), (1, 1), (0, 1), (-1, 1), (-1, 0), (-1, -1), (0, -1), (1, -1)]
+surrounding_shifts = [(-1, -1), (0, -1), (1, -1), (2, -1),
+                      (-1, 0), (0, 0), (1, 0), (2, 0),
+                      (-1, 1), (0, 1), (1, 1), (2, 1),
+                      (-1, 2), (0, 2), (1, 2), (2, 2)]
 
 while True:
     for e in event.get():
@@ -124,36 +127,15 @@ while True:
             break
 
     else:
-        surrounding_blocks = set()
+
+        surrounding_blocks = []
 
         for shift in surrounding_shifts:
             try:
-                surrounding_blocks.add(gameWorld[player.rect.y // b_height + shift[1], player.rect.x // b_width + shift[0]])
-            except:
+                surrounding_blocks.append(gameWorld[player.rect.y // b_height + shift[1],
+                                                    player.rect.x // b_width + shift[0]])
+            except IndexError:
                 pass
-
-        if player.vx > 0 and player.vy > 0:
-            for x in range(player.vx):
-                for y in range(player.vy):
-                    for shift in surrounding_shifts:
-                        try:
-                            surrounding_blocks.add(gameWorld[(player.rect.y+y) // b_height + shift[1], (player.rect.x + x) // b_width + shift[0]])
-                        except:
-                            pass
-        elif player.vx != 0:
-            for x in range(player.vx):
-                for shift in surrounding_shifts:
-                    try:
-                        surrounding_blocks.add(gameWorld[player.rect.y // b_height + shift[1], (player.rect.x+x) // b_width + shift[0]])
-                    except:
-                        pass
-        else:
-            for y in range(player.vy):
-                for shift in surrounding_shifts:
-                    try:
-                        surrounding_blocks.add(gameWorld[(player.rect.y+y) // b_height + shift[1], player.rect.x // b_width + shift[0]])
-                    except:
-                        pass
 
         for block in surrounding_blocks:
             block.around = True
@@ -166,7 +148,7 @@ while True:
         player.detect(surrounding_blocks)
         player.update()
 
-        clock.tick(10)
+        clock.tick(60)
 
         display.set_caption("New Physics Idea! // FPS - {0:.0f}".format(clock.get_fps()))
 
