@@ -1,5 +1,6 @@
 from random import *
 from pickle import *
+from pygame import *
 import numpy as np
 
 # Code to trigger Syed
@@ -113,3 +114,11 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
     # Return the world object for use
     return np.array(world)
 
+
+def draw_block(x, y, x_offset, y_offset, block_size, colour, colour_in, screen):
+    draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
+    draw.rect(screen, colour_in, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)
+
+
+def get_neighbours(x, y, world):
+    return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
