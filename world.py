@@ -88,26 +88,26 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
 
                 #Coal
                 if 10 + terrain[x] > y > 5 + terrain[x] and randint(0,200) == 0:
-                    for cluster in range(randint(3,6)):
-                        world[x + randint(-4,4)][y + randint(-4,4)] = block_lookup["Coal Ore"]
+                    for cluster in range(randint(3, 10)):
+                        world[x + randint(-4, 4)][y + randint(-4, 4)] = block_lookup["Coal Ore"]
 
                 #Iron
                 if 30 + terrain[x] > y > 20 + terrain[x] and randint(0, 200) == 0:
                     for cluster in range(randint(3, 6)):
-                        world[x + randint(-4, 4)][y + randint(-4, 4)] = block_lookup["Coal Ore"]
+                        world[x + randint(-4, 4)][y + randint(-4, 4)] = block_lookup["Iron Ore"]
 
                 #Gold
-                if 60 > y > 50 and randint(0, 400) == 0:
+                if 80 > y > 65 and randint(0, 400) == 0:
                     for cluster in range(randint(3, 6)):
                         world[x + randint(-4, 4)][y + randint(-4, 4)] = block_lookup["Gold Ore"]
 
                 #Diamonds
-                if 80 > y > 70 and randint(0,400) == 0:
-                    for cluster in range(randint(3,6)):
+                if 80 > y > 70 and randint(0, 500) == 0:
+                    for cluster in range(randint(1, 5)):
                         world[x + randint(-3,3)][y + randint(-3,3)] = block_lookup["Diamond Ore"]
 
                 #Bedrock
-                if y > 92 or y > 87 and randint(0,3) == 0:
+                if y > 92 or y > 87 and randint(0, 3) == 0:
                     world[x][y] = block_lookup["Bed Rock"]
 
 

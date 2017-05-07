@@ -190,15 +190,16 @@ if __name__ == '__main__':
                 else:
                     PN = playerNDisconnect.popleft()
 
+                playerLocations = {players[x][0].username: [players[x][0].cord, (0, 0)] for x in players}
+
                 players[address] = (Player(PN, message[1], message[2], message[3]), message[1])
-                sendQueue.put(((10000, 100, players[address][0].cord[0], players[address][0].cord[1]), address))
+                sendQueue.put(((0, 10000, 100, players[address][0].cord[0], players[address][0].cord[1], playerLocations), address))
                 print('Player %s has connected from %s' % (message[1], address))
                 username.add(message[1])
 
                 for i in players:
                     if players[i][1] != players[address][1]:
-                        sendQueue.put(
-                            ((1, players[address][1], players[address][0].cord[0], players[address][0].cord[1]), i))
+                        sendQueue.put(((1, players[address][1], players[address][0].cord[0], players[address][0].cord[1]), i))
 
             else:
                 sendQueue.put(((400,), address))
@@ -260,7 +261,14 @@ if __name__ == '__main__':
                 break
 
             if message[1].lower() == "del world":
-                if input("<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: ").lower() == "y":
+                print("<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: ", end="")
+                sys.stdout.flush()
+                in_put = messageQueue.get()
+                while in_put[0][0] != 10:
+                    print(in_put)
+                    in_put = messageQueue.get()
+
+                if in_put[0][1] == 'y':
                     os.remove("world.pkl")
                     print("World deleted successfully\nServer will shutdown")
                     receiver.terminate()
