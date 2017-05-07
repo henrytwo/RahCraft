@@ -60,11 +60,12 @@ class Player:
             if type(block) is Block and self.rect.colliderect(block.rect):
                 if self.vy > 0:
                     self.rect.bottom = block.rect.top
-                    self.vy = 0
+
                     self.standing = True
                 if self.vy < 0:
                     self.rect.top = block.rect.bottom
-                    self.vy = 1
+
+                self.vy = 0
 
         self.rect.centerx = (self.rect.centerx + self.vx) % screenSize[0]
 
@@ -116,10 +117,9 @@ gameWorld = make_world(columns, rows)
 
 player = Player((b_width, b_height, b_width, b_height), [K_a, K_d, K_w, K_s])
 
-surrounding_shifts = [(-1, -1), (0, -1), (1, -1), (2, -1),
-                      (-1, 0), (0, 0), (1, 0), (2, 0),
-                      (-1, 1), (0, 1), (1, 1), (2, 1),
-                      (-1, 2), (0, 2), (1, 2), (2, 2)]
+surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
+                      (-1, 0), (0, 0), (1, 0),
+                      (-1, 1), (0, 1), (1, 1)]
 
 while True:
     for e in event.get():
@@ -132,8 +132,8 @@ while True:
 
         for shift in surrounding_shifts:
             try:
-                surrounding_blocks.append(gameWorld[player.rect.y // b_height + shift[1],
-                                                    player.rect.x // b_width + shift[0]])
+                surrounding_blocks.append(gameWorld[player.rect.centery // b_height + shift[1],
+                                                    player.rect.centerx // b_width + shift[0]])
             except IndexError:
                 pass
 
