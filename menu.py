@@ -1,3 +1,4 @@
+import rahma as rah
 
 class Button:
     def __init__(self, x, y, w, h, function, text):
@@ -35,16 +36,8 @@ class Button:
         else:
             self.idle()
 
-        text_surface = minecraft_font.render(self.text, True, (255, 255, 255))
-        text_shadow = minecraft_font.render(self.text, True, (0, 0, 0))
-        shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
-        shadow_surface.blit(text_shadow, (0, 0))
-        shadow_surface.set_alpha(100)
-        text_pos = center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(),
-                          text_surface.get_height())
-        screen.blit(text_shadow, (text_pos[0] + 2, text_pos[1] + 2))
-        screen.blit(text_surface, text_pos)
-
+        rah.text(self.text, center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(),
+                      text_surface.get_height()))
 
 
 class Menu:
