@@ -7,6 +7,7 @@ import numpy as np
 import time as t
 from pygame import *
 from random import randint
+import rahma
 
 host = "127.0.0.1"
 port = 0
@@ -664,7 +665,6 @@ def game():
                           Button(200, 180, 400, 40, 'exit', "4 memez press here"),
                           Button(200, 230, 195, 40, 'exit', "Achievements"),
                           Button(404, 230, 195, 40, 'exit', "Statistics"),
-
                           Button(200, 280, 400, 40, 'exit', "Options"),
                           Button(200, 330, 400, 40, 'exit', "Disconnect from server")]
 
@@ -1011,12 +1011,7 @@ if __name__ == '__main__':
     size = (800, 500)
     screen = display.set_mode((800, 500))
 
-    screen.fill((255, 255, 255))
-    splash = image.load('textures/menu/splash.png')
-    screen.blit(splash, center(0, 0, 800, 500, splash.get_width(), splash.get_height()))
-    display.flip()
-
-    t.sleep(1)
+    rahma.rah(screen)
 
     font.init()
 
