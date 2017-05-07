@@ -6,26 +6,49 @@ init()
 display.set_caption("Cursors!")
 screen = display.set_mode((250, 250))
 
-cursor = ["       o        ",
-          "       oo       ",
-          "       oo       ",
-          "       oo       ",
-          "       oo       ",
-          "        o       ",
-          "                ",
-          " ooooo     ooooo",
-          "ooooo     ooooo ",
-          "                ",
-          "       o        ",
-          "       oo       ",
-          "       oo       ",
-          "       oo       ",
-          "       oo       ",
-          "        o       "]
+# cursor = ["       o        ",
+#           "       oo       ",
+#           "       oo       ",
+#           "       oo       ",
+#           "       oo       ",
+#           "        o       ",
+#           "                ",
+#           " ooooo     ooooo",
+#           "ooooo     ooooo ",
+#           "                ",
+#           "       o        ",
+#           "       oo       ",
+#           "       oo       ",
+#           "       oo       ",
+#           "       oo       ",
+#           "        o       "]
 
-print(len(cursor), len(cursor[0]))
+cursor = ["      XX                ",
+          "     X..X               ",
+          "     X..X               ",
+          "     X..X               ",
+          "     X..X               ",
+          "     X..X               ",
+          "     X..XXX             ",
+          "     X..X..XXX          ",
+          "     X..X..X..X         ",
+          "     X..X..X..XXX       ",
+          "     X..X..X..X..X      ",
+          "     X..X..X..X..X      ",
+          "XXX  X..X..X..X..X      ",
+          "X..XXX...........X      ",
+          "X....X...........X      ",
+          " X...X...........X      ",
+          "  X..............X      ",
+          "  X..............X      ",
+          "   X.............X      ",
+          "    X...........X       ",
+          "    X...........X       ",
+          "     X.........X        ",
+          "     X.........X        ",
+          "     XXXXXXXXXXX        "]
 
-cursorData = ((len(cursor), len(cursor[0])), (len(cursor) // 2, len(cursor[0]) // 2), *cursors.compile(cursor))
+cursorData = ((24, 24), (7, 1), *cursors.compile(cursor))
 mouse.set_cursor(*cursorData)
 
 while True:

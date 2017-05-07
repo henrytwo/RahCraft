@@ -54,7 +54,7 @@ class Player:
 
     def detect(self, blocks):
 
-        self.rect.centery = (self.rect.centery + self.vy) % screenSize[1]
+        self.rect.y += self.vy
 
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):

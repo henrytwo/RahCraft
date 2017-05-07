@@ -76,11 +76,13 @@ class Button:
         minecraft_font = font.Font("fonts/minecraft.ttf", size)
 
         if self.rect.collidepoint(mx, my):
-            if release:
-                return self.function
 
             if mb[0] == 1:
                 self.mouse_down()
+
+            elif release:
+                mouse.set_cursor(*cursors.tri_left)
+                return self.function
 
             else:
                 self.highlight()
@@ -144,11 +146,22 @@ def menu():
         mx, my = mouse.get_pos()
         mb = mouse.get_pressed()
 
+        hover_over_button = False
+
         for button in button_list:
             nav_update = button.update(mx, my, mb, 15, release)
 
             if nav_update is not None:
                 return nav_update
+
+            if button.rect.collidepoint(mx, my):
+                hover_over_button = True
+
+        if hover_over_button:
+            mouse.set_cursor(*click_cursor_data)
+
+        else:
+            mouse.set_cursor(*cursors.tri_left)
 
         clock.tick(120)
         display.update()
@@ -196,7 +209,7 @@ def custom_server_picker():
 
     allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
                'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
+               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'A', 'Y', 'Z', '0', '1', '2', '3', '4',
                '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/',
                ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
@@ -261,6 +274,8 @@ def custom_server_picker():
         ml, mm, mr = mouse.get_pressed()
         mb = mouse.get_pressed()
 
+        hover_over_button = False
+
         for button in button_list:
             nav_update = button.update(mx, my, mb, 15, release)
 
@@ -273,6 +288,15 @@ def custom_server_picker():
                     except:
                         pass
                 return nav_update
+
+            if button.rect.collidepoint(mx, my):
+                hover_over_button = True
+
+        if hover_over_button:
+            mouse.set_cursor(*click_cursor_data)
+
+        else:
+            mouse.set_cursor(*cursors.tri_left)
 
         if Rect(ipfield_rect).collidepoint(mx, my) and ml == 1:
             current_field = "ip"
@@ -323,11 +347,22 @@ def server_picker():
         mx, my = mouse.get_pos()
         mb = mouse.get_pressed()
 
+        hover_over_button = False
+
         for button in button_list:
             nav_update = button.update(mx, my, mb, 15, release)
 
             if nav_update is not None:
                 return nav_update
+
+            if button.rect.collidepoint(mx, my):
+                hover_over_button = True
+
+        if hover_over_button:
+            mouse.set_cursor(*click_cursor_data)
+
+        else:
+            mouse.set_cursor(*cursors.tri_left)
 
         clock.tick(120)
         display.update()
@@ -353,7 +388,7 @@ def login():
 
     allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
                'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', '0', '1', '2', '3', '4',
+               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'A', 'Y', 'Z', '0', '1', '2', '3', '4',
                '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/',
                ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
@@ -400,6 +435,8 @@ def login():
         ml, mm, mr = mouse.get_pressed()
         mb = mouse.get_pressed()
 
+        hover_over_button = False
+
         for button in button_list:
             nav_update = button.update(mx, my, mb, 15, release)
 
@@ -407,6 +444,17 @@ def login():
                 username = fields["username"]
 
                 return nav_update
+
+            hover_over_button = False
+
+            if button.rect.collidepoint(mx, my):
+                hover_over_button = True
+
+        if hover_over_button:
+            mouse.set_cursor(*click_cursor_data)
+
+        else:
+            mouse.set_cursor(*cursors.tri_left)
 
         if Rect(usernamefield_rect).collidepoint(mx, my) and ml == 1:
             current_field = "username"
@@ -658,6 +706,10 @@ def game():
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
     inventory_slot = 1
 
+    block_highlight = Surface((block_size, block_size))
+    block_highlight.fill((255, 255, 0))
+    block_highlight.set_alpha(100)
+
     advanced_graphics = True
     paused = False
 
@@ -764,6 +816,48 @@ def game():
                     current_tick = 0
 
 
+        keys = key.get_pressed()
+
+        if keys[K_d]:
+            if x_offset // block_size < 9950 and player_offset_x == 0:
+                x_offset += 60 // block_size
+                moved = True
+
+            elif player_offset_x < 400:
+                player_offset_x += 60 // block_size
+
+        elif keys[K_a]:
+            if x_offset // block_size > 0 and player_offset_x == 0:
+                x_offset -= 60 // block_size
+                moved = True
+
+            elif player_offset_x > -400:
+                player_offset_x -= 60 // block_size
+                moved = True
+
+        if keys[K_w]:
+            if y_offset // block_size > 5 and player_offset_y == 0:
+                y_offset -= 60 // block_size
+                moved = True
+
+            elif player_offset_y > -250:
+                player_offset_y -= 60 // block_size
+                moved = True
+
+        elif keys[K_s]:
+            if y_offset // block_size < 73 and player_offset_y == 0:
+                y_offset += 60 // block_size
+                moved = True
+
+            elif player_offset_y < 250:
+                player_offset_y += 60 // block_size
+
+        player_x, player_y = size[0] // 2 - 10 + player_offset_x, size[1] // 2 - 10 + player_offset_y,
+
+        if moved and on_tick:
+            send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
+            moved = False
+
         disping_world = world[x_offset // block_size:x_offset // block_size + 41,
                         y_offset // block_size:y_offset // block_size + 26]
         update_cost = disping_world.flatten()
@@ -780,7 +874,8 @@ def game():
                 players[world_msg[1]] = (world_msg[2], world_msg[3])
 
             elif world_msg[0] == 2:
-                world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
+                world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3],
+                                                                                                         copy=True)
                 try:
                     render_queue.remove((world_msg[1], world_msg[2]))
                 except:
@@ -823,6 +918,25 @@ def game():
                     send_queue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot],
                                     (host, port)])
                     block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
+        display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(
+            x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
+            block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0] +
+                            "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
+
+        if mb[0] == 1:
+            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x,
+                                                                                                  my - player_y) <= reach and (
+                        (mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
+                send_queue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
+                block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
+        if mb[2] == 1:
+            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(
+                    get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size, world)) > 0 and hypot(
+                        mx - player_x, my - player_y) <= reach and (
+                        (mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
+                send_queue.put(
+                    [[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot], (host, port)])
+                block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
 
             if keys[K_d]:
                 if x_offset // block_size < 9950 and player_offset_x == 0:
@@ -1013,7 +1127,36 @@ if __name__ == '__main__':
 
     rahma.rah(screen)
 
+    init()
     font.init()
+
+    click_cursor = ["      ..                ",
+                    "     .XX.               ",
+                    "     .XX.               ",
+                    "     .XX.               ",
+                    "     .XX.               ",
+                    "     .XX.               ",
+                    "     .XX...             ",
+                    "     .XX.XX...          ",
+                    "     .XX.XX.XX.         ",
+                    "     .XX.XX.XX...       ",
+                    "     .XX.XX.XX.XX.      ",
+                    "     .XX.XX.XX.XX.      ",
+                    "...  .XX.XX.XX.XX.      ",
+                    ".XX...XXXXXXXXXXX.      ",
+                    ".XXXX.XXXXXXXXXXX.      ",
+                    " .XXX.XXXXXXXXXXX.      ",
+                    "  .XXXXXXXXXXXXXX.      ",
+                    "  .XXXXXXXXXXXXXX.      ",
+                    "   .XXXXXXXXXXXXX.      ",
+                    "    .XXXXXXXXXXX.       ",
+                    "    .XXXXXXXXXXX.       ",
+                    "     .XXXXXXXXX.        ",
+                    "     .XXXXXXXXX.        ",
+                    "     ...........        "]
+
+    click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
+    mouse.set_cursor(*cursors.tri_left)
 
     UI = {'login': login,
           'menu': menu,
