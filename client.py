@@ -670,14 +670,17 @@ def game():
     receiver = Process(target=receive_message, args=(message_queue, server))
     receiver.start()
 
-    first_message = message_queue.get()
-    print(first_message)
-    if first_message == (400,):
-        sender.terminate()
-        receiver.terminate()
-        return "login"
+    while True:
+        first_message = message_queue.get()
+        print(first_message)
+        if first_message == (400,):
+            sender.terminate()
+            receiver.terminate()
+            return "login"
+        elif first_message[0] == 0:
+            break
 
-    world_size_x, world_size_y, x_offset, y_offset = first_message
+    world_size_x, world_size_y, x_offset, y_offset, players = first_message[1:]
 
     '''
     if player_offset_x // block_size < 50:
@@ -701,7 +704,11 @@ def game():
     updated = False
 
     send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
-    world_msg = message_queue.get()
+
+    while True:
+        world_msg = message_queue.get()
+        if world_msg[0] == 2:
+            break
 
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
     inventory_slot = 1
@@ -720,8 +727,7 @@ def game():
                           Button(200, 280, 400, 40, 'exit', "Options"),
                           Button(200, 330, 400, 40, 'exit', "Disconnect from server")]
 
-    block_texture = [transform.scale(image.load("textures/blocks/" + block_list[block][3]), (20, 20)) for block in
-                     range(len(block_list))]
+    block_texture = [transform.scale(image.load("textures/blocks/" + block_list[block][3]), (20, 20)) for block in range(len(block_list))]
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -747,7 +753,6 @@ def game():
 
     inventory_slot = 0
 
-    players = {}
     current_tick = 0
 
     INVULNERABILITYEVENT = USEREVENT + 1
@@ -762,6 +767,9 @@ def game():
         on_tick = False
         click = False
         release = False
+        print(players)
+
+        framePerTick = max(1, clock.get_fps()/3)
 
         for e in event.get():
             if e.type == QUIT:
@@ -854,8 +862,9 @@ def game():
 
         player_x, player_y = size[0] // 2 - 10 + player_offset_x, size[1] // 2 - 10 + player_offset_y,
 
-        if moved and on_tick:
-            send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
+        if on_tick:
+            #send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
+            send_queue.put([[1, x_offset, y_offset], (host, port)])
             moved = False
 
         disping_world = world[x_offset // block_size:x_offset // block_size + 41,
@@ -871,11 +880,13 @@ def game():
         try:
             world_msg = message_queue.get_nowait()
             if world_msg[0] == 1:
-                players[world_msg[1]] = (world_msg[2], world_msg[3])
+                if world_msg[1] in players:
+                    players[world_msg[1]][1] = [(world_msg[2]-players[world_msg[1]][0][0])/framePerTick, (world_msg[3]-players[world_msg[1]][0][1])/framePerTick]
+                else:
+                    players[world_msg[1]] = [(world_msg[2], world_msg[3]), [0, 0]]
 
             elif world_msg[0] == 2:
-                world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3],
-                                                                                                         copy=True)
+                world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
                 try:
                     render_queue.remove((world_msg[1], world_msg[2]))
                 except:
@@ -1080,15 +1091,14 @@ def game():
                                         player_name.get_width(), player_name.get_height()))
 
         for world_msg in players:
-            draw.rect(screen, (0, 0, 0), (
-                players[world_msg][0] - x_offset + size[0] // 2 - 10,
-                players[world_msg][1] - y_offset + size[1] // 2 - 10,
-                block_size, block_size))
+            currentPlayerX = players[world_msg][0][0]+players[world_msg][1][0]
+            currentPlayerY = players[world_msg][0][1]+players[world_msg][1][1]
+            draw.rect(screen, (0, 0, 0), (round(currentPlayerX) - x_offset + size[0] // 2 - 10, round(currentPlayerY) - y_offset + size[1] // 2 - 10, block_size, block_size))
 
             player_name = normal_font.render(world_msg, True, (255, 255, 255))
-            screen.blit(player_name, center(players[world_msg][0] - x_offset + size[0] // 2 - 10,
-                                            players[world_msg][1] - y_offset + size[1] // 2 - 10, 20, 20,
-                                            player_name.get_width(), player_name.get_height()))
+            screen.blit(player_name, center(round(currentPlayerX) - x_offset + size[0] // 2 - 10, round(currentPlayerY) - y_offset + size[1] // 2 - 10, 20, 20, player_name.get_width(), player_name.get_height()))
+
+            players[world_msg][0] = (currentPlayerX, currentPlayerY)
 
         screen.blit(toolbar, (400 - toolbar.get_width() // 2, 456))
 
@@ -1111,7 +1121,8 @@ def game():
                     return nav_update
 
         else:
-            event.set_grab(True)
+            #event.set_grab(True)
+            pass
 
         clock.tick(60)
         display.update()
