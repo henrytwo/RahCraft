@@ -93,8 +93,10 @@ def generate_world(world_seed,maxHeight,minX,maxX,w,h):
 
                 #Iron
                 if 30 + terrain[x] > y > 20 + terrain[x] and randint(0, 200) == 0:
+
                     for cluster in range(randint(3, 6)):
                         world[x + randint(-4, 4)][y + randint(-4, 4)] = block_lookup["Iron Ore"]
+
 
                 #Gold
                 if 80 > y > 65 and randint(0, 400) == 0:
