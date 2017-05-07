@@ -657,11 +657,16 @@ def game():
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
     inventory_slot = 1
 
-    block_highlight = Surface((block_size, block_size))
-    block_highlight.fill((255, 255, 0))
-    block_highlight.set_alpha(100)
-
     advanced_graphics = True
+    paused = False
+
+    paused_button_list = [Button(200, 130, 400, 40, 'exit', "Back to Game"),
+                          Button(200, 180, 400, 40, 'exit, "4 memez press here"),
+                          Button(200, 230, 195, 40, 'exit', "Achievements"),
+                          Button(404, 230, 195, 40, 'exit', "Statistics"),
+
+                          Button(200, 280, 400, 40, 'exit', "Options"),
+                          Button(200, 330, 400, 40, 'exit', "Disconnect from server")]
 
     block_texture = [transform.scale(image.load("textures/blocks/" + block_list[block][3]), (20, 20)) for block in
                      range(len(block_list))]
@@ -675,6 +680,10 @@ def game():
     highlight_bad = Surface((20, 20))
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
+
+    pause_backdrop = Surface((800,500))
+    pause_backdrop.fill((0, 0, 0))
+    pause_backdrop.set_alpha(90)
 
     inventory = [[-1 for y in range(6)] for x in range(7)]
 
@@ -699,6 +708,9 @@ def game():
 
     while True:
         on_tick = False
+        click = False
+        release = False
+
         for e in event.get():
             if e.type == QUIT:
                 send_queue.put(((9,), _server))
@@ -720,14 +732,27 @@ def game():
                 if inventory_slot == 9:
                     inventory_slot = 0
 
+                if e.button == 1:
+                    click = True
+
+            elif e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
             elif e.type == KEYDOWN:
-                if e.key == K_t:
-                    if advanced_graphics:
-                        advanced_graphics = False
+                if e.key == K_ESCAPE:
+                    if paused:
+                        paused = False
                     else:
-                        advanced_graphics = True
-                elif e.unicode in _inventory_keys:
-                    inventory_slot = int(e.unicode) - 1
+                        paused = True
+
+                if not paused:
+                    if e.key == K_t:
+                        if advanced_graphics:
+                            advanced_graphics = False
+                        else:
+                            advanced_graphics = True
+                    elif e.unicode in _inventory_keys:
+                        inventory_slot = int(e.unicode) - 1
 
             elif e.type == INVULNERABILITYEVENT:
                 event.clear(INVULNERABILITYEVENT)
@@ -738,48 +763,6 @@ def game():
                 if current_tick == 20:
                     current_tick = 0
 
-
-        keys = key.get_pressed()
-
-        if keys[K_d]:
-            if x_offset // block_size < 9950 and player_offset_x == 0:
-                x_offset += 60 // block_size
-                moved = True
-
-            elif player_offset_x < 400:
-                player_offset_x += 60 // block_size
-
-        elif keys[K_a]:
-            if x_offset // block_size > 0 and player_offset_x == 0:
-                x_offset -= 60 // block_size
-                moved = True
-
-            elif player_offset_x > -400:
-                player_offset_x -= 60 // block_size
-                moved = True
-
-        if keys[K_w]:
-            if y_offset // block_size > 5 and player_offset_y == 0:
-                y_offset -= 60 // block_size
-                moved = True
-
-            elif player_offset_y > -250:
-                player_offset_y -= 60 // block_size
-                moved = True
-
-        elif keys[K_s]:
-            if y_offset // block_size < 73 and player_offset_y == 0:
-                y_offset += 60 // block_size
-                moved = True
-
-            elif player_offset_y < 250:
-                player_offset_y += 60 // block_size
-
-        player_x, player_y = size[0] // 2 - 10 + player_offset_x, size[1] // 2 - 10 + player_offset_y,
-
-        if moved and on_tick:
-            send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
-            moved = False
 
         disping_world = world[x_offset // block_size:x_offset // block_size + 41,
                         y_offset // block_size:y_offset // block_size + 26]
@@ -819,23 +802,72 @@ def game():
         except:
             pass
 
-        mb = mouse.get_pressed()
+        keys = key.get_pressed()
 
+        mb = mouse.get_pressed()
         mx, my = mouse.get_pos()
+
+        if not paused:
+            if mb[0] == 1:
+                if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x,
+                                                                                                      my - player_y) <= reach and (
+                    (mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
+                    send_queue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
+                    block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
+
+            if mb[2] == 1:
+                if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(
+                        get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size,
+                                       world)) > 0 and hypot(mx - player_x, my - player_y) <= reach and (
+                    (mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
+                    send_queue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot],
+                                    (host, port)])
+                    block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
+
+            if keys[K_d]:
+                if x_offset // block_size < 9950 and player_offset_x == 0:
+                    x_offset += 60 // block_size
+                    moved = True
+
+                elif player_offset_x < 400:
+                    player_offset_x += 60 // block_size
+
+            elif keys[K_a]:
+                if x_offset // block_size > 0 and player_offset_x == 0:
+                    x_offset -= 60 // block_size
+                    moved = True
+
+                elif player_offset_x > -400:
+                    player_offset_x -= 60 // block_size
+                    moved = True
+
+            if keys[K_w]:
+                if y_offset // block_size > 5 and player_offset_y == 0:
+                    y_offset -= 60 // block_size
+                    moved = True
+
+                elif player_offset_y > -250:
+                    player_offset_y -= 60 // block_size
+                    moved = True
+
+            elif keys[K_s]:
+                if y_offset // block_size < 73 and player_offset_y == 0:
+                    y_offset += 60 // block_size
+                    moved = True
+
+                elif player_offset_y < 250:
+                    player_offset_y += 60 // block_size
+
+            player_x, player_y = size[0] // 2 - 10 + player_offset_x, size[1] // 2 - 10 + player_offset_y
+
+        if moved and on_tick:
+            send_queue.put([[1, x_offset + player_offset_y, y_offset + player_offset_y], (host, port)])
+            moved = False
 
         display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " X: " + str(
             x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
             block_size) + " Block Selected:" + str(inventory_slot) + "  // " + block_list[inventory_slot][0] +
                             "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
-
-        if mb[0] == 1:
-            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] != 0 and hypot(mx - player_x, my - player_y) <= reach and ((mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
-                send_queue.put([[3, (mx + x_offset) // block_size, (my + y_offset) // block_size], (host, port)])
-                block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
-        if mb[2] == 1:
-            if world[(mx + x_offset) // block_size, (my + y_offset) // block_size] == 0 and sum(get_neighbours((mx + x_offset) // block_size, (my + y_offset) // block_size, world)) > 0 and hypot(mx - player_x, my - player_y) <= reach and ((mx + x_offset) // block_size, (my + y_offset) // block_size) not in block_queue:
-                send_queue.put([[4, (mx + x_offset) // block_size, (my + y_offset) // block_size, inventory_slot], (host, port)])
-                block_queue.add(((mx + x_offset) // block_size, (my + y_offset) // block_size))
 
         # print((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
@@ -912,12 +944,14 @@ def game():
                 elif block == -1:
                     draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
 
-        if hypot(mx - player_x, my - player_y) <= reach:
-            screen.blit(highlight_good, ((mx + x_offset) // block_size * block_size - x_offset,
-                                         (my + y_offset) // block_size * block_size - y_offset))
-        else:
-            screen.blit(highlight_bad, ((mx + x_offset) // block_size * block_size - x_offset,
-                                        (my + y_offset) // block_size * block_size - y_offset))
+        if not paused:
+            if hypot(mx - player_x, my - player_y) <= reach:
+                screen.blit(highlight_good, ((mx + x_offset) // block_size * block_size - x_offset,
+                                             (my + y_offset) // block_size * block_size - y_offset))
+            else:
+                screen.blit(highlight_bad, ((mx + x_offset) // block_size * block_size - x_offset,
+                                            (my + y_offset) // block_size * block_size - y_offset))
+
 
         draw.rect(screen, (0, 0, 0), (player_x - block_size // 2, player_y - block_size // 2, block_size, block_size))
         draw.circle(screen, (0, 0, 0), (player_x, player_y), reach, 2)
@@ -950,6 +984,15 @@ def game():
             icon_x, icon_y = 225 + item, 462
             if item // 40 < len(block_texture):
                 screen.blit(transform.scale(block_texture[item // 40], (32, 32)), (icon_x, icon_y))
+
+        if paused:
+            screen.blit(pause_backdrop,(0,0))
+
+            for button in paused_button_list:
+                nav_update = button.update(mx, my, mb, 15, release)
+
+                if nav_update is not None:
+                    return nav_update
 
         clock.tick(60)
         display.update()
