@@ -1181,28 +1181,6 @@ if __name__ == '__main__':
           'rahmish_server': rahmish_server}
 
     while navigation != 'exit':
-        # if navigation == "login":
-        #     navigation = login()
-        # elif navigation == 'menu':
-        #     navigation = menu()
-        # elif navigation == 'about':
-        #     navigation = about()
-        # elif navigation == 'options':
-        #     navigation = options()
-        # elif navigation == 'assistance':
-        #     navigation = assistance()
-        # elif navigation == 'game':
-        #     navigation = game()
-
-        # elif navigation == 'server_picker':
-        #     navigation = server_picker()
-        # elif navigation == 'custom_server_picker':
-        #     navigation = custom_server_picker()
-        # elif navigation == 'local_server':
-        #     navigation = local_server()
-        # elif navigation == 'rahmish_server':
-        #     navigation = rahmish_server()
-
         navigation = UI[navigation]()
 
     display.quit()
