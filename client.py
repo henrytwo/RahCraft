@@ -661,7 +661,7 @@ def game():
     paused = False
 
     paused_button_list = [Button(200, 130, 400, 40, 'exit', "Back to Game"),
-                          Button(200, 180, 400, 40, 'exit, "4 memez press here"),
+                          Button(200, 180, 400, 40, 'exit', "4 memez press here"),
                           Button(200, 230, 195, 40, 'exit', "Achievements"),
                           Button(404, 230, 195, 40, 'exit', "Statistics"),
 
@@ -986,6 +986,8 @@ def game():
                 screen.blit(transform.scale(block_texture[item // 40], (32, 32)), (icon_x, icon_y))
 
         if paused:
+            event.set_grab(False)
+
             screen.blit(pause_backdrop,(0,0))
 
             for button in paused_button_list:
@@ -993,6 +995,9 @@ def game():
 
                 if nav_update is not None:
                     return nav_update
+
+        else:
+            event.set_grab(True)
 
         clock.tick(60)
         display.update()
