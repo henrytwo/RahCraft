@@ -39,6 +39,8 @@ class Player:
 
         self.standing = False
 
+        self.surrounding_blocks = []
+
     def control(self):
 
         if key.get_pressed()[self.controls[0]]:
@@ -50,7 +52,22 @@ class Player:
 
         self.standing = False
 
-    def detect(self, blocks):
+    def detect(self):
+        self.surrounding_blocks = []
+
+        for shift in surrounding_shifts:
+            try:
+                self.surrounding_blocks.append(gameWorld[self.rect.centery // b_height + shift[1],
+                                                         self.rect.centerx // b_width + shift[0]])
+            except IndexError:
+                pass
+
+        for block in self.surrounding_blocks:
+            block.around = True
+
+        self.collide(self.surrounding_blocks)
+
+    def collide(self, blocks):
 
         self.rect.y += self.vy
 
@@ -126,24 +143,12 @@ while True:
 
     else:
 
-        surrounding_blocks = []
-
-        for shift in surrounding_shifts:
-            try:
-                surrounding_blocks.append(gameWorld[player.rect.centery // b_height + shift[1],
-                                                    player.rect.centerx // b_width + shift[0]])
-            except IndexError:
-                pass
-
-        for block in surrounding_blocks:
-            block.around = True
-
         for c in range(columns):
             for r in range(rows):
                 gameWorld[r, c].update()
 
         player.control()
-        player.detect(surrounding_blocks)
+        player.detect()
         player.update()
 
         clock.tick(60)
