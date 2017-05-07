@@ -4,7 +4,7 @@ from collections import deque
 from numpy import *
 import pickle
 import glob
-from generation import *
+from world import *
 import os.path
 import sys
 

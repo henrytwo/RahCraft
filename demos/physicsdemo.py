@@ -3,14 +3,14 @@ from random import *
 import numpy as np
 
 init()
-specs = display.Info()
 
+specs = display.Info()
 clock = time.Clock()
 
 
 class Air:
-    def __init__(self, rect):
-        self.rect = Rect(*rect)
+    def __init__(self, x, y, w, h):
+        self.rect = Rect(x, y, w, h)
         self.around = False
 
     def update(self):
@@ -19,8 +19,8 @@ class Air:
 
 
 class Block:
-    def __init__(self, rect):
-        self.rect = Rect(*rect)
+    def __init__(self, x, y, w, h):
+        self.rect = Rect(x, y, w, h)
         self.around = False
 
     def update(self):
@@ -29,8 +29,8 @@ class Block:
 
 
 class Player:
-    def __init__(self, rect, controls):
-        self.rect = Rect(*rect)
+    def __init__(self, x, y, w, h, controls):
+        self.rect = Rect(x, y, w, h)
 
         self.vx = 0
         self.vy = 0
@@ -47,8 +47,6 @@ class Player:
             self.vx = 8
         if key.get_pressed()[self.controls[2]] and self.standing:
             self.vy = -23
-        # if key.get_pressed()[self.controls[3]]:
-        #     self.vy = 5
 
         self.standing = False
 
@@ -90,9 +88,9 @@ def make_world(columns, rows):
         row_list = []
         for x in range(columns):
             if randrange(rows - len(world_list)):
-                row_list.append(Air((b_width * x, b_height * y, b_width, b_height)))
+                row_list.append(Air(b_width * x, b_height * y, b_width, b_height))
             else:
-                row_list.append(Block((b_width * x, b_height * y, b_width, b_height)))
+                row_list.append(Block(b_width * x, b_height * y, b_width, b_height))
 
         world_list.append(row_list)
 
@@ -115,7 +113,7 @@ b_height = screenSize[1] // rows
 
 gameWorld = make_world(columns, rows)
 
-player = Player((b_width, b_height, b_width, b_height), [K_a, K_d, K_w, K_s])
+player = Player(b_width, b_height, b_width, b_height, [K_a, K_d, K_w, K_s])
 
 surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
                       (-1, 0), (0, 0), (1, 0),
