@@ -1,6 +1,8 @@
 from pygame import *
 import rahma as rah
 
+font.init()
+
 normal_font = font.Font("fonts/minecraft.ttf", 14)
 
 
