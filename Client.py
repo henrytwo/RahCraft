@@ -1,10 +1,11 @@
 from pygame import *
 from multiprocessing import *
+from player import *
+import numpy as np
 import socket
 import rahma
 import menu
 import pickle
-import player
 
 
 def player_sender(send_queue, server):
@@ -147,6 +148,9 @@ def game(username):
     hotbar_slot = 1
 
     inventory = [[-1] * 6 for x in range(7)]
+    local_player = Player(player_x, player_y, player_h, player_w, 1, size)  # Need player w and h
+
+    remote_players = {}
 
     _inventory_keys = {str(x) for x in range(1, 10)}
 
@@ -206,6 +210,49 @@ def game(username):
                 current_tick += 1
                 if current_tick == 20:
                     current_tick = 0
+
+        if on_tick:
+            send_queue.put([(1, local_player.x, local_player.x)])
+
+        local_player.update()
+
+        #===================Decode Message======================
+
+        try:
+            server_message = message_queue.get_nowait()
+            command = server_message[0]
+
+            if command == 1:
+                pass
+            elif command == 2
+                pass
+
+        except:
+            pass
+
+        #==================Render World==========================
+
+        for x in range(0, 821, block_size):  # Render blocks
+            for y in range(0, 521, block_size):
+                block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
+
+                if len(block_list) > block > 0:
+                        screen.blit(block_texture[block], (x - x_offset % 20, y - y_offset % 20))
+
+                elif block == -1:
+                    draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
+
+        player.update(screen)
+        display.flip()
+        clock.tick(60)
+
+        '''
+        to do list:
+            Make world generation alg
+            make the server command decoder
+            do player interpolation
+            get sprite
+        '''
 
 
 if __name__ == "__main__":

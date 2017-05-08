@@ -61,7 +61,14 @@ class Player:
         self.vx = 0
         self.vy += 2 if self.vy + 1 < self.max_fall else 0
 
-    def update(self, surf):
+    def debug(self, surf):
+        draw.rect(surf, (0, 0, 0), self.rect, 2)
+        draw.circle(surf, (0, 0,0 ), (self.rect.x, self.rect.y), 5, 2)
+
+    def update(self, surf, de = False):
+        if de:
+            self.debug()
+        self.control()
         draw.rect(surf, (255, 0, 0), self.rect)
         surf.blit(self.name_back, rah.center(self.rect.x - 10, self.rect.y - 40, 20, 20, self.name_back.get_width(), self.name_back.get_height()))
         surf.blit(self.name_tag, rah.center(self.rect.x - 10, self.rect.y - 40, 20, 20, self.name_tag.get_width(), self.name_tag.get_height()))
