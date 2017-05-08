@@ -27,5 +27,3 @@ def text(screen, text, x, y, screen_w, screen_h):
 
     screen.blit(text_shadow, (pos[0] + 2, pos[1] + 2))
     screen.blit(text_surface, pos)
-
-    display.flip()
