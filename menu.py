@@ -72,7 +72,7 @@ class Menu:
             self.button_list.append(Button(button_x, button_y, BUTTON_W, BUTTON_H, function, text))
 
 
-    def update(self):
+    def update(self, release):
         for button in self.button_list:
             nav_update = button.update(mx, my, mb, 15, release)
 
