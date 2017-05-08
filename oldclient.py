@@ -881,7 +881,7 @@ def game():
             world_msg = message_queue.get_nowait()
             if world_msg[0] == 1:
                 if world_msg[1] in players:
-                    players[world_msg[1]][1] = [(world_msg[2]-players[world_msg[1]][0][0])/framePerTick, (world_msg[3]-players[world_msg[1]][0][1])/framePerTick]
+                    players[world_msg[1]][1] = [(world_msg[2]-players[world_msg[1]][0][0])//framePerTick, (world_msg[3]-players[world_msg[1]][0][1])//framePerTick]
                 else:
                     players[world_msg[1]] = [(world_msg[2], world_msg[3]), [0, 0]]
 
@@ -1093,10 +1093,10 @@ def game():
         for world_msg in players:
             currentPlayerX = players[world_msg][0][0]+players[world_msg][1][0]
             currentPlayerY = players[world_msg][0][1]+players[world_msg][1][1]
-            draw.rect(screen, (0, 0, 0), (round(currentPlayerX) - x_offset + size[0] // 2 - 10, round(currentPlayerY) - y_offset + size[1] // 2 - 10, block_size, block_size))
+            draw.rect(screen, (0, 0, 0), (round(currentPlayerX) - x_offset + size[0] // 2 - 15, round(currentPlayerY) - y_offset + size[1] // 2 - 15, block_size, block_size))
 
             player_name = normal_font.render(world_msg, True, (255, 255, 255))
-            screen.blit(player_name, center(round(currentPlayerX) - x_offset + size[0] // 2 - 10, round(currentPlayerY) - y_offset + size[1] // 2 - 10, 20, 20, player_name.get_width(), player_name.get_height()))
+            screen.blit(player_name, center(round(currentPlayerX) - x_offset + size[0] // 2 - 15, round(currentPlayerY) - y_offset + size[1] // 2 - 15, 20, 20, player_name.get_width(), player_name.get_height()))
 
             players[world_msg][0] = (currentPlayerX, currentPlayerY)
 

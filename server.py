@@ -7,6 +7,7 @@ from multiprocessing import *
 from numpy import *
 from world import *
 import glob
+from math import *
 
 # If world doesn't exist
 if not os.path.isfile('world.pkl'):
@@ -25,7 +26,7 @@ else:
 class Player(object):
     global PlayerData, PlayerUUID, itemLib
 
-    def __init__(self, player_number, player_username, x_offset, y_offset):
+    def __init__(self, player_number, player_username):
         self.username = player_username
         self.number = player_number
 
@@ -33,15 +34,15 @@ class Player(object):
 
         # self.saturation, self.foodLib
 
-        if self.cord == (0, 0):
-            self.cord = [x_offset, y_offset]
-
     def get_player_info(self):
         try:
             return PlayerData[self.username]
         except:
-            PlayerData[self.username] = [(0, 0), (0, 0), [[0] * 2 for _ in range(36)], 10, 10]
+            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint, [[0] * 2 for _ in range(36)], 10, 10]
             return PlayerData[self.username]
+
+    def change_spawn(self, spawn_position):
+        self.spawnCord = spawn_position[:]
 
     def change_location(self, cord_change):
         self.cord = cord_change[:]
@@ -85,6 +86,7 @@ class Player(object):
 class World:
     def __init__(self, world_name):
         self.overworld = self.load_world(world_name)
+        self.spawnpoint = self.get_spawnpoint()
 
     def load_world(self, worldn):
         return pickle.load(open(worldn + ".pkl", "rb"))
@@ -97,6 +99,31 @@ class World:
 
     def place_block(self, x, y, blocktype):
         self.overworld[x, y] = blocktype
+
+    def get_spawnpoint(self):
+        x = len(self.overworld)//2
+        spawn_offset = 0
+        spawn_found = False
+        search_cords = self.overworld[x, :len(self.overworld[x])//2]
+
+        while not spawn_found:
+            for y in range(len(search_cords)):
+                if y != 0 and search_cords[y] != 0:
+                    spawn_found = True
+                    x += spawn_offset
+                    y -= 1
+                    break
+
+            if spawn_offset < 0:
+                spawn_offset = abs(spawn_offset)
+            elif spawn_offset > 0:
+                spawn_offset = spawn_offset*-1-1
+            else:
+                spawn_offset -= 1
+
+            search_cords = self.overworld[x + spawn_offset, :len(self.overworld[x + spawn_offset])//2]
+
+        return x, y
 
     def save(self):
         pickle.dump(self.overworld, open('world.pkl', 'wb'))
@@ -171,16 +198,14 @@ if __name__ == '__main__':
     cmdIn = ""
 
     while True:
-
         pickled_message = messageQueue.get()
         message, address = pickled_message
-        print(message)
         # print(message, address)
         command = message[0]
 
         if command == 0:
             # Create player/login
-            # Data: [0,<username>,<x_offset>,<y_offset>]
+            # Data: [0,<username>]
 
             if message[1] not in username:
 
@@ -190,16 +215,16 @@ if __name__ == '__main__':
                 else:
                     PN = playerNDisconnect.popleft()
 
-                playerLocations = {players[x][0].username: [players[x][0].cord, (0, 0)] for x in players}
+                playerLocations = {players[x].username: [players[x].cord, (0, 0)] for x in players}
 
-                players[address] = (Player(PN, message[1], message[2], message[3]), message[1])
-                sendQueue.put(((0, 10000, 100, players[address][0].cord[0], players[address][0].cord[1], playerLocations), address))
+                players[address] = Player(PN, message[1])
+                sendQueue.put(((0, 10000, 100, players[address].cord[0], players[address].cord[1], playerLocations), address))
                 print('Player %s has connected from %s' % (message[1], address))
                 username.add(message[1])
 
                 for i in players:
-                    if players[i][1] != players[address][1]:
-                        sendQueue.put(((1, players[address][1], players[address][0].cord[0], players[address][0].cord[1]), i))
+                    if players[i].username != players[address].username:
+                        sendQueue.put(((1, players[address][1], players[address].cord[0], players[address].cord[1]), i))
 
             else:
                 sendQueue.put(((400,), address))
@@ -207,11 +232,11 @@ if __name__ == '__main__':
         elif command == 1:
             # Player movement
             # Data: [1, <cordx>, <cordy>]
-            x, y = players[address][0].change_location((message[1], message[2]))
+            x, y = players[address].change_location((message[1], message[2]))
 
             for i in players:
-                if players[i][1] != players[address][1]:
-                    sendQueue.put(((1, players[address][1], x, y), i))
+                if players[i].username != players[address].username:
+                    sendQueue.put(((1, players[address].username, x, y), i))
 
         elif command == 2:
             # Render world
@@ -221,6 +246,15 @@ if __name__ == '__main__':
         elif command == 3:
             # Break block
             # Data: [3, <cordx>, <cordy>]
+            if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 5:
+                spawnpoint_check = world.get_spawnpoint()
+
+                if spawnpoint_check != world.spawnpoint:
+                    world.spawnpoint = spawnpoint_check[:]
+
+                    for i in players:
+                        players[i].change_spawn(world.spawnpoint)
+
             world.break_block(message[1], message[2])
 
             for i in players:
@@ -229,6 +263,15 @@ if __name__ == '__main__':
         elif command == 4:
             # Place block
             # Data: [4, <cordx>, <cordy>, <block type>]
+            if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 5:
+                spawnpoint_check = world.get_spawnpoint()
+
+                if spawnpoint_check != world.spawnpoint:
+                    world.spawnpoint = spawnpoint_check[:]
+
+                    for i in players:
+                        players[i].change_spawn(world.spawnpoint)
+
             world.place_block(message[1], message[2], message[3])
 
             for i in players:
@@ -239,11 +282,11 @@ if __name__ == '__main__':
 
         elif command == 9:
 
-            print('Player %s has disconnected from the game. %s' % (players[address][1], address))
+            print('Player %s has disconnected from the game. %s' % (players[address].username, address))
 
-            playerNDisconnect.append(players[address][0].number)
-            PlayerData[players[address][1]] = players[address][0].save()
-            offPlayer = players[address][1]
+            playerNDisconnect.append(players[address].number)
+            PlayerData[players[address].username] = players[address].save()
+            offPlayer = players[address].username
             username.remove(offPlayer)
 
             del players[address]
