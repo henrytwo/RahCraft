@@ -37,7 +37,7 @@ class Button:
         else:
             self.idle()
 
-        rah.text(self.text, rah.center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height()))
+        rah.text(screen, self.text, self.rect.x, self.rect.y, self.rect.w, self.rect.h)
 
 
 class Menu:
