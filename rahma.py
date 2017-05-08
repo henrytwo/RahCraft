@@ -2,6 +2,7 @@ from pygame import *
 import oldclient
 import time as t
 
+
 # RAHMISH EMPIRE WILL DIE
 def rah(screen):
     screen.fill((255, 255, 255))
@@ -11,10 +12,13 @@ def rah(screen):
 
     t.sleep(1)
 
+
 def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2
 
-def text(text, pos):
+
+def text(screen, text, pos):
+    minecraft_font = font.Font("fonts/minecraft.ttf", 30)
     text_surface = minecraft_font.render(text, True, (255, 255, 255))
     text_shadow = minecraft_font.render(text, True, (0, 0, 0))
     shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
@@ -23,3 +27,5 @@ def text(text, pos):
 
     screen.blit(text_shadow, (pos[0] + 2, pos[1] + 2))
     screen.blit(text_surface, pos)
+
+    display.flip()

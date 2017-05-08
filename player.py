@@ -61,7 +61,5 @@ class Player:
 
     def update(self, surf):
         draw.rect(surf, (255, 0, 0), self.rect)
-        surf.blit(self.name_back, rah.center(self.rect.x - 10, self.rect.y - 40, 20, 20,
-                                             self.name_back.get_width(), self.name_back.get_height()))
-        surf.blit(self.name_tag, rah.center(self.rect.x - 10, self.rect.y - 40, 20, 20,
-                                            self.name_tag.get_width(), self.name_tag.get_height()))
+        surf.blit(self.name_back, rah.center(self.rect.x - 10, self.rect.y - 40, 20, 20, self.name_back.get_width(), self.name_back.get_height()))
+        surf.blit(self.name_tag, rah.center(self.rect.x - 10, self.rect.y - 40, 20, 20, self.name_tag.get_width(), self.name_tag.get_height()))
