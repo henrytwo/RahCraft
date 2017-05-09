@@ -15,15 +15,20 @@ def rah(screen):
 
     t.sleep(1)
 
-def text(screen, text, x, y, screen_w, screen_h):
-    minecraft_font = font.Font("fonts/minecraft.ttf", 30)
+def text(text, pos, size):
+    minecraft_font = font.Font("fonts/minecraft.ttf", size)
     text_surface = minecraft_font.render(text, True, (255, 255, 255))
     text_shadow = minecraft_font.render(text, True, (0, 0, 0))
+
     shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
     shadow_surface.blit(text_shadow, (0, 0))
     shadow_surface.set_alpha(100)
 
-    pos = center(x, y, screen_w, screen_h, text_surface.get_width(), text_surface.get_height())
+    text_surface = Surface((text_surface.get_width() + 2, text_surface.get_height() + 2), SRCALPHA)
 
-    screen.blit(text_shadow, (pos[0] + 2, pos[1] + 2))
-    screen.blit(text_surface, pos)
+    text_surface.blit(text_shadow, (pos[0] + 2, pos[1] + 2))
+    text_surface.blit(text_surface, pos)
+
+    return text_surface
+
+
