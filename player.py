@@ -8,7 +8,7 @@ normal_font = font.Font("fonts/minecraft.ttf", 14)
 
 class Player:
     def __init__(self, x, y, w, h, name, block_type, screen_size):
-        self.rect = Rect(x, y, w, h)
+        self.rect = Rect((x, y, w, h))
 
         self.vx = 0
         self.vy = 0
