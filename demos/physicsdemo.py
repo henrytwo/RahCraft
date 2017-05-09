@@ -270,7 +270,7 @@ screenSize = 960, 540  # screen size 960px x 540px
 screen = display.set_mode(screenSize)  # set the mode for the screen (makes it appear)
 
 # Make values to generate the world list and array
-complexity = abs(int(input('Complexity level? (Use a positive integer)\n')))  # complexity of world
+complexity = abs(int(input('Complexity level of world? (Use a positive integer)\n')))  # complexity of world
 rows = 9 * complexity  # number of rows in world
 columns = 16 * complexity  # number of columns in world
 
