@@ -1,3 +1,10 @@
+from pygame import *
+from multiprocessing import *
+from player import *
+import numpy as np
+import socket
+import pickle
+
 def player_sender(send_queue, server):
     print('Sender running...')
 
@@ -64,11 +71,12 @@ def game(username):
     world_size_x, world_size_y, player_x, player_y, players = first_message[1:]
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
+    block_size = 20
 
     hotbar_slot = 1
 
     inventory = [[-1] * 6 for x in range(7)]
-    local_player = Player(player_x, player_y, player_h, player_w, 1, size)  # Need player w and h
+    local_player = Player(player_x, player_y, username, 20, 20, 1, size)  # Need player w and h
 
     remote_players = {}
 
@@ -82,6 +90,7 @@ def game(username):
 
     while True:
         on_tick = False
+        tickPerframe = max(clock.get_fps()/20, 1)
         for e in event.get():
             if e.type == QUIT:
                 quit_game()
@@ -92,16 +101,16 @@ def game(username):
                     click = True
 
                 elif e.button == 4:
-                    inventory_slot = max(-1, inventory_slot - 1)
+                    hotbar_slot = max(-1, hotbar_slot - 1)
 
-                    if inventory_slot == -1:
-                        inventory_slot = 8
+                    if hotbar_slot == -1:
+                        hotbar_slot = 8
 
                 elif e.button == 5:
-                    inventory_slot = min(9, inventory_slot + 1)
+                    hotbar_slot = min(9, hotbar_slot + 1)
 
-                    if inventory_slot == 0:
-                        inventory_slot = 0
+                    if hotbar_slot == 0:
+                        hotbar_slot = 0
 
             elif e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
@@ -124,15 +133,19 @@ def game(username):
 
             elif e.type == TICKEVENT:
                 event.clear(TICKEVENT)
-                invulnerabilityTimer = time.set_timer(TickEVENT, 50)
+                tickTimer = time.set_timer(TICKEVENT, 50)
 
                 on_tick = True
                 current_tick += 1
                 if current_tick == 20:
                     current_tick = 0
 
+        local_player.update(screen)
+        x_offset = local_player.rect.x
+        y_offset = local_player.rect.y
+
         if on_tick:
-            send_queue.put([(1, local_player.x, local_player.x)])
+            send_queue.put([(1, local_player.rect.x, local_player.rect.y)])
 
         local_player.update()
 
@@ -140,12 +153,50 @@ def game(username):
 
         try:
             server_message = message_queue.get_nowait()
-            command = server_message[0]
+            command, message = server_message[0], server_message[1:]
 
             if command == 1:
-                pass
-            elif command == 2
-                pass
+                username, current_x, current_y, = message
+                if username in players:
+                    past_x, past_y = players[username][0]
+
+                    players[username][1] = ((current_x - past_x) // tickPerFrame, (current_y - past_y) // tickPerframe)
+
+                    if sum(players[username][1]) < 3:
+                        players[username][1] = (0, 0)
+                        players[username][0] = [past_x, past_y]
+
+                else:
+                    players[username] = [[current_x, current_y], (0, 0)]
+
+            elif command == 2:
+                chunk_positionX, chunk_positionY, world_chunk = message
+
+                world[chunk_positionX-5:chunk_positionX+45, chunk_positionY-5:chunk_positionY+31] = np.array(world_chunk, copy=True)
+
+                if (chunk_positionX, chunk_positionY) in render_request:
+                    render_request.remove((chunk_positionX, chunk_positionY))
+
+            elif command == 3:
+                pos_x, pos_y = message
+
+                world[pos_x, pos_y] = 0
+
+                if (pos_x, pos_y) in block_request:
+                    block_request.remove((pos_x, pos_y))
+
+            elif message == 4:
+                pos_x, pos_y, block = message
+
+                world[pos_x, pos_y] = block
+
+                if (pos_x, pos_y) in block_request:
+                    block_request.remove((pos_x, pos_y))
+
+            elif message == 9:
+                username = message[0]
+
+                del players[username]
 
         except:
             pass
@@ -160,9 +211,8 @@ def game(username):
                         screen.blit(block_texture[block], (x - x_offset % 20, y - y_offset % 20))
 
                 elif block == -1:
-                    draw_block(x, y, x_offset, y_offset, block_size, (0, 0, 0), (0, 0, 0), screen)
+                    draw.rect(screen, (0, 0, 0), (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
 
-        player.update(screen)
         display.flip()
         clock.tick(60)
 
@@ -176,7 +226,7 @@ def game(username):
 
 if __name__ == "__main__":
     host = "127.0.0.1"
-    port = 5175
+    port = 5176
 
     navigation = 'menu'
 
@@ -185,4 +235,6 @@ if __name__ == "__main__":
 
     init()
     font.init()
+
+    game("Ryan")
 
