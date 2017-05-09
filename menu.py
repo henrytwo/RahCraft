@@ -62,9 +62,6 @@ class Menu:
 
         self.button_list = []
 
-        print(X_OFFSET, Y_OFFSET)
-
-
         for button_index in range(len(button_param)):
             button_x = X_OFFSET
             button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
@@ -72,14 +69,52 @@ class Menu:
             function = button_param[button_index][FUNCTION]
             text = button_param[button_index][TEXT]
 
-            print(button_x, button_y, BUTTON_W, BUTTON_H, function, text)
-
             self.button_list.append(Button(button_x, button_y, BUTTON_W, BUTTON_H, function, text))
 
 
     def update(self, screen, release, mx, my, mb):
+
+        click_cursor = ["      ..                ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX...             ",
+                        "     .XX.XX...          ",
+                        "     .XX.XX.XX.         ",
+                        "     .XX.XX.XX...       ",
+                        "     .XX.XX.XX.XX.      ",
+                        "     .XX.XX.XX.XX.      ",
+                        "...  .XX.XX.XX.XX.      ",
+                        ".XX...XXXXXXXXXXX.      ",
+                        ".XXXX.XXXXXXXXXXX.      ",
+                        " .XXX.XXXXXXXXXXX.      ",
+                        "  .XXXXXXXXXXXXXX.      ",
+                        "  .XXXXXXXXXXXXXX.      ",
+                        "   .XXXXXXXXXXXXX.      ",
+                        "    .XXXXXXXXXXX.       ",
+                        "    .XXXXXXXXXXX.       ",
+                        "     .XXXXXXXXX.        ",
+                        "     .XXXXXXXXX.        ",
+                        "     ...........        "]
+
+        click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
+
+        hover_over_button = False
+
         for button in self.button_list:
             nav_update = button.update(screen, mx, my, mb, 15, release)
 
             if nav_update is not None:
                 return nav_update
+
+            if button.rect.collidepoint(mx, my):
+                hover_over_button = True
+
+
+        if hover_over_button:
+            mouse.set_cursor(*click_cursor_data)
+
+        else:
+            mouse.set_cursor(*cursors.tri_left)

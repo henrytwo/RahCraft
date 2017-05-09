@@ -64,14 +64,6 @@ def menu_screen():
         if nav_update:
             return nav_update
 
-        '''
-        if hover_over_button:
-            mouse.set_cursor(*click_cursor_data)
-
-        else:
-            mouse.set_cursor(*cursors.tri_left)
-        '''
-
         clock.tick(120)
         display.update()
 

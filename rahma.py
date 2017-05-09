@@ -24,11 +24,11 @@ def text(text, pos, size):
     shadow_surface.blit(text_shadow, (0, 0))
     shadow_surface.set_alpha(100)
 
-    text_surface = Surface((text_surface.get_width() + 2, text_surface.get_height() + 2), SRCALPHA)
+    text_surface_final = Surface((text_surface.get_width() + 2, text_surface.get_height() + 2), SRCALPHA)
 
-    text_surface.blit(text_shadow, (pos[0] + 2, pos[1] + 2))
-    text_surface.blit(text_surface, pos)
+    text_surface_final.blit(text_shadow, (2, 2))
+    text_surface_final.blit(text_surface, (0,0))
 
-    return text_surface
+    return text_surface_final
 
 
