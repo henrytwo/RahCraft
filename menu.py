@@ -120,33 +120,32 @@ class Menu:
             mouse.set_cursor(*cursors.tri_left)
 
 class TextBox:
-    def __init__(self,x,y,w,h,name,label):
-        self.name = name
+    def __init__(self,x,y,w,h,label):
+
         self.rect = Rect(x,y,w,h)
         self.content = ""
         self.font = font.Font("fonts/minecraft.ttf", 14)
         self.label = self.font.render(label, True, (255, 255, 255))
 
 
-        self.allowered =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+        self.allowed =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
                'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
                'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'A', 'Y', 'Z', '0', '1', '2', '3', '4',
                '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/',
                ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
-
-    def update(self, screen, mouse, e, field):
-
-
+    def draw(self, screen):
         screen.blit(self.label, (self.rect.x, self.rect.y - self.label.get_height() - 2))
 
         draw.rect(screen, (0, 0, 0), self.rect)
         draw.rect(screen, (151, 151, 151), self.rect, 2)
 
-        screen.blit(normal_font.render(self.content, True, (255, 255, 255)), (self.rect.x + 3, self.rect.y + 3))
+        screen.blit(self.font.render(self.content, True, (255, 255, 255)), (self.rect.x + 10, self.rect.y + 15))
 
-        if e.type == KEYDOWN and field == self.name:
-            if e.unicode in self.allowed:
+
+    def update(self, screen, mouse, e):
+        if e and e.type == KEYDOWN:
+            if e.unicode in self.allowed and len(self.content) < 35:
                 self.content += e.unicode
 
             elif e.key == K_BACKSPACE:
@@ -155,4 +154,5 @@ class TextBox:
                 except:
                     pass
 
+        return self.content
 

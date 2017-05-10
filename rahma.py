@@ -13,7 +13,7 @@ def rah(screen):
     screen.blit(splash, center(0, 0, 800, 500, splash.get_width(), splash.get_height()))
     display.flip()
 
-    t.sleep(1)
+    t.sleep(0.1)
 
 def text(text, pos, size):
     minecraft_font = font.Font("fonts/minecraft.ttf", size)

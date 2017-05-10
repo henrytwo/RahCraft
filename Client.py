@@ -11,13 +11,15 @@ import pickle
 
 
 def login():
+    global username
+
     clock = time.Clock()
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
     login_button = menu.Button(200, 370, 400, 40, 'menu', "Login")
-    login_box = menu.TextBox(size[0]//2 - 200 , size[1]//2 - 20 , 400, 40 , 'login', 'Username')
+    login_box = menu.TextBox(size[0]//2 - 200 , size[1]//2 - 20 , 400, 40 , 'Username')
 
     username = ""
 
@@ -26,9 +28,73 @@ def login():
         click = False
         release = False
 
-        for e in event.get():
-            username = login_box.update(screen, mouse, e, 'login')
+        pass_event = None
 
+        for e in event.get():
+
+            pass_event = e
+
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+            if e.type == KEYDOWN:
+                if e.key == K_RETURN and username:
+                    return 'menu'
+
+        login_box.draw(screen)
+
+        username = login_box.update(screen, mouse, pass_event)
+
+        mx, my = mouse.get_pos()
+        mb = mouse.get_pressed()
+
+        nav_update = login_button.update(screen, mx, my, mb, 15, release)
+
+        if nav_update and username:
+            return nav_update
+
+        clock.tick(120)
+        display.update()
+
+def about():
+    clock = time.Clock()
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    back_button = menu.Button(200, 370, 400, 40, 'menu', "Back")
+
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    about_list = ['The Zen of Python, by Tim Peters',
+                  'Beautiful is better than ugly.',
+                  'Explicit is better than implicit.',
+                  'Simple is better than complex.',
+                  'Complex is better than complicated.',
+                  'Flat is better than nested.',
+                  'Sparse is better than dense.',
+                  'Readability counts.',
+                  'Special cases aren\'t special enough to break the rules.',
+                  '...',
+                  'If the implementation is hard to explain, it\'s a bad idea.',
+                  'If the implementation is easy to explain, it may be a good idea.',
+                  'Namespaces are one honking great idea -- let\'s do more of those!',
+                  '',
+                  'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
+                  'ICS3U 2017',
+                  '']
+
+    while True:
+        click = False
+        release = False
+
+        for e in event.get():
             if e.type == QUIT:
                 return 'exit'
 
@@ -41,21 +107,18 @@ def login():
         mx, my = mouse.get_pos()
         mb = mouse.get_pressed()
 
-        nav_update = login_button.update(screen, mx, my, mb, 15, release)
+        for y in range(0, len(about_list)):
+            about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+            screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
 
+        nav_update = back_button.update(screen, mx, my, mb, 15, release)
 
-
-        if nav_update and username:
+        if nav_update is not None:
             return nav_update
+
 
         clock.tick(120)
         display.update()
-
-def about():
-    return 'menu'
-
-def options():
-    return 'menu'
 
 def assistance():
     clock = time.Clock()
@@ -115,19 +178,82 @@ def assistance():
         clock.tick(120)
         display.update()
 
+def options():
+    return 'menu'
 
 def server_picker():
     return 'menu'
 
-
 def custom_server_picker():
-    return 'menu'
 
+    global host, port
 
-def menu_screen():
     clock = time.Clock()
 
-    menu_list = [[0, 'server_picker', "Connect to server"],
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    connect_button = menu.Button(200, 370, 400, 40, 'game', "Connect")
+
+    field_selected = 'host'
+
+    fields = {'host':[menu.TextBox(size[0]//2 - 200 , size[1]//2 - 60 , 400, 40, 'Host'),host],
+              'port':[menu.TextBox(size[0]//2 - 200 , size[1]//2 + 20 , 400, 40, 'Port'),port]}
+
+    while True:
+
+        click = False
+        release = False
+
+        pass_event = None
+
+        mx, my = mouse.get_pos()
+        mb = mouse.get_pressed()
+
+        for e in event.get():
+
+            pass_event = e
+
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+            if e.type == KEYDOWN:
+                if e.key == K_RETURN and username:
+                    return 'menu'
+
+        fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
+
+        for field in fields:
+            fields[field][0].draw(screen)
+
+            if fields[field][0].rect.collidepoint(mx,my) and click:
+                field_selected = field
+
+        nav_update = connect_button.update(screen, mx, my, mb, 15, release)
+
+        host, port = fields['host'][1], int(fields['port'][1])
+
+        print(host,port)
+
+        if nav_update and username:
+            return nav_update
+
+        clock.tick(120)
+        display.update()
+
+def menu_screen():
+
+    global username
+
+    clock = time.Clock()
+
+    menu_list = [[0, 'custom_server_picker', "Connect to server"],
                  [1, 'assistance', "Help"],
                  [2, 'options', "Options"],
                  [3, 'about', "About"],
@@ -143,18 +269,14 @@ def menu_screen():
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    version_text = normal_font.render("Minecrap 0.0.1 Beta", True, (255, 255, 255))
+    version_text = normal_font.render("Rahcraft 0.0.1 Beta", True, (255, 255, 255))
     screen.blit(version_text, (10, 480))
 
     about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
     screen.blit(about_text, (size[0] - about_text.get_width(), 480))
 
-    '''
-    global username
-
     user_text = normal_font.render("Logged in as: %s" % username, True, (255, 255, 255))
     screen.blit(user_text, (20, 20))
-    '''
 
     while True:
 
@@ -186,14 +308,14 @@ def menu_screen():
 
 if __name__ == "__main__":
     host = "127.0.0.1"
-    port = 5175
+    port = 5275
 
     navigation = 'login'
 
     size = (800, 500)
     screen = display.set_mode(size)
 
-    # rahma.rah(screen)
+    rahma.rah(screen)
 
     init()
     font.init()
