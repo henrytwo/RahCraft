@@ -146,7 +146,7 @@ class Player:
         """ Handles collision with surrounding blocks. """
 
         # Move the player in the y-direction
-        self.rect.centery += int(self.vy)
+        self.rect.y += int(self.vy)
 
         # For loop to run through blocks in surrounding
         for block in blocks:  # for every block in the block list
