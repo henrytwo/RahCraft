@@ -43,7 +43,7 @@ class Menu:
     def __init__(self,button_param, x, y , w, h):
         # button_list <row>, <function>, <text>
 
-        V_SPACE = 10
+        V_SPACE = 5
 
         BUTTON_W = 400
         BUTTON_H = 40
@@ -118,3 +118,41 @@ class Menu:
 
         else:
             mouse.set_cursor(*cursors.tri_left)
+
+class TextBox:
+    def __init__(self,x,y,w,h,name,label):
+        self.name = name
+        self.rect = Rect(x,y,w,h)
+        self.content = ""
+        self.font = font.Font("fonts/minecraft.ttf", 14)
+        self.label = self.font.render(label, True, (255, 255, 255))
+
+
+        self.allowered =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
+               'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
+               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'A', 'Y', 'Z', '0', '1', '2', '3', '4',
+               '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/',
+               ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
+
+
+    def update(self, screen, mouse, e, field):
+
+
+        screen.blit(self.label, (self.rect.x, self.rect.y - self.label.get_height() - 2))
+
+        draw.rect(screen, (0, 0, 0), self.rect)
+        draw.rect(screen, (151, 151, 151), self.rect, 2)
+
+        screen.blit(normal_font.render(self.content, True, (255, 255, 255)), (self.rect.x + 3, self.rect.y + 3))
+
+        if e.type == KEYDOWN and field == self.name:
+            if e.unicode in self.allowed:
+                self.content += e.unicode
+
+            elif e.key == K_BACKSPACE:
+                try:
+                    self.content = self.content[:-1]
+                except:
+                    pass
+
+
