@@ -11,16 +11,51 @@ import pickle
 
 
 def login():
-    pass
+    clock = time.Clock()
 
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    login_button = menu.Button(200, 370, 400, 40, 'menu', "Login")
+    login_box = menu.TextBox(size[0]//2 - 200 , size[1]//2 - 20 , 400, 40 , 'login', 'Username')
+
+    username = ""
+
+    while True:
+
+        click = False
+        release = False
+
+        for e in event.get():
+            username = login_box.update(screen, mouse, e, 'login')
+
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+        mx, my = mouse.get_pos()
+        mb = mouse.get_pressed()
+
+        nav_update = login_button.update(screen, mx, my, mb, 15, release)
+
+
+
+        if nav_update and username:
+            return nav_update
+
+        clock.tick(120)
+        display.update()
 
 def about():
-    pass
-
+    return 'menu'
 
 def options():
-    pass
-
+    return 'menu'
 
 def assistance():
     clock = time.Clock()
@@ -82,21 +117,21 @@ def assistance():
 
 
 def server_picker():
-    pass
+    return 'menu'
 
 
 def custom_server_picker():
-    pass
+    return 'menu'
 
 
 def menu_screen():
     clock = time.Clock()
 
-    menu_list = [[1, 'server_picker', "Connect to server"],
-                 [2, 'assistance', "Help"],
-                 [3, 'options', "Options"],
-                 [4, 'about', "About"],
-                 [5, 'exit', "Exit"]]
+    menu_list = [[0, 'server_picker', "Connect to server"],
+                 [1, 'assistance', "Help"],
+                 [2, 'options', "Options"],
+                 [3, 'about', "About"],
+                 [4, 'exit', "Exit"]]
 
     main_menu = menu.Menu(menu_list, 0, 0, size[0], size[1])
 
@@ -104,7 +139,7 @@ def menu_screen():
     screen.blit(wallpaper, (0, 0))
 
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
-    screen.blit(logo, (400 - logo.get_width() // 2, 100))
+    screen.blit(logo, (size[0]//2 - logo.get_width() // 2, 100))
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -112,14 +147,13 @@ def menu_screen():
     screen.blit(version_text, (10, 480))
 
     about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
-    screen.blit(about_text, (800 - about_text.get_width(), 480))
+    screen.blit(about_text, (size[0] - about_text.get_width(), 480))
 
     '''
     global username
 
     user_text = normal_font.render("Logged in as: %s" % username, True, (255, 255, 255))
     screen.blit(user_text, (20, 20))
-
     '''
 
     while True:
@@ -154,7 +188,7 @@ if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5175
 
-    navigation = 'menu'
+    navigation = 'login'
 
     size = (800, 500)
     screen = display.set_mode(size)
