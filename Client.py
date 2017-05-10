@@ -224,8 +224,8 @@ def custom_server_picker():
                 release = True
 
             if e.type == KEYDOWN:
-                if e.key == K_RETURN and username:
-                    return 'menu'
+                if e.key == K_RETURN and host and port:
+                    return 'game'
 
         fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
 
@@ -237,9 +237,7 @@ def custom_server_picker():
 
         nav_update = connect_button.update(screen, mx, my, mb, 15, release)
 
-        host, port = fields['host'][1], int(fields['port'][1])
-
-        print(host,port)
+        host, port = fields['host'][1], fields['port'][1]
 
         if nav_update and username:
             return nav_update
