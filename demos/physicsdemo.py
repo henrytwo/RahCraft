@@ -76,8 +76,8 @@ class Player:
         self.vy = 0  # velocity in y-direction
 
         self.run_speed = int(self.rect.w * 0.3)
-        self.jump_height = -(int(self.rect.h * 0.8))
-        self.gravity = 2
+        self.jump_height = -(self.rect.h // 2)
+        self.gravity = self.rect.h * 2 / 45
 
         print(self.run_speed, self.jump_height, self.gravity)
 
@@ -102,7 +102,6 @@ class Player:
             self.vx = self.run_speed  # x-velocity is player-speed right / frame
         if key.get_pressed()[self.controls[2]] and self.standing:  # if player hits up and is standing
             self.vy = self.jump_height  # y-velocity is 23px up / frame (initially)
-            # print(self.rect.h, self.vy)
 
         # Player is initially not standing every frame (must prove to be standing in later code)
         self.standing = False
@@ -147,7 +146,7 @@ class Player:
         """ Handles collision with surrounding blocks. """
 
         # Move the player in the y-direction
-        self.rect.y += int(self.vy)
+        self.rect.centery += int(self.vy)
 
         # For loop to run through blocks in surrounding
         for block in blocks:  # for every block in the block list
