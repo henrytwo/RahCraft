@@ -1,5 +1,4 @@
 from pygame import *
-import oldclient
 import time as t
 
 

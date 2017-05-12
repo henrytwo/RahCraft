@@ -20,7 +20,7 @@ def receive_message(message_queue, server):
         msg = server.recvfrom(16384)
         message_queue.put(pickle.loads(msg[0]))
 
-def game(username):
+def game(screen, username, host, port):
     print('Starting game')
 
     def quit_game():
@@ -236,5 +236,5 @@ if __name__ == "__main__":
     init()
     font.init()
 
-    game("Ryan")
+    game(screen, "Ryan", host, port)
 

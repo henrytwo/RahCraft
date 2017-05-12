@@ -4,7 +4,7 @@ from pygame import *
 import numpy as np
 
 # Code to trigger Syed
-with open('block', 'r') as block_lookup:
+with open('data/block.rah', 'r') as block_lookup:
     block_list = block_lookup.read().strip().split('\n')
 
 block_list = [block.split(' // ') for block in block_list]

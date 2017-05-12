@@ -3,16 +3,14 @@ from multiprocessing import *
 import pickle
 import numpy as np
 import socket
-import sys
 
-sys.path.extend(['general/','components/','legacy/'])
+import sys
+sys.path.extend(['general/','components/'])
 
 from player import *
 import rahma
 import menu
 import Game
-
-
 
 def login():
     global username
@@ -22,7 +20,7 @@ def login():
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
-    login_button = menu.Button(200, 370, 400, 40, 'menu', "Login")
+    login_button = menu.Button(200, 370, 400, 40, 'menu', 'Login')
     login_box = menu.TextBox(size[0]//2 - 200 , size[1]//2 - 20 , 400, 40 , 'Username')
 
     username = ""
@@ -230,7 +228,6 @@ def custom_server_picker():
             if e.type == KEYDOWN:
                 if e.key == K_RETURN and host and port:
                     return 'game'
-
         fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
 
         for field in fields:
@@ -241,9 +238,8 @@ def custom_server_picker():
 
         nav_update = connect_button.update(screen, mx, my, mb, 15, release)
 
-        host, port = fields['host'][1], fields['port'][1]
-
         if nav_update and username:
+            host, port = fields['host'][1], int(fields['port'][1])
             return nav_update
 
         clock.tick(120)
@@ -312,6 +308,8 @@ if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5275
 
+    username = ''
+
     navigation = 'login'
 
     size = (800, 500)
@@ -355,13 +353,17 @@ if __name__ == "__main__":
           'about': about,
           'options': options,
           'assistance': assistance,
-          'game': Game.game,
+          'game': menu_screen,
           'server_picker': server_picker,
           'custom_server_picker': custom_server_picker}
 
 
     while navigation != 'exit':
-        navigation = UI[navigation]()
+        if navigation == 'game':
+            Game.game(screen, username, host, port)
+
+        else:
+            navigation = UI[navigation]()
 
     display.quit()
     raise SystemExit

@@ -1,5 +1,7 @@
-import os.path
 import sys
+sys.path.extend(['general/','components/'])
+
+import os.path
 from collections import deque
 import socket
 import pickle
@@ -9,18 +11,24 @@ from world import *
 import glob
 from math import *
 
+with open("data/config.rah", "r") as config:
+    config = config.read().split("\n")
+    host = config[0]
+    port = int(config[1])
+    world_name = config[2]
+
 # If world doesn't exist
-if not os.path.isfile('world.pkl'):
+if not os.path.isfile('saves/%s.pkl'%(world_name)):
     # Generate a new world with the function
     # world_seed,maxHeight,minX,maxX,w,h
     world = generate_world(input("Seed:\n"), 1, 3, 10, 10000, 100)
 
     # Dumps world to file
-    with open('world.pkl', 'wb') as file:
+    with open('saves/%s.pkl'%(world_name), 'wb') as file:
         dump(world, file)
 
 else:
-    world = pickle.load(open('world.pkl', 'rb'))
+    world = pickle.load(open('saves/world.pkl', 'rb'))
 
 
 class Player(object):
@@ -89,7 +97,7 @@ class World:
         self.spawnpoint = self.get_spawnpoint()
 
     def load_world(self, worldn):
-        return pickle.load(open(worldn + ".pkl", "rb"))
+        return pickle.load(open("saves/" + worldn + ".pkl", "rb"))
 
     def get_world(self, x, y):
         return self.overworld[x - 5:x + 45, y - 5:y + 31]
@@ -126,7 +134,7 @@ class World:
         return x, y
 
     def save(self):
-        pickle.dump(self.overworld, open('world.pkl', 'wb'))
+        pickle.dump(self.overworld, open('saves/world.pkl', 'wb'))
 
 
 def player_sender(send_queue, server):
@@ -171,13 +179,6 @@ if __name__ == '__main__':
     commandlineQueue = Queue()
     itemLib = {}
     username = set()
-
-    with open("config", "r") as config:
-
-        config = config.read().split("\n")
-        host = config[0]
-        port = int(config[1])
-        world_name = config[2]
 
     world = World(world_name)
 
