@@ -1,13 +1,17 @@
 from pygame import *
 from multiprocessing import *
-from player import *
+import pickle
 import numpy as np
 import socket
+import sys
+
+sys.path.extend(['general/','components/','legacy/'])
+
+from player import *
 import rahma
 import menu
 import Game
-import Connection
-import pickle
+
 
 
 def login():
@@ -353,9 +357,7 @@ if __name__ == "__main__":
           'assistance': assistance,
           'game': Game.game,
           'server_picker': server_picker,
-          'custom_server_picker': custom_server_picker,
-          'local_server': Connection.local_server,
-          'rahmish_server': Connection.rahmish_server}
+          'custom_server_picker': custom_server_picker}
 
 
     while navigation != 'exit':
