@@ -28,8 +28,8 @@ def load_blocks(block_file):
     block_file = open("data/" + block_file).readlines()
 
     for line_number in range(len(block_file)):
-        block_type, inner_block, outline, block_image = block_file[line_number].strip("\n").split(" // ")
-        blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")), (int(x) for x in outline.split(",")), transform.scale(image.load("textures/blocks/" + block_image), (20, 20))]
+        block_type, inner_block, outline, block_image, hardness = block_file[line_number].strip("\n").split(" // ")
+        blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")), (int(x) for x in outline.split(",")), transform.scale(image.load("textures/blocks/" + block_image), (20, 20)), int(hardness)]
 
     return blocks
 
@@ -43,7 +43,7 @@ def game(screen, username, host, port):
         sender.terminate()
         receiver.terminate()
 
-    def get_neighbours(x, y, world):
+    def get_neighbours(x, y):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -117,6 +117,9 @@ def game(screen, username, host, port):
     x, y = 0, 0
     paused = False
 
+    current_breaking = []
+    breaking_block = False
+
     send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
     while True:
@@ -131,6 +134,7 @@ def game(screen, username, host, port):
 
     while True:
         on_tick = False
+        block_broken = False
         tickPerFrame = max(clock.get_fps() / 20, 1)
         for e in event.get():
             if e.type == QUIT:
@@ -165,7 +169,7 @@ def game(screen, username, host, port):
 
                 elif not paused:
                     if e.unicode in _inventory_keys:
-                        inventory_slot = int(e.unicode) - 1
+                        hotbar_slot = int(e.unicode) - 1
 
             elif e.type == TICKEVENT:
                 event.clear(TICKEVENT)
@@ -184,8 +188,8 @@ def game(screen, username, host, port):
             send_queue.put([(1, local_player.rect.x, local_player.rect.y)])
         '''
 
-        disping_world = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
-        update_cost = disping_world.flatten()
+        displaying_world = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
+        update_cost = displaying_world.flatten()
         update_cost = np.count_nonzero(update_cost == -1)
 
         if update_cost > 10 and on_tick and (x_offset // block_size, y_offset // block_size) not in render_request:
@@ -203,7 +207,7 @@ def game(screen, username, host, port):
                 if username in players:
                     past_x, past_y = players[username][0]
 
-                    players[username][1] = ((current_x - past_x) // tickPerFrame, (current_y - past_y) // tickPerframe)
+                    players[username][1] = ((current_x - past_x) // tickPerFrame, (current_y - past_y) // tickPerFrame)
 
                     if sum(players[username][1]) < 3:
                         players[username][1] = (0, 0)
@@ -228,7 +232,7 @@ def game(screen, username, host, port):
                 if (pos_x, pos_y) in block_request:
                     block_request.remove((pos_x, pos_y))
 
-            elif message == 4:
+            elif command == 4:
                 pos_x, pos_y, block = message
 
                 world[pos_x, pos_y] = block
@@ -236,7 +240,7 @@ def game(screen, username, host, port):
                 if (pos_x, pos_y) in block_request:
                     block_request.remove((pos_x, pos_y))
 
-            elif message == 9:
+            elif command == 9:
                 username = message[0]
 
                 del players[username]
@@ -249,8 +253,44 @@ def game(screen, username, host, port):
         mb = mouse.get_pressed()
         mx, my = mouse.get_pos()
 
-        hover_x, hover_y = ((mx + x_offset) // block_size*block_size - x_offset, (my + y_offset) // block_size * block_size - y_offset)
+        hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
+        display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
+            block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_texture[hotbar_slot][0] +
+                            "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
+
+        print(current_breaking)
+
+        if mb[0] == 0:
+            current_breaking = []
+            breaking_block = False
+
+        elif mb[0] == 1 and mb[2] == 0:
+
+            if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request:
+                breaking_block = True
+                current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
+                if current_breaking[3] >= block_texture[current_breaking[0]][4]:
+                    block_broken = True
+
+            elif breaking_block:
+                if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
+                    current_breaking[3] += 1
+
+                    if current_breaking[3] >= block_texture[current_breaking[0]][4]:
+                        block_broken = True
+
+            if block_broken:
+                block_request.add((hover_x, hover_y))
+                send_queue.put(((3, hover_x, hover_y), _server))
+
+                current_breaking = []
+                breaking_block = False
+
+        if mb[2] == 1:
+            if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
+                block_request.add((hover_x, hover_y))
+                send_queue.put(((4, hover_x, hover_y, hotbar_slot), _server))
 
         keys = key.get_pressed()
         if keys[K_d]:
@@ -267,15 +307,15 @@ def game(screen, username, host, port):
 
         # ==================Render World==========================
         screen.fill((0, 0, 0))
-        for x in range(0, 821, block_size):  # Render blocks
-            for y in range(0, 521, block_size):
+        for x in range(0, size[0]+block_size+1, block_size):  # Render blocks
+            for y in range(0, size[1]+block_size+1, block_size):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
-                if len(block_texture) > block > 1:
-                    screen.blit(block_texture[block][3], (x - x_offset % 20, y - y_offset % 20))
+                if len(block_texture) > block > 0:
+                    screen.blit(block_texture[block][3], (x - x_offset % block_size, y - y_offset % block_size))
 
                 elif block == 0:
-                    draw.rect(screen, (0, 0, 0), (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
+                    draw.rect(screen, (0, 0, 0), (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
         display.update()
         clock.tick(60)
