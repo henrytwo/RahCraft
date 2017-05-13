@@ -195,7 +195,8 @@ def custom_server_picker():
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
-    connect_button = menu.Button(200, 370, 400, 40, 'game', "Connect")
+    buttons = [menu.Button(200, 370, 400, 40, 'game', "Connect"),
+               menu.Button(200, 320, 400, 40, 'menu', "Back")]
 
     field_selected = 'host'
 
@@ -227,7 +228,9 @@ def custom_server_picker():
 
             if e.type == KEYDOWN:
                 if e.key == K_RETURN and host and port:
+                    host, port = fields['host'][1], int(fields['port'][1])
                     return 'game'
+
         fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
 
         for field in fields:
@@ -236,11 +239,18 @@ def custom_server_picker():
             if fields[field][0].rect.collidepoint(mx,my) and click:
                 field_selected = field
 
-        nav_update = connect_button.update(screen, mx, my, mb, 15, release)
+        for button in buttons:
+            nav_update = button.update(screen, mx, my, mb, 15, release)
 
-        if nav_update and username:
-            host, port = fields['host'][1], int(fields['port'][1])
-            return nav_update
+            print(release)
+
+            if nav_update is not None:
+                if nav_update == 'game' and host and port:
+                    host, port = fields['host'][1], int(fields['port'][1])
+                    return nav_update
+
+                else:
+                    return nav_update
 
         clock.tick(120)
         display.update()
@@ -306,7 +316,7 @@ def menu_screen():
 
 if __name__ == "__main__":
     host = "127.0.0.1"
-    port = 5275
+    port = 5276
 
     username = ''
 

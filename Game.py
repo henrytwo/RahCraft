@@ -291,9 +291,7 @@ def game(screen, username, host, port):
 
 if __name__ == "__main__":
     host = "127.0.0.1"
-    port = 5176
-
-    navigation = 'menu'
+    port = 5276
 
     size = (800, 500)
     screen = display.set_mode(size)
