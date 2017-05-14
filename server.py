@@ -226,7 +226,7 @@ if __name__ == '__main__':
 
                 for i in players:
                     if players[i].username != players[address].username:
-                        sendQueue.put(((1, players[address][1], players[address].cord[0], players[address].cord[1]), i))
+                        sendQueue.put(((1, players[address].username, players[address].cord[0], players[address].cord[1]), i))
 
             else:
                 sendQueue.put(((400,), address))

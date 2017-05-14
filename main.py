@@ -21,7 +21,7 @@ def login():
     screen.blit(wallpaper, (0, 0))
 
     login_button = menu.Button(200, 370, 400, 40, 'menu', 'Login')
-    login_box = menu.TextBox(size[0]//2 - 200 , size[1]//2 - 20 , 400, 40 , 'Username')
+    login_box = menu.TextBox(size[0]//4 , size[1]//3  , 400, 40 , 'Username')
 
     username = ""
 
@@ -200,8 +200,8 @@ def custom_server_picker():
 
     field_selected = 'host'
 
-    fields = {'host':[menu.TextBox(size[0]//2 - 200 , size[1]//2 - 60 , 400, 40, 'Host'),host],
-              'port':[menu.TextBox(size[0]//2 - 200 , size[1]//2 + 20 , 400, 40, 'Port'),port]}
+    fields = {'host':[menu.TextBox(size[0]//4 , size[1]//4 , 400, 40, 'Host'),host],
+              'port':[menu.TextBox(size[0]//4 , 7*size[1]//16 , 400, 40, 'Port'),port]}
 
     while True:
 
