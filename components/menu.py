@@ -35,7 +35,7 @@ class Button:
         else:
             self.idle(screen)
 
-        text_surface = rah.text(self.text, (self.rect.x, self.rect.y), size)
+        text_surface = rah.text(self.text, size)
 
         screen.blit(text_surface, rah.center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height()))
 

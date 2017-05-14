@@ -17,18 +17,25 @@ class Player:
         self.controls = controls
         self.standing = False
 
-    def control(self):
+    def control(self, fly):
 
         if key.get_pressed()[self.controls[0]]:
             self.vx = -self.run_speed
         if key.get_pressed()[self.controls[1]]:
             self.vx = self.run_speed
+
+        if fly:
+            if key.get_pressed()[self.controls[2]]:
+                self.vy = -self.run_speed
+            if key.get_pressed()[self.controls[3]]:
+                self.vy = self.run_speed
+
         if key.get_pressed()[self.controls[2]] and self.standing:
             self.vy = self.jump_height
 
         self.standing = False
 
-    def collide(self, blocks):
+    def collide(self, blocks, fly):
         self.rect.y += int(self.vy)
         self.rect.x += int(self.vx)
 
@@ -46,6 +53,11 @@ class Player:
                 self.vy = 0
                 bumped = True
 
+        if fly:
+            self.gravity = 0
+        else:
+            self.gravity = self.rect.h * 2 / 45
+
         for block in blocks:
             if self.rect.colliderect(block):
                 if self.vx > 0:
@@ -55,12 +67,16 @@ class Player:
                     self.rect.left = block.right
 
         self.vx = 0
+
+        if fly:
+            self.vy = 0
+
         if self.vy + self.gravity < self.rect.h and not bumped:
             self.vy += self.gravity
         else:
             self.vy -= 0
 
-    def update(self, screen, collision_blocks, x_offset, y_offset):
-        self.control()
-        self.collide(collision_blocks)
+    def update(self, screen, collision_blocks, x_offset, y_offset, fly):
+        self.control(fly)
+        self.collide(collision_blocks, fly)
         draw.rect(screen, (255, 0, 0), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))

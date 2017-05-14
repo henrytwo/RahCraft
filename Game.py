@@ -38,8 +38,10 @@ def load_blocks(block_file):
     return blocks
 
 
-def game(screen, username, host, port):
+def game(screen, username, host, port, size):
     print('Starting game')
+
+    font.init()
 
     def quit_game():
         send_queue.put(((9,), _server))
@@ -98,7 +100,7 @@ def game(screen, username, host, port):
     hotbar_slot = 1
 
     inventory = [[-1] * 6 for x in range(7)]
-    local_player = player2.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w))
+    local_player = player2.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w, K_s))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -119,6 +121,8 @@ def game(screen, username, host, port):
     current_breaking = []
     breaking_block = False
 
+    fly = False
+
     send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
     while True:
@@ -130,6 +134,7 @@ def game(screen, username, host, port):
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
 
     print("ini done")
+
 
     while True:
         on_tick = False
@@ -169,6 +174,12 @@ def game(screen, username, host, port):
                 elif not paused:
                     if e.unicode in _inventory_keys:
                         hotbar_slot = int(e.unicode) - 1
+
+                    if e.key == K_f:
+                        if fly:
+                            fly = False
+                        else:
+                            fly = True
 
             elif e.type == TICKEVENT:
                 event.clear(TICKEVENT)
@@ -311,7 +322,8 @@ def game(screen, username, host, port):
                 if world[(block_clip[0]-x_blocks*block_size)//block_size, (block_clip[1]-y_blocks*block_size)//block_size] > 0:
                     surrounding_blocks.append(Rect(block_clip[0]-x_blocks*block_size, block_clip[1]-y_blocks*block_size, block_size, block_size))
 
-        local_player.update(screen, surrounding_blocks, x_offset, y_offset)
+
+        local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
         display.update()
         clock.tick(60)
 
