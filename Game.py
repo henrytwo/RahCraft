@@ -94,6 +94,9 @@ def game(screen, username, host, port):
 
     block_size = 20
 
+    x_offset = x_offset*20 - size[0]//2
+    y_offset = y_offset*20 - size[1]//2
+
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
     hotbar_slot = 1
