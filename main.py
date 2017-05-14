@@ -370,7 +370,7 @@ if __name__ == "__main__":
 
     while navigation != 'exit':
         if navigation == 'game':
-            Game.game(screen, username, host, port, size)
+            navigation = Game.game(screen, username, host, port, size)
         else:
             navigation = UI[navigation]()
 

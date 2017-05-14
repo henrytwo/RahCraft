@@ -322,7 +322,6 @@ def game(screen, username, host, port, size):
                 if world[(block_clip[0]-x_blocks*block_size)//block_size, (block_clip[1]-y_blocks*block_size)//block_size] > 0:
                     surrounding_blocks.append(Rect(block_clip[0]-x_blocks*block_size, block_clip[1]-y_blocks*block_size, block_size, block_size))
 
-
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
         display.update()
         clock.tick(60)
