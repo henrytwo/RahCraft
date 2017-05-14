@@ -112,8 +112,6 @@ def game(screen, username, host, port):
     block_request = set()
     render_request = set()
 
-    y_offset = 10 * block_size
-    x_offset = 5000 * block_size
     x, y = 0, 0
     paused = False
 
@@ -279,6 +277,9 @@ def game(screen, username, host, port):
 
                     if current_breaking[3] >= block_texture[current_breaking[0]][4]:
                         block_broken = True
+                else:
+                    breaking_block = False
+                    current_breaking = []
 
             if block_broken:
                 block_request.add((hover_x, hover_y))
@@ -306,7 +307,7 @@ def game(screen, username, host, port):
             y_offset += 60 // block_size
 
         # ==================Render World==========================
-        screen.fill((0, 0, 0))
+        screen.fill((173, 216, 230))
         for x in range(0, size[0]+block_size+1, block_size):  # Render blocks
             for y in range(0, size[1]+block_size+1, block_size):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
@@ -314,7 +315,7 @@ def game(screen, username, host, port):
                 if len(block_texture) > block > 0:
                     screen.blit(block_texture[block][3], (x - x_offset % block_size, y - y_offset % block_size))
 
-                elif block == 0:
+                elif block < 0:
                     draw.rect(screen, (0, 0, 0), (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
         display.update()
