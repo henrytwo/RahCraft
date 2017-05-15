@@ -1,14 +1,11 @@
-import sys
-sys.path.extend(['general/','components/'])
-
 from pygame import *
 from multiprocessing import *
 #from player import *
 import numpy as np
 import socket
 import pickle
-import rahma
-import player2
+import components.rahma as rah
+import components.player2 as plr
 
 def player_sender(send_queue, server):
     print('Sender running...')
@@ -62,8 +59,8 @@ def game(screen, username, host, port, size):
     screen.blit(wallpaper, (0, 0))
 
     block_texture = load_blocks("block.rah")
-    connecting_text = rahma.text("Connecting to %s:%i..." % (host, port), 30)
-    screen.blit(connecting_text, rahma.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+    connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
+    screen.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
     display.update()
 
@@ -100,7 +97,7 @@ def game(screen, username, host, port, size):
     hotbar_slot = 1
 
     inventory = [[-1] * 6 for x in range(7)]
-    local_player = player2.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w, K_s))
+    local_player = plr.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w, K_s))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 

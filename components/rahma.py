@@ -1,5 +1,4 @@
 import time as t
-
 from pygame import *
 
 

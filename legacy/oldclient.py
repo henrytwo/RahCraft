@@ -7,7 +7,7 @@ import numpy as np
 import time as t
 from pygame import *
 from random import randint
-import rahma
+import components.rahma as rah
 
 host = "127.0.0.1"
 port = 0
@@ -1136,7 +1136,7 @@ if __name__ == '__main__':
     size = (800, 500)
     screen = display.set_mode((800, 500))
 
-    rahma.rah(screen)
+    rah.rah(screen)
 
     init()
     font.init()

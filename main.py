@@ -7,10 +7,10 @@ import socket
 import sys
 sys.path.extend(['general/','components/'])
 
-from player import *
-import rahma
-import menu
-import Game
+from components.player import *
+import components.rahma as rah
+import components.menu as menu
+import Game as Game
 
 def login():
     global username
@@ -325,7 +325,7 @@ if __name__ == "__main__":
     size = (800, 500)
     screen = display.set_mode(size)
 
-    rahma.rah(screen)
+    rah.rah(screen)
 
     init()
     font.init()

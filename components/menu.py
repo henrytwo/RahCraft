@@ -1,5 +1,6 @@
-import rahma as rah
+import components.rahma as rah
 from pygame import *
+
 
 class Button:
     def __init__(self, x, y, w, h, function, text):
@@ -37,10 +38,13 @@ class Button:
 
         text_surface = rah.text(self.text, size)
 
-        screen.blit(text_surface, rah.center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(), text_surface.get_height()))
+        screen.blit(text_surface,
+                    rah.center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(),
+                               text_surface.get_height()))
+
 
 class Menu:
-    def __init__(self,button_param, x, y , w, h):
+    def __init__(self, button_param, x, y, w, h):
         # button_list <row>, <function>, <text>
 
         V_SPACE = 5
@@ -53,8 +57,8 @@ class Menu:
         SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
         SET_W = BUTTON_W
 
-        X_OFFSET = x + w//2 - SET_W // 2
-        Y_OFFSET = y + h//2 - SET_H // 2
+        X_OFFSET = x + w // 2 - SET_W // 2
+        Y_OFFSET = y + h // 2 - SET_H // 2
 
         ROW = 0
         FUNCTION = 1
@@ -70,7 +74,6 @@ class Menu:
             text = button_param[button_index][TEXT]
 
             self.button_list.append(Button(button_x, button_y, BUTTON_W, BUTTON_H, function, text))
-
 
     def update(self, screen, release, mx, my, mb):
 
@@ -112,26 +115,29 @@ class Menu:
             if button.rect.collidepoint(mx, my):
                 hover_over_button = True
 
-
         if hover_over_button:
             mouse.set_cursor(*click_cursor_data)
 
         else:
             mouse.set_cursor(*cursors.tri_left)
 
-class TextBox:
-    def __init__(self,x,y,w,h,label):
 
-        self.rect = Rect(x,y,w,h)
+class TextBox:
+    def __init__(self, x, y, w, h, label):
+
+        self.rect = Rect(x, y, w, h)
         self.content = ""
         self.font = font.Font("fonts/minecraft.ttf", 14)
         self.label = self.font.render(label, True, (255, 255, 255))
 
-        self.allowed =  ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u',
-               'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P',
-               'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'A', 'Y', 'Z', '0', '1', '2', '3', '4',
-               '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-', '.', '/',
-               ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
+        self.allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+                        't', 'u',
+                        'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N',
+                        'O', 'P',
+                        'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'A', 'Y', 'Z', '0', '1', '2', '3', '4',
+                        '5', '6', '7', '8', '9', '!', '"', '#', '$', '%', '&', "\\", "'", '(', ')', '*', '+', ',', '-',
+                        '.', '/',
+                        ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'", "'"]
 
     def draw(self, screen):
         screen.blit(self.label, (self.rect.x, self.rect.y - self.label.get_height() - 2))
@@ -141,7 +147,6 @@ class TextBox:
 
         screen.blit(self.font.render(self.content, True, (255, 255, 255)), (self.rect.x + 10, self.rect.y + 15))
 
-
     def update(self, screen, mouse, e):
         if e and e.type == KEYDOWN:
             if e.unicode in self.allowed and len(self.content) < 35:
@@ -150,8 +155,7 @@ class TextBox:
             elif e.key == K_BACKSPACE:
                 try:
                     self.content = self.content[:-1]
-                except:
+                except IndexError:
                     pass
 
         return self.content
-
