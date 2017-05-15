@@ -118,10 +118,11 @@ class Player:
                 self.vx = self.run_speed  # x-velocity is player-speed right / frame
         if key.get_pressed()[self.controls[2]] and self.standing:  # if player hits up and is standing
             if self.plr_relation['top']:
-                self.vy = self.jump_height // 2
+                self.vy = self.jump_height // 4
                 for player in self.plr_surround['top']:
-                    player.vy = self.jump_height // 2
-            self.vy = self.jump_height  # y-velocity is 23px up / frame (initially)
+                    player.vy = self.jump_height // 4
+            else:
+                self.vy = self.jump_height  # y-velocity is 23px up / frame (initially)
 
         # Player is initially not standing every frame (must prove to be standing in later code)
         self.standing = False
@@ -201,12 +202,10 @@ class Player:
                 if self.vy > 0:
                     self.rect.bottom = player.rect.top
                     self.standing = True
-                    self.plr_surround['right'].append(player)
                 elif self.vy < 0:
                     self.plr_relation['top'] = 1
                     self.plr_surround['top'].append(player)
-                self.vy = 0
-                
+
         # Move the player in the x-direction
         self.rect.centerx = (self.rect.centerx + self.vx) % screenSize[0]
 
