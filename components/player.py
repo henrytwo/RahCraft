@@ -1,5 +1,5 @@
 from pygame import *
-import rahma as rah
+import components.rahma as rah
 
 font.init()
 
@@ -67,7 +67,7 @@ class Player:
 
     def update(self, surf, de = False):
         if de:
-            self.debug()
+            self.debug(surf)
         self.control()
         draw.rect(surf, (255, 0, 0), self.rect)
         surf.blit(self.name_back, rah.center(self.rect.x - 10, self.rect.y - 40, 20, 20, self.name_back.get_width(), self.name_back.get_height()))
