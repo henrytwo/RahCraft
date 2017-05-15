@@ -1,11 +1,12 @@
 from pygame import *
 from multiprocessing import *
-#from player import *
+# from player import *
 import numpy as np
 import socket
 import pickle
 import components.rahma as rah
-import components.player2 as plr
+import components.player2 as player2
+
 
 def player_sender(send_queue, server):
     print('Sender running...')
@@ -90,16 +91,16 @@ def game(screen, username, host, port, size):
     print("player done")
 
     block_size = 20
-    reach = 5*block_size
-    player_x = int(player_x)*20 - size[0]//2
-    player_y = int(player_y)*20 - size[1]//2
+    reach = 5 * block_size
+    player_x = int(player_x) * 20 - size[0] // 2
+    player_y = int(player_y) * 20 - size[1] // 2
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
     hotbar_slot = 1
 
     inventory = [[-1] * 6 for x in range(7)]
-    local_player = plr.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w, K_s))
+    local_player = player2.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w, K_s))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -133,7 +134,6 @@ def game(screen, username, host, port, size):
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
 
     print("ini done")
-
 
     while True:
         on_tick = False
@@ -189,9 +189,9 @@ def game(screen, username, host, port, size):
                 if current_tick == 20:
                     current_tick = 0
 
-        x_offset = local_player.rect.x - size[0]//2 + block_size//2
-        y_offset = local_player.rect.y - size[1]//2 + block_size//2
-        
+        x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
+        y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
+
         if on_tick:
             send_queue.put(([(1, local_player.rect.x, local_player.rect.y), _server]))
 
@@ -247,12 +247,11 @@ def game(screen, username, host, port, size):
             elif command == 9:
                 username = message[0]
 
-                del players[username]
-
+                del remote_players[username]
         except:
             pass
 
-        #testing==================================================
+        # testing==================================================
 
         mb = mouse.get_pressed()
         mx, my = mouse.get_pos()
@@ -298,8 +297,8 @@ def game(screen, username, host, port, size):
 
         # ==================Render World==========================
         screen.fill((173, 216, 230))
-        for x in range(0, size[0]+block_size+1, block_size):  # Render blocks
-            for y in range(0, size[1]+block_size+1, block_size):
+        for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
+            for y in range(0, size[1] + block_size + 1, block_size):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
                 if len(block_texture) > block > 0:
@@ -310,12 +309,12 @@ def game(screen, username, host, port, size):
 
         surrounding_blocks = []
 
-        block_clip = (local_player.rect.x//block_size*block_size, local_player.rect.y//block_size*block_size)
+        block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
 
-        for x_blocks in range(-1,2):
-            for y_blocks in range(-1,2):
-                if world[(block_clip[0]-x_blocks*block_size)//block_size, (block_clip[1]-y_blocks*block_size)//block_size] > 0:
-                    surrounding_blocks.append(Rect(block_clip[0]-x_blocks*block_size, block_clip[1]-y_blocks*block_size, block_size, block_size))
+        for x_blocks in range(-1, 2):
+            for y_blocks in range(-1, 2):
+                if world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size] > 0:
+                    surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
 
@@ -323,7 +322,7 @@ def game(screen, username, host, port, size):
             remote_players[remote].update(screen, x_offset, y_offset)
 
         display.update()
-        clock.tick(60)
+        clock.tick(120)
 
 
 if __name__ == "__main__":
