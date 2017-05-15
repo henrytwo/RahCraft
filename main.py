@@ -195,8 +195,10 @@ def custom_server_picker():
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
-    buttons = [menu.Button(200, 370, 400, 40, 'game', "Connect"),
-               menu.Button(200, 320, 400, 40, 'menu', "Back")]
+    buttons = [[0, 'game', "Connect"],
+               [1, 'menu', "Back"]]
+
+    ip_menu = menu.Menu(buttons, 0, size[1]//2 , size[0], size[1]//2)
 
     field_selected = 'host'
 
@@ -209,9 +211,6 @@ def custom_server_picker():
         release = False
 
         pass_event = None
-
-        mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
 
         for e in event.get():
 
@@ -231,6 +230,20 @@ def custom_server_picker():
                     host, port = fields['host'][1], int(fields['port'][1])
                     return 'game'
 
+        mx, my = mouse.get_pos()
+        mb = mouse.get_pressed()
+
+        nav_update = ip_menu.update(screen, release, mx, my, mb)
+
+        if nav_update:
+
+            if nav_update == 'game' and host and port:
+                host, port = fields['host'][1], int(fields['port'][1])
+                return nav_update
+
+            else:
+                return nav_update
+
         fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
 
         for field in fields:
@@ -238,19 +251,6 @@ def custom_server_picker():
 
             if fields[field][0].rect.collidepoint(mx,my) and click:
                 field_selected = field
-
-        for button in buttons:
-            nav_update = button.update(screen, mx, my, mb, 15, release)
-
-            print(release)
-
-            if nav_update is not None:
-                if nav_update == 'game' and host and port:
-                    host, port = fields['host'][1], int(fields['port'][1])
-                    return nav_update
-
-                else:
-                    return nav_update
 
         clock.tick(120)
         display.update()
