@@ -76,10 +76,15 @@ class Player:
         else:
             self.vy -= 0
 
-    def update(self, screen, collision_blocks, x_offset, y_offset, fly):
+    def update(self, screen, collision_blocks, x_offset, y_offset, fly, reach=5):
         self.control(fly)
         self.collide(collision_blocks, fly)
+
         draw.rect(screen, (255, 0, 0), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
+
+        # debug
+
+        draw.circle(screen, (0, 0, 0), (self.rect.x - x_offset, self.rect.y - y_offset), reach*20, 3)
 
 
 class RemotePlayer:

@@ -5,6 +5,7 @@ import numpy as np
 import socket
 import pickle
 import components.rahma as rah
+from math import *
 import components.player2 as player2
 
 
@@ -42,7 +43,7 @@ def game(screen, username, host, port, size):
     font.init()
 
     def quit_game():
-        send_queue.put(((9, block_size), _server))
+        send_queue.put(((9, block_size), SERVER))
         time.wait(50)
         sender.terminate()
         receiver.terminate()
@@ -51,7 +52,7 @@ def game(screen, username, host, port, size):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    _server = (host, port)
+    SERVER = (host, port)
 
     send_queue = Queue()
     message_queue = Queue()
@@ -67,9 +68,9 @@ def game(screen, username, host, port, size):
 
     clock = time.Clock()
 
-    print("Client connecting to %s:%i" % _server)
+    print("Client connecting to %s:%i" % SERVER)
 
-    server.sendto(pickle.dumps([0, username]), _server)
+    server.sendto(pickle.dumps([0, username]), SERVER)
 
     sender = Process(target=player_sender, args=(send_queue, server))
     sender.start()
@@ -91,22 +92,17 @@ def game(screen, username, host, port, size):
     print("player done")
 
     block_size = 20
-    reach = 5 * block_size
+    reach = 5
     player_x = int(player_x) * 20 - size[0] // 2
     player_y = int(player_y) * 20 - size[1] // 2
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
-    hotbar_slot = 1
-
-    inventory = [[-1] * 6 for x in range(7)]
     local_player = player2.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w, K_s))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
     remote_players = {}
-
-    _inventory_keys = {str(x) for x in range(1, 10)}
 
     TICKEVENT = USEREVENT + 1
     tickTimer = time.set_timer(TICKEVENT, 50)
@@ -132,6 +128,19 @@ def game(screen, username, host, port, size):
             break
 
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
+
+
+    #=============================init inventory==========================
+
+    hotbar = image.load("textures/gui/toolbar/toolbar.png").convert()
+    selected = image.load("textures/gui/toolbar/selected.png").convert_alpha()
+
+    hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
+    hotbar_items = [0, 1, 0, 0, 0, 0, 0, 0, 0]
+    hotbar_slot = 1
+
+    INVENTORY_KEYS = {str(x) for x in range(1, 10)}
+    inventory = [[-1] * 6 for x in range(7)]
 
     print("ini done")
 
@@ -171,7 +180,7 @@ def game(screen, username, host, port, size):
                         paused = True
 
                 elif not paused:
-                    if e.unicode in _inventory_keys:
+                    if e.unicode in INVENTORY_KEYS:
                         hotbar_slot = int(e.unicode) - 1
 
                     if e.key == K_f:
@@ -191,9 +200,10 @@ def game(screen, username, host, port, size):
 
         x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
         y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
+        block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
 
         if on_tick:
-            send_queue.put(([(1, local_player.rect.x, local_player.rect.y), _server]))
+            send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVER]))
 
         displaying_world = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
         update_cost = displaying_world.flatten()
@@ -262,18 +272,19 @@ def game(screen, username, host, port, size):
             block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_texture[hotbar_slot][0] +
                             "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
 
+        block_clip_cord = (block_clip[0]//block_size, block_clip[1]//block_size)
         if mb[0] == 0:
             current_breaking = []
             breaking_block = False
 
-        elif mb[0] == 1 and mb[2] == 0:
-            if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request:
+        elif mb[0] == 1:
+            if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                 breaking_block = True
                 current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
                 if current_breaking[3] >= block_texture[current_breaking[0]][4]:
                     block_broken = True
 
-            elif breaking_block:
+            elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                 if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
                     current_breaking[3] += 1
 
@@ -285,15 +296,15 @@ def game(screen, username, host, port, size):
 
             if block_broken:
                 block_request.add((hover_x, hover_y))
-                send_queue.put(((3, hover_x, hover_y), _server))
+                send_queue.put(((3, hover_x, hover_y), SERVER))
 
                 current_breaking = []
                 breaking_block = False
 
-        if mb[2] == 1:
+        if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
             if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
                 block_request.add((hover_x, hover_y))
-                send_queue.put(((4, hover_x, hover_y, hotbar_slot), _server))
+                send_queue.put(((4, hover_x, hover_y, hotbar_slot), SERVER))
 
         # ==================Render World==========================
         screen.fill((173, 216, 230))
@@ -309,8 +320,6 @@ def game(screen, username, host, port, size):
 
         surrounding_blocks = []
 
-        block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
-
         for x_blocks in range(-1, 2):
             for y_blocks in range(-1, 2):
                 if world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size] > 0:
@@ -320,6 +329,15 @@ def game(screen, username, host, port, size):
 
         for remote in remote_players:
             remote_players[remote].update(screen, x_offset, y_offset)
+
+        #====================Inventory/hotbar========================
+
+        screen.blit(hotbar, hotbarRect)
+        for item in hotbar_items:
+            screen.blit(transform.scale(block_texture[item][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+
+        screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
+
 
         display.update()
         clock.tick(120)
