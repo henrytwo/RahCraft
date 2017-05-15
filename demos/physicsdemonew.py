@@ -87,6 +87,9 @@ class Player:
         # Boolean to check if player is standing (can jump)
         self.standing = False
 
+        self.plr_relation = {'left': 0, 'right': 0, 'top': 0}
+        self.plr_surround = {'left': [], 'right': [], 'top': []}
+
         # List to hold surrounding blocks (blocks around player)
         self.surrounding_blocks = []
 
@@ -100,14 +103,30 @@ class Player:
 
         # Check to see which directions the player wants to go
         if key.get_pressed()[self.controls[0]]:  # if player hit left
-            self.vx = -self.run_speed  # x-velocity is player-speed left / frame
+            if self.plr_relation['left']:
+                self.vx = -(self.run_speed // 2)
+                for player in self.plr_surround['left']:
+                    player.vx = -(self.run_speed // 2)
+            else:
+                self.vx = -self.run_speed  # x-velocity is player-speed left / frame
         if key.get_pressed()[self.controls[1]]:  # if player hit right
-            self.vx = self.run_speed  # x-velocity is player-speed right / frame
+            if self.plr_relation['right']:
+                self.vx = self.run_speed // 2
+                for player in self.plr_surround['right']:
+                    player.vx = self.run_speed // 2
+            else:
+                self.vx = self.run_speed  # x-velocity is player-speed right / frame
         if key.get_pressed()[self.controls[2]] and self.standing:  # if player hits up and is standing
+            if self.plr_relation['top']:
+                self.vy = self.jump_height // 2
+                for player in self.plr_surround['top']:
+                    player.vy = self.jump_height // 2
             self.vy = self.jump_height  # y-velocity is 23px up / frame (initially)
 
         # Player is initially not standing every frame (must prove to be standing in later code)
         self.standing = False
+        self.plr_relation = {'left': 0, 'right': 0, 'top': 0}
+        self.plr_surround = {'left': [], 'right': [], 'top': []}
 
     # Method to detect collision with surrounding blocks
     def detect(self):
@@ -182,8 +201,10 @@ class Player:
                 if self.vy > 0:
                     self.rect.bottom = player.rect.top
                     self.standing = True
+                    self.plr_surround['right'].append(player)
                 elif self.vy < 0:
-                    self.rect.top = player.rect.bottom
+                    self.plr_relation['top'] = 1
+                    self.plr_surround['top'].append(player)
                 self.vy = 0
                 
         # Move the player in the x-direction
@@ -213,8 +234,12 @@ class Player:
             if self is not player and self.rect.colliderect(player.rect):
                 if self.vx > 0:
                     self.rect.right = player.rect.left
+                    self.plr_relation['right'] = 1
+                    self.plr_surround['right'].append(player)
                 elif self.vx < 0:
                     self.rect.left = player.rect.right
+                    self.plr_relation['left'] = 1
+                    self.plr_surround['left'].append(player)
         
         # Reset velocity variables
         self.vx = 0  # player temporarily stops moving along x-axis
