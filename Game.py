@@ -44,7 +44,7 @@ def game(screen, username, host, port, size):
     font.init()
 
     def quit_game():
-        send_queue.put(((9,), _server))
+        send_queue.put(((9, block_size), _server))
         time.wait(50)
         sender.terminate()
         receiver.terminate()
@@ -90,10 +90,12 @@ def game(screen, username, host, port, size):
 
     world_size_x, world_size_y, player_x, player_y, players = first_message[1:]
 
+    print("player done")
+
     block_size = 20
     reach = 5*block_size
-    player_x = player_x*20 - size[0]//2
-    player_y = player_y*20 - size[1]//2
+    player_x = int(player_x)*20 - size[0]//2
+    player_y = int(player_y)*20 - size[1]//2
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
@@ -196,7 +198,6 @@ def game(screen, username, host, port, size):
         if on_tick:
             send_queue.put(([(1, local_player.rect.x, local_player.rect.y), _server]))
 
-
         displaying_world = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
         update_cost = displaying_world.flatten()
         update_cost = np.count_nonzero(update_cost == -1)
@@ -212,18 +213,15 @@ def game(screen, username, host, port, size):
             command, message = server_message[0], server_message[1:]
 
             if command == 1:
-                username, current_x, current_y, = message
-                if username in players:
-                    past_x, past_y = players[username][0]
-
-                    players[username][1] = ((current_x - past_x) // tickPerFrame, (current_y - past_y) // tickPerFrame)
-
-                    if sum(players[username][1]) < 3:
-                        players[username][1] = (0, 0)
-                        players[username][0] = [past_x, past_y]
-
+                username, current_x, current_y = message
+                if username in remote_players:
+                    remote_players[username].calculate_velocity((current_x, current_y), tickPerFrame)
                 else:
-                    players[username] = [[current_x, current_y], (0, 0)]
+                    if type(current_y) is str:
+                        current_x = int(current_x) * 20
+                        current_y = int(current_y) * 20
+
+                    remote_players[username] = player2.RemotePlayer(current_x, current_y, block_size)
 
             elif command == 2:
                 chunk_positionX, chunk_positionY, world_chunk = message
@@ -323,6 +321,10 @@ def game(screen, username, host, port, size):
                     surrounding_blocks.append(Rect(block_clip[0]-x_blocks*block_size, block_clip[1]-y_blocks*block_size, block_size, block_size))
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
+
+        for remote in remote_players:
+            remote_players[remote].update(screen, x_offset, y_offset)
+
         display.update()
         clock.tick(60)
 
@@ -337,4 +339,4 @@ if __name__ == "__main__":
     init()
     font.init()
 
-    game(screen, "Ryan1", host, port)
+    game(screen, "6", host, port, size)

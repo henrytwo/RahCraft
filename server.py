@@ -87,8 +87,8 @@ class Player(object):
         self.health = 10
         # self.saturation = 10
 
-    def save(self):
-        return [self.cord, self.spawnCord, self.inventory, self.health, self.hunger]
+    def save(self, block_size):
+        return [(self.cord[0]//block_size, self.cord[1]//block_size), self.spawnCord, self.inventory, self.health, self.hunger]
 
 
 class World:
@@ -201,8 +201,6 @@ if __name__ == '__main__':
     while True:
         pickled_message = messageQueue.get()
         message, address = pickled_message
-
-        print(pickled_message)
         command = message[0]
 
         if command == 0:
@@ -220,13 +218,13 @@ if __name__ == '__main__':
                 playerLocations = {players[x].username: [players[x].cord, (0, 0)] for x in players}
 
                 players[address] = Player(PN, message[1])
-                sendQueue.put(((0, 10000, 100, players[address].cord[0], players[address].cord[1], playerLocations), address))
+                sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]), playerLocations), address))
                 print('Player %s has connected from %s' % (message[1], address))
                 username.add(message[1])
 
                 for i in players:
                     if players[i].username != players[address].username:
-                        sendQueue.put(((1, players[address].username, players[address].cord[0], players[address].cord[1]), i))
+                        sendQueue.put(((1, players[address].username, str(players[address].cord[0]), str(players[address].cord[1])), i))
 
             else:
                 sendQueue.put(((400,), address))
@@ -238,6 +236,7 @@ if __name__ == '__main__':
 
             for i in players:
                 if players[i].username != players[address].username:
+                    print(x,y)
                     sendQueue.put(((1, players[address].username, x, y), i))
 
         elif command == 2:
@@ -287,7 +286,7 @@ if __name__ == '__main__':
             print('Player %s has disconnected from the game. %s' % (players[address].username, address))
 
             playerNDisconnect.append(players[address].number)
-            PlayerData[players[address].username] = players[address].save()
+            PlayerData[players[address].username] = players[address].save(message[1])
             offPlayer = players[address].username
             username.remove(offPlayer)
 

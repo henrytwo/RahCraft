@@ -80,3 +80,33 @@ class Player:
         self.control(fly)
         self.collide(collision_blocks, fly)
         draw.rect(screen, (255, 0, 0), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
+
+
+class RemotePlayer:
+    def __init__(self, x, y, player_size):
+        self.x = x
+        self.y = y
+
+        self.vx = 0
+        self.vy = 0
+
+        self.player_size = player_size
+        print(self.x, self.y)
+
+    def calculate_velocity(self, ncord, fpt):
+        self.vy = (ncord[1] - self.y)//fpt
+        self.vx = (ncord[0] - self.x)//fpt
+
+        if self.vx == 0 and ncord[0] - self.x != 0:
+            self.x = ncord[0]
+
+        if self.vy == 0 and ncord[1] - self.y != 0:
+            self.y = ncord[1]
+
+    def update(self, screen, x_offset, y_offset):
+        self.y += self.vy
+        self.x += self.vx
+
+        draw.rect(screen, (10, 10, 10), (self.x - x_offset, self.y - y_offset, self.player_size, self.player_size))
+
+
