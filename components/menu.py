@@ -42,7 +42,6 @@ class Button:
                     rah.center(self.rect.x, self.rect.y, self.rect.w, self.rect.h, text_surface.get_width(),
                                text_surface.get_height()))
 
-
 class Menu:
     def __init__(self, button_param, x, y, w, h):
         # button_list <row>, <function>, <text>
@@ -159,3 +158,138 @@ class TextBox:
                     pass
 
         return self.content
+
+
+class ServerButton:
+    def __init__(self, x, y, w, h, title, host, port):
+        self.rect = Rect(x, y, w, h)
+        self.title = title
+        self.host = host
+        self.port = port
+
+    def draw_button(self, screen, inner, outer):
+        draw.rect(screen, outer, self.rect)
+        draw.rect(screen, inner, (self.rect.x + 2, self.rect.y + 2, self.rect.w - 4, self.rect.h - 4))
+
+
+    def highlight(self, screen):
+        self.draw_button(screen, (40,40,40), (250,250,250))
+
+    def mouse_down(self, screen):
+        self.draw_button(screen, (10, 10, 10), (250, 250, 250))
+
+    def idle(self, screen):
+        self.draw_button(screen, (20, 20, 20),(250, 250, 250))
+
+    def update(self, screen, mx, my, mb, release):
+
+        if self.rect.collidepoint(mx, my):
+
+            if mb[0] == 1:
+                self.mouse_down(screen)
+
+            elif release:
+                mouse.set_cursor(*cursors.tri_left)
+
+                return ['game', self.host, self.port]
+
+            else:
+                self.highlight(screen)
+        else:
+            self.idle(screen)
+
+        title_text_surface = rah.text(self.title, 20)
+        screen.blit(title_text_surface, (self.rect.x + 10, self.rect.y + 10))
+
+        connection_text_surface = rah.text("%s:%i"%(self.host, self.port), 15)
+        screen.blit(connection_text_surface, (self.rect.x + 10, self.rect.y + 32))
+
+        if self.host == 'rahmish.com':
+            special_text_surface = rah.text("Verified Rahmish Server", 12)
+            screen.blit(special_text_surface, (self.rect.x + self.rect.w - special_text_surface.get_width() - 10, self.rect.y + 34))
+
+
+class ScrollingMenu:
+    def __init__(self, button_param, x, y, w, h):
+        # button_list <row>, <function>, <title>, <host>, <port>
+
+        V_SPACE = 5
+
+        BUTTON_W = 400
+        BUTTON_H = 60
+
+        ROWS = max([button[0] for button in button_param])
+
+        SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
+        SET_W = BUTTON_W
+
+        X_OFFSET = x + w // 2 - SET_W // 2
+        Y_OFFSET = y + h // 2 - SET_H // 2
+
+        ROW = 0
+        TITLE = 1
+        HOST = 2
+        PORT = 3
+
+        self.button_list = []
+
+        for button_index in range(len(button_param)):
+            button_x = X_OFFSET
+            button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
+
+            title = button_param[button_index][TITLE]
+            host = button_param[button_index][HOST]
+            port = int(button_param[button_index][PORT])
+
+            self.button_list.append(ServerButton(button_x, button_y, BUTTON_W, BUTTON_H, title, host, port))
+
+    def update(self, screen, release, mx, my, mb):
+
+        click_cursor = ["      ..                ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX.               ",
+                        "     .XX...             ",
+                        "     .XX.XX...          ",
+                        "     .XX.XX.XX.         ",
+                        "     .XX.XX.XX...       ",
+                        "     .XX.XX.XX.XX.      ",
+                        "     .XX.XX.XX.XX.      ",
+                        "...  .XX.XX.XX.XX.      ",
+                        ".XX...XXXXXXXXXXX.      ",
+                        ".XXXX.XXXXXXXXXXX.      ",
+                        " .XXX.XXXXXXXXXXX.      ",
+                        "  .XXXXXXXXXXXXXX.      ",
+                        "  .XXXXXXXXXXXXXX.      ",
+                        "   .XXXXXXXXXXXXX.      ",
+                        "    .XXXXXXXXXXX.       ",
+                        "    .XXXXXXXXXXX.       ",
+                        "     .XXXXXXXXX.        ",
+                        "     .XXXXXXXXX.        ",
+                        "     ...........        "]
+
+        click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
+
+        hover_over_button = False
+
+        for button in self.button_list:
+            nav_update = button.update(screen, mx, my, mb, release)
+
+            if nav_update is not None:
+                return nav_update
+
+            if button.rect.collidepoint(mx, my):
+                hover_over_button = True
+
+        if hover_over_button:
+            mouse.set_cursor(*click_cursor_data)
+
+        else:
+            mouse.set_cursor(*cursors.tri_left)
+
+
+class Window:
+    def __init__(self, x, y, w, h):
+        pass

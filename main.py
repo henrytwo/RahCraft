@@ -13,7 +13,7 @@ import components.menu as menu
 import Game as Game
 
 def login():
-    global username
+    global username, host, port
 
     clock = time.Clock()
 
@@ -184,7 +184,62 @@ def options():
     return 'menu'
 
 def server_picker():
-    return 'menu'
+
+    global host, port
+
+    clock = time.Clock()
+
+    with open('data/servers.rah','r') as servers:
+        server_list = [server.split(' // ') for server in servers.read().split('\n')]
+
+
+    for server in server_list:
+        server[0] = int(server[0])
+        server[3] = int(server[3])
+
+    server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1])
+
+    while True:
+        wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+        screen.blit(wallpaper, (0, 0))
+
+        click = False
+        release = False
+
+        pass_event = None
+
+        for e in event.get():
+
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+        mx, my = mouse.get_pos()
+        mb = mouse.get_pressed()
+
+        nav_update = server_menu.update(screen, release, mx, my, mb)
+
+        if nav_update:
+            host, port = nav_update[1], nav_update[2]
+            return nav_update[0]
+
+        server_bar = Surface((size[0], 80))
+
+        server_bar.fill((200, 200, 200))
+
+        server_bar.set_alpha(90)
+
+        screen.blit(server_bar, (0, size[1] - 80))
+
+
+        clock.tick(120)
+        display.update()
+
 
 def custom_server_picker():
 
@@ -261,7 +316,7 @@ def menu_screen():
 
     clock = time.Clock()
 
-    menu_list = [[0, 'custom_server_picker', "Connect to server"],
+    menu_list = [[0, 'server_picker', "Connect to server"],
                  [1, 'assistance', "Help"],
                  [2, 'options', "Options"],
                  [3, 'about', "About"],

@@ -57,10 +57,12 @@ def game(screen, username, host, port, size):
     send_queue = Queue()
     message_queue = Queue()
 
+    block_texture = load_blocks("block.rah")
+
+
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
-    block_texture = load_blocks("block.rah")
     connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
     screen.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
@@ -136,7 +138,7 @@ def game(screen, username, host, port, size):
     selected = image.load("textures/gui/toolbar/selected.png").convert_alpha()
 
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
-    hotbar_items = [0, 1, 0, 0, 0, 0, 0, 0, 0]
+    hotbar_items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     hotbar_slot = 1
 
     INVENTORY_KEYS = {str(x) for x in range(1, 10)}
@@ -268,7 +270,7 @@ def game(screen, username, host, port, size):
 
         hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
-        display.set_caption("Minecrap Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
+        display.set_caption("Rahcraft Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
             block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_texture[hotbar_slot][0] +
                             "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
 
