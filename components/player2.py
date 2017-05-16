@@ -84,7 +84,7 @@ class Player:
 
         # debug
 
-        draw.circle(screen, (0, 0, 0), (self.rect.x - x_offset, self.rect.y - y_offset), reach*20, 3)
+        draw.circle(screen, (0, 0, 0), (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset + self.rect.h//2), reach*20, 3)
 
 
 class RemotePlayer:
