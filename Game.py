@@ -57,8 +57,10 @@ def game(screen, username, host, port, size):
     send_queue = Queue()
     message_queue = Queue()
 
-    block_texture = load_blocks("block.rah")
+    block_size = 20
 
+    block_texture = load_blocks("block.rah")
+    breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_"+str(i)+".png"), (20, 20)).convert_alpha() for i in range(10)]
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
@@ -93,7 +95,6 @@ def game(screen, username, host, port, size):
 
     print("player done")
 
-    block_size = 20
     reach = 5
     player_x = int(player_x) * 20 - size[0] // 2
     player_y = int(player_y) * 20 - size[1] // 2
@@ -320,6 +321,10 @@ def game(screen, username, host, port, size):
 
                 if len(block_texture) > block > 0:
                     screen.blit(block_texture[block][3], (x - x_offset % block_size, y - y_offset % block_size))
+
+                    if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[2] == (y + y_offset) // block_size:
+                        percent_broken = (current_breaking[3]/block_texture[current_breaking[0]][4]) * 10
+                        screen.blit(breaking_animation[int(percent_broken)], (x - x_offset % block_size, y - y_offset % block_size))
 
                 elif block < 0:
                     draw.rect(screen, (0, 0, 0), (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
