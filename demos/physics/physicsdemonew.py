@@ -56,7 +56,7 @@ class Player:
             if self.plr_relation['left']:
                 self.vx = -(self.run_speed // 2)
                 for player in self.plr_surround['left']:
-                    player.vx = -(self.run_speed // 2)0
+                    player.vx = -(self.run_speed // 2)
             else:
                 self.vx = -self.run_speed
         if key.get_pressed()[self.controls[1]]:
