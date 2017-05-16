@@ -113,5 +113,3 @@ class RemotePlayer:
         self.x += self.vx
 
         draw.rect(screen, (10, 10, 10), (self.x - x_offset, self.y - y_offset, self.player_size, self.player_size))
-
-
