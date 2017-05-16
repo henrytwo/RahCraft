@@ -168,7 +168,7 @@ def game(screen, username, host, port, size):
                 elif e.button == 5:
                     hotbar_slot = min(9, hotbar_slot + 1)
 
-                    if hotbar_slot == 0:
+                    if hotbar_slot == 9:
                         hotbar_slot = 0
 
             elif e.type == MOUSEBUTTONUP and e.button == 1:
@@ -306,7 +306,11 @@ def game(screen, username, host, port, size):
         if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
             if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
                 block_request.add((hover_x, hover_y))
-                send_queue.put(((4, hover_x, hover_y, hotbar_slot), SERVER))
+                send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot]), SERVER))
+
+        if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+            hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+
 
         # ==================Render World==========================
         screen.fill((173, 216, 230))
@@ -335,15 +339,15 @@ def game(screen, username, host, port, size):
         #====================Inventory/hotbar========================
 
         screen.blit(hotbar, hotbarRect)
-        for item in hotbar_items:
-            screen.blit(transform.scale(block_texture[item][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+        for item in range(9):
+            if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
+                hotbar_slot = item
+            screen.blit(transform.scale(block_texture[hotbar_items[item]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
         screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
 
-
         display.update()
         clock.tick(120)
-
 
 if __name__ == "__main__":
     host = "127.0.0.1"

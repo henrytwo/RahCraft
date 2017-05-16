@@ -1,15 +1,15 @@
 Air // 0, 0, 0 // 0, 0, 0 // mob_spawner.png // 1
-Grass // 0, 150, 0 // 0, 100, 0 // grass_side.png // 60
-Dirt // 129, 68, 32 // 99, 38, 12 // dirt.png // 1
-Stone // 150, 150, 150 // 100, 100, 100 // stone.png // 1
-Wood // 119, 58, 22 // 89, 28, 2 // log_spruce.png // 1
-Leaves // 10, 160, 10 // 10, 110, 10 // leaves_oak.png // 1
-Planks // 10, 160, 10 // 10, 110, 10 // planks_oak.png // 1
-Cobble Stone // 150, 150, 150 // 100, 100, 100 // cobblestone.png // 1
-Crafting Bench // 119, 58, 22 // 89, 28, 2 // crafting_table_front.png // 1
-Glass // 10, 160, 10 // 10, 110, 10 // glass_silver.png // 1
-Bed Rock // 150, 150, 150 // 100, 100, 100 // bedrock.png // 1
-Diamond Ore // 0, 0, 0 // 0, 0, 0 // diamond_ore.png // 1
-Gold Ore // 0, 0, 0 // 0, 0, 0 // gold_ore.png // 1
-Coal Ore // 0, 0, 0 // 0, 0, 0 // coal_ore.png // 1
-Iron Ore // 0, 0, 0 // 0, 0, 0 // iron_ore.png // 1
+Grass // 0, 150, 0 // 0, 100, 0 // grass_side.png // 19
+Dirt // 129, 68, 32 // 99, 38, 12 // dirt.png // 19
+Stone // 150, 150, 150 // 100, 100, 100 // stone.png // 150
+Wood // 119, 58, 22 // 89, 28, 2 // log_spruce.png // 60
+Leaves // 10, 160, 10 // 10, 110, 10 // leaves_oak.png // 7
+Planks // 10, 160, 10 // 10, 110, 10 // planks_oak.png // 60
+Cobble Stone // 150, 150, 150 // 100, 100, 100 // cobblestone.png // 200
+Crafting Bench // 119, 58, 22 // 89, 28, 2 // crafting_table_front.png // 75
+Glass // 10, 160, 10 // 10, 110, 10 // glass_silver.png // 9
+Bed Rock // 150, 150, 150 // 100, 100, 100 // bedrock.png // 10000000000
+Diamond Ore // 0, 0, 0 // 0, 0, 0 // diamond_ore.png // 300
+Gold Ore // 0, 0, 0 // 0, 0, 0 // gold_ore.png // 300
+Coal Ore // 0, 0, 0 // 0, 0, 0 // coal_ore.png // 300
+Iron Ore // 0, 0, 0 // 0, 0, 0 // iron_ore.png // 300
