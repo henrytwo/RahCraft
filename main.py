@@ -199,6 +199,9 @@ def server_picker():
 
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1])
 
+    button_list = [menu.Button((size[0] * 6)//8 - 175, size[1] - 60, 350, 40, 'custom_server_picker', 'Direct Connect'),
+                   menu.Button((size[0] * 2)//8 - 175, size[1] - 60, 350, 40, 'add_server', 'Add Server')]
+
     while True:
         wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
         screen.blit(wallpaper, (0, 0))
@@ -236,6 +239,11 @@ def server_picker():
 
         screen.blit(server_bar, (0, size[1] - 80))
 
+        for button in button_list:
+            nav_update = button.update(screen, mx, my, mb, 15, release)
+
+            if nav_update:
+                return nav_update
 
         clock.tick(120)
         display.update()
@@ -309,6 +317,94 @@ def custom_server_picker():
 
         clock.tick(120)
         display.update()
+
+
+def server_adder():
+
+    clock = time.Clock()
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    buttons = [[0, 'server_picker', "Add"],
+               [1, 'server_picker', "Back"]]
+
+    ip_menu = menu.Menu(buttons, 0, size[1]//2 , size[0], size[1]//2)
+
+    name, host, port = '','',None
+
+    field_selected = 'name'
+
+    fields = {'name':[menu.TextBox(size[0]//4 , size[1]//4 , 400, 40, 'Name'),name],
+              'host':[menu.TextBox(size[0]//4 , size[1]//4 + 70, 400, 40, 'Host'),host],
+              'port':[menu.TextBox(size[0]//4 , size[1]//4 + 140 , 400, 40, 'Port'),port]}
+
+    while True:
+
+        click = False
+        release = False
+
+        pass_event = None
+
+        for e in event.get():
+
+            pass_event = e
+
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+            if e.type == KEYDOWN:
+                if e.key == K_RETURN and host and port:
+                    name, host, port = fields['name'][1], fields['host'][1], int(fields['port'][1])
+
+                    with open('data/servers.rah','w') as servers:
+                        line_count = len(servers.read().split('\n'))
+
+                        print(line_count)
+
+                        servers.write('%i // %s // %s // %i'%(line_count, name, host, port))
+
+                    return 'server_picker'
+
+        mx, my = mouse.get_pos()
+        mb = mouse.get_pressed()
+
+        nav_update = ip_menu.update(screen, release, mx, my, mb)
+
+        if nav_update:
+
+            if nav_update == 'server_picker' and fields['name'][1] and fields['host'][1] and fields['port'][1]:
+
+                name, host, port = fields['name'][1], fields['host'][1], int(fields['port'][1])
+
+                with open('data/servers.rah', 'r+') as servers:
+
+                    line_count = len(servers.read().split('\n'))
+
+                    servers.write('\n%i // %s // %s // %i' % (line_count, name, host, port))
+
+                return 'server_picker'
+
+            else:
+                return nav_update
+
+        fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
+
+        for field in fields:
+            fields[field][0].draw(screen)
+
+            if fields[field][0].rect.collidepoint(mx,my) and click:
+                field_selected = field
+
+        clock.tick(120)
+        display.update()
+
 
 def menu_screen():
 
@@ -420,7 +516,8 @@ if __name__ == "__main__":
           'assistance': assistance,
           'game': menu_screen,
           'server_picker': server_picker,
-          'custom_server_picker': custom_server_picker}
+          'custom_server_picker': custom_server_picker,
+          'add_server' : server_adder}
 
 
     while navigation != 'exit':
