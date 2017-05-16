@@ -36,7 +36,7 @@ class Player:
         self.vx = 0
         self.vy = 0
 
-        self.run_speed = int(self.rect.w * 0.3)
+        self.run_speed = int(self.rect.w * 0.2)
         self.jump_height = -(self.rect.h // 2)
         self.gravity = self.rect.h * 2 / 45
 
@@ -56,7 +56,7 @@ class Player:
             if self.plr_relation['left']:
                 self.vx = -(self.run_speed // 2)
                 for player in self.plr_surround['left']:
-                    player.vx = -(self.run_speed // 2)
+                    player.vx = -(self.run_speed // 2)0
             else:
                 self.vx = -self.run_speed
         if key.get_pressed()[self.controls[1]]:
@@ -97,16 +97,6 @@ class Player:
     def collide(self, blocks):
         self.rect.y += int(self.vy)
 
-        for block in blocks:
-            if type(block) is Block and self.rect.colliderect(block.rect):
-                if self.vy > 0:
-                    self.rect.bottom = block.rect.top
-                    self.standing = True
-                elif self.vy < 0:
-                    self.rect.top = block.rect.bottom
-
-                self.vy = 0
-
         for player in playerList:
             if self is not player and self.rect.colliderect(player.rect):
                 if self.vy > 0:
@@ -117,14 +107,17 @@ class Player:
                     self.plr_relation['top'] = 1
                     self.plr_surround['top'].append(player)
 
-        self.rect.centerx = (self.rect.centerx + self.vx) % screenSize[0]
-
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):
-                if self.vx > 0:
-                    self.rect.right = block.rect.left
-                elif self.vx < 0:
-                    self.rect.left = block.rect.right
+                if self.vy > 0:
+                    self.rect.bottom = block.rect.top
+                    self.standing = True
+                elif self.vy < 0:
+                    self.rect.top = block.rect.bottom
+
+                self.vy = 0
+
+        self.rect.centerx = (self.rect.centerx + self.vx) % screenSize[0]
 
         for player in playerList:
             if self is not player and self.rect.colliderect(player.rect):
@@ -136,6 +129,13 @@ class Player:
                     self.rect.left = player.rect.right
                     self.plr_relation['left'] = 1
                     self.plr_surround['left'].append(player)
+
+        for block in blocks:
+            if type(block) is Block and self.rect.colliderect(block.rect):
+                if self.vx > 0:
+                    self.rect.right = block.rect.left
+                elif self.vx < 0:
+                    self.rect.left = block.rect.right
         
         self.vx = 0
         self.vy += self.gravity if self.vy + self.gravity < self.rect.h else 0
