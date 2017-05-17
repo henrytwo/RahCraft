@@ -128,6 +128,7 @@ class TextBox:
         self.content = ""
         self.font = font.Font("fonts/minecraft.ttf", 14)
         self.label = self.font.render(label, True, (255, 255, 255))
+        self.name = label
 
         self.allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
                         't', 'u',
@@ -144,7 +145,12 @@ class TextBox:
         draw.rect(screen, (0, 0, 0), self.rect)
         draw.rect(screen, (151, 151, 151), self.rect, 2)
 
-        screen.blit(self.font.render(self.content, True, (255, 255, 255)), (self.rect.x + 10, self.rect.y + 15))
+        if self.name == 'Password':
+            text = '*' * len(self.content)
+        else:
+            text = self.content
+
+        screen.blit(self.font.render(text, True, (255, 255, 255)), (self.rect.x + 10, self.rect.y + 15))
 
     def update(self, screen, mouse, e):
         if e and e.type == KEYDOWN:

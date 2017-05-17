@@ -37,7 +37,7 @@ def load_blocks(block_file):
     return blocks
 
 
-def game(screen, username, host, port, size):
+def game(screen, username, token, host, port, size):
     print('Starting game')
 
     font.init()
@@ -74,7 +74,7 @@ def game(screen, username, host, port, size):
 
     print("Client connecting to %s:%i" % SERVER)
 
-    server.sendto(pickle.dumps([0, username]), SERVER)
+    server.sendto(pickle.dumps([0, username, token]), SERVER)
 
     sender = Process(target=player_sender, args=(send_queue, server))
     sender.start()

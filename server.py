@@ -204,8 +204,8 @@ if __name__ == '__main__':
         command = message[0]
 
         if command == 0:
-            # Create player/login
-            # Data: [0,<username>]
+            # Player login and authentication
+            # Data: [0,<username>, <token>]
 
             if message[1] not in username:
 

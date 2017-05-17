@@ -24,7 +24,7 @@ def login():
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
-    login_button = menu.Button(200, 370, 400, 40, 'menu', 'Login')
+    login_button = menu.Button(200, 370, 400, 40, 'menu', 'Login offline (Some features restricted)')
 
     auth_button = menu.Button(200, 320, 400, 40, 'auth', 'AUTHENTICATE WITH SERVER')
 
@@ -56,9 +56,15 @@ def login():
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
-            #if e.type == KEYDOWN:
-            #    if e.key == K_RETURN and username:
-            #        return 'menu'
+            if e.type == KEYDOWN:
+                if e.key == K_RETURN and username and password:
+                    return 'auth'
+
+                if e.key == K_TAB:
+                    if field_selected == 'user':
+                        field_selected = 'pass'
+                    else:
+                        field_selected = 'user'
 
 
         mx, my = mouse.get_pos()
@@ -90,27 +96,22 @@ def authenticate():
 
     global username, password, online, token
 
-    clock = time.Clock()
-
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
-    normal_font = font.Font("fonts/minecraft.ttf", 14)
+    connecting_text = rah.text("Waiting for AUTH server...", 30)
+    screen.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
-    status_list = ["Waiting for server to reply..."]
+    display.update()
 
-    def player_sender(send_queue, server, status_list):
-
-        status_list.append('Sender running...')
+    def player_sender(send_queue, server):
 
         while True:
             tobesent = send_queue.get()
             server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
-    def receive_message(message_queue, server, status_list):
-
-        status_list.append('Ready to receive command...')
+    def receive_message(message_queue, server):
 
         while True:
             msg = server.recvfrom(16384)
@@ -127,8 +128,8 @@ def authenticate():
     send_queue = Queue()
     message_queue = Queue()
 
-    sender = Process(target=player_sender, args=(send_queue, server, status_list))
-    receiver = Process(target=receive_message, args=(message_queue, server, status_list))
+    sender = Process(target=player_sender, args=(send_queue, server))
+    receiver = Process(target=receive_message, args=(message_queue, server))
 
     credentials = [username, password]
 
@@ -138,33 +139,12 @@ def authenticate():
     receiver.start()
 
     while True:
-        click = False
-        release = False
-
-        for e in event.get():
-            if e.type == QUIT:
-                return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
-
-            if e.type == MOUSEBUTTONUP and e.button == 1:
-                release = True
-
-        mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
-
-        for y in range(0, len(status_list)):
-            about_text = normal_font.render(status_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (50, 50 + y * 20))
-
-        display.flip()
 
         first_message = message_queue.get()
 
         if first_message == (400,):
 
-            status_list.append("Invalid credentials")
+            print("Invalid credentials")
 
             return 'login'
             server.sendto(pickle.dumps([0, credentials]), _server)
@@ -178,27 +158,8 @@ def authenticate():
 
             return 'menu'
 
-        elif first_message[0] == 2:
-            if first_message[1] == 1:
-
-                status_list.append("Connected to server")
-
-            else:
-                status_list.append("Disconnected. Invalid token!")
-                sender.terminate()
-                receiver.terminate()
-                exit()
-
-        #elif first_message[0] == 3:
-        #    print("[Server]", first_message[1])
-
-
-        clock.tick(120)
-        display.update()
 
 def about():
-    clock = time.Clock()
-
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
@@ -225,15 +186,11 @@ def about():
                   '']
 
     while True:
-        click = False
         release = False
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
@@ -250,13 +207,9 @@ def about():
         if nav_update is not None:
             return nav_update
 
-
-        clock.tick(120)
         display.update()
 
 def assistance():
-    clock = time.Clock()
-
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
@@ -284,15 +237,11 @@ def assistance():
 
     while True:
 
-        click = False
         release = False
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
@@ -309,7 +258,6 @@ def assistance():
         if nav_update is not None:
             return nav_update
 
-        clock.tick(120)
         display.update()
 
 def options():
@@ -318,8 +266,6 @@ def options():
 def server_picker():
 
     global host, port
-
-    clock = time.Clock()
 
     with open('data/servers.rah','r') as servers:
         server_list = [server.split(' // ') for server in servers.read().split('\n')]
@@ -339,16 +285,12 @@ def server_picker():
         wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
         screen.blit(wallpaper, (0, 0))
 
-        click = False
         release = False
 
         for e in event.get():
 
             if e.type == QUIT:
                 return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
@@ -380,15 +322,12 @@ def server_picker():
                 else:
                     return nav_update
 
-        clock.tick(120)
         display.update()
 
 
 def custom_server_picker():
 
     global host, port
-
-    clock = time.Clock()
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
@@ -405,7 +344,6 @@ def custom_server_picker():
 
     while True:
 
-        click = False
         release = False
 
         pass_event = None
@@ -416,9 +354,6 @@ def custom_server_picker():
 
             if e.type == QUIT:
                 return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
@@ -450,7 +385,6 @@ def custom_server_picker():
             if fields[field][0].rect.collidepoint(mx,my) and click:
                 field_selected = field
 
-        clock.tick(120)
         display.update()
 
 
@@ -476,7 +410,6 @@ def server_adder():
 
     while True:
 
-        click = False
         release = False
 
         pass_event = None
@@ -487,9 +420,6 @@ def server_adder():
 
             if e.type == QUIT:
                 return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
@@ -537,7 +467,6 @@ def server_adder():
             if fields[field][0].rect.collidepoint(mx,my) and click:
                 field_selected = field
 
-        clock.tick(120)
         display.update()
 
 
@@ -578,15 +507,11 @@ def menu_screen():
 
     while True:
 
-        click = False
         release = False
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
-
-            if e.type == MOUSEBUTTONDOWN and e.button == 1:
-                click = True
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
@@ -594,14 +519,11 @@ def menu_screen():
         mx, my = mouse.get_pos()
         mb = mouse.get_pressed()
 
-        hover_over_button = False
-
         nav_update = main_menu.update(screen, release, mx, my, mb)
 
         if nav_update:
             return nav_update
 
-        clock.tick(120)
         display.update()
 
 if __name__ == "__main__":
@@ -611,6 +533,7 @@ if __name__ == "__main__":
     online = False
 
     username = ''
+    token = ''
 
     navigation = 'login'
 
@@ -663,7 +586,7 @@ if __name__ == "__main__":
 
     while navigation != 'exit':
         if navigation == 'game':
-            navigation = Game.game(screen, username, host, port, size)
+            navigation = Game.game(screen, username, token, host, port, size)
         else:
             navigation = UI[navigation]()
 
