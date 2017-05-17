@@ -13,7 +13,7 @@ import components.menu as menu
 import Game as Game
 
 def login():
-    global username, host, port
+    global username, password, host, port
 
     clock = time.Clock()
 
@@ -21,9 +21,16 @@ def login():
     screen.blit(wallpaper, (0, 0))
 
     login_button = menu.Button(200, 370, 400, 40, 'menu', 'Login')
-    login_box = menu.TextBox(size[0]//4 , size[1]//3  , 400, 40 , 'Username')
 
-    username = ""
+    auth_button = menu.Button(200, 320, 400, 40, 'auth', 'AUTHENTICATE WITH SERVER')
+
+    username, password = '',''
+
+    field_selected = 'user'
+
+    fields = {'user':[menu.TextBox(size[0]//4 , size[1]//4 , 400, 40, 'Username'),username],
+              'pass':[menu.TextBox(size[0]//4 , 7*size[1]//16 , 400, 40, 'Password'),password]}
+
 
     while True:
 
@@ -49,17 +56,136 @@ def login():
                 if e.key == K_RETURN and username:
                     return 'menu'
 
-        login_box.draw(screen)
-
-        username = login_box.update(screen, mouse, pass_event)
 
         mx, my = mouse.get_pos()
         mb = mouse.get_pressed()
 
-        nav_update = login_button.update(screen, mx, my, mb, 15, release)
+        fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
 
+        for field in fields:
+            fields[field][0].draw(screen)
+
+            if fields[field][0].rect.collidepoint(mx,my) and click:
+                field_selected = field
+
+        nav_update = login_button.update(screen, mx, my, mb, 15, release)
         if nav_update and username:
             return nav_update
+
+        nav_update = auth_button.update(screen, mx, my, mb, 15, release)
+        if nav_update and username:
+            return nav_update
+
+        username, password = fields['user'][1], fields['pass'][1]
+
+
+        clock.tick(120)
+        display.update()
+
+def authenticate():
+
+    global username, password
+
+    clock = time.Clock()
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    status_list = ["Waiting for server to reply..."]
+
+    def player_sender(send_queue, server, status_list):
+
+        status_list.append('Sender running...')
+
+        while True:
+            tobesent = send_queue.get()
+            server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
+
+
+    def receive_message(message_queue, server, status_list):
+
+        status_list.append('Ready to receive command...')
+
+        while True:
+            msg = server.recvfrom(16384)
+            message_queue.put(pickle.loads(msg[0]))
+
+    host, port = 'rahmish.com', 1111
+
+    sendQueue = Queue()
+    messageQueue = Queue()
+
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    _server = (host, port)
+
+    send_queue = Queue()
+    message_queue = Queue()
+
+    sender = Process(target=player_sender, args=(send_queue, server, status_list))
+    receiver = Process(target=receive_message, args=(message_queue, server, status_list))
+
+    credentials = [username, password]
+
+    server.sendto(pickle.dumps([0, credentials]), _server)
+
+    sender.start()
+    receiver.start()
+
+    while True:
+        click = False
+        release = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONDOWN and e.button == 1:
+                click = True
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+        mx, my = mouse.get_pos()
+        mb = mouse.get_pressed()
+
+        for y in range(0, len(status_list)):
+            about_text = normal_font.render(status_list[y], True, (255, 255, 255))
+            screen.blit(about_text, (50, 50 + y * 20))
+
+        display.flip()
+
+        first_message = message_queue.get()
+
+        if first_message == (400,):
+
+            status_list.append("Invalid credentials")
+
+            return 'login'
+            server.sendto(pickle.dumps([0, credentials]), _server)
+
+
+        elif first_message[0] == 1:
+            token = str(first_message[1])
+
+            status_list.append("Login successful " + token)
+
+            server.sendto(pickle.dumps([2, [credentials[0],token]]), ('127.0.0.1', 1234))
+
+        elif first_message[0] == 2:
+            if first_message[1] == 1:
+                status_list.append("Connected to server")
+
+            else:
+                status_list.append("Disconnected. Invalid token!")
+                sender.terminate()
+                receiver.terminate()
+                exit()
+
+        #elif first_message[0] == 3:
+        #    print("[Server]", first_message[1])
+
 
         clock.tick(120)
         display.update()
@@ -197,10 +323,11 @@ def server_picker():
         server[0] = int(server[0])
         server[3] = int(server[3])
 
-    server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1])
+    server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1] - 80)
 
-    button_list = [menu.Button((size[0] * 6)//8 - 175, size[1] - 60, 350, 40, 'custom_server_picker', 'Direct Connect'),
-                   menu.Button((size[0] * 2)//8 - 175, size[1] - 60, 350, 40, 'add_server', 'Add Server')]
+    button_list = [menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, 200, 40, 'custom_server_picker', 'Direct Connect'),
+                   menu.Button(size[0]//2 - 100, size[1] - 60, 200, 40, 'add_server', 'Add Server'),
+                   menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, 200, 40, 'menu', 'Back')]
 
     while True:
         wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -208,8 +335,6 @@ def server_picker():
 
         click = False
         release = False
-
-        pass_event = None
 
         for e in event.get():
 
@@ -243,7 +368,11 @@ def server_picker():
             nav_update = button.update(screen, mx, my, mb, 15, release)
 
             if nav_update:
-                return nav_update
+                if nav_update == 'add_server' and len(server_list) > 4:
+                    print("Too many")
+
+                else:
+                    return nav_update
 
         clock.tick(120)
         display.update()
@@ -516,7 +645,8 @@ if __name__ == "__main__":
           'game': menu_screen,
           'server_picker': server_picker,
           'custom_server_picker': custom_server_picker,
-          'add_server' : server_adder}
+          'add_server' : server_adder,
+          'auth':authenticate}
 
 
     while navigation != 'exit':
