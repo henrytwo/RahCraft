@@ -10,7 +10,6 @@ clock = time.Clock()
 screen.fill((135, 206, 235))
 display.update()
 sky_color = [135, 206, 235]
-
 BLUE_VALUE = 235
 
 darken = True

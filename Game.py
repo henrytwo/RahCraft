@@ -147,6 +147,16 @@ def game(screen, username, host, port, size):
 
     print("ini done")
 
+    #==============================Sky=====================================
+
+    sky_color = [135, 206, 235]
+    normalized_color = sky_color[:]
+    DEFAULT_BLUE = 235
+    darken = True
+
+    sky_tick = 0
+    SKYTICKDEFAULT = 120
+
     while True:
         on_tick = False
         block_broken = False
@@ -314,7 +324,24 @@ def game(screen, username, host, port, size):
 
 
         # ==================Render World==========================
-        screen.fill((173, 216, 230))
+        if on_tick and sky_tick < SKYTICKDEFAULT: # Change SKYTICKDEFAULT to a lower number to test
+            sky_tick += 1
+        else:
+            sky_tick = 1
+
+            if darken:
+                sky_color = [i - 1 for i in sky_color]
+                if sky_color[2] == 35:
+                    darken = False
+            else:
+                sky_color = [i + 1 for i in sky_color]
+                if sky_color[2] == DEFAULT_BLUE:
+                    darken = True
+
+            normalized_color = [max(x, 0) for x in sky_color]
+
+        screen.fill(normalized_color)
+
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
             for y in range(0, size[1] + block_size + 1, block_size):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
