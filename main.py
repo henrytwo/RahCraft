@@ -3,6 +3,7 @@ from multiprocessing import *
 import pickle
 import numpy as np
 import socket
+import hashlib
 
 import sys
 sys.path.extend(['general/','components/'])
@@ -14,6 +15,9 @@ import Game as Game
 
 def login():
     global username, password, host, port
+
+    def hash(target):
+        return hashlib.md5(target.encode('utf-8')).hexdigest()
 
     clock = time.Clock()
 
@@ -52,9 +56,9 @@ def login():
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
-            if e.type == KEYDOWN:
-                if e.key == K_RETURN and username:
-                    return 'menu'
+            #if e.type == KEYDOWN:
+            #    if e.key == K_RETURN and username:
+            #        return 'menu'
 
 
         mx, my = mouse.get_pos()
@@ -76,7 +80,7 @@ def login():
         if nav_update and username:
             return nav_update
 
-        username, password = fields['user'][1], fields['pass'][1]
+        username, password = fields['user'][1], hash(fields['pass'][1] + fields['user'][1])
 
 
         clock.tick(120)
@@ -84,7 +88,7 @@ def login():
 
 def authenticate():
 
-    global username, password
+    global username, password, online, token
 
     clock = time.Clock()
 
@@ -168,13 +172,15 @@ def authenticate():
 
         elif first_message[0] == 1:
             token = str(first_message[1])
+            print("Login successful " + token)
 
-            status_list.append("Login successful " + token)
+            online = True
 
-            server.sendto(pickle.dumps([2, [credentials[0],token]]), ('127.0.0.1', 1234))
+            return 'menu'
 
         elif first_message[0] == 2:
             if first_message[1] == 1:
+
                 status_list.append("Connected to server")
 
             else:
@@ -537,7 +543,7 @@ def server_adder():
 
 def menu_screen():
 
-    global username
+    global username, online, token
 
     clock = time.Clock()
 
@@ -565,6 +571,10 @@ def menu_screen():
 
     user_text = normal_font.render("Logged in as: %s" % username, True, (255, 255, 255))
     screen.blit(user_text, (20, 20))
+
+    if online:
+        user_text = normal_font.render("AUTH ID: %s"%token, True, (255, 255, 255))
+        screen.blit(user_text, (20, 50))
 
     while True:
 
@@ -597,6 +607,8 @@ def menu_screen():
 if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5276
+
+    online = False
 
     username = ''
 
