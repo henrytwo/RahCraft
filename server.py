@@ -10,6 +10,7 @@ from numpy import *
 from world import *
 import glob
 from math import *
+import time
 
 with open("data/config.rah", "r") as config:
     config = config.read().split("\n")
@@ -165,6 +166,16 @@ def commandline_in(commandline_queue, fn):
         commandline_queue.put(((10, command), ('127.0.0.1',)))
 
 
+def heart_beat(message_queue, tick):
+    while True:
+        time.sleep(1//20)
+        tick += 1
+        if tick % 120 == 0:
+            message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
+
+            if tick == 24000:
+                tick = 1
+
 if __name__ == '__main__':
     players = {}
     player_number = 1
@@ -197,6 +208,9 @@ if __name__ == '__main__':
     commandline = Process(target=commandline_in, args=(messageQueue, fn))
     commandline.start()
     cmdIn = ""
+
+    heart_beat = Process(target=heart_beat, args=(messageQueue, 0))  # Change the tick stuff later
+    heart_beat.start()
 
     while True:
         pickled_message = messageQueue.get()
@@ -300,6 +314,7 @@ if __name__ == '__main__':
                 receiver.terminate()
                 sender.terminate()
                 commandline.terminate()
+                heart_beat.terminate()
                 server.close()
                 world.save()
                 break
@@ -326,4 +341,6 @@ if __name__ == '__main__':
                     print("Command aborted")
 
         elif command == 100:
-            sendQueue.put(('hello', address))
+            for p in players:
+                sendQueue.put((message, p))
+

@@ -7,6 +7,7 @@ import pickle
 import components.rahma as rah
 from math import *
 import components.player2 as player2
+import time as ti
 
 
 def player_sender(send_queue, server):
@@ -154,7 +155,7 @@ def game(screen, username, token, host, port, size):
     DEFAULT_BLUE = 235
     darken = True
 
-    sky_tick = 0
+    sky_tick = 1
     SKYTICKDEFAULT = 120
 
     while True:
@@ -272,6 +273,16 @@ def game(screen, username, token, host, port, size):
                 username = message[0]
 
                 del remote_players[username]
+
+            elif command == 100:
+                send_time, tick = message
+
+                tick_offset = (round(ti.time(), 3) - send_time)*20
+
+                sky_tick = tick_offset + tick
+
+
+
         except:
             pass
 
@@ -316,10 +327,13 @@ def game(screen, username, token, host, port, size):
                 breaking_block = False
 
         # ==================Render World==========================
-        if on_tick and sky_tick < SKYTICKDEFAULT: # Change SKYTICKDEFAULT to a lower number to test
-            sky_tick += 1
+        if sky_tick % SKYTICKDEFAULT != 0: # Change SKYTICKDEFAULT to a lower number to test
+            if on_tick:
+                sky_tick += 1
         else:
-            sky_tick = 1
+            sky_tick += 1
+            if sky_tick >= 24000:
+                sky_tick = 1
 
             if darken:
                 sky_color = [i - 1 for i in sky_color]
@@ -333,6 +347,8 @@ def game(screen, username, token, host, port, size):
             normalized_color = [max(x, 0) for x in sky_color]
 
         screen.fill(normalized_color)
+
+        print(sky_tick)
 
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
             for y in range(0, size[1] + block_size + 1, block_size):
