@@ -151,6 +151,7 @@ def game(screen, username, host, port, size):
         on_tick = False
         block_broken = False
         tickPerFrame = max(clock.get_fps() / 20, 1)
+
         for e in event.get():
             if e.type == QUIT:
                 quit_game()
@@ -160,7 +161,7 @@ def game(screen, username, host, port, size):
                 if e.button == 1:
                     click = True
 
-                elif e.button == 4:
+                if e.button == 4:
                     hotbar_slot = max(-1, hotbar_slot - 1)
 
                     if hotbar_slot == -1:
@@ -304,15 +305,6 @@ def game(screen, username, host, port, size):
                 current_breaking = []
                 breaking_block = False
 
-        if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-            if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
-                block_request.add((hover_x, hover_y))
-                send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot]), SERVER))
-
-        if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-            hotbar_items[hotbar_slot] = world[hover_x, hover_y]
-
-
         # ==================Render World==========================
         screen.fill((173, 216, 230))
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
@@ -338,6 +330,17 @@ def game(screen, username, host, port, size):
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
 
+        print(local_player.block_interact(screen, surrounding_blocks, mouse, x_offset, y_offset))
+
+        if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+            if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
+                block_request.add((hover_x, hover_y))
+                send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot]), SERVER))
+
+
+        if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+            hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+
         for remote in remote_players:
             remote_players[remote].update(screen, x_offset, y_offset)
 
@@ -361,7 +364,6 @@ if __name__ == "__main__":
     size = (800, 500)
     screen = display.set_mode(size)
 
-    init()
     font.init()
 
     game(screen, "6", host, port, size)

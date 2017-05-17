@@ -1,5 +1,5 @@
 from pygame import *
-
+import math
 
 class Player:
 
@@ -76,6 +76,27 @@ class Player:
         else:
             self.vy -= 0
 
+    def block_interact(self, screen, blocks, mouse, x_offset, y_offset,):
+        center = (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset + self.rect.h//2)
+
+        mx, my = mouse.get_pos()
+
+        try:
+            slope = (center[1] - my) / (center[0] - mx)
+
+            for x in range(mx - center[0]):
+                for block in blocks:
+
+                    if block.collidepoint(center[0] + x + x_offset, center[1] + (slope * x) + y_offset):
+                        return False
+
+                draw.line(screen, (0, 0, 255), center, (center[0] + x, center[1] + (slope * x)), 3)
+        except:
+            pass
+
+        return True
+
+
     def update(self, screen, collision_blocks, x_offset, y_offset, fly, reach=5):
         self.control(fly)
         self.collide(collision_blocks, fly)
@@ -84,7 +105,9 @@ class Player:
 
         # debug
 
-        draw.circle(screen, (0, 0, 0), (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset + self.rect.h//2), reach*20, 3)
+        center = (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset + self.rect.h//2)
+        draw.circle(screen, (0, 0, 0), center, reach*20, 3)
+
 
 
 class RemotePlayer:

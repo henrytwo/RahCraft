@@ -478,7 +478,6 @@ if __name__ == "__main__":
 
     rah.rah(screen)
 
-    init()
     font.init()
 
     click_cursor = ["      ..                ",
