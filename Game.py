@@ -139,6 +139,8 @@ def game(screen, username, token, host, port, size):
     hotbar = image.load("textures/gui/toolbar/toolbar.png").convert()
     selected = image.load("textures/gui/toolbar/selected.png").convert_alpha()
 
+    sky = transform.scale(image.load("textures/sky/sky.png"),(2800,800))
+
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
     hotbar_items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     hotbar_slot = 1
@@ -348,6 +350,8 @@ def game(screen, username, token, host, port, size):
             normalized_color = [max(x, 0) for x in sky_color]
 
         screen.fill(normalized_color)
+
+        screen.blit(sky,(0 - sky_tick%24000,0))
 
         print(sky_tick)
 
