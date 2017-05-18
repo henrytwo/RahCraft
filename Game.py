@@ -159,6 +159,9 @@ def game(screen, username, token, host, port, size):
     SKYTICKDEFAULT = 120
 
     while True:
+
+        print(sky_tick)
+
         on_tick = False
         block_broken = False
         tickPerFrame = max(clock.get_fps() / 20, 1)
