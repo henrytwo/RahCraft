@@ -8,6 +8,7 @@ import components.rahma as rah
 from math import *
 import components.player2 as player2
 import time as ti
+import glob
 
 
 def player_sender(send_queue, server):
@@ -32,7 +33,7 @@ def load_blocks(block_file):
     block_file = open("data/" + block_file).readlines()
 
     for line_number in range(len(block_file)):
-        block_type, inner_block, outline, block_image, hardness = block_file[line_number].strip("\n").split(" // ")
+        block_type, inner_block, outline, block_image, hardness, soundpack = block_file[line_number].strip("\n").split(" // ")
         blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")), (int(x) for x in outline.split(",")), transform.scale(image.load("textures/blocks/" + block_image), (20, 20)), int(hardness)]
 
     return blocks
@@ -144,6 +145,24 @@ def game(screen, username, token, host, port, size):
     sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
     moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
 
+
+
+    sound_list = glob.glob('sound/step/*.ogg')
+
+    sound_groups = [sound[sound.index('step/') + 5:-5] for sound in sound_list if sound not in sound_groups]
+
+    print(sound_groups)
+
+    sound = {}
+
+    for sound_title in sound_groups:
+        for sound_dir in sound_list:
+            if
+                sound[sound_title] = sound_list
+
+    print(sound_list)
+
+
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
     hotbar_items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     hotbar_slot = 1
@@ -164,8 +183,6 @@ def game(screen, username, token, host, port, size):
     SKYTICKDEFAULT = 120
 
     while True:
-
-        print(sky_tick)
 
         on_tick = False
         block_broken = False
@@ -337,9 +354,12 @@ def game(screen, username, token, host, port, size):
             if on_tick:
                 sky_tick += 1
         else:
+
             sky_tick += 1
             if sky_tick >= 24000:
-                sky_tick = 1
+                sky_tick = 0
+
+                print("Reset")
 
             if darken:
                 sky_color = [i - 1 for i in sky_color]
@@ -352,11 +372,15 @@ def game(screen, username, token, host, port, size):
 
             normalized_color = [max(x, 0) for x in sky_color]
 
+        print(sky_tick)
+
         screen.fill(normalized_color)
 
-        screen.blit(sky,(0 - sky_tick%24000,0))
+        screen.blit(sky,((0 - sky_tick%2400), y_offset//2 - 400))
 
-        print(sky_tick)
+        print("Location %i:%i"%((0 - sky_tick%2400), y_offset//2 - 400))
+
+        #print(sky_tick)
 
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
             for y in range(0, size[1] + block_size + 1, block_size):

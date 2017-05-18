@@ -168,12 +168,12 @@ def commandline_in(commandline_queue, fn):
 
 def heart_beats(message_queue, tick):
     while True:
-        time.sleep(.05)
-        tick += 10
+        time.sleep(.01)
+        tick += 1
         print(tick)
         if tick % 1200 == 0:
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
-            if tick == 24000:
+            if tick >= 24000:
                 tick = 1
 
 if __name__ == '__main__':
