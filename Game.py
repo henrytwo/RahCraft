@@ -149,11 +149,11 @@ def game(screen, username, token, host, port, size):
     print("ini done")
 
     #==============================Sky=====================================
-
-    sky_color = [135, 206, 235]
-    normalized_color = sky_color[:]
+    DEFAULTSKYCOLOR = [135, 206, 235]
+    sky_color = [-65, 6, 35]
+    normalized_color = [max(x, 0) for x in sky_color]
     DEFAULT_BLUE = 235
-    darken = True
+    darken = False
 
     sky_tick = 1
     SKYTICKDEFAULT = 120
@@ -280,8 +280,6 @@ def game(screen, username, token, host, port, size):
                 tick_offset = (round(ti.time(), 3) - send_time)*20
 
                 sky_tick = tick_offset + tick
-
-
 
         except:
             pass

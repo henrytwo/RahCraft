@@ -166,13 +166,13 @@ def commandline_in(commandline_queue, fn):
         commandline_queue.put(((10, command), ('127.0.0.1',)))
 
 
-def heart_beat(message_queue, tick):
+def heart_beats(message_queue, tick):
     while True:
-        time.sleep(1//20)
+        time.sleep(.05)
         tick += 1
-        if tick % 120 == 0:
+        print(tick)
+        if tick % 1200 == 0:
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
-
             if tick == 24000:
                 tick = 1
 
@@ -198,6 +198,9 @@ if __name__ == '__main__':
 
     print("Server binded to %s:%i" % (host, port))
 
+    heart_beat = Process(target=heart_beats, args=(messageQueue, 0))  # Change the tick stuff later
+    heart_beat.start()
+
     receiver = Process(target=receive_message, args=(messageQueue, server))
     receiver.start()
 
@@ -208,9 +211,6 @@ if __name__ == '__main__':
     commandline = Process(target=commandline_in, args=(messageQueue, fn))
     commandline.start()
     cmdIn = ""
-
-    heart_beat = Process(target=heart_beat, args=(messageQueue, 0))  # Change the tick stuff later
-    heart_beat.start()
 
     while True:
         pickled_message = messageQueue.get()
