@@ -141,6 +141,9 @@ def game(screen, username, token, host, port, size):
 
     sky = transform.scale(image.load("textures/sky/sky.png"),(2800,800))
 
+    sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
+    moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
+
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
     hotbar_items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
     hotbar_slot = 1
@@ -401,6 +404,10 @@ def game(screen, username, token, host, port, size):
             screen.blit(transform.scale(block_texture[hotbar_items[item]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
         screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
+
+        screen.blit(sun,(0,0))
+
+        screen.blit(moon, (400, 0))
 
         display.update()
         clock.tick(120)
