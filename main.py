@@ -92,6 +92,19 @@ def login():
         clock.tick(120)
         display.update()
 
+def player_sender(send_queue, server):
+
+    while True:
+        tobesent = send_queue.get()
+        server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
+
+
+def receive_message(message_queue, server):
+
+    while True:
+        msg = server.recvfrom(16384)
+        message_queue.put(pickle.loads(msg[0]))
+
 def authenticate():
 
     global username, password, online, token
@@ -103,19 +116,6 @@ def authenticate():
     screen.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
     display.update()
-
-    def player_sender(send_queue, server):
-
-        while True:
-            tobesent = send_queue.get()
-            server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
-
-
-    def receive_message(message_queue, server):
-
-        while True:
-            msg = server.recvfrom(16384)
-            message_queue.put(pickle.loads(msg[0]))
 
     host, port = 'rahmish.com', 1111
 
