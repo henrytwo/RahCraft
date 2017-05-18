@@ -405,8 +405,6 @@ def game(screen, username, token, host, port, size):
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
 
-        print(local_player.block_interact(screen, surrounding_blocks, mouse, x_offset, y_offset))
-
         if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
             if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
                 block_request.add((hover_x, hover_y))
