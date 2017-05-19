@@ -38,6 +38,19 @@ def load_blocks(block_file):
 
     return blocks
 
+def invert(colour):
+    return (255 - colour[0], 255 - colour[1], 255 - colour[2])
+
+def inverted_rect(screen, block_size, width, rx, ry):
+    for x in range(block_size):
+        for y in range(width):
+            screen.set_at((rx + x, ry + y), invert(screen.get_at((rx + x, ry + y))))
+            screen.set_at((rx + x, ry + y + block_size - width), invert(screen.get_at((rx + x, ry + y + block_size - width))))
+
+    for y in range(block_size - width * 2):
+        for x in range(width):
+            screen.set_at((rx + x, ry + y + width), invert(screen.get_at((rx + x, ry + y + width))))
+            screen.set_at((rx + x + block_size - width, ry + y + width), invert(screen.get_at((rx + x + block_size - width, ry + y + width))))
 
 def game(screen, username, token, host, port, size, music_enable):
     print('Starting game')
@@ -386,8 +399,10 @@ def game(screen, username, token, host, port, size, music_enable):
 
         screen.blit(sky,(int(0 - 4800 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
 
-        screen.blit(sun,(int(0 - 4800 * (sky_tick%24000)/24000) + 2800, max(y_offset // 16 - 50, -200)))
-        screen.blit(moon,(int(0 - 4800 * (sky_tick%24000)/24000) - 2800, max(y_offset // 16 - 50, -200)))
+        screen.blit(sun,(int(5600 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
+        screen.blit(moon,(int(2800 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
+
+        print(int(2800 - 4800 * (sky_tick%24000)/24000), int(5600 - 4800 * (sky_tick%24000)/24000))
 
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
             for y in range(0, size[1] + block_size + 1, block_size):
@@ -412,6 +427,8 @@ def game(screen, username, token, host, port, size, music_enable):
                     surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
+
+        inverted_rect(screen, block_size, 2, (mx + x_offset) // block_size * block_size - x_offset, (my + y_offset) // block_size * block_size - y_offset)
 
         if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
             if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
