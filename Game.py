@@ -386,6 +386,9 @@ def game(screen, username, token, host, port, size, music_enable):
 
         screen.blit(sky,(int(0 - 4800 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
 
+        screen.blit(sun,(int(0 - 4800 * (sky_tick%24000)/24000) + 2800, max(y_offset // 16 - 50, -200)))
+        screen.blit(moon,(int(0 - 4800 * (sky_tick%24000)/24000) - 2800, max(y_offset // 16 - 50, -200)))
+
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
             for y in range(0, size[1] + block_size + 1, block_size):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
@@ -431,10 +434,6 @@ def game(screen, username, token, host, port, size, music_enable):
             screen.blit(transform.scale(block_properties[hotbar_items[item]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
         screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
-
-        screen.blit(sun,(0,0))
-
-        screen.blit(moon, (400, 0))
 
         display.update()
         clock.tick(120)

@@ -328,7 +328,7 @@ if __name__ == '__main__':
                     in_put = messageQueue.get()
 
                 if in_put[0][1] == 'y':
-                    os.remove("world.pkl")
+                    os.remove("saves/world.pkl")
                     print("World deleted successfully\nServer will shutdown")
                     receiver.terminate()
                     sender.terminate()
