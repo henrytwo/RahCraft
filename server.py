@@ -168,7 +168,7 @@ def commandline_in(commandline_queue, fn):
 
 def heart_beats(message_queue, tick):
     while True:
-        time.sleep(.01)
+        time.sleep(.06)
         tick += 1
         print(tick)
         if tick % 1200 == 0:
