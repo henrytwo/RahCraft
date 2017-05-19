@@ -33,13 +33,13 @@ def load_blocks(block_file):
     block_file = open("data/" + block_file).readlines()
 
     for line_number in range(len(block_file)):
-        block_type, inner_block, outline, block_image, hardness, soundpack = block_file[line_number].strip("\n").split(" // ")
-        blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")), (int(x) for x in outline.split(",")), transform.scale(image.load("textures/blocks/" + block_image), (20, 20)), int(hardness)]
+        block_type, inner_block, outline, block_image, hardness, soundpack, collision = block_file[line_number].strip("\n").split(" // ")
+        blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")), (int(x) for x in outline.split(",")), transform.scale(image.load("textures/blocks/" + block_image), (20, 20)), int(hardness), soundpack, collision]
 
     return blocks
 
 
-def game(screen, username, token, host, port, size):
+def game(screen, username, token, host, port, size, music_enable):
     print('Starting game')
 
     font.init()
@@ -61,7 +61,7 @@ def game(screen, username, token, host, port, size):
 
     block_size = 20
 
-    block_texture = load_blocks("block.rah")
+    block_properties = load_blocks("block.rah")
     breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_"+str(i)+".png"), (20, 20)).convert_alpha() for i in range(10)]
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -165,7 +165,7 @@ def game(screen, username, token, host, port, size):
 
 
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
-    hotbar_items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+    hotbar_items = [1, 2, 3, 5, 7, 8, 9, 10, 11]
     hotbar_slot = 1
 
     INVENTORY_KEYS = {str(x) for x in range(1, 10)}
@@ -318,7 +318,7 @@ def game(screen, username, token, host, port, size):
         hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
         display.set_caption("Rahcraft Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
-            block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_texture[hotbar_slot][0] +
+            block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_properties[hotbar_slot][0] +
                             "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
 
         block_clip_cord = (block_clip[0]//block_size, block_clip[1]//block_size)
@@ -330,14 +330,14 @@ def game(screen, username, token, host, port, size):
             if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                 breaking_block = True
                 current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
-                if current_breaking[3] >= block_texture[current_breaking[0]][4]:
+                if current_breaking[3] >= block_properties[current_breaking[0]][4]:
                     block_broken = True
 
             elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                 if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
                     current_breaking[3] += 1
 
-                    if current_breaking[3] >= block_texture[current_breaking[0]][4]:
+                    if current_breaking[3] >= block_properties[current_breaking[0]][4]:
                         block_broken = True
                 else:
                     breaking_block = False
@@ -390,11 +390,11 @@ def game(screen, username, token, host, port, size):
             for y in range(0, size[1] + block_size + 1, block_size):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
-                if len(block_texture) > block > 0:
-                    screen.blit(block_texture[block][3], (x - x_offset % block_size, y - y_offset % block_size))
+                if len(block_properties) > block > 0:
+                    screen.blit(block_properties[block][3], (x - x_offset % block_size, y - y_offset % block_size))
 
                     if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[2] == (y + y_offset) // block_size:
-                        percent_broken = (current_breaking[3]/block_texture[current_breaking[0]][4]) * 10
+                        percent_broken = (current_breaking[3]/block_properties[current_breaking[0]][4]) * 10
                         screen.blit(breaking_animation[int(percent_broken)], (x - x_offset % block_size, y - y_offset % block_size))
 
                 elif block < 0:
@@ -404,7 +404,8 @@ def game(screen, username, token, host, port, size):
 
         for x_blocks in range(-1, 2):
             for y_blocks in range(-1, 2):
-                if world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size] > 0:
+
+                if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
                     surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
@@ -427,7 +428,7 @@ def game(screen, username, token, host, port, size):
         for item in range(9):
             if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
                 hotbar_slot = item
-            screen.blit(transform.scale(block_texture[hotbar_items[item]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+            screen.blit(transform.scale(block_properties[hotbar_items[item]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
         screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
 

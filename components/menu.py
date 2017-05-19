@@ -29,6 +29,8 @@ class Button:
 
             elif release:
                 mouse.set_cursor(*cursors.tri_left)
+                #mixer.Sound('sound/random/click.ogg').play()
+
                 return self.function
 
             else:

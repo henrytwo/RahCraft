@@ -12,6 +12,7 @@ from components.player import *
 import components.rahma as rah
 import components.menu as menu
 import Game as Game
+import platform
 
 def login():
     global username, password, host, port
@@ -530,6 +531,12 @@ if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5276
 
+    if platform.system() == "Windows":
+        mixer.init()
+        music_enable = True
+    else:
+        music_enable = False
+
     online = False
 
     username = ''
@@ -586,7 +593,7 @@ if __name__ == "__main__":
 
     while navigation != 'exit':
         if navigation == 'game':
-            navigation = Game.game(screen, username, token, host, port, size)
+            navigation = Game.game(screen, username, token, host, port, size, music_enable)
         else:
             navigation = UI[navigation]()
 

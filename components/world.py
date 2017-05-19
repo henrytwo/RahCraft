@@ -18,13 +18,13 @@ def generate_tree(bx,by,world):
 
         
     for y in range(height):
-        world[bx][by-y] = block_lookup["Wood"]
+        world[bx][by-y] = block_lookup["WoodN"]
 
 
     for x in range(randint(3,5)):
         for y in range(randint(2,4)):
-            world[bx - x//2][by - y - height] = block_lookup["Leaves"]
-            world[bx + x//2][by - y - height] = block_lookup["Leaves"]
+            world[bx - x//2][by - y - height] = block_lookup["LeavesN"]
+            world[bx + x//2][by - y - height] = block_lookup["LeavesN"]
 
     return world
 
