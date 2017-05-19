@@ -140,7 +140,7 @@ def game(screen, username, token, host, port, size):
     hotbar = image.load("textures/gui/toolbar/toolbar.png").convert()
     selected = image.load("textures/gui/toolbar/selected.png").convert_alpha()
 
-    sky = transform.scale(image.load("textures/sky/sky.png"),(2800,800))
+    sky = transform.scale(image.load("textures/sky/sky.png"),(5600,800))
 
     sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
     moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
@@ -376,7 +376,7 @@ def game(screen, username, token, host, port, size):
 
         screen.fill(normalized_color)
 
-        screen.blit(sky,((0 - sky_tick%2400), y_offset//2 - 400))
+        screen.blit(sky,(int(0 - 5600 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
 
         print("Location %i:%i"%((0 - sky_tick%2400), y_offset//2 - 400))
 
