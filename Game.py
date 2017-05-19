@@ -148,7 +148,7 @@ def game(screen, username, token, host, port, size, music_enable):
 
     sound_list = glob.glob('sound/step/*.ogg')
 
-    sound_groups = list({sound[sound.index('step/') + 5:-5] for sound in sound_list})
+    sound_groups = [sound.split("/")[-1]for sound in sound_list]
 
     sound = {}
 
@@ -405,11 +405,19 @@ def game(screen, username, token, host, port, size, music_enable):
 
         surrounding_blocks = []
 
-        for x_blocks in range(-1, 2):
-            for y_blocks in range(-1, 2):
+        for y_blocks in range(-1, 2):
+            if block_properties[world[(block_clip[0] - 1 * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
+                surrounding_blocks.append(Rect(block_clip[0] - block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
 
-                if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
-                    surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
+            if block_properties[world[(block_clip[0] + 1 * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
+                surrounding_blocks.append(Rect(block_clip[0] + block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
+
+        for x_blocks in range(-1, 2):
+            if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - 1 * block_size) // block_size]][6] == 'collide':
+                surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - block_size, block_size, block_size))
+
+            if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] + 1 * block_size) // block_size]][6] == 'collide':
+                surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] + block_size, block_size, block_size))
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
 
