@@ -146,22 +146,23 @@ def game(screen, username, token, host, port, size):
     moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
 
 
-    '''
     sound_list = glob.glob('sound/step/*.ogg')
 
-    sound_groups = [sound[sound.index('step/') + 5:-5] for sound in sound_list if sound not in sound_groups]
-
-    print(sound_groups)
+    sound_groups = list({sound[sound.index('step/') + 5:-5] for sound in sound_list})
 
     sound = {}
 
     for sound_title in sound_groups:
-        for sound_dir in sound_list:
-            pass
-            #    sound[sound_title] = sound_list
+        local_sounds = []
 
-    print(sound_list)
-    '''
+        for sound_dir in sound_list:
+            if sound_title in sound_dir:
+                local_sounds.append(sound_dir)
+
+        sound[sound_title] = local_sounds
+
+    print(sound)
+
 
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
     hotbar_items = [1, 2, 3, 4, 5, 6, 7, 8, 9]
