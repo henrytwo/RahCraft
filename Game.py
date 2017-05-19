@@ -383,9 +383,7 @@ def game(screen, username, token, host, port, size):
 
         print(sky_tick)
 
-        screen.blit(sky,(int(0 - 5600 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
-
-        print("Location %i:%i"%((0 - sky_tick%2400), y_offset//2 - 400))
+        screen.blit(sky,(int(0 - 4800 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
 
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
             for y in range(0, size[1] + block_size + 1, block_size):
