@@ -303,12 +303,10 @@ class Window:
         pass
 
 class Inventory:
-    def __init__(self, x, y, inventory, hotbar):
-        self.x, self.y = x,y
+    def __init__(self, x, y, w, h):
         self.graphic = image.load('textures/gui/inventory.png')
-        self.inventory = inventory
-        self.hotbar = hotbar
+        self.x, self.y = w//2 - self.graphic.get_width()//2, h//2 - self.graphic.get_height()//2
 
-    def update(self, screen, mx, my, mb):
+    def update(self, screen, mx, my, mb, inventory, hotbar):
         screen.blit(self.graphic, (self.x, self.y))
 

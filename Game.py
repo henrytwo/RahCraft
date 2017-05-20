@@ -57,6 +57,12 @@ def inverted_rect(screen, block_size, width, rx, ry):
     except:
         pass
 
+def toggle(bool):
+    if bool:
+        return False
+    else:
+        return True
+
 def game(screen, username, token, host, port, size, music_enable):
     print('Starting game')
 
@@ -81,7 +87,7 @@ def game(screen, username, token, host, port, size, music_enable):
 
     tint = Surface(size)
     tint.fill((0,0,0))
-    tint.set_alpha(80)
+    tint.set_alpha(99)
 
     block_properties = load_blocks("block.rah")
     breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_"+str(i)+".png"), (20, 20)).convert_alpha() for i in range(10)]
@@ -145,6 +151,7 @@ def game(screen, username, token, host, port, size, music_enable):
     breaking_block = False
 
     fly = False
+    inventory_visible = False
 
     send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
@@ -192,6 +199,10 @@ def game(screen, username, token, host, port, size, music_enable):
 
     print(sound)
 
+    inventory = [[0 for i in range(10)] for n in range(4)]
+    hotbar = [0 for i in range(10)]
+
+    inventory_object = menu.Inventory(screen, mx, my, mb, inventory, hotbar)
 
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
     hotbar_items = [1, 2, 3, 5, 7, 8, 9, 10, 11]
@@ -245,20 +256,17 @@ def game(screen, username, token, host, port, size, music_enable):
 
             elif e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
-                    if paused:
-                        paused = False
-                    else:
-                        paused = True
+                    paused = toggle(paused)
 
                 elif not paused:
                     if e.unicode in INVENTORY_KEYS:
                         hotbar_slot = int(e.unicode) - 1
 
                     if e.key == K_f:
-                        if fly:
-                            fly = False
-                        else:
-                            fly = True
+                        fly = toggle(fly)
+
+                    if e.key == K_e:
+                        inventory_visible = toggle(inventory_visible)
 
             elif e.type == TICKEVENT:
                 event.clear(TICKEVENT)
@@ -451,18 +459,20 @@ def game(screen, username, token, host, port, size, music_enable):
             if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] + 1 * block_size) // block_size]][6] == 'collide':
                 surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] + block_size, block_size, block_size))
 
-        local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
+        local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly, paused)
 
-        inverted_rect(screen, block_size, 2, (mx + x_offset) // block_size * block_size - x_offset, (my + y_offset) // block_size * block_size - y_offset)
+        if not paused:
 
-        if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-            if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
-                block_request.add((hover_x, hover_y))
-                send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot]), SERVER))
+            inverted_rect(screen, block_size, 2, (mx + x_offset) // block_size * block_size - x_offset, (my + y_offset) // block_size * block_size - y_offset)
+
+            if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
+                    block_request.add((hover_x, hover_y))
+                    send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot]), SERVER))
 
 
-        if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-            hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+            if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                hotbar_items[hotbar_slot] = world[hover_x, hover_y]
 
         for remote in remote_players:
             remote_players[remote].update(screen, x_offset, y_offset)
@@ -477,8 +487,13 @@ def game(screen, username, token, host, port, size, music_enable):
 
         screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
 
+
+        #Pause screen
         if paused:
             screen.blit(tint, (0, 0))
+
+            text_surface = rah.text('Game Paused', 20)
+            screen.blit(text_surface,(size[0]//2 - text_surface.get_width()//2,50))
 
             nav_update = pause_menu.update(screen, release, mx, my, mb)
 
@@ -490,6 +505,11 @@ def game(screen, username, token, host, port, size, music_enable):
                     return 'menu'
                 else:
                     return nav_update
+
+        if inventory_visible:
+            screen.blit(tint, (0, 0))
+
+            inventory_object.update(screen,)
 
         display.update()
         clock.tick(120)

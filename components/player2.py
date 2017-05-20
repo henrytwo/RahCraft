@@ -76,8 +76,11 @@ class Player:
         else:
             self.vy -= 0
 
-    def update(self, screen, collision_blocks, x_offset, y_offset, fly, reach=5):
-        self.control(fly)
+    def update(self, screen, collision_blocks, x_offset, y_offset, fly, paused, reach=5):
+
+        if not paused:
+            self.control(fly)
+
         self.collide(collision_blocks, fly)
 
         draw.rect(screen, (255, 0, 0), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
