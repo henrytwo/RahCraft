@@ -39,7 +39,7 @@ class Player(object):
         self.username = player_username
         self.number = player_number
 
-        self.cord, self.spawnCord, self.inventory, self.health, self.hunger = self.get_player_info()
+        self.cord, self.spawnCord, self.inventory, self.hotbar, self.health, self.hunger = self.get_player_info()
 
         # self.saturation, self.foodLib
 
@@ -47,7 +47,7 @@ class Player(object):
         try:
             return PlayerData[self.username]
         except:
-            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint, [[0] * 2 for _ in range(36)], 10, 10]
+            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint, [[0] * 2 for _ in range(36)], [[2] * 2 for _ in range(9)], 10, 10]
             return PlayerData[self.username]
 
     def change_spawn(self, spawn_position):
@@ -89,7 +89,7 @@ class Player(object):
         # self.saturation = 10
 
     def save(self, block_size):
-        return [(self.cord[0]//block_size, self.cord[1]//block_size), self.spawnCord, self.inventory, self.health, self.hunger]
+        return [(self.cord[0]//block_size, self.cord[1]//block_size), self.spawnCord, self.inventory, self.hotbar, self.health, self.hunger]
 
 
 class World:
@@ -170,7 +170,6 @@ def heart_beats(message_queue, tick):
     while True:
         time.sleep(.06)
         tick += 1
-        print(tick)
         if tick % 1200 == 0:
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
             if tick >= 24000:
@@ -229,10 +228,10 @@ if __name__ == '__main__':
                 else:
                     PN = playerNDisconnect.popleft()
 
-                playerLocations = {players[x].username: [players[x].cord, (0, 0)] for x in players}
+                playerLocations = {players[x].username: players[x].cord for x in players}
 
                 players[address] = Player(PN, message[1])
-                sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]), playerLocations), address))
+                sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]), players[address].hotbar, players[address].inventory, playerLocations), address))
                 print('Player %s has connected from %s' % (message[1], address))
                 username.add(message[1])
 
@@ -250,7 +249,6 @@ if __name__ == '__main__':
 
             for i in players:
                 if players[i].username != players[address].username:
-                    print(x,y)
                     sendQueue.put(((1, players[address].username, x, y), i))
 
         elif command == 2:
@@ -288,12 +286,18 @@ if __name__ == '__main__':
                         players[i].change_spawn(world.spawnpoint)
 
             world.place_block(message[1], message[2], message[3])
+            players[address].hotbar[message[4]][1] -= 1
+
+            if players[address].hotbar[message[4]][1] == 0:
+                players[address].hotbar[message[4]] = [0, 0]
+
+            sendQueue.put(((6, message[4], players[address].hotbar[message[4]]), address))
 
             for i in players:
                 sendQueue.put(((4, message[1], message[2], message[3]), i))
 
-        # elif command == 5:
-        #     player[address][0].change_inventory
+        #elif command == 5:
+            #player[address][0].change_inventory()
 
         elif command == 9:
 
