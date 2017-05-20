@@ -106,7 +106,9 @@ def game(screen, username, token, host, port, size, music_enable):
         elif first_message[0] == 0:
             break
 
-    world_size_x, world_size_y, player_x, player_y, players = first_message[1:]
+    world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory, R_players = first_message[1:]
+
+
 
     print("player done")
 
@@ -116,7 +118,7 @@ def game(screen, username, token, host, port, size, music_enable):
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
-    local_player = player2.Player(player_x, player_y, block_size, block_size, (K_a, K_d, K_w, K_s))
+    local_player = player2.Player(player_x, player_y, block_size-5, block_size-5, (K_a, K_d, K_w, K_s))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -178,11 +180,9 @@ def game(screen, username, token, host, port, size, music_enable):
 
 
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
-    hotbar_items = [1, 2, 3, 5, 7, 8, 9, 10, 11]
     hotbar_slot = 1
 
     INVENTORY_KEYS = {str(x) for x in range(1, 10)}
-    inventory = [[-1] * 6 for x in range(7)]
 
     print("ini done")
 
@@ -195,6 +195,11 @@ def game(screen, username, token, host, port, size, music_enable):
 
     sky_tick = 1
     SKYTICKDEFAULT = 120
+
+    #====================Init remote players================================
+
+    for Rp in R_players:
+        remote_players[Rp] = player2.RemotePlayer(R_players[Rp][0], R_players[Rp][1], block_size-5)
 
     while True:
 
@@ -308,6 +313,11 @@ def game(screen, username, token, host, port, size, music_enable):
                 if (pos_x, pos_y) in block_request:
                     block_request.remove((pos_x, pos_y))
 
+            elif command == 6:
+                slot, meta_data = message
+
+                hotbar_items[slot] = meta_data[:]
+
             elif command == 9:
                 username = message[0]
 
@@ -420,29 +430,20 @@ def game(screen, username, token, host, port, size, music_enable):
 
         surrounding_blocks = []
 
-        for y_blocks in range(-1, 2):
-            if block_properties[world[(block_clip[0] - 1 * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
-                surrounding_blocks.append(Rect(block_clip[0] - block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
-
-            if block_properties[world[(block_clip[0] + 1 * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
-                surrounding_blocks.append(Rect(block_clip[0] + block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
-
         for x_blocks in range(-1, 2):
-            if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - 1 * block_size) // block_size]][6] == 'collide':
-                surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - block_size, block_size, block_size))
+            for y_blocks in range(-1, 2):
 
-            if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] + 1 * block_size) // block_size]][6] == 'collide':
-                surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] + block_size, block_size, block_size))
+                if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
+                    surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
 
         local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly)
 
         inverted_rect(screen, block_size, 2, (mx + x_offset) // block_size * block_size - x_offset, (my + y_offset) // block_size * block_size - y_offset)
 
         if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-            if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick:
+            if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
                 block_request.add((hover_x, hover_y))
-                send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot]), SERVER))
-
+                send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
 
         if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
             hotbar_items[hotbar_slot] = world[hover_x, hover_y]
@@ -456,7 +457,9 @@ def game(screen, username, token, host, port, size, music_enable):
         for item in range(9):
             if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
                 hotbar_slot = item
-            screen.blit(transform.scale(block_properties[hotbar_items[item]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+            screen.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+            if hotbar_items[item][1] != 0:
+                screen.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
         screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
 
