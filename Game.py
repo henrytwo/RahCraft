@@ -7,6 +7,7 @@ import pickle
 import components.rahma as rah
 from math import *
 import components.player2 as player2
+import components.menu as menu
 import time as ti
 import glob
 
@@ -42,15 +43,19 @@ def invert(colour):
     return (255 - colour[0], 255 - colour[1], 255 - colour[2])
 
 def inverted_rect(screen, block_size, width, rx, ry):
-    for x in range(block_size):
-        for y in range(width):
-            screen.set_at((rx + x, ry + y), invert(screen.get_at((rx + x, ry + y))))
-            screen.set_at((rx + x, ry + y + block_size - width), invert(screen.get_at((rx + x, ry + y + block_size - width))))
+    try:
+        for x in range(block_size):
+            for y in range(width):
+                screen.set_at((rx + x, ry + y), invert(screen.get_at((rx + x, ry + y))))
+                screen.set_at((rx + x, ry + y + block_size - width), invert(screen.get_at((rx + x, ry + y + block_size - width))))
 
-    for y in range(block_size - width * 2):
-        for x in range(width):
-            screen.set_at((rx + x, ry + y + width), invert(screen.get_at((rx + x, ry + y + width))))
-            screen.set_at((rx + x + block_size - width, ry + y + width), invert(screen.get_at((rx + x + block_size - width, ry + y + width))))
+        for y in range(block_size - width * 2):
+            for x in range(width):
+                screen.set_at((rx + x, ry + y + width), invert(screen.get_at((rx + x, ry + y + width))))
+                screen.set_at((rx + x + block_size - width, ry + y + width), invert(screen.get_at((rx + x + block_size - width, ry + y + width))))
+
+    except:
+        pass
 
 def game(screen, username, token, host, port, size, music_enable):
     print('Starting game')
@@ -73,6 +78,10 @@ def game(screen, username, token, host, port, size, music_enable):
     message_queue = Queue()
 
     block_size = 20
+
+    tint = Surface(size)
+    tint.fill((0,0,0))
+    tint.set_alpha(80)
 
     block_properties = load_blocks("block.rah")
     breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_"+str(i)+".png"), (20, 20)).convert_alpha() for i in range(10)]
@@ -147,6 +156,13 @@ def game(screen, username, token, host, port, size, music_enable):
 
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
 
+    pause_list = [[0, 'unpause', "Back to game"],
+                 [1, 'assistance', "Help"],
+                 [2, 'options', "Options"],
+                 [3, 'about', "About"],
+                 [4, 'menu', "Exit"]]
+
+    pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
 
     #=============================init inventory==========================
 
@@ -198,6 +214,7 @@ def game(screen, username, token, host, port, size, music_enable):
 
     while True:
 
+        release = False
         on_tick = False
         block_broken = False
         tickPerFrame = max(clock.get_fps() / 20, 1)
@@ -207,7 +224,7 @@ def game(screen, username, token, host, port, size, music_enable):
                 quit_game()
                 return 'menu'
 
-            elif e.type == MOUSEBUTTONDOWN:
+            elif e.type == MOUSEBUTTONDOWN and not paused:
                 if e.button == 1:
                     click = True
 
@@ -459,6 +476,20 @@ def game(screen, username, token, host, port, size, music_enable):
             screen.blit(transform.scale(block_properties[hotbar_items[item]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
         screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
+
+        if paused:
+            screen.blit(tint, (0, 0))
+
+            nav_update = pause_menu.update(screen, release, mx, my, mb)
+
+            if nav_update:
+                if nav_update == 'unpause':
+                    paused = False
+                elif nav_update == 'menu':
+                    quit_game()
+                    return 'menu'
+                else:
+                    return nav_update
 
         display.update()
         clock.tick(120)
