@@ -310,3 +310,11 @@ class Inventory:
     def update(self, screen, mx, my, mb, inventory, hotbar):
         screen.blit(self.graphic, (self.x, self.y))
 
+        for y in range(len(inventory)):
+            for x in range(len(inventory[y])):
+                draw.rect(screen, (255,0,0), (self.x + 15 + x * 36, self.y + 168 + y * 36, 32, 32), 2)
+
+        for x in range(len(hotbar)):
+            draw.rect(screen, (255,0,0), (self.x + 15 + x * 36, self.y + 282, 32, 32), 2)
+
+

@@ -201,10 +201,10 @@ def game(screen, username, token, host, port, size, music_enable):
 
     print(sound)
 
-    inventory = [[0 for i in range(10)] for n in range(4)]
-    hotbar = [0 for i in range(10)]
+    inventory_content = [[0 for i in range(9)] for n in range(3)]
+    hotbar_content = [0 for i in range(9)]
 
-    inventory_object = menu.Inventory(screen, mx, my, mb, inventory, hotbar)
+    inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
     hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
     hotbar_slot = 1
@@ -465,16 +465,16 @@ def game(screen, username, token, host, port, size, music_enable):
 
         if not paused:
 
-        if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-            if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
-                block_request.add((hover_x, hover_y))
-                send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
-
-        if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-            hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+            if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
+                    block_request.add((hover_x, hover_y))
+                    send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
 
             if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                 hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+
+                if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    hotbar_items[hotbar_slot] = world[hover_x, hover_y]
 
         for remote in remote_players:
             remote_players[remote].update(screen, x_offset, y_offset)
@@ -513,7 +513,7 @@ def game(screen, username, token, host, port, size, music_enable):
         if inventory_visible:
             screen.blit(tint, (0, 0))
 
-            inventory_object.update(screen,)
+            inventory_object.update(screen, mx, my, mb, inventory_content, hotbar_content)
 
         display.update()
         clock.tick(120)
