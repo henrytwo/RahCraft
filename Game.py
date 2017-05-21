@@ -483,6 +483,7 @@ def game(screen, username, token, host, port, size, music_enable):
 
         #====================Inventory/hotbar========================
 
+
         screen.blit(hotbar, hotbarRect)
         for item in range(9):
             if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
