@@ -306,15 +306,26 @@ class Inventory:
     def __init__(self, x, y, w, h):
         self.graphic = image.load('textures/gui/inventory.png')
         self.x, self.y = w//2 - self.graphic.get_width()//2, h//2 - self.graphic.get_height()//2
+        self.w, self.h = w,h
 
-    def update(self, screen, mx, my, mb, inventory, hotbar):
+    def update(self, screen, mx, my, mb, inventory, hotbar, block_properties):
         screen.blit(self.graphic, (self.x, self.y))
 
-        for y in range(len(inventory)):
-            for x in range(len(inventory[y])):
-                draw.rect(screen, (255,0,0), (self.x + 15 + x * 36, self.y + 168 + y * 36, 32, 32), 2)
+        for row in range(len(inventory)):
+            for item in range(len(inventory[row])):
 
-        for x in range(len(hotbar)):
-            draw.rect(screen, (255,0,0), (self.x + 15 + x * 36, self.y + 282, 32, 32), 2)
+                if inventory[row][item][1] != 0:
+                    screen.blit(transform.scale(block_properties[inventory[row][item][0]][3], (32, 32)),
+                                (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
+                    screen.blit(rah.text(str(inventory[row][item][1]), 10),
+                                (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+        for item in range(len(hotbar)):
+            if hotbar[item][1] != 0:
+                screen.blit(transform.scale(block_properties[hotbar[item][0]][3], (32, 32)),
+                            (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+                screen.blit(rah.text(str(hotbar[item][1]), 10),
+                            (self.x + 16 + item * 36, self.y + 283, 32, 32))
 

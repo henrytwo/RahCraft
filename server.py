@@ -47,7 +47,7 @@ class Player(object):
         try:
             return PlayerData[self.username]
         except:
-            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint, [{slot:[0,1]} for slot in range(36)], [{slot:[2,2]} for slot in range(9)], 10, 10]
+            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint, [[[5,32] for _ in range(9)] for __ in range(3)], [[2,64] for _ in range(9)], 10, 10]
 
             print(PlayerData[self.username])
             return PlayerData[self.username]

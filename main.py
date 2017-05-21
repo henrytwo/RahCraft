@@ -19,7 +19,7 @@ def login():
     global username, password, host, port
 
     def hash(target):
-        return hashlib.md5(target.encode('utf-8')).hexdigest()
+        return hashlib.sha512(target.encode('utf-8')).hexdigest()
 
     clock = time.Clock()
 
@@ -517,6 +517,9 @@ def menu_screen():
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
+
+            if e.type == KEYDOWN and e.key == K_ESCAPE:
+                return 'login'
 
         mx, my = mouse.get_pos()
         mb = mouse.get_pressed()

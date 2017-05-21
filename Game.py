@@ -491,8 +491,9 @@ def game(screen, username, token, host, port, size, music_enable):
             for item in range(9):
                 if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
                     hotbar_slot = item
-                screen.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+
                 if hotbar_items[item][1] != 0:
+                    screen.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
                     screen.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
             screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
@@ -519,7 +520,7 @@ def game(screen, username, token, host, port, size, music_enable):
             if inventory_visible:
                 screen.blit(tint, (0, 0))
 
-                inventory_object.update(screen, mx, my, mb, inventory_items, hotbar_items)
+                inventory_object.update(screen, mx, my, mb, inventory_items, hotbar_items, block_properties)
 
             display.update()
             clock.tick(120)
