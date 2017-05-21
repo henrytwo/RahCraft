@@ -10,7 +10,7 @@ import components.player2 as player2
 import components.menu as menu
 import time as ti
 import glob
-
+import traceback
 
 def player_sender(send_queue, server):
     print('Sender running...')
@@ -64,6 +64,7 @@ def toggle(bool):
         return True
 
 def game(screen, username, token, host, port, size, music_enable):
+
     print('Starting game')
 
     font.init()
@@ -220,306 +221,314 @@ def game(screen, username, token, host, port, size, music_enable):
     sky_tick = 1
     SKYTICKDEFAULT = 120
 
-    #====================Init remote players================================
+    try:
 
-    for Rp in R_players:
-        remote_players[Rp] = player2.RemotePlayer(R_players[Rp][0], R_players[Rp][1], block_size-5)
+        #====================Init remote players================================
 
-    while True:
+        for Rp in R_players:
+            remote_players[Rp] = player2.RemotePlayer(R_players[Rp][0], R_players[Rp][1], block_size-5)
 
-        release = False
-        on_tick = False
-        block_broken = False
-        tickPerFrame = max(clock.get_fps() / 20, 1)
+        while True:
 
-        for e in event.get():
-            if e.type == QUIT:
-                quit_game()
-                return 'menu'
+            release = False
+            on_tick = False
+            block_broken = False
+            tickPerFrame = max(clock.get_fps() / 20, 1)
 
-            elif e.type == MOUSEBUTTONDOWN and not paused:
-                if e.button == 1:
-                    click = True
+            for e in event.get():
+                if e.type == QUIT:
+                    quit_game()
+                    return 'menu'
 
-                if e.button == 4:
-                    hotbar_slot = max(-1, hotbar_slot - 1)
+                elif e.type == MOUSEBUTTONDOWN and not paused:
+                    if e.button == 1:
+                        click = True
 
-                    if hotbar_slot == -1:
-                        hotbar_slot = 8
+                    if e.button == 4:
+                        hotbar_slot = max(-1, hotbar_slot - 1)
 
-                elif e.button == 5:
-                    hotbar_slot = min(9, hotbar_slot + 1)
+                        if hotbar_slot == -1:
+                            hotbar_slot = 8
 
-                    if hotbar_slot == 9:
-                        hotbar_slot = 0
+                    elif e.button == 5:
+                        hotbar_slot = min(9, hotbar_slot + 1)
 
-            elif e.type == MOUSEBUTTONUP and e.button == 1:
-                release = True
+                        if hotbar_slot == 9:
+                            hotbar_slot = 0
 
-            elif e.type == KEYDOWN:
-                if e.key == K_ESCAPE:
-                    paused = toggle(paused)
+                elif e.type == MOUSEBUTTONUP and e.button == 1:
+                    release = True
 
-                elif not paused:
-                    if e.unicode in INVENTORY_KEYS:
-                        hotbar_slot = int(e.unicode) - 1
+                elif e.type == KEYDOWN:
+                    if e.key == K_ESCAPE:
+                        paused = toggle(paused)
 
-                    if e.key == K_f:
-                        fly = toggle(fly)
+                    elif not paused:
+                        if e.unicode in INVENTORY_KEYS:
+                            hotbar_slot = int(e.unicode) - 1
 
-                    if e.key == K_e:
-                        inventory_visible = toggle(inventory_visible)
+                        if e.key == K_f:
+                            fly = toggle(fly)
 
-            elif e.type == TICKEVENT:
-                event.clear(TICKEVENT)
-                tickTimer = time.set_timer(TICKEVENT, 50)
+                        if e.key == K_e:
+                            inventory_visible = toggle(inventory_visible)
 
-                on_tick = True
-                current_tick += 1
-                if current_tick == 20:
-                    current_tick = 0
+                elif e.type == TICKEVENT:
+                    event.clear(TICKEVENT)
+                    tickTimer = time.set_timer(TICKEVENT, 50)
 
-        x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
-        y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
-        block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
+                    on_tick = True
+                    current_tick += 1
+                    if current_tick == 20:
+                        current_tick = 0
 
-        if on_tick:
-            send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVER]))
+            x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
+            y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
+            block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
 
-        displaying_world = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
-        update_cost = displaying_world.flatten()
-        update_cost = np.count_nonzero(update_cost == -1)
+            if on_tick:
+                send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVER]))
 
-        if update_cost > 10 and on_tick and (x_offset // block_size, y_offset // block_size) not in render_request:
-            send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
+            displaying_world = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
+            update_cost = displaying_world.flatten()
+            update_cost = np.count_nonzero(update_cost == -1)
 
-            render_request.add((x_offset // block_size, y_offset // block_size))
-        # ===================Decode Message======================
+            if update_cost > 10 and on_tick and (x_offset // block_size, y_offset // block_size) not in render_request:
+                send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
 
-        try:
-            server_message = message_queue.get_nowait()
-            command, message = server_message[0], server_message[1:]
+                render_request.add((x_offset // block_size, y_offset // block_size))
+            # ===================Decode Message======================
 
-            if command == 1:
-                username, current_x, current_y = message
-                if username in remote_players:
-                    remote_players[username].calculate_velocity((current_x, current_y), tickPerFrame)
-                else:
-                    if type(current_y) is str:
-                        current_x = int(current_x) * 20
-                        current_y = int(current_y) * 20
+            try:
+                server_message = message_queue.get_nowait()
+                command, message = server_message[0], server_message[1:]
 
-                    remote_players[username] = player2.RemotePlayer(current_x, current_y, block_size)
+                if command == 1:
+                    username, current_x, current_y = message
+                    if username in remote_players:
+                        remote_players[username].calculate_velocity((current_x, current_y), tickPerFrame)
+                    else:
+                        if type(current_y) is str:
+                            current_x = int(current_x) * 20
+                            current_y = int(current_y) * 20
 
-            elif command == 2:
-                chunk_positionX, chunk_positionY, world_chunk = message
+                        remote_players[username] = player2.RemotePlayer(current_x, current_y, block_size)
 
-                world[chunk_positionX - 5:chunk_positionX + 45, chunk_positionY - 5:chunk_positionY + 31] = np.array(world_chunk, copy=True)
+                elif command == 2:
+                    chunk_positionX, chunk_positionY, world_chunk = message
 
-                if (chunk_positionX, chunk_positionY) in render_request:
-                    render_request.remove((chunk_positionX, chunk_positionY))
+                    world[chunk_positionX - 5:chunk_positionX + 45, chunk_positionY - 5:chunk_positionY + 31] = np.array(world_chunk, copy=True)
 
-            elif command == 3:
-                pos_x, pos_y = message
+                    if (chunk_positionX, chunk_positionY) in render_request:
+                        render_request.remove((chunk_positionX, chunk_positionY))
 
-                world[pos_x, pos_y] = 0
+                elif command == 3:
+                    pos_x, pos_y = message
 
-                if (pos_x, pos_y) in block_request:
-                    block_request.remove((pos_x, pos_y))
+                    world[pos_x, pos_y] = 0
 
-            elif command == 4:
-                pos_x, pos_y, block = message
+                    if (pos_x, pos_y) in block_request:
+                        block_request.remove((pos_x, pos_y))
 
-                world[pos_x, pos_y] = block
+                elif command == 4:
+                    pos_x, pos_y, block = message
 
-                if (pos_x, pos_y) in block_request:
-                    block_request.remove((pos_x, pos_y))
+                    world[pos_x, pos_y] = block
 
-            elif command == 6:
-                slot, meta_data = message
+                    if (pos_x, pos_y) in block_request:
+                        block_request.remove((pos_x, pos_y))
 
-                hotbar_items[slot] = meta_data[:]
+                elif command == 6:
+                    slot, meta_data = message
 
-            elif command == 7:
-                slot, meta_data = message
+                    hotbar_items[slot] = meta_data[:]
 
-                inventory_items[slot] = meta_data[:]
+                elif command == 7:
+                    slot, meta_data = message
 
-            elif command == 9:
-                username = message[0]
+                    inventory_items[slot] = meta_data[:]
 
-                del remote_players[username]
+                elif command == 9:
+                    username = message[0]
 
-            elif command == 100:
-                send_time, tick = message
+                    del remote_players[username]
 
-                tick_offset = (round(ti.time(), 3) - send_time)*20
+                elif command == 100:
+                    send_time, tick = message
 
-                sky_tick = tick_offset + tick
+                    tick_offset = (round(ti.time(), 3) - send_time)*20
 
-        except:
-            pass
+                    sky_tick = tick_offset + tick
 
-        # testing==================================================
+            except:
+                pass
 
-        mb = mouse.get_pressed()
-        mx, my = mouse.get_pos()
+            # testing==================================================
 
-        hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
+            mb = mouse.get_pressed()
+            mx, my = mouse.get_pos()
 
-        display.set_caption("Rahcraft Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
-            block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_properties[hotbar_slot][0] +
-                            "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
+            hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
-        block_clip_cord = (block_clip[0]//block_size, block_clip[1]//block_size)
-        if mb[0] == 0:
-            current_breaking = []
-            breaking_block = False
+            display.set_caption("Rahcraft Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
+                block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_properties[hotbar_slot][0] +
+                                "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
 
-        elif mb[0] == 1:
-            if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                breaking_block = True
-                current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
-                if current_breaking[3] >= block_properties[current_breaking[0]][4]:
-                    block_broken = True
-
-            elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
-                    current_breaking[3] += 1
-
-                    if current_breaking[3] >= block_properties[current_breaking[0]][4]:
-                        block_broken = True
-                else:
-                    breaking_block = False
-                    current_breaking = []
-
-            if block_broken:
-                block_request.add((hover_x, hover_y))
-                send_queue.put(((3, hover_x, hover_y), SERVER))
-
+            block_clip_cord = (block_clip[0]//block_size, block_clip[1]//block_size)
+            if mb[0] == 0:
                 current_breaking = []
                 breaking_block = False
 
-        # ==================Render World==========================
-        if sky_tick % SKYTICKDEFAULT != 0: # Change SKYTICKDEFAULT to a lower number to test
-            if on_tick:
-                sky_tick += 1
-        else:
+            elif mb[0] == 1:
+                if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    breaking_block = True
+                    current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
+                    if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                        block_broken = True
 
-            sky_tick += 1
-            if sky_tick >= 24000:
-                sky_tick = 0
+                elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
+                        current_breaking[3] += 1
 
-                print("Reset")
+                        if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                            block_broken = True
+                    else:
+                        breaking_block = False
+                        current_breaking = []
 
-        '''
-
-            if darken:
-                sky_color = [i - 1 for i in sky_color]
-                if sky_color[2] == 35:
-                    darken = False
-            else:
-                sky_color = [i + 1 for i in sky_color]
-                if sky_color[2] == DEFAULT_BLUE:
-                    darken = True
-
-            normalized_color = [max(x, 0) for x in sky_color]
-
-
-
-        screen.fill(normalized_color)
-
-        '''
-        screen.fill((255,0,0))
-
-        print(sky_tick)
-
-        screen.blit(sky,(int(0 - 4800 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
-
-        screen.blit(sun,(int(5600 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
-        screen.blit(moon,(int(2800 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
-
-        print(int(2800 - 4800 * (sky_tick%24000)/24000), int(5600 - 4800 * (sky_tick%24000)/24000))
-
-        for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
-            for y in range(0, size[1] + block_size + 1, block_size):
-                block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
-
-                if len(block_properties) > block > 0:
-                    screen.blit(block_properties[block][3], (x - x_offset % block_size, y - y_offset % block_size))
-
-                    if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[2] == (y + y_offset) // block_size:
-                        percent_broken = (current_breaking[3]/block_properties[current_breaking[0]][4]) * 10
-                        screen.blit(breaking_animation[int(percent_broken)], (x - x_offset % block_size, y - y_offset % block_size))
-
-                elif block < 0:
-                    draw.rect(screen, (0, 0, 0), (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
-
-        surrounding_blocks = []
-
-        for x_blocks in range(-1, 2):
-            for y_blocks in range(-1, 2):
-
-                if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
-                    surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
-
-        local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly, paused)
-
-        if not paused:
-
-            if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
+                if block_broken:
                     block_request.add((hover_x, hover_y))
-                    send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
+                    send_queue.put(((3, hover_x, hover_y), SERVER))
 
-            if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+                    current_breaking = []
+                    breaking_block = False
+
+            # ==================Render World==========================
+            if sky_tick % SKYTICKDEFAULT != 0: # Change SKYTICKDEFAULT to a lower number to test
+                if on_tick:
+                    sky_tick += 1
+            else:
+
+                sky_tick += 1
+                if sky_tick >= 24000:
+                    sky_tick = 0
+
+                    print("Reset")
+
+            '''
+
+                if darken:
+                    sky_color = [i - 1 for i in sky_color]
+                    if sky_color[2] == 35:
+                        darken = False
+                else:
+                    sky_color = [i + 1 for i in sky_color]
+                    if sky_color[2] == DEFAULT_BLUE:
+                        darken = True
+
+                normalized_color = [max(x, 0) for x in sky_color]
+
+
+
+            screen.fill(normalized_color)
+
+            '''
+            screen.fill((255,0,0))
+
+            print(sky_tick)
+
+            screen.blit(sky,(int(0 - 4800 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
+
+            screen.blit(sun,(int(5600 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
+            screen.blit(moon,(int(2800 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
+
+            print(int(2800 - 4800 * (sky_tick%24000)/24000), int(5600 - 4800 * (sky_tick%24000)/24000))
+
+            for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
+                for y in range(0, size[1] + block_size + 1, block_size):
+                    block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
+
+                    if len(block_properties) > block > 0:
+                        screen.blit(block_properties[block][3], (x - x_offset % block_size, y - y_offset % block_size))
+
+                        if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[2] == (y + y_offset) // block_size:
+                            percent_broken = (current_breaking[3]/block_properties[current_breaking[0]][4]) * 10
+                            screen.blit(breaking_animation[int(percent_broken)], (x - x_offset % block_size, y - y_offset % block_size))
+
+                    elif block < 0:
+                        draw.rect(screen, (0, 0, 0), (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
+
+            surrounding_blocks = []
+
+            for x_blocks in range(-1, 2):
+                for y_blocks in range(-1, 2):
+
+                    if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
+                        surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
+
+            local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly, paused)
+
+            if not paused:
+
+                if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
+                        block_request.add((hover_x, hover_y))
+                        send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = world[hover_x, hover_y]
 
-        for remote in remote_players:
-            remote_players[remote].update(screen, x_offset, y_offset)
+                    if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                        hotbar_items[hotbar_slot] = world[hover_x, hover_y]
 
-        #====================Inventory/hotbar========================
+            for remote in remote_players:
+                remote_players[remote].update(screen, x_offset, y_offset)
 
-
-        screen.blit(hotbar, hotbarRect)
-        for item in range(9):
-            if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
-                hotbar_slot = item
-            screen.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
-            if hotbar_items[item][1] != 0:
-                screen.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
-
-        screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
+            #====================Inventory/hotbar========================
 
 
-        #Pause screen
-        if paused:
-            screen.blit(tint, (0, 0))
+            screen.blit(hotbar, hotbarRect)
+            for item in range(9):
+                if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
+                    hotbar_slot = item
+                screen.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+                if hotbar_items[item][1] != 0:
+                    screen.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
 
-            text_surface = rah.text('Game Paused', 20)
-            screen.blit(text_surface,(size[0]//2 - text_surface.get_width()//2,50))
+            screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
 
-            nav_update = pause_menu.update(screen, release, mx, my, mb)
 
-            if nav_update:
-                if nav_update == 'unpause':
-                    paused = False
-                elif nav_update == 'menu':
-                    quit_game()
-                    return 'menu'
-                else:
-                    return nav_update
+            #Pause screen
+            if paused:
+                screen.blit(tint, (0, 0))
 
-        if inventory_visible:
-            screen.blit(tint, (0, 0))
+                text_surface = rah.text('Game Paused', 20)
+                screen.blit(text_surface,(size[0]//2 - text_surface.get_width()//2,50))
 
-            inventory_object.update(screen, mx, my, mb, inventory_items, hotbar_items)
+                nav_update = pause_menu.update(screen, release, mx, my, mb)
 
-        display.update()
-        clock.tick(120)
+                if nav_update:
+                    if nav_update == 'unpause':
+                        paused = False
+                    elif nav_update == 'menu':
+                        quit_game()
+                        return 'menu'
+                    else:
+                        return nav_update
+
+            if inventory_visible:
+                screen.blit(tint, (0, 0))
+
+                inventory_object.update(screen, mx, my, mb, inventory_items, hotbar_items)
+
+            display.update()
+            clock.tick(120)
+
+    except:
+        traceback.print_exc()
+        quit_game()
+        return 'menu'
+
 
 if __name__ == "__main__":
     host = "127.0.0.1"

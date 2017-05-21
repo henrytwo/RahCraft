@@ -4,6 +4,7 @@ import pickle
 import numpy as np
 import socket
 import hashlib
+import traceback
 
 import sys
 sys.path.extend(['general/','components/'])
@@ -591,9 +592,11 @@ if __name__ == "__main__":
           'auth':authenticate}
 
 
+
     while navigation != 'exit':
         if navigation == 'game':
             navigation = Game.game(screen, username, token, host, port, size, music_enable)
+
         else:
             navigation = UI[navigation]()
 
