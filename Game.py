@@ -121,7 +121,7 @@ def game(screen, username, token, host, port, size, music_enable):
         elif first_message[0] == 0:
             break
 
-    world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory, R_players = first_message[1:]
+    world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory_items, R_players = first_message[1:]
 
 
 
@@ -200,9 +200,6 @@ def game(screen, username, token, host, port, size, music_enable):
         sound[sound_title] = local_sounds
 
     print(sound)
-
-    inventory_content = [[0 for i in range(9)] for n in range(3)]
-    hotbar_content = [0 for i in range(9)]
 
     inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
@@ -342,6 +339,11 @@ def game(screen, username, token, host, port, size, music_enable):
                 slot, meta_data = message
 
                 hotbar_items[slot] = meta_data[:]
+
+            elif command == 7:
+                slot, meta_data = message
+
+                inventory_items[slot] = meta_data[:]
 
             elif command == 9:
                 username = message[0]
@@ -513,7 +515,7 @@ def game(screen, username, token, host, port, size, music_enable):
         if inventory_visible:
             screen.blit(tint, (0, 0))
 
-            inventory_object.update(screen, mx, my, mb, inventory_content, hotbar_content)
+            inventory_object.update(screen, mx, my, mb, inventory_items, hotbar_items)
 
         display.update()
         clock.tick(120)

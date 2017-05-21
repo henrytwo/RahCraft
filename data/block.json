@@ -1,0 +1,156 @@
+{
+
+    "Air"{
+        "texture":"mob_spawner.png"
+        "icon":"mob_spawner.png"
+        "collison":"pass"
+        "sound":"nothing"
+        "hardness":"1"
+    }
+
+        
+    "Grass"{
+        "texture":"grass_side.png"
+        "icon":"grass_side.png"
+        "collison":"collide"
+        "sound":"grass"
+        "hardness":"19"
+    }
+
+        
+    "Dirt"{
+        "texture":"dirt.png"
+        "icon":"dirt.png"
+        "collison":"collide"
+        "sound":"grass"
+        "hardness":"19"
+    }
+
+        
+    "Stone"{
+        "texture":"stone.png"
+        "icon":"stone.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"150"
+    }
+
+        
+    "WoodN"{
+        "texture":"log_spruce.png"
+        "icon":"log_spruce.png"
+        "collison":"pass"
+        "sound":"wood"
+        "hardness":"60"
+    }
+
+        
+    "Wood"{
+        "texture":"log_spruce.png"
+        "icon":"log_spruce.png"
+        "collison":"collide"
+        "sound":"wood"
+        "hardness":"60"
+    }
+
+        
+    "LeavesN"{
+        "texture":"leaves_oak.png"
+        "icon":"leaves_oak.png"
+        "collison":"pass"
+        "sound":"grass"
+        "hardness":"7"
+    }
+
+        
+    "Leaves"{
+        "texture":"leaves_oak.png"
+        "icon":"leaves_oak.png"
+        "collison":"collide"
+        "sound":"grass"
+        "hardness":"7"
+    }
+
+        
+    "Planks"{
+        "texture":"planks_oak.png"
+        "icon":"planks_oak.png"
+        "collison":"collide"
+        "sound":"wood"
+        "hardness":"60"
+    }
+
+        
+    "Cobble Stone"{
+        "texture":"cobblestone.png"
+        "icon":"cobblestone.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"200"
+    }
+
+        
+    "Crafting Bench"{
+        "texture":"crafting_table_front.png"
+        "icon":"crafting_table_front.png"
+        "collison":"collide"
+        "sound":"wood"
+        "hardness":"75"
+    }
+
+        
+    "Glass"{
+        "texture":"glass_silver.png"
+        "icon":"glass_silver.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"9"
+    }
+
+        
+    "Bed Rock"{
+        "texture":"bedrock.png"
+        "icon":"bedrock.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"10000000000"
+    }
+
+        
+    "Diamond Ore"{
+        "texture":"diamond_ore.png"
+        "icon":"diamond_ore.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"300"
+    }
+
+        
+    "Gold Ore"{
+        "texture":"gold_ore.png"
+        "icon":"gold_ore.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"300"
+    }
+
+        
+    "Coal Ore"{
+        "texture":"coal_ore.png"
+        "icon":"coal_ore.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"300"
+    }
+
+        
+    "Iron Ore"{
+        "texture":"iron_ore.png"
+        "icon":"iron_ore.png"
+        "collison":"collide"
+        "sound":"stone"
+        "hardness":"300"
+    }
+
+        
+}

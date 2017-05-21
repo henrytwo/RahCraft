@@ -81,15 +81,14 @@ class Player(object):
         # self.x = self.spawnx
         # self.y = self.spawny
 
-        pass
-
         self.inventory = [[0] * 2 for _ in range(36)]
+        self.hotbar = [[0] * 2 for _ in range(36)]
         self.hunger = 10
         self.health = 10
         # self.saturation = 10
 
     def save(self, block_size):
-        return [(self.cord[0]//block_size, self.cord[1]//block_size), self.spawnCord, self.inventory, self.hotbar, self.health, self.hunger]
+        return [(self.cord[0]//block_size, self.cord[1]//block_size), self.spawnCord, self.hotbar, self.inventory, self.health, self.hunger]
 
 
 class World:
