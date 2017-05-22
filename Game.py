@@ -39,7 +39,7 @@ def load_blocks(block_file):
             "\n").split(" // ")
         blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")),
                                (int(x) for x in outline.split(",")),
-                               transform.scale(image.load("textures/blocks/" + block_image), (20, 20)), int(hardness),
+                               transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (20, 20)), int(hardness),
                                soundpack, collision]
 
     return blocks
@@ -228,6 +228,11 @@ def game(surf, username, token, host, port, size, music_enable):
     sky_tick = 1
     SKYTICKDEFAULT = 120
 
+    # ==========================Crafting====================================
+    crafting_object = menu.Crafting(size[0], size[1])
+
+    crafting = False
+
     try:
 
         # ====================Init remote players================================
@@ -241,6 +246,7 @@ def game(surf, username, token, host, port, size, music_enable):
             on_tick = False
             block_broken = False
             tickPerFrame = max(clock.get_fps() / 20, 1)
+            r_click = False
 
             for e in event.get():
                 if e.type == QUIT:
@@ -250,6 +256,8 @@ def game(surf, username, token, host, port, size, music_enable):
                 elif e.type == MOUSEBUTTONDOWN and not paused:
                     if e.button == 1:
                         click = True
+                    if e.button == 3:
+                        r_click = True
 
                     if e.button == 4:
                         hotbar_slot = max(-1, hotbar_slot - 1)
@@ -268,7 +276,10 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif e.type == KEYDOWN:
                     if e.key == K_ESCAPE:
-                        paused = toggle(paused)
+                        if crafting:
+                            crafting = toggle(crafting)
+                        else:
+                            paused = toggle(paused)
 
                     elif not paused:
                         if e.unicode in INVENTORY_KEYS:
@@ -469,16 +480,18 @@ def game(surf, username, token, host, port, size, music_enable):
 
             local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, paused)
 
-            if not paused:
+            if not paused and not crafting:
 
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                    if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
+                    if world[hover_x, hover_y] == 10:
+                        crafting = toggle(crafting)
+                    elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                    hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+                    hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]
 
                     if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                         hotbar_items[hotbar_slot] = world[hover_x, hover_y]
@@ -519,10 +532,15 @@ def game(surf, username, token, host, port, size, music_enable):
                     else:
                         return nav_update
 
-            if inventory_visible:
+            elif inventory_visible:
                 surf.blit(tint, (0, 0))
 
                 inventory_object.update(surf, mx, my, mb, inventory_items, hotbar_items, block_properties)
+
+            elif crafting:
+                surf.blit(tint, (0, 0))
+
+                crafting_object.update(surf, mx, my, mb, inventory_items, hotbar_items, block_properties)
 
             display.update()
             clock.tick(120)

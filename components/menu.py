@@ -279,6 +279,35 @@ class Inventory:
         self.graphic = image.load('textures/gui/inventory.png')
         self.x, self.y = w // 2 - self.graphic.get_width() // 2, h // 2 - self.graphic.get_height() // 2
         self.w, self.h = w, h
+        self.item_slots = []
+
+    def update(self, surf, mx, my, m_press, inventory, hotbar, block_properties):
+        surf.blit(self.graphic, (self.x, self.y))
+
+        for row in range(len(inventory)):
+            for item in range(len(inventory[row])):
+
+                elif inventory[row][item][1] != 0:
+                    surf.blit(transform.scale(block_properties[inventory[row][item][0]][3], (32, 32)),
+                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                    surf.blit(rah.text(str(inventory[row][item][1]), 10),
+                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+        for item in range(len(hotbar)):
+            if hotbar[item][1] != 0:
+                surf.blit(transform.scale(block_properties[hotbar[item][0]][3], (32, 32)),
+                          (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+                surf.blit(rah.text(str(hotbar[item][1]), 10),
+                          (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+
+class Crafting:
+    def __init__(self, w, h):
+        self.graphic = image.load('textures/gui/crafting_table.png').convert_alpha()
+        self.x, self.y = w // 2 - self.graphic.get_width() // 2, h // 2 - self.graphic.get_height() // 2
+        self.w, self.h = w, h
 
     def update(self, surf, mx, my, m_press, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
@@ -300,3 +329,6 @@ class Inventory:
 
                 surf.blit(rah.text(str(hotbar[item][1]), 10),
                           (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+
+
