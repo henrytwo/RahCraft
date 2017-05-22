@@ -429,24 +429,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     print("Reset")
 
-            '''
-
-                if darken:
-                    sky_color = [i - 1 for i in sky_color]
-                    if sky_color[2] == 35:
-                        darken = False
-                else:
-                    sky_color = [i + 1 for i in sky_color]
-                    if sky_color[2] == DEFAULT_BLUE:
-                        darken = True
-
-                normalized_color = [max(x, 0) for x in sky_color]
-
-
-
-            surf.fill(normalized_color)
-
-            '''
             surf.fill((255, 0, 0))
 
             print(sky_tick)
@@ -465,9 +447,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     if len(block_properties) > block > 0:
                         surf.blit(block_properties[block][3], (x - x_offset % block_size, y - y_offset % block_size))
 
-                        if current_breaking[1] == (x + x_offset) // block_size \
-                                and current_breaking[2] == (y + y_offset) // block_size \
-                                and breaking_block:
+                        if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[2] == (y + y_offset) // block_size:
                             percent_broken = (current_breaking[3] / block_properties[current_breaking[0]][4]) * 10
                             surf.blit(breaking_animation[int(percent_broken)],
                                       (x - x_offset % block_size, y - y_offset % block_size))

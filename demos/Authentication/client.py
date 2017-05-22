@@ -32,7 +32,7 @@ if __name__ == '__main__':
     sender = Process(target=player_sender, args=(send_queue, server))
     receiver = Process(target=receive_message, args=(message_queue, server))
 
-    credentials = [input("Username: "),input("Password: ")]
+    credentials = [input("Username: "), input("Password: ")]
 
     server.sendto(pickle.dumps([0, credentials]), _server)
 
