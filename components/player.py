@@ -17,7 +17,7 @@ class Player:
 
         self.name = name
         self.name_tag = normal_font.render(name, True, (255, 255, 255))
-        self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height + 10), SRCALPHA)
+        self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height() + 10), SRCALPHA)
         self.name_back.fill(Color(75, 75, 75, 150))
 
         self.block_type = block_type

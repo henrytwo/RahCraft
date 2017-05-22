@@ -155,7 +155,7 @@ class RemotePlayer:
         self.x += self.vx
 
         draw.rect(surf, (10, 10, 10), (self.x - x_offset, self.y - y_offset, self.player_size, self.player_size))
-        surf.blit(self.name_back, rah.center(self.x - 10, self.y - 40, 20, 20,
+        surf.blit(self.name_back, rah.center(self.x - 10 - x_offset, self.y - 40 - y_offset, 20, 20,
                                              self.name_back.get_width(), self.name_back.get_height()))
-        surf.blit(self.name_tag, rah.center(self.x - 10, self.y - 40, 20, 20,
+        surf.blit(self.name_tag, rah.center(self.x - 10 - x_offset, self.y - 40 - y_offset, 20, 20,
                                             self.name_tag.get_width(), self.name_tag.get_height()))
