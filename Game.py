@@ -233,6 +233,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     crafting = False
 
+    current_gui = ''
+
     try:
 
         # ====================Init remote players================================
@@ -276,10 +278,18 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif e.type == KEYDOWN:
                     if e.key == K_ESCAPE:
-                        if crafting:
-                            crafting = toggle(crafting)
-                        else:
+                        if current_gui == 'C':
+                            crafting = False
+                            current_gui = ''
+                        elif current_gui == 'I':
+                            inventory_visible = False
+                            current_gui == ''
+                        elif current_gui == '' or current_gui == 'P':
                             paused = toggle(paused)
+                            if paused:
+                                current_gui = 'P'
+                            else:
+                                current_gui = ''
 
                     elif not paused:
                         if e.unicode in INVENTORY_KEYS:
@@ -288,8 +298,13 @@ def game(surf, username, token, host, port, size, music_enable):
                         if e.key == K_f:
                             fly = toggle(fly)
 
-                        if e.key == K_e:
+                        if e.key == K_e and current_gui == '' or current_gui == 'I':
                             inventory_visible = toggle(inventory_visible)
+
+                            if inventory_visible:
+                                current_gui = 'I'
+                            else:
+                                current_gui = ''
 
                 elif e.type == TICKEVENT:
                     event.clear(TICKEVENT)
@@ -302,8 +317,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
-            block_clip = (
-                local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
+            block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
 
             if on_tick:
                 send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVER]))
@@ -398,35 +412,37 @@ def game(surf, username, token, host, port, size, music_enable):
                 (my + y_offset) // block_size))
 
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
-            if mb[0] == 0:
-                current_breaking = []
-                breaking_block = False
 
-            elif mb[0] == 1:
-                if not breaking_block and world[hover_x, hover_y] != 0 and (
-                        hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
-                                                                         hover_y - block_clip_cord[1]) <= reach:
-                    breaking_block = True
-                    current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
-                    if current_breaking[3] >= block_properties[current_breaking[0]][4]:
-                        block_broken = True
-
-                elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                    if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
-                        current_breaking[3] += 1
-
-                        if current_breaking[3] >= block_properties[current_breaking[0]][4]:
-                            block_broken = True
-                    else:
-                        breaking_block = False
-                        current_breaking = []
-
-                if block_broken:
-                    block_request.add((hover_x, hover_y))
-                    send_queue.put(((3, hover_x, hover_y), SERVER))
-
+            if not current_gui:
+                if mb[0] == 0:
                     current_breaking = []
                     breaking_block = False
+
+                elif mb[0] == 1:
+                    if not breaking_block and world[hover_x, hover_y] != 0 and (
+                            hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
+                                                                             hover_y - block_clip_cord[1]) <= reach:
+                        breaking_block = True
+                        current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
+                        if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                            block_broken = True
+
+                    elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                        if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
+                            current_breaking[3] += 1
+
+                            if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                                block_broken = True
+                        else:
+                            breaking_block = False
+                            current_breaking = []
+
+                    if block_broken:
+                        block_request.add((hover_x, hover_y))
+                        send_queue.put(((3, hover_x, hover_y), SERVER))
+
+                        current_breaking = []
+                        breaking_block = False
 
             # ==================Render World==========================
             if sky_tick % SKYTICKDEFAULT != 0:  # Change SKYTICKDEFAULT to a lower number to test
@@ -467,24 +483,23 @@ def game(surf, username, token, host, port, size, music_enable):
                         draw.rect(surf, (0, 0, 0),
                                   (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
-            surrounding_blocks = []
+            if not current_gui:
+                surrounding_blocks = []
 
-            for x_blocks in range(-1, 2):
-                for y_blocks in range(-1, 2):
+                for x_blocks in range(-1, 2):
+                    for y_blocks in range(-1, 2):
 
-                    if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (
-                                block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
-                        surrounding_blocks.append(
-                            Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size,
-                                 block_size, block_size))
+                        if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
+                            surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
 
-            local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, paused)
+                local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, paused)
 
-            if not paused and not crafting:
+            if not current_gui:
 
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                    if world[hover_x, hover_y] == 10:
+                    if world[hover_x, hover_y] == 10 and current_gui == '':
                         crafting = toggle(crafting)
+                        current_gui = 'C'
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
                         block_request.add((hover_x, hover_y))
