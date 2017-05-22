@@ -287,7 +287,7 @@ class Inventory:
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
 
-                elif inventory[row][item][1] != 0:
+                if inventory[row][item][1] != 0:
                     surf.blit(transform.scale(block_properties[inventory[row][item][0]][3], (32, 32)),
                               (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
