@@ -39,12 +39,12 @@ class Player:
         self.rect.y += self.vy
 
         for block in blocks:
-            if self.rect.colliderect(block.rect):
+            if self.rect.colliderect(block):
                 if self.vy > 0:
-                    self.rect.bottom = block.rect.top
+                    self.rect.bottom = block.top
                     self.standing = True
                 elif self.vy < 0:
-                    self.rect.top = block.rect.bottom
+                    self.rect.top = block.bottom
 
                 self.vy = 0
 
@@ -56,11 +56,11 @@ class Player:
         self.rect.x += self.vx
 
         for block in blocks:
-            if self.rect.colliderect(block.rect):
+            if self.rect.colliderect(block):
                 if self.vx > 0:
-                    self.rect.right = block.rect.left
+                    self.rect.right = block.left
                 elif self.vx < 0:
-                    self.rect.left = block.rect.right
+                    self.rect.left = block.right
 
         self.vx = 0
 
