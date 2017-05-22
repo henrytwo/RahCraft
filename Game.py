@@ -240,7 +240,7 @@ def game(surf, username, token, host, port, size, music_enable):
         # ====================Init remote players================================
 
         for Rp in R_players:
-            remote_players[Rp] = player2.RemotePlayer(Rp, R_players[Rp][0], R_players[Rp][1], block_size - 5)
+            remote_players[Rp] = player2.RemotePlayer(Rp, R_players[Rp][0], R_players[Rp][1], block_size - 5, 2 * block_size - 5)
 
         while True:
 
