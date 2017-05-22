@@ -1,5 +1,5 @@
 from pygame import *
-import math
+
 
 class Player:
 
@@ -7,18 +7,18 @@ class Player:
 
         self.rect = Rect(x, y, w, h)
         self.screenSize = (800, 500)
+
         self.vx = 0
         self.vy = 0
 
         self.run_speed = int(self.rect.w * 0.3)
-        self.jump_height = -(self.rect.h // 2)
+        self.jump_height = -(self.rect.h  //  2)
         self.gravity = self.rect.h * 2 / 45
 
         self.controls = controls
         self.standing = False
 
     def control(self, fly):
-
         if key.get_pressed()[self.controls[0]]:
             self.vx = -self.run_speed
         if key.get_pressed()[self.controls[1]]:
@@ -36,45 +36,73 @@ class Player:
         self.standing = False
 
     def collide(self, blocks, fly):
-        self.rect.y += int(self.vy)
-        self.rect.x += int(self.vx)
-
-        bumped = False
+        self.rect.y += self.vy
 
         for block in blocks:
-            if self.rect.colliderect(block):
+            if self.rect.colliderect(block.rect):
                 if self.vy > 0:
-                    self.rect.bottom = block.top
+                    self.rect.bottom = block.rect.top
                     self.standing = True
-
                 elif self.vy < 0:
-                    self.rect.top = block.bottom
+                    self.rect.top = block.rect.bottom
 
                 self.vy = 0
-                bumped = True
-
-        if fly:
-            self.gravity = 0
-        else:
-            self.gravity = self.rect.h * 2 / 45
-
-        for block in blocks:
-            if self.rect.colliderect(block):
-                if self.vx > 0:
-                    self.rect.right = block.left
-
-                elif self.vx < 0:
-                    self.rect.left = block.right
-
-        self.vx = 0
 
         if fly:
             self.vy = 0
-
-        if self.vy + self.gravity < self.rect.h and not bumped:
-            self.vy += self.gravity
         else:
-            self.vy -= 0
+            self.vy += self.gravity if self.vy + self.gravity < self.rect.h else 0
+
+        self.rect.x += self.vx
+
+        for block in blocks:
+            if self.rect.colliderect(block.rect):
+                if self.vx > 0:
+                    self.rect.right = block.rect.left
+                elif self.vx < 0:
+                    self.rect.left = block.rect.right
+
+        self.vx = 0
+
+        # self.rect.y += int(self.vy)
+        # self.rect.x += int(self.vx)
+        #
+        # bumped = False
+        #
+        # for block in blocks:
+        #     if self.rect.colliderect(block):
+        #         if self.vy > 0:
+        #             self.rect.bottom = block.top
+        #             self.standing = True
+        #
+        #         elif self.vy < 0:
+        #             self.rect.top = block.bottom
+        #
+        #         self.vy = 0
+        #         bumped = True
+        #
+        # if fly:
+        #     self.gravity = 0
+        # else:
+        #     self.gravity = self.rect.h * 2 / 45
+        #
+        # for block in blocks:
+        #     if self.rect.colliderect(block):
+        #         if self.vx > 0:
+        #             self.rect.right = block.left
+        #
+        #         elif self.vx < 0:
+        #             self.rect.left = block.right
+        #
+        # self.vx = 0
+        #
+        # if fly:
+        #     self.vy = 0
+        #
+        # if self.vy + self.gravity < self.rect.h and not bumped:
+        #     self.vy += self.gravity
+        # else:
+        #     self.vy -= 0
 
     def update(self, screen, collision_blocks, x_offset, y_offset, fly, paused, reach=5):
 
@@ -87,9 +115,8 @@ class Player:
 
         # debug
 
-        center = (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset + self.rect.h//2)
+        center = (self.rect.x - x_offset + self.rect.w // 2, self.rect.y - y_offset + self.rect.h // 2)
         draw.circle(screen, (0, 0, 0), center, reach*20, 3)
-
 
 
 class RemotePlayer:
@@ -104,8 +131,8 @@ class RemotePlayer:
         print(self.x, self.y)
 
     def calculate_velocity(self, ncord, fpt):
-        self.vy = (ncord[1] - self.y)//fpt
-        self.vx = (ncord[0] - self.x)//fpt
+        self.vy = (ncord[1] - self.y) // fpt
+        self.vx = (ncord[0] - self.x) // fpt
 
         if self.vx == 0 and ncord[0] - self.x != 0:
             self.x = ncord[0]

@@ -12,6 +12,7 @@ import time as ti
 import glob
 import traceback
 
+
 def player_sender(send_queue, server):
     print('Sender running...')
 
@@ -34,37 +35,43 @@ def load_blocks(block_file):
     block_file = open("data/" + block_file).readlines()
 
     for line_number in range(len(block_file)):
-        block_type, inner_block, outline, block_image, hardness, soundpack, collision = block_file[line_number].strip("\n").split(" // ")
-        blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")), (int(x) for x in outline.split(",")), transform.scale(image.load("textures/blocks/" + block_image), (20, 20)), int(hardness), soundpack, collision]
+        block_type, inner_block, outline, block_image, hardness, soundpack, collision = block_file[line_number].strip(
+            "\n").split(" // ")
+        blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")),
+                               (int(x) for x in outline.split(",")),
+                               transform.scale(image.load("textures/blocks/" + block_image), (20, 20)), int(hardness),
+                               soundpack, collision]
 
     return blocks
 
-def invert(colour):
-    return (255 - colour[0], 255 - colour[1], 255 - colour[2])
 
-def inverted_rect(screen, block_size, width, rx, ry):
+def invert(colour):
+    return 255 - colour[0], 255 - colour[1], 255 - colour[2]
+
+
+def inverted_rect(surf, block_size, width, rx, ry):
     try:
         for x in range(block_size):
             for y in range(width):
-                screen.set_at((rx + x, ry + y), invert(screen.get_at((rx + x, ry + y))))
-                screen.set_at((rx + x, ry + y + block_size - width), invert(screen.get_at((rx + x, ry + y + block_size - width))))
+                surf.set_at((rx + x, ry + y), invert(surf.get_at((rx + x, ry + y))))
+                surf.set_at((rx + x, ry + y + block_size - width),
+                            invert(surf.get_at((rx + x, ry + y + block_size - width))))
 
         for y in range(block_size - width * 2):
             for x in range(width):
-                screen.set_at((rx + x, ry + y + width), invert(screen.get_at((rx + x, ry + y + width))))
-                screen.set_at((rx + x + block_size - width, ry + y + width), invert(screen.get_at((rx + x + block_size - width, ry + y + width))))
+                surf.set_at((rx + x, ry + y + width), invert(surf.get_at((rx + x, ry + y + width))))
+                surf.set_at((rx + x + block_size - width, ry + y + width),
+                            invert(surf.get_at((rx + x + block_size - width, ry + y + width))))
 
     except:
         pass
 
-def toggle(bool):
-    if bool:
-        return False
-    else:
-        return True
 
-def game(screen, username, token, host, port, size, music_enable):
+def toggle(boolean):
+    return not boolean
 
+
+def game(surf, username, token, host, port, size, music_enable):
     print('Starting game')
 
     font.init()
@@ -87,17 +94,20 @@ def game(screen, username, token, host, port, size, music_enable):
     block_size = 20
 
     tint = Surface(size)
-    tint.fill((0,0,0))
+    tint.fill((0, 0, 0))
     tint.set_alpha(99)
 
     block_properties = load_blocks("block.rah")
-    breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_"+str(i)+".png"), (20, 20)).convert_alpha() for i in range(10)]
+    breaking_animation = [
+        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
+        in range(10)]
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
-    screen.blit(wallpaper, (0, 0))
+    surf.blit(wallpaper, (0, 0))
 
     connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
-    screen.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+    surf.blit(connecting_text,
+              rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
     display.update()
 
@@ -124,8 +134,6 @@ def game(screen, username, token, host, port, size, music_enable):
 
     world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory_items, R_players = first_message[1:]
 
-
-
     print("player done")
 
     reach = 5
@@ -134,7 +142,7 @@ def game(screen, username, token, host, port, size, music_enable):
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
-    local_player = player2.Player(player_x, player_y, block_size-5, block_size-5, (K_a, K_d, K_w, K_s))
+    local_player = player2.Player(player_x, player_y, block_size - 5, block_size - 5, (K_a, K_d, K_w, K_s))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -167,27 +175,26 @@ def game(screen, username, token, host, port, size, music_enable):
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
 
     pause_list = [[0, 'unpause', "Back to game"],
-                 [1, 'assistance', "Help"],
-                 [2, 'options', "Options"],
-                 [3, 'about', "About"],
-                 [4, 'menu', "Exit"]]
+                  [1, 'assistance', "Help"],
+                  [2, 'options', "Options"],
+                  [3, 'about', "About"],
+                  [4, 'menu', "Exit"]]
 
     pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
 
-    #=============================init inventory==========================
+    # =============================init inventory==========================
 
     hotbar = image.load("textures/gui/toolbar/toolbar.png").convert()
     selected = image.load("textures/gui/toolbar/selected.png").convert_alpha()
 
-    sky = transform.scale(image.load("textures/sky/sky.png"),(5600,800))
+    sky = transform.scale(image.load("textures/sky/sky.png"), (5600, 800))
 
     sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
     moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
 
-
     sound_list = glob.glob('sound/step/*.ogg')
 
-    sound_groups = [sound.split("/")[-1]for sound in sound_list]
+    sound_groups = [sound.split("/")[-1] for sound in sound_list]
 
     sound = {}
 
@@ -204,14 +211,14 @@ def game(screen, username, token, host, port, size, music_enable):
 
     inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
-    hotbarRect = (size[0]//2 - hotbar.get_width()//2, size[1]-hotbar.get_height())
+    hotbarRect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
     hotbar_slot = 1
 
     INVENTORY_KEYS = {str(x) for x in range(1, 10)}
 
     print("ini done")
 
-    #==============================Sky=====================================
+    # ==============================Sky=====================================
     DEFAULTSKYCOLOR = [135, 206, 235]
     sky_color = [-65, 6, 35]
     normalized_color = [max(x, 0) for x in sky_color]
@@ -223,10 +230,10 @@ def game(screen, username, token, host, port, size, music_enable):
 
     try:
 
-        #====================Init remote players================================
+        # ====================Init remote players================================
 
         for Rp in R_players:
-            remote_players[Rp] = player2.RemotePlayer(R_players[Rp][0], R_players[Rp][1], block_size-5)
+            remote_players[Rp] = player2.RemotePlayer(R_players[Rp][0], R_players[Rp][1], block_size - 5)
 
         while True:
 
@@ -284,12 +291,14 @@ def game(screen, username, token, host, port, size, music_enable):
 
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
-            block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
+            block_clip = (
+                local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
 
             if on_tick:
                 send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVER]))
 
-            displaying_world = world[x_offset // block_size:x_offset // block_size + 41, y_offset // block_size:y_offset // block_size + 26]
+            displaying_world = world[x_offset // block_size:x_offset // block_size + 41,
+                                     y_offset // block_size:y_offset // block_size + 26]
             update_cost = displaying_world.flatten()
             update_cost = np.count_nonzero(update_cost == -1)
 
@@ -317,7 +326,8 @@ def game(screen, username, token, host, port, size, music_enable):
                 elif command == 2:
                     chunk_positionX, chunk_positionY, world_chunk = message
 
-                    world[chunk_positionX - 5:chunk_positionX + 45, chunk_positionY - 5:chunk_positionY + 31] = np.array(world_chunk, copy=True)
+                    world[chunk_positionX - 5:chunk_positionX + 45,
+                          chunk_positionY - 5:chunk_positionY + 31] = np.array(world_chunk, copy=True)
 
                     if (chunk_positionX, chunk_positionY) in render_request:
                         render_request.remove((chunk_positionX, chunk_positionY))
@@ -356,7 +366,7 @@ def game(screen, username, token, host, port, size, music_enable):
                 elif command == 100:
                     send_time, tick = message
 
-                    tick_offset = (round(ti.time(), 3) - send_time)*20
+                    tick_offset = (round(ti.time(), 3) - send_time) * 20
 
                     sky_tick = tick_offset + tick
 
@@ -370,17 +380,21 @@ def game(screen, username, token, host, port, size, music_enable):
 
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
-            display.set_caption("Rahcraft Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
+            display.set_caption("Rahcraft Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(
+                x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
                 block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_properties[hotbar_slot][0] +
-                                "Mouse: " + str((mx + x_offset) // block_size) + " " + str((my + y_offset) // block_size))
+                                "Mouse: " + str((mx + x_offset) // block_size) + " " + str(
+                (my + y_offset) // block_size))
 
-            block_clip_cord = (block_clip[0]//block_size, block_clip[1]//block_size)
+            block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
             if mb[0] == 0:
                 current_breaking = []
                 breaking_block = False
 
             elif mb[0] == 1:
-                if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                if not breaking_block and world[hover_x, hover_y] != 0 and (
+                        hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
+                                                                         hover_y - block_clip_cord[1]) <= reach:
                     breaking_block = True
                     current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
                     if current_breaking[3] >= block_properties[current_breaking[0]][4]:
@@ -404,7 +418,7 @@ def game(screen, username, token, host, port, size, music_enable):
                     breaking_block = False
 
             # ==================Render World==========================
-            if sky_tick % SKYTICKDEFAULT != 0: # Change SKYTICKDEFAULT to a lower number to test
+            if sky_tick % SKYTICKDEFAULT != 0:  # Change SKYTICKDEFAULT to a lower number to test
                 if on_tick:
                     sky_tick += 1
             else:
@@ -430,48 +444,56 @@ def game(screen, username, token, host, port, size, music_enable):
 
 
 
-            screen.fill(normalized_color)
+            surf.fill(normalized_color)
 
             '''
-            screen.fill((255,0,0))
+            surf.fill((255, 0, 0))
 
             print(sky_tick)
 
-            screen.blit(sky,(int(0 - 4800 * (sky_tick%24000)/24000) , max(y_offset//2 - 400, -200)))
+            surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
 
-            screen.blit(sun,(int(5600 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
-            screen.blit(moon,(int(2800 - 4800 * (sky_tick%24000)/24000), max(y_offset // 16 - 50, -200)))
+            surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
+            surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
 
-            print(int(2800 - 4800 * (sky_tick%24000)/24000), int(5600 - 4800 * (sky_tick%24000)/24000))
+            print(int(2800 - 4800 * (sky_tick % 24000) / 24000), int(5600 - 4800 * (sky_tick % 24000) / 24000))
 
             for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
                 for y in range(0, size[1] + block_size + 1, block_size):
                     block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
                     if len(block_properties) > block > 0:
-                        screen.blit(block_properties[block][3], (x - x_offset % block_size, y - y_offset % block_size))
+                        surf.blit(block_properties[block][3], (x - x_offset % block_size, y - y_offset % block_size))
 
-                        if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[2] == (y + y_offset) // block_size:
-                            percent_broken = (current_breaking[3]/block_properties[current_breaking[0]][4]) * 10
-                            screen.blit(breaking_animation[int(percent_broken)], (x - x_offset % block_size, y - y_offset % block_size))
+                        if current_breaking[1] == (x + x_offset) // block_size \
+                                and current_breaking[2] == (y + y_offset) // block_size \
+                                and breaking_block:
+                            percent_broken = (current_breaking[3] / block_properties[current_breaking[0]][4]) * 10
+                            surf.blit(breaking_animation[int(percent_broken)],
+                                      (x - x_offset % block_size, y - y_offset % block_size))
 
                     elif block < 0:
-                        draw.rect(screen, (0, 0, 0), (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
+                        draw.rect(surf, (0, 0, 0),
+                                  (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
             surrounding_blocks = []
 
             for x_blocks in range(-1, 2):
                 for y_blocks in range(-1, 2):
 
-                    if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
-                        surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
+                    if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (
+                                block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
+                        surrounding_blocks.append(
+                            Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size,
+                                 block_size, block_size))
 
-            local_player.update(screen, surrounding_blocks, x_offset, y_offset, fly, paused)
+            local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, paused)
 
             if not paused:
 
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                    if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
+                    if world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
+                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
 
@@ -482,31 +504,31 @@ def game(screen, username, token, host, port, size, music_enable):
                         hotbar_items[hotbar_slot] = world[hover_x, hover_y]
 
             for remote in remote_players:
-                remote_players[remote].update(screen, x_offset, y_offset)
+                remote_players[remote].update(surf, x_offset, y_offset)
 
-            #====================Inventory/hotbar========================
+            # ====================Inventory/hotbar========================
 
-
-            screen.blit(hotbar, hotbarRect)
+            surf.blit(hotbar, hotbarRect)
             for item in range(9):
-                if Rect(hotbarRect[0]+(32+8)*item+6, size[1]-32-6, 32, 32).collidepoint(mx, my) and mb[0]:
+                if Rect(hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6, 32, 32).collidepoint(mx, my) and mb[0]:
                     hotbar_slot = item
 
                 if hotbar_items[item][1] != 0:
-                    screen.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
-                    screen.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbarRect[0]+(32+8)*item+6, size[1]-32-6))
+                    surf.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)),
+                              (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
+                    surf.blit(rah.text(str(hotbar_items[item][1]), 10),
+                              (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
-            screen.blit(selected, (hotbarRect[0]+(32+8)*hotbar_slot, size[1]-32-12))
+            surf.blit(selected, (hotbarRect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))
 
-
-            #Pause screen
+            # Pause surf
             if paused:
-                screen.blit(tint, (0, 0))
+                surf.blit(tint, (0, 0))
 
                 text_surface = rah.text('Game Paused', 20)
-                screen.blit(text_surface,(size[0]//2 - text_surface.get_width()//2,50))
+                surf.blit(text_surface, (size[0] // 2 - text_surface.get_width() // 2, 50))
 
-                nav_update = pause_menu.update(screen, release, mx, my, mb)
+                nav_update = pause_menu.update(surf, release, mx, my, mb)
 
                 if nav_update:
                     if nav_update == 'unpause':
@@ -518,9 +540,9 @@ def game(screen, username, token, host, port, size, music_enable):
                         return nav_update
 
             if inventory_visible:
-                screen.blit(tint, (0, 0))
+                surf.blit(tint, (0, 0))
 
-                inventory_object.update(screen, mx, my, mb, inventory_items, hotbar_items, block_properties)
+                inventory_object.update(surf, mx, my, mb, inventory_items, hotbar_items, block_properties)
 
             display.update()
             clock.tick(120)

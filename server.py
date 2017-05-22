@@ -1,5 +1,4 @@
 import sys
-sys.path.extend(['general/','components/'])
 
 import os.path
 from collections import deque
@@ -7,7 +6,7 @@ import socket
 import pickle
 from multiprocessing import *
 from numpy import *
-from world import *
+from components.world import *
 import glob
 from math import *
 import time
@@ -19,13 +18,13 @@ with open("data/config.rah", "r") as config:
     world_name = config[2]
 
 # If world doesn't exist
-if not os.path.isfile('saves/%s.pkl'%(world_name)):
+if not os.path.isfile('saves/%s.pkl' % world_name):
     # Generate a new world with the function
     # world_seed,maxHeight,minX,maxX,w,h
     world = generate_world(input("Seed:\n"), 1, 3, 10, 10000, 100)
 
     # Dumps world to file
-    with open('saves/%s.pkl'%(world_name), 'wb') as file:
+    with open('saves/%s.pkl' % world_name, 'wb') as file:
         dump(world, file)
 
 else:
@@ -46,8 +45,10 @@ class Player(object):
     def get_player_info(self):
         try:
             return PlayerData[self.username]
-        except:
-            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint, [[[5,32] for _ in range(9)] for __ in range(3)], [[2,64] for _ in range(9)], 10, 10]
+        except KeyError:
+            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
+                                         [[[5, 32] for _ in range(9)] for __ in range(3)], [[2, 64] for _ in range(9)],
+                                         10, 10]
 
             print(PlayerData[self.username])
             return PlayerData[self.username]
@@ -90,7 +91,8 @@ class Player(object):
         # self.saturation = 10
 
     def save(self, block_size):
-        return [(self.cord[0]//block_size, self.cord[1]//block_size), self.spawnCord, self.hotbar, self.inventory, self.health, self.hunger]
+        return [(self.cord[0] // block_size, self.cord[1] // block_size), self.spawnCord, self.hotbar, self.inventory,
+                self.health, self.hunger]
 
 
 class World:
@@ -111,10 +113,10 @@ class World:
         self.overworld[x, y] = blocktype
 
     def get_spawnpoint(self):
-        x = len(self.overworld)//2
+        x = len(self.overworld) // 2
         spawn_offset = 0
         spawn_found = False
-        search_cords = self.overworld[x, :len(self.overworld[x])//2]
+        search_cords = self.overworld[x, :len(self.overworld[x]) // 2]
 
         while not spawn_found:
             for y in range(len(search_cords)):
@@ -127,11 +129,11 @@ class World:
             if spawn_offset < 0:
                 spawn_offset = abs(spawn_offset)
             elif spawn_offset > 0:
-                spawn_offset = spawn_offset*-1-1
+                spawn_offset = spawn_offset * -1 - 1
             else:
                 spawn_offset -= 1
 
-            search_cords = self.overworld[x + spawn_offset, :len(self.overworld[x + spawn_offset])//2]
+            search_cords = self.overworld[x + spawn_offset, :len(self.overworld[x + spawn_offset]) // 2]
 
         return x, y
 
@@ -175,6 +177,7 @@ def heart_beats(message_queue, tick):
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
             if tick >= 24000:
                 tick = 1
+
 
 if __name__ == '__main__':
     players = {}
@@ -232,13 +235,15 @@ if __name__ == '__main__':
                 playerLocations = {players[x].username: players[x].cord for x in players}
 
                 players[address] = Player(PN, message[1])
-                sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]), players[address].hotbar, players[address].inventory, playerLocations), address))
+                sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
+                                players[address].hotbar, players[address].inventory, playerLocations), address))
                 print('Player %s has connected from %s' % (message[1], address))
                 username.add(message[1])
 
                 for i in players:
                     if players[i].username != players[address].username:
-                        sendQueue.put(((1, players[address].username, str(players[address].cord[0]), str(players[address].cord[1])), i))
+                        sendQueue.put(((1, players[address].username, str(players[address].cord[0]),
+                                        str(players[address].cord[1])), i))
 
             else:
                 sendQueue.put(((400,), address))
@@ -297,8 +302,8 @@ if __name__ == '__main__':
             for i in players:
                 sendQueue.put(((4, message[1], message[2], message[3]), i))
 
-        #elif command == 5:
-            #player[address][0].change_inventory()
+                # elif command == 5:
+                # player[address][0].change_inventory()
 
         elif command == 9:
 
@@ -348,4 +353,3 @@ if __name__ == '__main__':
         elif command == 100:
             for p in players:
                 sendQueue.put((message, p))
-

@@ -6,19 +6,17 @@ import socket
 import hashlib
 import traceback
 
-import sys
-sys.path.extend(['general/','components/'])
-
 from components.player import *
 import components.rahma as rah
 import components.menu as menu
 import Game as Game
 import platform
 
+
 def login():
     global username, password, host, port
 
-    def hash(target):
+    def hash_creds(target):
         return hashlib.sha512(target.encode('utf-8')).hexdigest()
 
     clock = time.Clock()
@@ -30,13 +28,12 @@ def login():
 
     auth_button = menu.Button(200, 320, 400, 40, 'auth', 'AUTHENTICATE WITH SERVER')
 
-    username, password = '',''
+    username, password = '', ''
 
     field_selected = 'user'
 
-    fields = {'user':[menu.TextBox(size[0]//4 , size[1]//4 , 400, 40, 'Username'),username],
-              'pass':[menu.TextBox(size[0]//4 , 7*size[1]//16 , 400, 40, 'Password'),password]}
-
+    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 4, 400, 40, 'Username'), username],
+              'pass': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, 400, 40, 'Password'), password]}
 
     while True:
 
@@ -68,61 +65,59 @@ def login():
                     else:
                         field_selected = 'user'
 
-
         mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
+        m_press = mouse.get_pressed()
 
         fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
 
         for field in fields:
             fields[field][0].draw(screen)
 
-            if fields[field][0].rect.collidepoint(mx,my) and click:
+            if fields[field][0].rect.collidepoint(mx, my) and click:
                 field_selected = field
 
-        nav_update = login_button.update(screen, mx, my, mb, 15, release)
+        nav_update = login_button.update(screen, mx, my, m_press, 15, release)
         if nav_update and username:
             return nav_update
 
-        nav_update = auth_button.update(screen, mx, my, mb, 15, release)
+        nav_update = auth_button.update(screen, mx, my, m_press, 15, release)
         if nav_update and username:
             return nav_update
 
-        username, password = fields['user'][1], hash(fields['pass'][1] + fields['user'][1])
-
+        username, password = fields['user'][1], hash_creds(fields['pass'][1] + fields['user'][1])
 
         clock.tick(120)
         display.update()
 
-def player_sender(send_queue, server):
 
+def player_sender(send_queue, server):
     while True:
         tobesent = send_queue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
 def receive_message(message_queue, server):
-
     while True:
-        msg = server.recvfrom(16384)
-        message_queue.put(pickle.loads(msg[0]))
+        message = server.recvfrom(16384)
+        message_queue.put(pickle.loads(message[0]))
+
 
 def authenticate():
-
     global username, password, online, token
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
     connecting_text = rah.text("Waiting for AUTH server...", 30)
-    screen.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+    screen.blit(connecting_text,
+                rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
     display.update()
 
     host, port = 'rahmish.com', 1111
 
-    sendQueue = Queue()
-    messageQueue = Queue()
+    send_queue = Queue()
+    message_queue = Queue()
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     _server = (host, port)
@@ -149,8 +144,6 @@ def authenticate():
             print("Invalid credentials")
 
             return 'login'
-            server.sendto(pickle.dumps([0, credentials]), _server)
-
 
         elif first_message[0] == 1:
             token = str(first_message[1])
@@ -198,18 +191,19 @@ def about():
                 release = True
 
         mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
+        m_press = mouse.get_pressed()
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
             screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
 
-        nav_update = back_button.update(screen, mx, my, mb, 15, release)
+        nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
         if nav_update is not None:
             return nav_update
 
         display.update()
+
 
 def assistance():
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -249,29 +243,29 @@ def assistance():
                 release = True
 
         mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
+        m_press = mouse.get_pressed()
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
             screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
 
-        nav_update = back_button.update(screen, mx, my, mb, 15, release)
+        nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
         if nav_update is not None:
             return nav_update
 
         display.update()
 
+
 def options():
     return 'menu'
 
-def server_picker():
 
+def server_picker():
     global host, port
 
-    with open('data/servers.rah','r') as servers:
+    with open('data/servers.rah', 'r') as servers:
         server_list = [server.split(' // ') for server in servers.read().split('\n')]
-
 
     for server in server_list:
         server[0] = int(server[0])
@@ -279,9 +273,10 @@ def server_picker():
 
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1] - 80)
 
-    button_list = [menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, 200, 40, 'custom_server_picker', 'Direct Connect'),
-                   menu.Button(size[0]//2 - 100, size[1] - 60, 200, 40, 'add_server', 'Add Server'),
-                   menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, 200, 40, 'menu', 'Back')]
+    button_list = [
+        menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, 200, 40, 'custom_server_picker', 'Direct Connect'),
+        menu.Button(size[0] // 2 - 100, size[1] - 60, 200, 40, 'add_server', 'Add Server'),
+        menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, 200, 40, 'menu', 'Back')]
 
     while True:
         wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -298,9 +293,9 @@ def server_picker():
                 release = True
 
         mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
+        m_press = mouse.get_pressed()
 
-        nav_update = server_menu.update(screen, release, mx, my, mb)
+        nav_update = server_menu.update(screen, release, mx, my, m_press)
 
         if nav_update:
             host, port = nav_update[1], nav_update[2]
@@ -315,7 +310,7 @@ def server_picker():
         screen.blit(server_bar, (0, size[1] - 80))
 
         for button in button_list:
-            nav_update = button.update(screen, mx, my, mb, 15, release)
+            nav_update = button.update(screen, mx, my, m_press, 15, release)
 
             if nav_update:
                 if nav_update == 'add_server' and len(server_list) > 4:
@@ -328,7 +323,6 @@ def server_picker():
 
 
 def custom_server_picker():
-
     global host, port
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -337,12 +331,12 @@ def custom_server_picker():
     buttons = [[0, 'game', "Connect"],
                [1, 'menu', "Back"]]
 
-    ip_menu = menu.Menu(buttons, 0, size[1]//2 , size[0], size[1]//2)
+    ip_menu = menu.Menu(buttons, 0, size[1] // 2, size[0], size[1] // 2)
 
     field_selected = 'host'
 
-    fields = {'host':[menu.TextBox(size[0]//4 , size[1]//4 , 400, 40, 'Host'),host],
-              'port':[menu.TextBox(size[0]//4 , 7*size[1]//16 , 400, 40, 'Port'),port]}
+    fields = {'host': [menu.TextBox(size[0] // 4, size[1] // 4, 400, 40, 'Host'), host],
+              'port': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, 400, 40, 'Port'), port]}
 
     while True:
 
@@ -366,9 +360,9 @@ def custom_server_picker():
                     return 'game'
 
         mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
+        m_press = mouse.get_pressed()
 
-        nav_update = ip_menu.update(screen, release, mx, my, mb)
+        nav_update = ip_menu.update(screen, release, mx, my, m_press)
 
         if nav_update:
 
@@ -384,14 +378,13 @@ def custom_server_picker():
         for field in fields:
             fields[field][0].draw(screen)
 
-            if fields[field][0].rect.collidepoint(mx,my) and click:
+            if fields[field][0].rect.collidepoint(mx, my) and click:
                 field_selected = field
 
         display.update()
 
 
 def server_adder():
-
     clock = time.Clock()
 
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
@@ -400,15 +393,15 @@ def server_adder():
     buttons = [[0, 'server_picker', "Add"],
                [1, 'server_picker', "Back"]]
 
-    ip_menu = menu.Menu(buttons, 0, size[1]//2 , size[0], size[1]//2)
+    ip_menu = menu.Menu(buttons, 0, size[1] // 2, size[0], size[1] // 2)
 
-    name, host, port = '','',None
+    name, host, port = '', '', None
 
     field_selected = 'name'
 
-    fields = {'name':[menu.TextBox(size[0]//4 , size[1]//4 , 400, 40, 'Name'),name],
-              'host':[menu.TextBox(size[0]//4 , size[1]//4 + 70, 400, 40, 'Host'),host],
-              'port':[menu.TextBox(size[0]//4 , size[1]//4 + 140 , 400, 40, 'Port'),port]}
+    fields = {'name': [menu.TextBox(size[0] // 4, size[1] // 4, 400, 40, 'Name'), name],
+              'host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, 400, 40, 'Host'), host],
+              'port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, 400, 40, 'Port'), port]}
 
     while True:
 
@@ -430,19 +423,19 @@ def server_adder():
                 if e.key == K_RETURN and host and port:
                     name, host, port = fields['name'][1], fields['host'][1], int(fields['port'][1])
 
-                    with open('data/servers.rah','w') as servers:
+                    with open('data/servers.rah', 'w') as servers:
                         line_count = len(servers.read().split('\n'))
 
                         print(line_count)
 
-                        servers.write('%i // %s // %s // %i'%(line_count, name, host, port))
+                        servers.write('%i // %s // %s // %i' % (line_count, name, host, port))
 
                     return 'server_picker'
 
         mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
+        m_press = mouse.get_pressed()
 
-        nav_update = ip_menu.update(screen, release, mx, my, mb)
+        nav_update = ip_menu.update(screen, release, mx, my, m_press)
 
         if nav_update:
 
@@ -466,14 +459,13 @@ def server_adder():
         for field in fields:
             fields[field][0].draw(screen)
 
-            if fields[field][0].rect.collidepoint(mx,my) and click:
+            if fields[field][0].rect.collidepoint(mx, my) and click:
                 field_selected = field
 
         display.update()
 
 
 def menu_screen():
-
     global username, online, token
 
     clock = time.Clock()
@@ -490,7 +482,7 @@ def menu_screen():
     screen.blit(wallpaper, (0, 0))
 
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
-    screen.blit(logo, (size[0]//2 - logo.get_width() // 2, 100))
+    screen.blit(logo, (size[0] // 2 - logo.get_width() // 2, 100))
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -504,7 +496,7 @@ def menu_screen():
     screen.blit(user_text, (20, 20))
 
     if online:
-        user_text = normal_font.render("AUTH ID: %s"%token, True, (255, 255, 255))
+        user_text = normal_font.render("AUTH ID: %s" % token, True, (255, 255, 255))
         screen.blit(user_text, (20, 50))
 
     while True:
@@ -522,14 +514,15 @@ def menu_screen():
                 return 'login'
 
         mx, my = mouse.get_pos()
-        mb = mouse.get_pressed()
+        m_press = mouse.get_pressed()
 
-        nav_update = main_menu.update(screen, release, mx, my, mb)
+        nav_update = main_menu.update(screen, release, mx, my, m_press)
 
         if nav_update:
             return nav_update
 
         display.update()
+
 
 if __name__ == "__main__":
     host = "127.0.0.1"
@@ -591,10 +584,8 @@ if __name__ == "__main__":
           'game': menu_screen,
           'server_picker': server_picker,
           'custom_server_picker': custom_server_picker,
-          'add_server' : server_adder,
-          'auth':authenticate}
-
-
+          'add_server': server_adder,
+          'auth': authenticate}
 
     while navigation != 'exit':
         if navigation == 'game':

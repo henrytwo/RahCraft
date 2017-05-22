@@ -7,32 +7,29 @@ import time
 
 
 def import_users(que, thing):
+    while True:
+        user = {}
 
-	while True:
-		user = {}
+        db = MySQLdb.connect(host='localhost', user='root', passwd='', db='Rahmish')
 
-		db = MySQLdb.connect(host = 'localhost',
-		     user = 'root',
-		     passwd = '',
-	             db = 'Rahmish')
+        cur = db.cursor()
 
-		cur = db.cursor()
+        cur.execute("SELECT * FROM data")
 
-		cur.execute("SELECT * FROM data")
+        for group in cur.fetchall():
+            user[group[1]] = group[2]
 
-		for group in cur.fetchall():
-			user[group[1]] = group[2]
+        db.close()
 
-		db.close()
+        print("[Update]", user)
 
-		print("[Update]",user)
+        que.put(user)
 
-		que.put(user)
-
-		time.sleep(10)
+        time.sleep(10)
 
 
 tokens = {}
+
 
 def player_sender(send_queue, server):
     print('Sender running...')
@@ -52,8 +49,8 @@ def receive_message(message_queue, server):
             continue
         message_queue.put((pickle.loads(message[0]), message[1]))
 
-def token(credentials):
 
+def token(credentials):
     username = credentials[0]
     tokens[username] = str(uuid.uuid4())
 
@@ -61,24 +58,24 @@ def token(credentials):
 
 
 def login(credentials, user):
-
     print("[Login]", user, credentials)
 
     if credentials[0] in user and user[credentials[0]] == credentials[1]:
-            sendQueue.put(((1, token(credentials)), address))
+        sendQueue.put(((1, token(credentials)), address))
 
     else:
         sendQueue.put(((400,), address))
 
-    print("[Tokens]",tokens)
+    print("[Tokens]", tokens)
+
 
 def auth(credentials):
-
     if credentials[0] in tokens and tokens[credentials[0]] == credentials[1]:
         sendQueue.put(((10, 1), address))
 
     else:
         sendQueue.put(((10, 0), address))
+
 
 if __name__ == '__main__':
     host, port = 'rahmish.com', 1111
@@ -87,7 +84,7 @@ if __name__ == '__main__':
 
     sendQueue = Queue()
     messageQueue = Queue()
-    
+
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
 
@@ -109,17 +106,17 @@ if __name__ == '__main__':
     while True:
 
         user = user_queue.get()
-            
+
         pickled_message = messageQueue.get()
         message, address = pickled_message
 
-        print("[address]",message)
+        print("[address]", message)
         command = message[0]
-        
+
         if command == 0:
-            #Login
+            # Login
             login(message[1], user)
 
         elif command == 1:
-            #Auth request
+            # Auth request
             auth(message[1])
