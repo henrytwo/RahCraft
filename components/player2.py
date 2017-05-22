@@ -1,7 +1,11 @@
 from pygame import *
+import components.rahma as rah
 
+font.init()
 
-surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 3)]
+normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 4)]
 
 
 class Player:
@@ -9,7 +13,7 @@ class Player:
     def __init__(self, x, y, w, h, controls):
 
         self.rect = Rect(x, y, w, h)
-        self.screenSize = (800, 500)
+        self.surfSize = (800, 500)
 
         self.vx = 0
         self.vy = 0
@@ -107,19 +111,18 @@ class Player:
         # else:
         #     self.vy -= 0
 
-    def update(self, screen, collision_blocks, x_offset, y_offset, fly, paused, reach=5):
+    def update(self, surf, collision_blocks, x_offset, y_offset, fly, paused, reach=5):
 
         if not paused:
             self.control(fly)
 
         self.collide(collision_blocks, fly)
 
-        draw.rect(screen, (255, 0, 0), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
+        draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
 
-        # debug
 
         center = (self.rect.x - x_offset + self.rect.w // 2, self.rect.y - y_offset + self.rect.h // 2)
-        draw.circle(screen, (0, 0, 0), center, reach*20, 3)
+        draw.circle(surf, (0, 0, 0), center, reach*20, 3)
 
 
 class RemotePlayer:
@@ -133,6 +136,9 @@ class RemotePlayer:
         self.player_size = player_size
 
         self.username = username
+        self.name_tag = normal_font.render(username, True, (255, 255, 255))
+        self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height + 10), SRCALPHA)
+        self.name_back.fill(Color(75, 75, 75, 150))
 
     def calculate_velocity(self, ncord, fpt):
         self.vy = (ncord[1] - self.y) // fpt
@@ -144,8 +150,12 @@ class RemotePlayer:
         if self.vy == 0 and ncord[1] - self.y != 0:
             self.y = ncord[1]
 
-    def update(self, screen, x_offset, y_offset):
+    def update(self, surf, x_offset, y_offset):
         self.y += self.vy
         self.x += self.vx
 
-        draw.rect(screen, (10, 10, 10), (self.x - x_offset, self.y - y_offset, self.player_size, self.player_size))
+        draw.rect(surf, (10, 10, 10), (self.x - x_offset, self.y - y_offset, self.player_size, self.player_size))
+        surf.blit(self.name_back, rah.center(self.x - 10, self.y - 40, 20, 20,
+                                             self.name_back.get_width(), self.name_back.get_height()))
+        surf.blit(self.name_tag, rah.center(self.x - 10, self.y - 40, 20, 20,
+                                            self.name_tag.get_width(), self.name_tag.get_height()))
