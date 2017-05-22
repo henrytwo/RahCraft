@@ -2,15 +2,35 @@ import socket
 from multiprocessing import *
 import pickle
 import uuid
+import MySQLdb
+import time
 
-with open('users.csv','r') as users:
-	user_list = users.read().strip().split('\n')
 
-user = {}
+def import_users(que, thing):
 
-for group in user_list:
-	group = group.split(',')
-	user[group[0]] = group[1]
+	while True:
+		user = {}
+
+		db = MySQLdb.connect(host = 'localhost',
+		     user = 'root',
+		     passwd = '',
+	             db = 'Rahmish')
+
+		cur = db.cursor()
+
+		cur.execute("SELECT * FROM data")
+
+		for group in cur.fetchall():
+			user[group[1]] = group[2]
+
+		db.close()
+
+		print("[Update]",user)
+
+		que.put(user)
+
+		time.sleep(10)
+
 
 tokens = {}
 
@@ -40,14 +60,17 @@ def token(credentials):
     return tokens[username]
 
 
-def login(credentials):
+def login(credentials, user):
+
+    print("[Login]", user, credentials)
+
     if credentials[0] in user and user[credentials[0]] == credentials[1]:
             sendQueue.put(((1, token(credentials)), address))
 
     else:
         sendQueue.put(((400,), address))
 
-    print(tokens)
+    print("[Tokens]",tokens)
 
 def auth(credentials):
 
@@ -59,7 +82,9 @@ def auth(credentials):
 
 if __name__ == '__main__':
     host, port = 'rahmish.com', 1111
-    
+
+    user = {}
+
     sendQueue = Queue()
     messageQueue = Queue()
     
@@ -68,22 +93,32 @@ if __name__ == '__main__':
 
     print("Auth Server binded to %s:%i" % (host, port))
 
+    thing = None
+
+    user_queue = Queue()
+
     receiver = Process(target=receive_message, args=(messageQueue, server))
     receiver.start()
 
     sender = Process(target=player_sender, args=(sendQueue, server))
     sender.start()
 
+    user_update = Process(target=import_users, args=(user_queue, thing))
+    user_update.start()
+
     while True:
+
+        user = user_queue.get()
+            
         pickled_message = messageQueue.get()
         message, address = pickled_message
 
-        print(pickled_message)
+        print("[address]",message)
         command = message[0]
         
         if command == 0:
             #Login
-            login(message[1])
+            login(message[1], user)
 
         elif command == 1:
             #Auth request
