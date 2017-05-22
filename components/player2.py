@@ -126,14 +126,15 @@ class Player:
 
 
 class RemotePlayer:
-    def __init__(self, username, x, y, player_size):
+    def __init__(self, username, x, y, w, h):
         self.x = x
         self.y = y
 
         self.vx = 0
         self.vy = 0
 
-        self.player_size = player_size
+        self.w = w
+        self.h = h
 
         self.username = username
         self.name_tag = normal_font.render(username, True, (255, 255, 255))
@@ -154,7 +155,7 @@ class RemotePlayer:
         self.y += self.vy
         self.x += self.vx
 
-        draw.rect(surf, (10, 10, 10), (self.x - x_offset, self.y - y_offset, self.player_size, self.player_size))
+        draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y - y_offset, self.w, self.h))
         surf.blit(self.name_back, rah.center(self.x - 10 - x_offset, self.y - 40 - y_offset, 20, 20,
                                              self.name_back.get_width(), self.name_back.get_height()))
         surf.blit(self.name_tag, rah.center(self.x - 10 - x_offset, self.y - 40 - y_offset, 20, 20,
