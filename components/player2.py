@@ -1,6 +1,9 @@
 from pygame import *
 
 
+surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 3)]
+
+
 class Player:
 
     def __init__(self, x, y, w, h, controls):

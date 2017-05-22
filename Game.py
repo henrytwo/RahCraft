@@ -486,11 +486,10 @@ def game(surf, username, token, host, port, size, music_enable):
             if not current_gui:
                 surrounding_blocks = []
 
-                for x_blocks in range(-1, 2):
-                    for y_blocks in range(-1, 2):
+                for x_shift, y_shift in player2.surrounding_shifts:
 
-                        if block_properties[world[(block_clip[0] - x_blocks * block_size) // block_size, (block_clip[1] - y_blocks * block_size) // block_size]][6] == 'collide':
-                            surrounding_blocks.append(Rect(block_clip[0] - x_blocks * block_size, block_clip[1] - y_blocks * block_size, block_size, block_size))
+                    if block_properties[world[(block_clip[0] - x_shift * block_size) // block_size, (block_clip[1] - y_shift * block_size) // block_size]][6] == 'collide':
+                        surrounding_blocks.append(Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size, block_size))
 
                 local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, paused)
 
