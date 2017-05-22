@@ -373,7 +373,7 @@ def custom_server_picker():
             else:
                 return nav_update
 
-        fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
+        fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
             fields[field][0].draw(screen)
