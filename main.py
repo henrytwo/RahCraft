@@ -141,13 +141,13 @@ def authenticate():
 
         if first_message == (400,):
 
-            print("Invalid credentials")
+            rah.rahrah.rahprint("Invalid credentials")
 
             return 'login'
 
         elif first_message[0] == 1:
             token = str(first_message[1])
-            print("Login successful " + token)
+            rah.rahrah.rahprint("Login successful " + token)
 
             online = True
 
@@ -314,7 +314,7 @@ def server_picker():
 
             if nav_update:
                 if nav_update == 'add_server' and len(server_list) > 4:
-                    print("Too many")
+                    rah.rahrah.rahprint("Too many")
 
                 else:
                     return nav_update
@@ -426,7 +426,7 @@ def server_adder():
                     with open('data/servers.rah', 'w') as servers:
                         line_count = len(servers.read().split('\n'))
 
-                        print(line_count)
+                        rah.rahrah.rahprint(line_count)
 
                         servers.write('%i // %s // %s // %i' % (line_count, name, host, port))
 

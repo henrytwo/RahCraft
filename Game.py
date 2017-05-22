@@ -14,7 +14,7 @@ import traceback
 
 
 def player_sender(send_queue, server):
-    print('Sender running...')
+    rah.rahprint('Sender running...')
 
     while True:
         tobesent = send_queue.get()
@@ -22,7 +22,7 @@ def player_sender(send_queue, server):
 
 
 def receive_message(message_queue, server):
-    print('Ready to receive command...')
+    rah.rahprint('Ready to receive command...')
 
     while True:
         msg = server.recvfrom(16384)
@@ -72,7 +72,7 @@ def toggle(boolean):
 
 
 def game(surf, username, token, host, port, size, music_enable):
-    print('Starting game')
+    rah.rahprint('Starting game')
 
     font.init()
 
@@ -113,7 +113,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     clock = time.Clock()
 
-    print("Client connecting to %s:%i" % SERVER)
+    rah.rahprint("Client connecting to %s:%i" % SERVER)
 
     server.sendto(pickle.dumps([0, username, token]), SERVER)
 
@@ -134,7 +134,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory_items, R_players = first_message[1:]
 
-    print("player done")
+    rah.rahprint("player done")
 
     reach = 5
     player_x = int(player_x) * 20 - size[0] // 2
@@ -168,7 +168,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     while True:
         world_msg = message_queue.get()
-        print(world_msg)
+        rah.rahprint(world_msg)
         if world_msg[0] == 2:
             break
 
@@ -207,7 +207,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
         sound[sound_title] = local_sounds
 
-    print(sound)
+    rah.rahprint(sound)
 
     inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
@@ -216,7 +216,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     INVENTORY_KEYS = {str(x) for x in range(1, 10)}
 
-    print("ini done")
+    rah.rahprint("ini done")
 
     # ==============================Sky=====================================
     DEFAULTSKYCOLOR = [135, 206, 235]
@@ -455,7 +455,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 if sky_tick >= 24000:
                     sky_tick = 0
 
-                    print("Reset")
+                    rah.rahprint("Reset")
 
             surf.fill((255, 0, 0))
 
