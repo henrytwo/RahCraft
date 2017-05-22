@@ -68,7 +68,7 @@ def login():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
-        fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
+        fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
             fields[field][0].draw(screen)
