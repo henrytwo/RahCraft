@@ -123,7 +123,7 @@ class Player:
 
 
 class RemotePlayer:
-    def __init__(self, x, y, player_size):
+    def __init__(self, username, x, y, player_size):
         self.x = x
         self.y = y
 
@@ -131,7 +131,8 @@ class RemotePlayer:
         self.vy = 0
 
         self.player_size = player_size
-        print(self.x, self.y)
+
+        self.username = username
 
     def calculate_velocity(self, ncord, fpt):
         self.vy = (ncord[1] - self.y) // fpt

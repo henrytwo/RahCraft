@@ -240,7 +240,7 @@ def game(surf, username, token, host, port, size, music_enable):
         # ====================Init remote players================================
 
         for Rp in R_players:
-            remote_players[Rp] = player2.RemotePlayer(R_players[Rp][0], R_players[Rp][1], block_size - 5)
+            remote_players[Rp] = player2.RemotePlayer(Rp, R_players[Rp][0], R_players[Rp][1], block_size - 5)
 
         while True:
 
@@ -249,6 +249,7 @@ def game(surf, username, token, host, port, size, music_enable):
             block_broken = False
             tickPerFrame = max(clock.get_fps() / 20, 1)
             r_click = False
+            l_click = False
 
             for e in event.get():
                 if e.type == QUIT:
@@ -257,7 +258,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif e.type == MOUSEBUTTONDOWN and not paused:
                     if e.button == 1:
-                        click = True
+                        l_click = True
                     if e.button == 3:
                         r_click = True
 
@@ -346,7 +347,7 @@ def game(surf, username, token, host, port, size, music_enable):
                             current_x = int(current_x) * 20
                             current_y = int(current_y) * 20
 
-                        remote_players[username] = player2.RemotePlayer(current_x, current_y, block_size)
+                        remote_players[username] = player2.RemotePlayer(username, current_x, current_y, block_size)
 
                 elif command == 2:
                     chunk_positionX, chunk_positionY, world_chunk = message
@@ -458,14 +459,11 @@ def game(surf, username, token, host, port, size, music_enable):
 
             surf.fill((255, 0, 0))
 
-            print(sky_tick)
 
             surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
 
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
             surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
-
-            print(int(2800 - 4800 * (sky_tick % 24000) / 24000), int(5600 - 4800 * (sky_tick % 24000) / 24000))
 
             for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
                 for y in range(0, size[1] + block_size + 1, block_size):
@@ -554,7 +552,7 @@ def game(surf, username, token, host, port, size, music_enable):
             elif crafting:
                 surf.blit(tint, (0, 0))
 
-                crafting_object.update(surf, mx, my, mb, inventory_items, hotbar_items, block_properties)
+                crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties)
 
             display.update()
             clock.tick(120)

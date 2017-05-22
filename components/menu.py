@@ -308,19 +308,30 @@ class Crafting:
         self.graphic = image.load('textures/gui/crafting_table.png').convert_alpha()
         self.x, self.y = w // 2 - self.graphic.get_width() // 2, h // 2 - self.graphic.get_height() // 2
         self.w, self.h = w, h
+        self.highlight = Surface((32, 32))
+        self.highlight.fill((255, 255, 255))
+        self.highlight.set_alpha(20)
+        self.holding = [0, 0]
 
-    def update(self, surf, mx, my, m_press, inventory, hotbar, block_properties):
+    def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
-
                 if inventory[row][item][1] != 0:
                     surf.blit(transform.scale(block_properties[inventory[row][item][0]][3], (32, 32)),
                               (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     surf.blit(rah.text(str(inventory[row][item][1]), 10),
                               (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
+                    surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                    if l_click:
+                        tempstorage = self.holding[:]
+                        self.holding = inventory[row][item][:]
+                        inventory[row][item] = tempstorage[:]
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
@@ -330,5 +341,12 @@ class Crafting:
                 surf.blit(rah.text(str(hotbar[item][1]), 10),
                           (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
+            if Rect((self.x + 16 + item * 36, self.y + 283, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
+                if l_click:
+                    tempstorage = self.holding[:]
+                    self.holding = hotbar[item][:]
+                    hotbar[item] = tempstorage[:]
 
+        surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
