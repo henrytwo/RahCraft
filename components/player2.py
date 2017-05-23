@@ -118,7 +118,12 @@ class Player:
 
         self.collide(collision_blocks, fly)
 
-        draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
+        triangle = [(self.rect.x - x_offset, self.rect.y - y_offset + self.rect.h // 2),
+                    (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset),
+                    (self.rect.x - x_offset + self.rect.w, self.rect.y - y_offset + self.rect.h // 2)]
+
+        draw.polygon(surf, (255, 255, 255), triangle)
+        draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset + self.rect.h//2, self.rect.w, self.rect.h//2))
 
         center = (self.rect.x - x_offset + self.rect.w // 2, self.rect.y - y_offset + self.rect.h // 2)
         draw.circle(surf, (0, 0, 0), center, reach * 20, 3)

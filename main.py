@@ -224,8 +224,6 @@ def crash(error):
                   'ICS3U 2017',
                   '']
 
-    print(about_list)
-
     while True:
         release = False
 
@@ -638,8 +636,8 @@ if __name__ == "__main__":
         if navigation == 'game':
             game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
-            error = game_nav[1]
-            navigation = game_nav[0]
+            navigation, error = game_nav
+
 
 
         elif navigation == 'crash':
