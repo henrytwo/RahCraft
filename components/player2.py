@@ -9,7 +9,7 @@ surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 4)]
 
 
 class Player:
-    def __init__(self, x, y, w, h, g_cap, controls):
+    def __init__(self, x, y, w, h, g_cap, reach, controls):
 
         self.rect = Rect(x, y, w, h)
         self.surfSize = (800, 500)
@@ -21,6 +21,10 @@ class Player:
         self.jump_height = -(self.rect.h // 2)
         self.gravity = self.rect.h * 2 / 45
         self.grav_cap = g_cap
+
+        self.reach = reach
+        self.reach_surf = Surface((reach * 40, reach * 40), SRCALPHA)
+        draw.circle(self.reach_surf, Color(255, 255, 255, 75), (reach * 20, reach * 20), reach * 20)
 
         self.controls = controls
         self.standing = False
@@ -111,22 +115,25 @@ class Player:
         # else:
         #     self.vy -= 0
 
-    def update(self, surf, collision_blocks, x_offset, y_offset, fly, paused, reach=5):
+    def update(self, surf, collision_blocks, x_offset, y_offset, fly, paused):
 
         if not paused:
             self.control(fly)
 
         self.collide(collision_blocks, fly)
 
-        triangle = [(self.rect.x - x_offset, self.rect.y - y_offset + self.rect.h // 2),
-                    (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset),
-                    (self.rect.x - x_offset + self.rect.w, self.rect.y - y_offset + self.rect.h // 2)]
+        # triangle = [(self.rect.x - x_offset, self.rect.y - y_offset + self.rect.h // 2),
+        #             (self.rect.x - x_offset + self.rect.w//2, self.rect.y - y_offset),
+        #             (self.rect.x - x_offset + self.rect.w, self.rect.y - y_offset + self.rect.h // 2)]
+        #
+        # draw.polygon(surf, (255, 255, 255), triangle)
+        # draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset + self.rect.h//2, self.rect.w, self.rect.h//2))
+        # center = (self.rect.x - x_offset + self.rect.w // 2, self.rect.y - y_offset + self.rect.h // 2)
+        # draw.circle(surf, (0, 0, 0), center, reach * 20, 3)
 
-        draw.polygon(surf, (255, 255, 255), triangle)
-        draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset + self.rect.h//2, self.rect.w, self.rect.h//2))
-
-        center = (self.rect.x - x_offset + self.rect.w // 2, self.rect.y - y_offset + self.rect.h // 2)
-        draw.circle(surf, (0, 0, 0), center, reach * 20, 3)
+        surf.blit(self.reach_surf,
+                  ((self.rect.centerx - self.reach * 20) - x_offset, (self.rect.centery - self.reach * 20) - y_offset))
+        draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
 
 
 class RemotePlayer:
