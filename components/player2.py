@@ -9,8 +9,7 @@ surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 4)]
 
 
 class Player:
-
-    def __init__(self, x, y, w, h, controls):
+    def __init__(self, x, y, w, h, g_cap, controls):
 
         self.rect = Rect(x, y, w, h)
         self.surfSize = (800, 500)
@@ -19,8 +18,9 @@ class Player:
         self.vy = 0
 
         self.run_speed = int(self.rect.w * 0.3)
-        self.jump_height = -(self.rect.h  //  2)
+        self.jump_height = -(self.rect.h // 2)
         self.gravity = self.rect.h * 2 / 45
+        self.grav_cap = g_cap
 
         self.controls = controls
         self.standing = False
@@ -58,7 +58,7 @@ class Player:
         if fly:
             self.vy = 0
         else:
-            self.vy += self.gravity if self.vy + self.gravity < self.rect.h else 0
+            self.vy += self.gravity if self.vy + self.gravity < self.grav_cap else 0
 
         self.rect.x += self.vx
 
@@ -120,9 +120,8 @@ class Player:
 
         draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
 
-
         center = (self.rect.x - x_offset + self.rect.w // 2, self.rect.y - y_offset + self.rect.h // 2)
-        draw.circle(surf, (0, 0, 0), center, reach*20, 3)
+        draw.circle(surf, (0, 0, 0), center, reach * 20, 3)
 
 
 class RemotePlayer:
