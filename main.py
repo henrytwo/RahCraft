@@ -205,6 +205,49 @@ def about():
         display.update()
 
 
+
+def crash():
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    screen.blit(wallpaper, (0, 0))
+
+    back_button = menu.Button(200, 370, 400, 40, 'menu', "Back to menu")
+
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    about_list = ['',
+                  '',
+                  ':( Whoops, something went wrong',
+                  '',
+                  'Rahcraft (C) Rahmish Empire, All Rahs Reserved',
+                  'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
+                  'ICS3U 2017',
+                  '']
+
+    while True:
+        release = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+        mx, my = mouse.get_pos()
+        m_press = mouse.get_pressed()
+
+        for y in range(0, len(about_list)):
+            about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+            screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
+
+        nav_update = back_button.update(screen, mx, my, m_press, 15, release)
+
+        if nav_update is not None:
+            return nav_update
+
+        display.update()
+
+
 def assistance():
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
@@ -585,7 +628,8 @@ if __name__ == "__main__":
           'server_picker': server_picker,
           'custom_server_picker': custom_server_picker,
           'add_server': server_adder,
-          'auth': authenticate}
+          'auth': authenticate,
+          'crash': crash}
 
     while navigation != 'exit':
         if navigation == 'game':

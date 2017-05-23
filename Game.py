@@ -195,7 +195,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     sound_list = glob.glob('sound/step/*.ogg')
 
-    sound_groups = [sound.split("/")[-1] for sound in sound_list]
+    sound_groups = [sound.split("/")[-1][:-5] for sound in sound_list]
+
 
     sound = {}
 
@@ -568,7 +569,7 @@ def game(surf, username, token, host, port, size, music_enable):
     except:
         traceback.print_exc()
         quit_game()
-        return 'menu'
+        return 'crash'
 
 
 if __name__ == "__main__":
