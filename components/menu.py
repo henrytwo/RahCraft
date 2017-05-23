@@ -314,8 +314,15 @@ class Crafting:
         self.holding = [0, 0]
 
         self.crafting_grid = [[[0, 0] for _ in range(3)] for __ in range(3)]
-        # self.recipes = self.load_recipes()
-        self.recipes = {'0 0 0 0 10 0 0 0 0': [2, 2]}
+
+        with open('data/crafting.rah','r') as recipes:
+            recipe_list = [recipe.split(' // ') for recipe in recipes.read().split('\n')]
+
+        self.recipes = {recipe[0]:[int(recipe[1]), int(recipe[2])] for recipe in recipe_list}
+
+        rah.rahprint(self.recipes)
+
+        #self.recipes = {'0 0 0 0 10 0 0 0 0': [2, 2]}
         self.current_recipe = []
         self.resulting_item = [0, 0]
 
