@@ -11,6 +11,8 @@ import glob
 from math import *
 import time
 
+from random import *
+
 with open("data/config.rah", "r") as config:
     config = config.read().split("\n")
     host = config[0]
@@ -47,7 +49,7 @@ class Player(object):
             return PlayerData[self.username]
         except KeyError:
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
-                                         [[[10, 32] for _ in range(9)] for __ in range(3)], [[10, 64] for _ in range(9)],
+                                         [[[randint(1,15), randint(1,64)] for _ in range(9)] for __ in range(3)], [[randint(1,15), randint(1,64)] for _ in range(9)],
                                          10, 10]
 
             print(PlayerData[self.username])
@@ -84,8 +86,8 @@ class Player(object):
         # self.x = self.spawnx
         # self.y = self.spawny
 
-        self.inventory = [[0] * 2 for _ in range(36)]
-        self.hotbar = [[0] * 2 for _ in range(36)]
+        self.inventory = [[0, 0] for _ in range(36)]
+        self.hotbar = [[0, 0] * 2 for _ in range(36)]
         self.hunger = 10
         self.health = 10
         # self.saturation = 10
@@ -345,6 +347,8 @@ if __name__ == '__main__':
                     commandline.terminate()
                     server.close()
 
+                    exit()
+                    
                     break
 
                 else:
