@@ -206,7 +206,7 @@ def about():
 
 
 
-def crash():
+def crash(error):
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     screen.blit(wallpaper, (0, 0))
 
@@ -214,14 +214,17 @@ def crash():
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
+    error_message = list(map(str,error.split('\n')))
+
     about_list = ['',
                   '',
                   ':( Whoops, something went wrong',
-                  '',
-                  'Rahcraft (C) Rahmish Empire, All Rahs Reserved',
+                  '',] + error_message + ['Rahcraft (C) Rahmish Empire, All Rahs Reserved',
                   'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
                   'ICS3U 2017',
                   '']
+
+    print(about_list)
 
     while True:
         release = False
@@ -633,7 +636,14 @@ if __name__ == "__main__":
 
     while navigation != 'exit':
         if navigation == 'game':
-            navigation = Game.game(screen, username, token, host, port, size, music_enable)
+            game_nav = Game.game(screen, username, token, host, port, size, music_enable)
+
+            error = game_nav[1]
+            navigation = game_nav[0]
+
+
+        elif navigation == 'crash':
+            navigation = crash(error)
 
         else:
             navigation = UI[navigation]()
