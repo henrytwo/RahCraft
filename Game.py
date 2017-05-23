@@ -78,7 +78,7 @@ def game(surf, username, token, host, port, size, music_enable):
     font.init()
 
     def quit_game():
-        send_queue.put(((9, block_size), SERVER))
+        send_queue.put(((9, block_size), SERVERADDRESS))
         time.wait(50)
         sender.terminate()
         receiver.terminate()
@@ -87,7 +87,7 @@ def game(surf, username, token, host, port, size, music_enable):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    SERVER = (host, port)
+    SERVERADDRESS = (host, port)
 
     send_queue = Queue()
     message_queue = Queue()
@@ -114,9 +114,9 @@ def game(surf, username, token, host, port, size, music_enable):
 
     clock = time.Clock()
 
-    rah.rahprint("Client connecting to %s:%i" % SERVER)
+    rah.rahprint("Client connecting to %s:%i" % SERVERADDRESS)
 
-    server.sendto(pickle.dumps([0, username, token]), SERVER)
+    server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
 
     sender = Process(target=player_sender, args=(send_queue, server))
     sender.start()
@@ -166,7 +166,7 @@ def game(surf, username, token, host, port, size, music_enable):
     fly = False
     inventory_visible = False
 
-    send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
+    send_queue.put([[2, x_offset // block_size, y_offset // block_size], SERVERADDRESS])
 
     while True:
         world_msg = message_queue.get()
@@ -328,7 +328,7 @@ def game(surf, username, token, host, port, size, music_enable):
             block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
 
             if on_tick:
-                send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVER]))
+                send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
 
             displaying_world = world[x_offset // block_size:x_offset // block_size + 41,
                                      y_offset // block_size:y_offset // block_size + 26]
@@ -336,7 +336,7 @@ def game(surf, username, token, host, port, size, music_enable):
             update_cost = np.count_nonzero(update_cost == -1)
 
             if update_cost > 10 and on_tick and (x_offset // block_size, y_offset // block_size) not in render_request:
-                send_queue.put([[2, x_offset // block_size, y_offset // block_size], (host, port)])
+                send_queue.put([[2, x_offset // block_size, y_offset // block_size], SERVERADDRESS])
 
                 render_request.add((x_offset // block_size, y_offset // block_size))
             # ===================Decode Message======================
@@ -447,7 +447,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     if block_broken:
                         block_request.add((hover_x, hover_y))
-                        send_queue.put(((3, hover_x, hover_y), SERVER))
+                        send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
 
                         current_breaking = []
                         breaking_block = False
@@ -507,7 +507,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
                         block_request.add((hover_x, hover_y))
-                        send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVER))
+                        send_queue.put(((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]
