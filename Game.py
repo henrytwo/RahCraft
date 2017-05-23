@@ -40,7 +40,8 @@ def load_blocks(block_file):
         blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")),
                                (int(x) for x in outline.split(",")),
                                transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (20, 20)), int(hardness),
-                               soundpack, collision]
+                               soundpack, collision,
+                               transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (32, 32))]
 
     return blocks
 
