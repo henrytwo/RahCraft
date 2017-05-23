@@ -297,8 +297,12 @@ def game(surf, username, token, host, port, size, music_enable):
                         if e.unicode in INVENTORY_KEYS:
                             hotbar_slot = int(e.unicode) - 1
 
+
                         if e.key == K_f:
                             fly = toggle(fly)
+
+                        if e.key == K_r:
+                            local_player.rect.y -= 50
 
                         if e.key == K_e and current_gui == '' or current_gui == 'I':
                             inventory_visible = toggle(inventory_visible)
@@ -506,8 +510,8 @@ def game(surf, username, token, host, port, size, music_enable):
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]
 
-                    if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                        hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+                    #if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    #    hotbar_items[hotbar_slot] = world[hover_x, hover_y]
 
             for remote in remote_players:
                 remote_players[remote].update(surf, x_offset, y_offset)
@@ -526,6 +530,9 @@ def game(surf, username, token, host, port, size, music_enable):
                               (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
             surf.blit(selected, (hotbarRect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))
+
+            block_name = rah.text(str(block_properties[hotbar_items[hotbar_slot][0]][0]), 13)
+            surf.blit(block_name ,( size[0]//2 - block_name.get_width()//2, size[1] - 60))
 
             # Pause surf
             if paused:

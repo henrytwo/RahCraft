@@ -319,11 +319,11 @@ class Inventory:
                     self.holding = hotbar[item][:]
                     hotbar[item] = tempstorage[:]
 
-        if Rect((463, 146, 48, 48)).collidepoint(mx, my):
-            surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
+        #if Rect((463, 146, 48, 48)).collidepoint(mx, my):
+        #    surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
 
-
-        surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
+        if self.holding[0] > 0:
+            surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
 
 
 class Crafting:
@@ -359,7 +359,7 @@ class Crafting:
 
     def craft(self):
         if self.holding == [0, 0] and self.resulting_item != [0, 0]:
-            self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
+            #self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
 
             print(self.current_recipe)
 
@@ -429,6 +429,13 @@ class Crafting:
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
 
+            if l_click and self.holding == [0,0]:
+                self.holding = self.resulting_item
+                self.resulting_item = [0,0]
+                self.crafting_grid = [[[0, 0] for _ in range(3)] for __ in range(3)]
+
+
         self.craft()
 
-        surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
+        if self.holding[0] > 0:
+            surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
