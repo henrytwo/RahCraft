@@ -548,7 +548,7 @@ def game(surf, username, token, host, port, size, music_enable):
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
 
-                inventory_object.update(surf, mx, my, mb, inventory_items, hotbar_items, block_properties)
+                inventory_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties)
 
             elif crafting:
                 surf.blit(tint, (0, 0))

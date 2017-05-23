@@ -49,7 +49,7 @@ class Player(object):
             return PlayerData[self.username]
         except KeyError:
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
-                                         [[[randint(1,15), randint(1,64)] for _ in range(9)] for __ in range(3)], [[randint(1,15), randint(1,64)] for _ in range(9)],
+                                         [[[randint(0,15), randint(0,64)] for _ in range(9)] for __ in range(3)], [[randint(0,15), randint(0,64)] for _ in range(9)],
                                          10, 10]
 
             print(PlayerData[self.username])
