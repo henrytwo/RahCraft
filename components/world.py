@@ -32,7 +32,7 @@ def generate_tree(bx, by, world):
 def generate_world(world_seed, max_height, min_x, max_x, w, h):
     """ Creates a world object randomly generated using a user-inputted seed. """
 
-    # Set the initial seed for the random module (random.seed())
+    # Set the initial seed for the randawom module (random.seed())
     seed(world_seed)
 
     # Create a blank map (2D list filled with '0' strings
@@ -108,8 +108,3 @@ def generate_world(world_seed, max_height, min_x, max_x, w, h):
 
     # Return the world object for use
     return np.array(world)
-
-
-def draw_block(x, y, x_offset, y_offset, block_size, colour, colour_in, screen):
-    draw.rect(screen, colour, (x - x_offset % 20, y - y_offset % 20, block_size, block_size))
-    draw.rect(screen, colour_in, (x - x_offset % 20, y - y_offset % 20, block_size, block_size), 1)

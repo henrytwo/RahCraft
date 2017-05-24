@@ -12,6 +12,7 @@ import components.menu as menu
 import Game as Game
 import platform
 
+socket.setdefaulttimeout(10)
 
 def login():
     global username, password, host, port
@@ -89,19 +90,6 @@ def login():
         clock.tick(120)
         display.update()
 
-
-def player_sender(send_queue, server):
-    while True:
-        tobesent = send_queue.get()
-        server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
-
-
-def receive_message(message_queue, server):
-    while True:
-        message = server.recvfrom(16384)
-        message_queue.put(pickle.loads(message[0]))
-
-
 def authenticate():
     global username, password, online, token
 
@@ -119,39 +107,36 @@ def authenticate():
     send_queue = Queue()
     message_queue = Queue()
 
-    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    _server = (host, port)
-
-    send_queue = Queue()
-    message_queue = Queue()
-
-    sender = Process(target=player_sender, args=(send_queue, server))
-    receiver = Process(target=receive_message, args=(message_queue, server))
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    SERVERADDRESS = (host, port)
 
     credentials = [username, password]
 
-    server.sendto(pickle.dumps([0, credentials]), _server)
+    try:
+        server.connect(SERVERADDRESS)
+        server.send(pickle.dumps([0, credentials]))
 
-    sender.start()
-    receiver.start()
+        while True:
 
-    while True:
+            first_message = pickle.loads(server.recv(4096))
 
-        first_message = message_queue.get()
+            if first_message == (400,):
 
-        if first_message == (400,):
+                rah.rahrah.rahprint("Invalid credentials")
+                server.close()
+                return 'login'
 
-            rah.rahrah.rahprint("Invalid credentials")
+            elif first_message[0] == 1:
+                token = str(first_message[1])
+                rah.rahrah.rahprint("Login successful " + token)
 
-            return 'login'
-
-        elif first_message[0] == 1:
-            token = str(first_message[1])
-            rah.rahrah.rahprint("Login successful " + token)
-
-            online = True
-
-            return 'menu'
+                online = True
+                server.close()
+                return 'menu'
+    except:
+        print(traceback.format_exc())
+        server.close()
+        return "login"  # change later to error screen
 
 
 def about():
