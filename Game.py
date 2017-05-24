@@ -221,6 +221,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     rah.rahprint("ini done")
 
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
     # ==============================Sky=====================================
     DEFAULTSKYCOLOR = [135, 206, 235]
     sky_color = [-65, 6, 35]
@@ -563,6 +565,24 @@ def game(surf, username, token, host, port, size, music_enable):
                 surf.blit(tint, (0, 0))
 
                 crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties)
+
+            if not paused:
+                if key.get_pressed()[K_TAB]:
+
+                    players =  ['Rahcraft',
+                                '---------',
+                                username] + [player for player in remote_players]
+
+                    tab_back = Surface((200, len(players) * 30 + 10),
+                                             SRCALPHA)
+
+                    tab_back.fill(Color(75, 75, 75, 150))
+
+                    surf.blit(tab_back, (size[0]//2 - 100, 40))
+
+                    for y in range(0, len(players)):
+                        about_text = normal_font.render(players[y], True, (255, 255, 255))
+                        surf.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 50 + y * 20))
 
             display.update()
             clock.tick(120)
