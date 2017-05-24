@@ -1,5 +1,6 @@
 import socket
 from multiprocessing import *
+from threading import *
 import pickle
 import uuid
 import MySQLdb
@@ -31,25 +32,6 @@ def import_users(que, thing):
 tokens = {}
 
 
-def player_sender(send_queue, server):
-    print('Sender running...')
-
-    while True:
-        tobesent = send_queue.get()
-        server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
-
-
-def receive_message(message_queue, server):
-    print('Auth Server is ready for connection!')
-
-    while True:
-        try:
-            message = server.recvfrom(1024)
-        except:
-            continue
-        message_queue.put((pickle.loads(message[0]), message[1]))
-
-
 def token(credentials):
     username = credentials[0]
     tokens[username] = str(uuid.uuid4())
@@ -60,33 +42,56 @@ def token(credentials):
 def login(credentials, user):
     print("[Login]", user, credentials)
 
-    if credentials[0] in user and user[credentials[0]] == credentials[1]:
-        sendQueue.put(((1, token(credentials)), address))
-
-    else:
-        sendQueue.put(((400,), address))
-
     print("[Tokens]", tokens)
+
+    if credentials[0] in user and user[credentials[0]] == credentials[1]:
+        return 1, token(credentials)
+    else:
+        return (400,)
 
 
 def auth(credentials):
     if credentials[0] in tokens and tokens[credentials[0]] == credentials[1]:
-        sendQueue.put(((10, 1), address))
+        return 10, 1
 
     else:
-        sendQueue.put(((10, 0), address))
+        return 10, 0
+
+
+def recieve_info(conn, addr):
+    global active_user
+
+    message = pickle.loads(conn.recv(4096))
+
+    command = message[0]
+    if command == 0:
+        # Login
+        reply = login(message[1], user)
+        conn.send(pickle.dumps(reply))
+
+    elif command == 1:
+        # Auth request
+        reply = auth(message[1])
+        conn.send(pickle.dumps(reply))
+
+    del active_user[addr]
+
+
+def local_user_update():
+    global user
+    while True:
+        user = user_queue.get()
 
 
 if __name__ == '__main__':
     host, port = 'rahmish.com', 1111
 
     user = {}
+    active_user = {}
 
-    sendQueue = Queue()
-    messageQueue = Queue()
-
-    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
+    server.listen(50)
 
     print("Auth Server binded to %s:%i" % (host, port))
 
@@ -94,29 +99,14 @@ if __name__ == '__main__':
 
     user_queue = Queue()
 
-    receiver = Process(target=receive_message, args=(messageQueue, server))
-    receiver.start()
-
-    sender = Process(target=player_sender, args=(sendQueue, server))
-    sender.start()
-
     user_update = Process(target=import_users, args=(user_queue, thing))
     user_update.start()
 
+    local_update = Thread(target=local_user_update)
+    local_update.start()
+
     while True:
+        conn, addr = server.accept()
 
-        user = user_queue.get()
-
-        pickled_message = messageQueue.get()
-        message, address = pickled_message
-
-        print("[address]", message)
-        command = message[0]
-
-        if command == 0:
-            # Login
-            login(message[1], user)
-
-        elif command == 1:
-            # Auth request
-            auth(message[1])
+        active_user[addr] = Thread(target=recieve_info, args=(conn, addr))
+        active_user[addr].run()
