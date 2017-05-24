@@ -259,7 +259,7 @@ def game(surf, username, token, host, port, size, music_enable):
             for e in event.get():
                 if e.type == QUIT:
                     quit_game()
-                    return 'menu', None
+                    return 'menu', None, 'menu'
 
                 elif e.type == MOUSEBUTTONDOWN and not paused:
                     if e.button == 1:
@@ -348,15 +348,27 @@ def game(surf, username, token, host, port, size, music_enable):
                 command, message = server_message[0], server_message[1:]
 
                 if command == 1:
-                    username, current_x, current_y = message
-                    if username in remote_players:
-                        remote_players[username].calculate_velocity((current_x, current_y), tickPerFrame)
+                    remote_username, current_x, current_y = message
+
+                    print(remote_username, remote_players)
+
+                    if remote_username in remote_players:
+
+                        print("Cal vol", remote_username)
+
+                        remote_players[remote_username].calculate_velocity((current_x, current_y), tickPerFrame)
+
                     else:
+
+                        print("else")
+
                         if type(current_y) is str:
                             current_x = int(current_x) * 20
                             current_y = int(current_y) * 20
 
-                        remote_players[username] = player2.RemotePlayer(username, current_x, current_y, block_size)
+                        remote_players[remote_username] = player2.RemotePlayer(remote_username, current_x, current_y, block_size)
+
+
 
                 elif command == 2:
                     chunk_positionX, chunk_positionY, world_chunk = message
@@ -552,7 +564,7 @@ def game(surf, username, token, host, port, size, music_enable):
                         paused = False
                     elif nav_update == 'menu':
                         quit_game()
-                        return 'menu', None
+                        return 'menu', None, 'menu'
                     else:
                         return nav_update
 
@@ -565,6 +577,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 surf.blit(tint, (0, 0))
 
                 crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties)
+
 
             if not paused:
                 if key.get_pressed()[K_TAB]:
@@ -589,7 +602,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     except:
         quit_game()
-        return 'crash', traceback.format_exc()
+        return 'crash', traceback.format_exc(), 'menu'
 
 
 if __name__ == "__main__":
