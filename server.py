@@ -218,6 +218,9 @@ if __name__ == '__main__':
     cmdIn = ""
 
     while True:
+
+        print(players)
+
         pickled_message = messageQueue.get()
         message, address = pickled_message
         command = message[0]
@@ -248,7 +251,7 @@ if __name__ == '__main__':
                                         str(players[address].cord[1])), i))
 
             else:
-                sendQueue.put(((400,), address))
+                sendQueue.put(((400, ("Connection closed by remote host\nUsername %s is currently in use"%players[i].username)), address))
 
         elif command == 1:
             # Player movement

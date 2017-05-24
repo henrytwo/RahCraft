@@ -12,7 +12,6 @@ import components.menu as menu
 import Game as Game
 import platform
 
-socket.setdefaulttimeout(10)
 
 def login():
     global username, password, host, port
@@ -106,9 +105,10 @@ def authenticate():
 
     send_queue = Queue()
     message_queue = Queue()
-
+    socket.setdefaulttimeout(10)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     SERVERADDRESS = (host, port)
+    socket.setdefaulttimeout(None)
 
     credentials = [username, password]
 
@@ -134,9 +134,10 @@ def authenticate():
                 server.close()
                 return 'menu'
     except:
-        print(traceback.format_exc())
+        #print(traceback.format_exc())
+
         server.close()
-        return "login"  # change later to error screen
+        return "crash", traceback.format_exc(),"login"
 
 
 def about():
@@ -189,13 +190,13 @@ def about():
 
         display.update()
 
+def crash(error, previous):
+    #wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    #screen.blit(wallpaper, (0, 0))
 
+    screen.fill((0,0,255))
 
-def crash(error):
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
-    screen.blit(wallpaper, (0, 0))
-
-    back_button = menu.Button(200, 370, 400, 40, 'menu', "Back to menu")
+    back_button = menu.Button(200, 370, 400, 40, previous, "Return")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -621,12 +622,10 @@ if __name__ == "__main__":
         if navigation == 'game':
             game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
-            navigation, error = game_nav
+            navigation = game_nav
 
-
-
-        elif navigation == 'crash':
-            navigation = crash(error)
+        elif navigation[0] == 'crash':
+            navigation = crash(navigation[1], navigation[2])
 
         else:
             navigation = UI[navigation]()
