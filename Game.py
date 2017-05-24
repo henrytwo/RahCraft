@@ -86,6 +86,8 @@ def game(surf, username, token, host, port, size, music_enable):
     def get_neighbours(x, y):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
+    socket.setdefaulttimeout(None)
+
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     SERVERADDRESS = (host, port)
 
