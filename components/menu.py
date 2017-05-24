@@ -70,43 +70,67 @@ click_cursor = ["      ..                ",
                 "     .XXXXXXXXX.        ",
                 "     ...........        "]
 
+click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
+
 
 class Menu:
-    def __init__(self, button_param, x, y, w, h):
+    def __init__(self, button_param, x, y, w, h,):
         # button_list <row>, <func>, <text>
 
-        V_SPACE = 5
+        # V_SPACE = 5
+        #
+        # BUTTON_W = 400
+        # BUTTON_H = 40
+        #
+        # ROWS = max([button[0] for button in button_param])
+        #
+        # SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
+        # SET_W = BUTTON_W
+        #
+        # X_OFFSET = x + w // 2 - SET_W // 2
+        # Y_OFFSET = y + h // 2 - SET_H // 2
+        #
+        # ROW = 0
+        # FUNCTION = 1
+        # TEXT = 2
+        #
+        # self.button_list = []
+        #
+        # for button_index in range(len(button_param)):
+        #     button_x = X_OFFSET
+        #     button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
+        #
+        #     func = button_param[button_index][FUNCTION]
+        #     text = button_param[button_index][TEXT]
+        #
+        #     self.button_list.append(Button(button_x, button_y, BUTTON_W, BUTTON_H, func, text))
 
-        BUTTON_W = 400
-        BUTTON_H = 40
+        row_num = max([button_row for button_row, *trash in button_param])
 
-        ROWS = max([button[0] for button in button_param])
+        group_w = 400
+        group_h = row_num * 45 - 5
 
-        SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
-        SET_W = BUTTON_W
-
-        X_OFFSET = x + w // 2 - SET_W // 2
-        Y_OFFSET = y + h // 2 - SET_H // 2
-
-        ROW = 0
-        FUNCTION = 1
-        TEXT = 2
+        group_x = x + w // 2 - group_w // 2
+        group_y = y + h // 2 - group_h // 2
 
         self.button_list = []
 
-        for button_index in range(len(button_param)):
-            button_x = X_OFFSET
-            button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
+        sorted_button_param = [[button for button in button_param if button[0] == row] for row in range(row_num)]
 
-            func = button_param[button_index][FUNCTION]
-            text = button_param[button_index][TEXT]
+        for button_row in range(len(sorted_button_param)):
+            b_w = int(group_w / len(sorted_button_param[button_row]) * 45 - 5 / len(sorted_button_param[button_row]))
+            b_h = 40
+            b_y = group_y + ((b_h + 5) * button_row)
 
-            self.button_list.append(Button(button_x, button_y, BUTTON_W, BUTTON_H, func, text))
+            for button_index in range(len(sorted_button_param[button_row])):
+                b_x = group_x + ((b_w + 5) * button_index)
+
+                func = sorted_button_param[button_row][button_index][1]
+                text = sorted_button_param[button_row][button_index][2]
+
+                self.button_list.append(Button(b_x, b_y, b_w, b_h, func, text))
 
     def update(self, surf, release, mx, my, m_press):
-
-        click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
-
         hover_over_button = False
 
         for button in self.button_list:
