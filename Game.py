@@ -128,10 +128,10 @@ def game(surf, username, token, host, port, size, music_enable):
 
     while True:
         first_message = message_queue.get()
-        if first_message == (400,):
+        if first_message[0] == 400:
             sender.terminate()
             receiver.terminate()
-            return "crash", '\nServer rejected connection\nUsername may already be in use\nose a different username and try again\n','login'
+            return "crash", first_message[1],'login'
         elif first_message[0] == 0:
             break
 
