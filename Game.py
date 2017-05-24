@@ -86,8 +86,6 @@ def game(surf, username, token, host, port, size, music_enable):
     def get_neighbours(x, y):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
-    socket.setdefaulttimeout(None)
-
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     SERVERADDRESS = (host, port)
 
@@ -352,23 +350,17 @@ def game(surf, username, token, host, port, size, music_enable):
                 if command == 1:
                     remote_username, current_x, current_y = message
 
-                    print(remote_username, remote_players)
-
                     if remote_username in remote_players:
-
-                        print("Cal vol", remote_username)
 
                         remote_players[remote_username].calculate_velocity((current_x, current_y), tickPerFrame)
 
                     else:
 
-                        print("else")
-
                         if type(current_y) is str:
                             current_x = int(current_x) * 20
                             current_y = int(current_y) * 20
 
-                        remote_players[remote_username] = player2.RemotePlayer(remote_username, current_x, current_y, block_size)
+                        remote_players[remote_username] = player2.RemotePlayer(remote_username, current_x, current_y, block_size - 5, 2 * block_size - 5)
 
 
 

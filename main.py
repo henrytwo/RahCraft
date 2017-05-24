@@ -12,7 +12,6 @@ import components.menu as menu
 import Game as Game
 import platform
 
-socket.setdefaulttimeout(10)
 
 def login():
     global username, password, host, port
@@ -106,9 +105,10 @@ def authenticate():
 
     send_queue = Queue()
     message_queue = Queue()
-
+    socket.setdefaulttimeout(10)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     SERVERADDRESS = (host, port)
+    socket.setdefaulttimeout(None)
 
     credentials = [username, password]
 
