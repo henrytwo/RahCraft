@@ -131,7 +131,7 @@ def game(surf, username, token, host, port, size, music_enable):
         if first_message == (400,):
             sender.terminate()
             receiver.terminate()
-            return "login"
+            return "crash", 'Server rejected connection','login'
         elif first_message[0] == 0:
             break
 
