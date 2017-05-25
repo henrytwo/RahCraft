@@ -21,19 +21,27 @@ def login():
 
     clock = time.Clock()
 
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     screen.blit(wallpaper, (0, 0))
 
-    login_button = menu.Button(200, 370, 400, 40, 'menu', 'Login offline (Some features restricted)')
+    login_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', 'Login offline (Some features restricted)')
 
-    auth_button = menu.Button(200, 320, 400, 40, 'auth', 'AUTHENTICATE WITH SERVER')
+    auth_button = menu.Button(size[0]//4, 320, size[0]//2, 40, 'auth', 'AUTHENTICATE WITH SERVER')
 
     username, password = '', ''
 
     field_selected = 'user'
 
-    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 4, 400, 40, 'Username'), username],
-              'pass': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, 400, 40, 'Password'), password]}
+    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 4, size[0]//2, 40, 'Username'), username],
+              'pass': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0]//2, 40, 'Password'), password]}
 
     while True:
 
@@ -92,7 +100,17 @@ def login():
 def authenticate():
     global username, password, online, token
 
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     screen.blit(wallpaper, (0, 0))
 
     connecting_text = rah.text("Waiting for AUTH server...", 30)
@@ -141,10 +159,18 @@ def authenticate():
 
 
 def about():
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     screen.blit(wallpaper, (0, 0))
 
-    back_button = menu.Button(200, 370, 400, 40, 'menu', "Back")
+    back_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -181,7 +207,7 @@ def about():
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
+            screen.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 50 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
@@ -191,12 +217,12 @@ def about():
         display.update()
 
 def crash(error, previous):
-    #wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    #wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     #screen.blit(wallpaper, (0, 0))
 
     screen.fill((0,0,255))
 
-    back_button = menu.Button(200, size[1] - 50, 400, 40, previous, "Return")
+    back_button = menu.Button(size[0]//4, size[1] - 50, size[0]//2, 40, previous, "Return")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -230,7 +256,7 @@ def crash(error, previous):
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (400 - about_text.get_width() // 2, 10 + y * 20))
+            screen.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 10 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
@@ -241,10 +267,21 @@ def crash(error, previous):
 
 
 def assistance():
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     screen.blit(wallpaper, (0, 0))
 
-    back_button = menu.Button(200, 370, 400, 40, 'menu', "Back")
+    back_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -282,7 +319,7 @@ def assistance():
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
+            screen.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 50 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
@@ -309,12 +346,20 @@ def server_picker():
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1] - 80)
 
     button_list = [
-        menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, 200, 40, 'custom_server_picker', 'Direct Connect'),
-        menu.Button(size[0] // 2 - 100, size[1] - 60, 200, 40, 'add_server', 'Add Server'),
-        menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, 200, 40, 'menu', 'Back')]
+        menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, size[0]//4, 40, 'custom_server_picker', 'Direct Connect'),
+        menu.Button(size[0] // 2 - 100, size[1] - 60, size[0]//4, 40, 'add_server', 'Add Server'),
+        menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, size[0]//4, 40, 'menu', 'Back')]
 
     while True:
-        wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+        if size[0] < size[1]:
+            wpw = size[0]
+            wph = int(500 / 955 * size[0])
+
+        else:
+            wph = size[1]
+            wpw = int(955 / 500 * size[1])
+
+        wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
         screen.blit(wallpaper, (0, 0))
 
         release = False
@@ -338,7 +383,7 @@ def server_picker():
 
         server_bar = Surface((size[0], 80))
 
-        server_bar.fill((200, 200, 200))
+        server_bar.fill((size[0]//4, size[0]//4, 200))
 
         server_bar.set_alpha(90)
 
@@ -360,7 +405,15 @@ def server_picker():
 def custom_server_picker():
     global host, port
 
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     screen.blit(wallpaper, (0, 0))
 
     buttons = [[0, 'game', "Connect"],
@@ -370,8 +423,8 @@ def custom_server_picker():
 
     field_selected = 'host'
 
-    fields = {'host': [menu.TextBox(size[0] // 4, size[1] // 4, 400, 40, 'Host'), host],
-              'port': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, 400, 40, 'Port'), port]}
+    fields = {'host': [menu.TextBox(size[0] // 4, size[1] // 4, size[0]//2, 40, 'Host'), host],
+              'port': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0]//2, 40, 'Port'), port]}
 
     while True:
 
@@ -422,7 +475,15 @@ def custom_server_picker():
 def server_adder():
     clock = time.Clock()
 
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     screen.blit(wallpaper, (0, 0))
 
     buttons = [[0, 'server_picker', "Add"],
@@ -436,9 +497,9 @@ def server_adder():
 
     field_selected = 'name'
 
-    fields = {'name': [menu.TextBox(size[0] // 4, size[1] // 4, 400, 40, 'Name'), name],
-              'host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, 400, 40, 'Host'), host],
-              'port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, 400, 40, 'Port'), port]}
+    fields = {'name': [menu.TextBox(size[0] // 4, size[1] // 4, size[0]//2, 40, 'Name'), name],
+              'host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, size[0]//2, 40, 'Host'), host],
+              'port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, size[0]//2, 40, 'Port'), port]}
 
     while True:
 
@@ -520,7 +581,15 @@ def menu_screen():
 
     main_menu = menu.Menu(menu_list, 0, 0, size[0], size[1])
 
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     screen.blit(wallpaper, (0, 0))
 
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
@@ -529,10 +598,10 @@ def menu_screen():
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
     version_text = normal_font.render("Rahcraft 0.0.1 Beta", True, (255, 255, 255))
-    screen.blit(version_text, (10, 480))
+    screen.blit(version_text, (10, size[1] - 20))
 
     about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
-    screen.blit(about_text, (size[0] - about_text.get_width(), 480))
+    screen.blit(about_text, (size[0] - about_text.get_width(), size[1] - 20))
 
     user_text = normal_font.render("Logged in as: %s" % username, True, (255, 255, 255))
     screen.blit(user_text, (20, 20))
@@ -583,7 +652,7 @@ if __name__ == "__main__":
 
     navigation = 'login'
 
-    size = (800, 500)
+    size = (900, 600)
     screen = display.set_mode(size, DOUBLEBUF)
 
     rah.rah(screen)
