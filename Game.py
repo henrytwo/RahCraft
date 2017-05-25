@@ -612,7 +612,7 @@ def game(surf, username, token, host, port, size, music_enable):
                                   (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
                         surf.blit(rah.text(str(hotbar_items[item][1]), 10),
                                   (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
-                    if hotbar_items[item][0] < 200:
+                    elif hotbar_items[item][0] < 200:
                         surf.blit(transform.scale(tool_properties[hotbar_items[item][0]][1], (32, 32)),
                                   (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
