@@ -240,6 +240,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     current_gui = ''
 
+    send_queue.put(((10, 'ping'), SERVERADDRESS))
+
     # ========================stuff=====================================
 
     highlight_good = Surface((block_size, block_size))
@@ -413,6 +415,11 @@ def game(surf, username, token, host, port, size, music_enable):
                     username = message[0]
 
                     del remote_players[username]
+
+                elif command == 10:
+                    print(message[0])
+
+                    send_queue.put(((10, 'ping'), SERVERADDRESS))
 
                 elif command == 100:
                     send_time, tick = message

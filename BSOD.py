@@ -5,9 +5,9 @@ pygame.init()
 
 monitor = pygame.display.Info()
 
-screen = pygame.display.set_mode((monitor.current_w, monitor.current_h), pygame.FULLSCREEN, pygame.NOFRAME)
+screen = pygame.display.set_mode((monitor.current_w, monitor.current_h))#, pygame.FULLSCREEN, pygame.NOFRAME)
 
-text = ["A problem has been detected and windows has been shutdown to prevent damage to your computer.",
+text = ["A problem has been detected and Rahcraft has been shutdown to prevent damage to your computer.",
         "",
         "RAHMA_IRQL_NOT_LES_OR_EQUAL",
         "",

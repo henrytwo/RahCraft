@@ -167,7 +167,7 @@ def commandline_in(commandline_queue, fn):
     sys.stdin = os.fdopen(fn)
 
     while True:
-        command = input()
+        command = input('[Server]>')
         commandline_queue.put(((10, command), ('127.0.0.1',)))
 
 
@@ -353,6 +353,10 @@ if __name__ == '__main__':
 
                 else:
                     print("Command aborted")
+
+            if message[1].lower() == 'ping':
+                for i in players:
+                    sendQueue.put(((10, '[Server] pong!'), i))
 
         elif command == 100:
             for p in players:
