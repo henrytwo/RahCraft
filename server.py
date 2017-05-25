@@ -9,6 +9,7 @@ import glob
 from math import *
 import time
 from random import *
+import sys
 
 with open("data/config.rah", "r") as config:
     config = config.read().split("\n")
@@ -27,7 +28,7 @@ if not os.path.isfile('saves/%s.pkl' % world_name):
         pkl.dump(world, file)
 
 else:
-    world = pickle.load(open('saves/world.pkl', 'rb'))
+    world = pkl.load(open('saves/world.pkl', 'rb'))
 
 
 class Player(object):
@@ -101,7 +102,7 @@ class World:
         self.spawnpoint = self.get_spawnpoint()
 
     def load_world(self, worldn):
-        return pickle.load(open("saves/" + worldn + ".pkl", "rb"))
+        return pkl.load(open("saves/" + worldn + ".pkl", "rb"))
 
     def get_world(self, x, y):
         return self.overworld[x - 5:x + 45, y - 5:y + 31]
@@ -138,7 +139,7 @@ class World:
         return x, y
 
     def save(self):
-        pickle.dump(self.overworld, open('saves/world.pkl', 'wb'))
+        pkl.dump(self.overworld, open('saves/world.pkl', 'wb'))
 
 
 def player_sender(send_queue, server):
@@ -146,7 +147,7 @@ def player_sender(send_queue, server):
 
     while True:
         tobesent = send_queue.get()
-        server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
+        server.sendto(pkl.dumps(tobesent[0], protocol=4), tobesent[1])
 
 
 def receive_message(message_queue, server):
@@ -157,7 +158,7 @@ def receive_message(message_queue, server):
             message = server.recvfrom(1024)
         except:
             continue
-        message_queue.put((pickle.loads(message[0]), message[1]))
+        message_queue.put((pkl.loads(message[0]), message[1]))
 
 
 def commandline_in(commandline_queue, fn):
