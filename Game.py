@@ -240,6 +240,16 @@ def game(surf, username, token, host, port, size, music_enable):
 
     current_gui = ''
 
+    # ========================stuff=====================================
+
+    highlight_good = Surface((block_size, block_size))
+    highlight_good.fill((255, 255, 255))
+    highlight_good.set_alpha(50)
+
+    highlight_bad = Surface((block_size, block_size))
+    highlight_bad.fill((255, 0, 0))
+    highlight_bad.set_alpha(90)
+
     try:
 
         # ====================Init remote players================================
@@ -522,6 +532,13 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     #if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     #    hotbar_items[hotbar_slot] = world[hover_x, hover_y]
+
+                if hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    surf.blit(highlight_good, ((mx + x_offset) // block_size * block_size - x_offset,
+                                               (my + y_offset) // block_size * block_size - y_offset))
+                else:
+                    surf.blit(highlight_bad, ((mx + x_offset) // block_size * block_size - x_offset,
+                                              (my + y_offset) // block_size * block_size - y_offset))
 
             for remote in remote_players:
                 remote_players[remote].update(surf, x_offset, y_offset)
