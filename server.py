@@ -52,7 +52,7 @@ class Player(object):
                                          [[[randint(0,15), randint(0,64)] for _ in range(9)] for __ in range(3)], [[randint(0,15), randint(0,64)] for _ in range(9)],
                                          10, 10]
 
-            print(PlayerData[self.username])
+            #print(PlayerData[self.username])
             return PlayerData[self.username]
 
     def change_spawn(self, spawn_position):
@@ -322,7 +322,7 @@ if __name__ == '__main__':
                 sendQueue.put(((9, offPlayer), i))
 
         elif command == 10:
-            if message[1].lower() == "quit":
+            if message[1].lower() == "/quit":
                 receiver.terminate()
                 sender.terminate()
                 commandline.terminate()
@@ -331,17 +331,18 @@ if __name__ == '__main__':
                 world.save()
                 break
 
-            if message[1].lower() == "del world":
-                print("<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: ", end="")
+            if message[1].lower() == "/del world":
+                send_message = "<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: "
+
                 sys.stdout.flush()
                 in_put = messageQueue.get()
                 while in_put[0][0] != 10:
-                    print(in_put)
+                    #print(in_put)
                     in_put = messageQueue.get()
 
                 if in_put[0][1] == 'y':
                     os.remove("saves/world.pkl")
-                    print("World deleted successfully\nServer will shutdown")
+                    send_message = "World deleted successfully\nServer will shutdown"
                     receiver.terminate()
                     sender.terminate()
                     commandline.terminate()
@@ -352,11 +353,21 @@ if __name__ == '__main__':
                     break
 
                 else:
-                    print("Command aborted")
+                    send_message = "Command aborted"
 
-            if message[1].lower() == 'ping':
-                for i in players:
-                    sendQueue.put(((10, '[Server] pong!'), i))
+            elif message[1].lower() == '/ping':
+                send_message = 'pong!'
+
+            else:
+                send_message = '[%s] %s' % (players[address].username, message[1])
+
+            if send_message[0] != '[':
+                send_message = '[Server] ' + send_message
+
+            for i in players:
+                sendQueue.put(((10, send_message), i))
+                print(send_message)
+
 
         elif command == 100:
             for p in players:

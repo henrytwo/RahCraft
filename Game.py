@@ -11,7 +11,8 @@ import components.menu as menu
 import time as ti
 import glob
 import traceback
-
+import sys
+import os
 
 def player_sender(send_queue, server):
     rah.rahprint('Sender running...')
@@ -71,6 +72,14 @@ def inverted_rect(surf, block_size, width, rx, ry):
 def toggle(boolean):
     return not boolean
 
+def commandline_in(commandline_queue, fn, address):
+    rah.rahprint('Ready for input.')
+    sys.stdin = os.fdopen(fn)
+
+    while True:
+        command = input('> ')
+        commandline_queue.put(((10, command), address))
+
 
 def game(surf, username, token, host, port, size, music_enable):
     rah.rahprint('Starting game')
@@ -123,6 +132,12 @@ def game(surf, username, token, host, port, size, music_enable):
 
     receiver = Process(target=receive_message, args=(message_queue, server))
     receiver.start()
+
+    fn = sys.stdin.fileno()
+    commandline = Process(target=commandline_in, args=(send_queue, fn, SERVERADDRESS))
+    commandline.start()
+    cmdIn = ""
+
 
     while True:
         first_message = message_queue.get()
@@ -239,8 +254,6 @@ def game(surf, username, token, host, port, size, music_enable):
     crafting = False
 
     current_gui = ''
-
-    send_queue.put(((10, 'ping'), SERVERADDRESS))
 
     # ========================stuff=====================================
 
@@ -418,8 +431,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif command == 10:
                     print(message[0])
-
-                    send_queue.put(((10, 'ping'), SERVERADDRESS))
 
                 elif command == 100:
                     send_time, tick = message
