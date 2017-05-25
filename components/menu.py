@@ -108,7 +108,7 @@ class Menu:
         row_num = max([button_row for button_row, *trash in button_param])
 
         group_w = 400
-        group_h = row_num * 45 - 5
+        group_h = row_num * 50 - 10
 
         group_x = x + w // 2 - group_w // 2
         group_y = y + h // 2 - group_h // 2
@@ -118,17 +118,18 @@ class Menu:
         sorted_button_param = [[button for button in button_param if button[0] == row] for row in range(row_num + 1)]
 
         for button_row in range(len(sorted_button_param)):
-            b_w = int(group_w / len(sorted_button_param[button_row]) - 5)
-            b_h = 40
-            b_y = group_y + ((b_h + 5) * button_row)
+            if sorted_button_param[button_row]:
+                b_w = int(group_w / len(sorted_button_param[button_row]) - 10)
+                b_h = 40
+                b_y = group_y + ((b_h + 10) * button_row)
 
-            for button_index in range(len(sorted_button_param[button_row])):
-                b_x = group_x + ((b_w + 5) * button_index)
+                for button_index in range(len(sorted_button_param[button_row])):
+                    b_x = group_x + ((b_w + 10) * button_index)
 
-                func = sorted_button_param[button_row][button_index][1]
-                text = sorted_button_param[button_row][button_index][2]
+                    func = sorted_button_param[button_row][button_index][1]
+                    text = sorted_button_param[button_row][button_index][2]
 
-                self.button_list.append(Button(b_x, b_y, b_w, b_h, func, text))
+                    self.button_list.append(Button(b_x, b_y, b_w, b_h, func, text))
 
     def update(self, surf, release, mx, my, m_press):
         hover_over_button = False

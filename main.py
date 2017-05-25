@@ -364,7 +364,7 @@ def custom_server_picker():
     screen.blit(wallpaper, (0, 0))
 
     buttons = [[0, 'game', "Connect"],
-               [1, 'menu', "Back"]]
+               [0, 'menu', "Back"]]
 
     ip_menu = menu.Menu(buttons, 0, size[1] // 2, size[0], size[1] // 2)
 
@@ -426,7 +426,7 @@ def server_adder():
     screen.blit(wallpaper, (0, 0))
 
     buttons = [[0, 'server_picker', "Add"],
-               [1, 'server_picker', "Back"]]
+               [0, 'server_picker', "Back"]]
 
     ip_menu = menu.Menu(buttons, 0, size[1] // 2, size[0], size[1] // 2)
 
