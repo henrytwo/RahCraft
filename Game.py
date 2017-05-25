@@ -259,7 +259,7 @@ def game(surf, username, token, host, port, size, music_enable):
             for e in event.get():
                 if e.type == QUIT:
                     quit_game()
-                    return 'menu', None, 'menu'
+                    return 'menu'
 
                 elif e.type == MOUSEBUTTONDOWN and not paused:
                     if e.button == 1:
@@ -558,7 +558,7 @@ def game(surf, username, token, host, port, size, music_enable):
                         paused = False
                     elif nav_update == 'menu':
                         quit_game()
-                        return 'menu', None, 'menu'
+                        return 'menu'
                     else:
                         return nav_update
 

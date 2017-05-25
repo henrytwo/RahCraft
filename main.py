@@ -630,7 +630,7 @@ if __name__ == "__main__":
             if navigation == 'game':
                 game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
-                navigation = game_nav[0]
+                navigation = game_nav
 
             elif navigation[0] == 'crash':
                 navigation = crash(navigation[1], navigation[2])
