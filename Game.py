@@ -297,6 +297,8 @@ def game(surf, username, token, host, port, size, music_enable):
             r_click = False
             l_click = False
 
+            pass_event = None
+
             for e in event.get():
 
                 pass_event = e
