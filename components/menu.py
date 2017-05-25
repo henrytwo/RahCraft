@@ -75,8 +75,8 @@ click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
 class Menu:
     def __init__(self, button_param, x, y, w, h,):
-        # button_list <row>, <func>, <text>
-
+        # # button_list <row>, <func>, <text>
+        #
         # V_SPACE = 5
         #
         # BUTTON_W = 400
@@ -108,27 +108,28 @@ class Menu:
         row_num = max([button_row for button_row, *trash in button_param])
 
         group_w = 400
-        group_h = row_num * 45 - 5
+        group_h = row_num * 50 - 10
 
         group_x = x + w // 2 - group_w // 2
         group_y = y + h // 2 - group_h // 2
 
         self.button_list = []
 
-        sorted_button_param = [[button for button in button_param if button[0] == row] for row in range(row_num)]
+        sorted_button_param = [[button for button in button_param if button[0] == row] for row in range(row_num + 1)]
 
         for button_row in range(len(sorted_button_param)):
-            b_w = group_w
-            b_h = 40
-            b_y = group_y + ((b_h + 5) * button_row)
+            if sorted_button_param[button_row]:
+                b_w = int(group_w / len(sorted_button_param[button_row]) - 10)
+                b_h = 40
+                b_y = group_y + ((b_h + 10) * button_row)
 
-            for button_index in range(len(sorted_button_param[button_row])):
-                b_x = group_x + ((b_w + 5) * button_index)
+                for button_index in range(len(sorted_button_param[button_row])):
+                    b_x = group_x + ((b_w + 10) * button_index)
 
-                func = sorted_button_param[button_row][button_index][1]
-                text = sorted_button_param[button_row][button_index][2]
+                    func = sorted_button_param[button_row][button_index][1]
+                    text = sorted_button_param[button_row][button_index][2]
 
-                self.button_list.append(Button(b_x, b_y, b_w, b_h, func, text))
+                    self.button_list.append(Button(b_x, b_y, b_w, b_h, func, text))
 
     def update(self, surf, release, mx, my, m_press):
         hover_over_button = False
@@ -309,24 +310,6 @@ class Inventory:
         self.item_slots = []
         self.holding = [0, 0]
 
-        self.MAX_STACK = 64
-
-    def check_stacking(self, item):
-        if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
-            previous_holding = self.holding[:]
-            self.holding = item[:]
-            return previous_holding
-        else:
-            calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
-            amount_holding = self.holding[1]
-
-            if calculate_stack >= 0:
-                self.holding = [0, 0]
-                return [item[0], item[1] + amount_holding]
-            else:
-                self.holding = [item[0], abs(calculate_stack)]
-                return [item[0], self.MAX_STACK]
-
     def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
 
@@ -343,7 +326,9 @@ class Inventory:
                     surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     if l_click:
-                        inventory[row][item] = self.check_stacking(inventory[row][item][:])
+                        tempstorage = self.holding[:]
+                        self.holding = inventory[row][item][:]
+                        inventory[row][item] = tempstorage[:]
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
@@ -355,7 +340,9 @@ class Inventory:
                 surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 if l_click:
-                    hotbar[item] = self.check_stacking(hotbar[item][:])
+                    tempstorage = self.holding[:]
+                    self.holding = hotbar[item][:]
+                    hotbar[item] = tempstorage[:]
 
         #if Rect((463, 146, 48, 48)).collidepoint(mx, my):
         #    surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
@@ -385,7 +372,6 @@ class Crafting:
 
         self.current_recipe = []
         self.resulting_item = [0, 0]
-        self.MAX_STACK = 64
 
     def recipe_check(self):
         current_recipe = [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)]
@@ -398,30 +384,17 @@ class Crafting:
 
     def craft(self):
         if self.holding == [0, 0] and self.resulting_item != [0, 0]:
-            self.holding = self.resulting_item
-            for x in range(len(self.crafting_grid)):
+            #self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
+
+            print(self.current_recipe)
+
+            for x in range(len(self.current_recipe)):
                 for y in range(3):
-                    if self.crafting_grid[x][y][0] != 0:
-                        if self.crafting_grid[x][y][1] == 1:
-                            self.crafting_grid[x][y] = [0, 0]
+                    if self.current_recipe[x][y][0] != 0:
+                        if self.current_recipe[x][y][1] == 1:
+                            self.current_recipe[x][y] = [0, 0]
                         else:
-                            self.crafting_grid[x][y][1] -= 1
-
-    def check_stacking(self, item):
-        if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
-            previous_holding = self.holding[:]
-            self.holding = item[:]
-            return previous_holding
-        else:
-            calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
-            amount_holding = self.holding[1]
-
-            if calculate_stack >= 0:
-                self.holding = [0, 0]
-                return [item[0], item[1] + amount_holding]
-            else:
-                self.holding = [item[0], abs(calculate_stack)]
-                return [item[0], self.MAX_STACK]
+                            self.current_recipe[x][y][1] -= 1
 
     def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
@@ -439,7 +412,9 @@ class Crafting:
                     surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     if l_click:
-                        inventory[row][item] = self.check_stacking(inventory[row][item][:])
+                        tempstorage = self.holding[:]
+                        self.holding = inventory[row][item][:]
+                        inventory[row][item] = tempstorage[:]
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
@@ -451,7 +426,9 @@ class Crafting:
                 surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 if l_click:
-                    hotbar[item] = self.check_stacking(hotbar[item][:])
+                    tempstorage = self.holding[:]
+                    self.holding = hotbar[item][:]
+                    hotbar[item] = tempstorage[:]
 
         for row in range(len(self.crafting_grid)):
             for item in range(3):
@@ -464,7 +441,9 @@ class Crafting:
                     surf.blit(self.highlight, (self.x + item * 36 + 60, self.y + 36 * row + 34, 32, 32))
 
                     if l_click:
-                        self.crafting_grid[row][item] = self.check_stacking(self.crafting_grid[row][item][:])
+                        tempstorage = self.holding[:]
+                        self.holding = self.crafting_grid[row][item][:]
+                        self.crafting_grid[row][item] = tempstorage[:]
 
         self.recipe_check()
 
@@ -475,12 +454,16 @@ class Crafting:
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
 
-            if l_click and self.holding == [0, 0]:
-                self.craft()
+            if l_click and self.holding == [0,0]:
+                self.holding = self.resulting_item
+                self.resulting_item = [0,0]
+                self.crafting_grid = [[[0, 0] for _ in range(3)] for __ in range(3)]
+
+
+        self.craft()
 
         if self.holding[0] > 0:
             surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
-            surf.blit(rah.text(str(self.holding[1]), 10), (mx - 10, my - 10))
 
 
 class Chest:
@@ -501,24 +484,6 @@ class Chest:
         self.item_slots = []
         self.holding = [0, 0]
 
-        self.MAX_STACK = 64
-
-    def check_stacking(self, item):
-        if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
-            previous_holding = self.holding[:]
-            self.holding = item[:]
-            return previous_holding
-        else:
-            calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
-            amount_holding = self.holding[1]
-
-            if calculate_stack >= 0:
-                self.holding = [0, 0]
-                return [item[0], item[1] + amount_holding]
-            else:
-                self.holding = [item[0], abs(calculate_stack)]
-                return [item[0], self.MAX_STACK]
-
     def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
 
@@ -535,7 +500,9 @@ class Chest:
                     surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     if l_click:
-                        inventory[row][item] = self.check_stacking(inventory[row][item][:])
+                        tempstorage = self.holding[:]
+                        self.holding = inventory[row][item][:]
+                        inventory[row][item] = tempstorage[:]
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
@@ -547,8 +514,9 @@ class Chest:
                 surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 if l_click:
-                    hotbar[item] = self.check_stacking(hotbar[item][:])
+                    tempstorage = self.holding[:]
+                    self.holding = hotbar[item][:]
+                    hotbar[item] = tempstorage[:]
 
         if self.holding[0] > 0:
             surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
-            surf.blit(rah.text(str(self.holding[1]), 10), (mx - 10, my - 10))

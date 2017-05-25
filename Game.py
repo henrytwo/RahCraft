@@ -177,10 +177,10 @@ def game(surf, username, token, host, port, size, music_enable):
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
 
     pause_list = [[0, 'unpause', "Back to game"],
-                  [1, 'assistance', "Help"],
-                  [2, 'options', "Options"],
-                  [3, 'about', "About"],
-                  [4, 'menu', "Exit"]]
+                  [1, 'options', "Options"],
+                  [2, 'assistance', "Help"],
+                  [2, 'about', "About"],
+                  [3, 'menu', "Exit"]]
 
     pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
 
