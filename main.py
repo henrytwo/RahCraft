@@ -21,16 +21,7 @@ def login():
 
     clock = time.Clock()
 
-    if size[0] < size[1]:
-        wpw = size[0]
-        wph = int(500 / 955 * size[0])
-
-    else:
-        wph = size[1]
-        wpw = int(955 / 500 * size[1])
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    screen.blit(wallpaper, (0, 0))
+    rah.wallpaper(screen, size)
 
     login_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', 'Login offline (Some features restricted)')
 
@@ -100,19 +91,7 @@ def login():
 def authenticate():
     global username, password, online, token
 
-    if size[0] < size[1]:
-        wpw = size[0]
-        wph = int(500 / 955 * size[0])
-
-    else:
-        wph = size[1]
-        wpw = int(955 / 500 * size[1])
-
-
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    screen.blit(wallpaper, (0, 0))
-
+    rah.wallpaper(screen, size)
     connecting_text = rah.text("Waiting for AUTH server...", 30)
     screen.blit(connecting_text,
                 rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
@@ -155,20 +134,11 @@ def authenticate():
         #print(traceback.format_exc())
 
         server.close()
-        return "crash", traceback.format_exc(),"login"
+        return "crash", traceback.format_exc(), "login"
 
 
 def about():
-    if size[0] < size[1]:
-        wpw = size[0]
-        wph = int(500 / 955 * size[0])
-
-    else:
-        wph = size[1]
-        wpw = int(955 / 500 * size[1])
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    screen.blit(wallpaper, (0, 0))
+    rah.wallpaper(screen, size)
 
     back_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', "Back")
 
@@ -267,20 +237,7 @@ def crash(error, previous):
 
 
 def assistance():
-
-    if size[0] < size[1]:
-        wpw = size[0]
-        wph = int(500 / 955 * size[0])
-
-    else:
-        wph = size[1]
-        wpw = int(955 / 500 * size[1])
-
-
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    screen.blit(wallpaper, (0, 0))
-
+    rah.wallpaper(screen, size)
     back_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
@@ -351,16 +308,8 @@ def server_picker():
         menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, size[0]//4, 40, 'menu', 'Back')]
 
     while True:
-        if size[0] < size[1]:
-            wpw = size[0]
-            wph = int(500 / 955 * size[0])
 
-        else:
-            wph = size[1]
-            wpw = int(955 / 500 * size[1])
-
-        wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-        screen.blit(wallpaper, (0, 0))
+        rah.wallpaper(screen, size)
 
         release = False
 
@@ -405,16 +354,7 @@ def server_picker():
 def custom_server_picker():
     global host, port
 
-    if size[0] < size[1]:
-        wpw = size[0]
-        wph = int(500 / 955 * size[0])
-
-    else:
-        wph = size[1]
-        wpw = int(955 / 500 * size[1])
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    screen.blit(wallpaper, (0, 0))
+    rah.wallpaper(screen, size)
 
     buttons = [[0, 'game', "Connect"],
                [0, 'menu', "Back"]]
@@ -475,16 +415,7 @@ def custom_server_picker():
 def server_adder():
     clock = time.Clock()
 
-    if size[0] < size[1]:
-        wpw = size[0]
-        wph = int(500 / 955 * size[0])
-
-    else:
-        wph = size[1]
-        wpw = int(955 / 500 * size[1])
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    screen.blit(wallpaper, (0, 0))
+    rah.wallpaper(screen, size)
 
     buttons = [[0, 'server_picker', "Add"],
                [0, 'server_picker', "Back"]]
@@ -581,16 +512,7 @@ def menu_screen():
 
     main_menu = menu.Menu(menu_list, 0, 0, size[0], size[1])
 
-    if size[0] < size[1]:
-        wpw = size[0]
-        wph = int(500 / 955 * size[0])
-
-    else:
-        wph = size[1]
-        wpw = int(955 / 500 * size[1])
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    screen.blit(wallpaper, (0, 0))
+    rah.wallpaper(screen, size)
 
     logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
     screen.blit(logo, (size[0] // 2 - logo.get_width() // 2, 100))
@@ -696,10 +618,12 @@ if __name__ == "__main__":
           'server_picker': server_picker,
           'custom_server_picker': custom_server_picker,
           'add_server': server_adder,
-          'auth': authenticate,
-          'crash': crash}
+          'auth': authenticate
+        }
 
     while navigation != 'exit':
+
+        print(navigation)
 
         try:
 

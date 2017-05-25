@@ -310,7 +310,26 @@ class Inventory:
         self.item_slots = []
         self.holding = [0, 0]
 
-    def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
+        self.MAX_STACK = 64
+
+    def check_stacking(self, item):
+        if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
+            previous_holding = self.holding[:]
+            self.holding = item[:]
+            return previous_holding
+        else:
+            calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
+            amount_holding = self.holding[1]
+
+            if calculate_stack >= 0:
+                self.holding = [0, 0]
+                return [item[0], item[1] + amount_holding]
+            else:
+                self.holding = [item[0], abs(calculate_stack)]
+                return [item[0], self.MAX_STACK]
+
+
+def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
 
         for row in range(len(inventory)):
@@ -372,6 +391,7 @@ class Crafting:
 
         self.current_recipe = []
         self.resulting_item = [0, 0]
+        self.MAX_STACK = 60
 
     def recipe_check(self):
         current_recipe = [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)]
@@ -384,17 +404,38 @@ class Crafting:
 
     def craft(self):
         if self.holding == [0, 0] and self.resulting_item != [0, 0]:
+            self.holding = self.resulting_item
+            for x in range(len(self.crafting_grid)):
+                for y in range(3):
+                    if self.crafting_grid[x][y][0] != 0:
+                        if self.crafting_grid[x][y][1] == 1:
+                            self.crafting_grid[x][y] = [0, 0]
+                        else:
+                            self.crafting_grid[x][y][1] -= 1
             #self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
 
-            print(self.current_recipe)
+            def check_stacking(self, item):
+                if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
+                    previous_holding = self.holding[:]
+                    self.holding = item[:]
+                    return previous_holding
+                else:
+                    calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
+                    amount_holding = self.holding[1]
 
-            for x in range(len(self.current_recipe)):
-                for y in range(3):
-                    if self.current_recipe[x][y][0] != 0:
-                        if self.current_recipe[x][y][1] == 1:
-                            self.current_recipe[x][y] = [0, 0]
-                        else:
-                            self.current_recipe[x][y][1] -= 1
+                print(self.current_recipe)
+
+                if calculate_stack >= 0:
+                    self.holding = [0, 0]
+                    return [item[0], item[1] + amount_holding]
+
+                for x in range(len(self.current_recipe)):
+                    for y in range(3):
+                        if self.current_recipe[x][y][0] != 0:
+                            if self.current_recipe[x][y][1] == 1:
+                                self.current_recipe[x][y] = [0, 0]
+                            else:
+                                self.current_recipe[x][y][1] -= 1
 
     def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
@@ -483,6 +524,24 @@ class Chest:
         self.highlight.set_alpha(150)
         self.item_slots = []
         self.holding = [0, 0]
+
+        self.MAX_STACK = 64
+
+    def check_stacking(self, item):
+        if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
+            previous_holding = self.holding[:]
+            self.holding = item[:]
+            return previous_holding
+        else:
+            calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
+            amount_holding = self.holding[1]
+
+            if calculate_stack >= 0:
+                self.holding = [0, 0]
+                return [item[0], item[1] + amount_holding]
+            else:
+                self.holding = [item[0], abs(calculate_stack)]
+                return [item[0], self.MAX_STACK]
 
     def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
         surf.blit(self.graphic, (self.x, self.y))
