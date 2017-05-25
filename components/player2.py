@@ -23,9 +23,13 @@ class Player:
         self.grav_cap = g_cap
 
         self.reach = reach
-        self.reach_surf = Surface((reach * 40, reach * 40), SRCALPHA)
-        for a in range(reach * 20, 0, -5):
-            draw.circle(self.reach_surf, Color(255, 255, 255, (reach * 20 - a) * 2), (reach * 20, reach * 20), a)
+
+        # Lighting
+        # draw.circle(self.reach_surf, Color(255, 255, 255, (reach * 20 - a) * 2), (reach * 20, reach * 20), a)
+
+        # self.reach_surf = Surface((reach * 40, reach * 40), SRCALPHA)
+        # for a in range(reach * 10, 0, -5):
+        #     draw.circle(self.reach_surf, Color(255, 255, 255, a), (reach * 20, reach * 20), a * 2)
 
         self.controls = controls
         self.standing = False
@@ -132,8 +136,8 @@ class Player:
         # center = (self.rect.x - x_offset + self.rect.w // 2, self.rect.y - y_offset + self.rect.h // 2)
         # draw.circle(surf, (0, 0, 0), center, reach * 20, 3)
 
-        surf.blit(self.reach_surf,
-                  ((self.rect.centerx - self.reach * 20) - x_offset, (self.rect.centery - self.reach * 20) - y_offset))
+        # surf.blit(self.reach_surf,
+        #           ((self.rect.centerx - self.reach * 20) - x_offset, (self.rect.centery - self.reach * 20) - y_offset))
         draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
 
 

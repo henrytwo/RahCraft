@@ -3,7 +3,7 @@ from pygame import *
 
 def rahprint(text):
 
-    printing = True
+    printing = False
 
     if printing:
         print(text)
