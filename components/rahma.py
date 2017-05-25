@@ -1,15 +1,17 @@
 import time as t
 from pygame import *
 
-def rahprint(text):
 
+def rahprint(text):
     printing = False
 
     if printing:
         print(text)
 
+
 def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2
+
 
 def rah(screen):
     screen.fill((255, 255, 255))
@@ -18,6 +20,7 @@ def rah(screen):
     display.flip()
 
     t.sleep(0.1)
+
 
 def wallpaper(screen, size):
     if size[0] < size[1]:

@@ -74,7 +74,7 @@ click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
 
 class Menu:
-    def __init__(self, button_param, x, y, w, h,):
+    def __init__(self, button_param, x, y, w, h, ):
         # # button_list <row>, <func>, <text>
         #
         # V_SPACE = 5
@@ -330,44 +330,44 @@ class Inventory:
 
 
 def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
-        surf.blit(self.graphic, (self.x, self.y))
+    surf.blit(self.graphic, (self.x, self.y))
 
-        for row in range(len(inventory)):
-            for item in range(len(inventory[row])):
-                if inventory[row][item][1] != 0:
-                    surf.blit(block_properties[inventory[row][item][0]][7],
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+    for row in range(len(inventory)):
+        for item in range(len(inventory[row])):
+            if inventory[row][item][1] != 0:
+                surf.blit(block_properties[inventory[row][item][0]][7],
+                          (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
-                    surf.blit(rah.text(str(inventory[row][item][1]), 10),
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+                surf.blit(rah.text(str(inventory[row][item][1]), 10),
+                          (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
-                if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
-                    surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
-
-                    if l_click:
-                        tempstorage = self.holding[:]
-                        self.holding = inventory[row][item][:]
-                        inventory[row][item] = tempstorage[:]
-
-        for item in range(len(hotbar)):
-            if hotbar[item][1] != 0:
-                surf.blit(block_properties[hotbar[item][0]][7], (self.x + 16 + item * 36, self.y + 283, 32, 32))
-
-                surf.blit(rah.text(str(hotbar[item][1]), 10), (self.x + 16 + item * 36, self.y + 283, 32, 32))
-
-            if Rect((self.x + 16 + item * 36, self.y + 283, 32, 32)).collidepoint(mx, my):
-                surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
+            if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                 if l_click:
                     tempstorage = self.holding[:]
-                    self.holding = hotbar[item][:]
-                    hotbar[item] = tempstorage[:]
+                    self.holding = inventory[row][item][:]
+                    inventory[row][item] = tempstorage[:]
 
-        #if Rect((463, 146, 48, 48)).collidepoint(mx, my):
-        #    surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
+    for item in range(len(hotbar)):
+        if hotbar[item][1] != 0:
+            surf.blit(block_properties[hotbar[item][0]][7], (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
-        if self.holding[0] > 0:
-            surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
+            surf.blit(rah.text(str(hotbar[item][1]), 10), (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+        if Rect((self.x + 16 + item * 36, self.y + 283, 32, 32)).collidepoint(mx, my):
+            surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+            if l_click:
+                tempstorage = self.holding[:]
+                self.holding = hotbar[item][:]
+                hotbar[item] = tempstorage[:]
+
+    # if Rect((463, 146, 48, 48)).collidepoint(mx, my):
+    #    surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
+
+    if self.holding[0] > 0:
+        surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
 
 
 class Crafting:
@@ -382,10 +382,10 @@ class Crafting:
 
         self.crafting_grid = [[[0, 0] for _ in range(3)] for __ in range(3)]
 
-        with open('data/crafting.rah','r') as recipes:
+        with open('data/crafting.rah', 'r') as recipes:
             recipe_list = [recipe.split(' // ') for recipe in recipes.read().split('\n')]
 
-        self.recipes = {recipe[0]:[int(recipe[1]), int(recipe[2])] for recipe in recipe_list}
+        self.recipes = {recipe[0]: [int(recipe[1]), int(recipe[2])] for recipe in recipe_list}
 
         rah.rahprint(self.recipes)
 
@@ -412,7 +412,8 @@ class Crafting:
                             self.crafting_grid[x][y] = [0, 0]
                         else:
                             self.crafting_grid[x][y][1] -= 1
-            #self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
+
+            # self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
 
             def check_stacking(self, item):
                 if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
@@ -474,9 +475,11 @@ class Crafting:
         for row in range(len(self.crafting_grid)):
             for item in range(3):
                 if self.crafting_grid[row][item][1] != 0:
-                    surf.blit(block_properties[self.crafting_grid[row][item][0]][7], (self.x + item * 36 + 60, self.y + 36 * row + 33, 32, 32))
+                    surf.blit(block_properties[self.crafting_grid[row][item][0]][7],
+                              (self.x + item * 36 + 60, self.y + 36 * row + 33, 32, 32))
 
-                    surf.blit(rah.text(str(self.crafting_grid[row][item][1]), 10), (self.x + item * 36 + 60, self.y + 36 * row + 33, 32, 32))
+                    surf.blit(rah.text(str(self.crafting_grid[row][item][1]), 10),
+                              (self.x + item * 36 + 60, self.y + 36 * row + 33, 32, 32))
 
                 if Rect((self.x + item * 36 + 60, self.y + 36 * row + 33, 32, 32)).collidepoint(mx, my):
                     surf.blit(self.highlight, (self.x + item * 36 + 60, self.y + 36 * row + 34, 32, 32))
@@ -495,11 +498,10 @@ class Crafting:
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
 
-            if l_click and self.holding == [0,0]:
+            if l_click and self.holding == [0, 0]:
                 self.holding = self.resulting_item
-                self.resulting_item = [0,0]
+                self.resulting_item = [0, 0]
                 self.crafting_grid = [[[0, 0] for _ in range(3)] for __ in range(3)]
-
 
         self.craft()
 

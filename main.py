@@ -6,7 +6,6 @@ import socket
 import hashlib
 import traceback
 
-from legacy.oldplayer import *
 import components.rahma as rah
 import components.menu as menu
 import Game as Game
@@ -23,16 +22,17 @@ def login():
 
     rah.wallpaper(screen, size)
 
-    login_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', 'Login offline (Some features restricted)')
+    login_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu',
+                               'Login offline (Some features restricted)')
 
-    auth_button = menu.Button(size[0]//4, 320, size[0]//2, 40, 'auth', 'AUTHENTICATE WITH SERVER')
+    auth_button = menu.Button(size[0] // 4, 320, size[0] // 2, 40, 'auth', 'AUTHENTICATE WITH SERVER')
 
     username, password = '', ''
 
     field_selected = 'user'
 
-    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 4, size[0]//2, 40, 'Username'), username],
-              'pass': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0]//2, 40, 'Password'), password]}
+    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Username'), username],
+              'pass': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0] // 2, 40, 'Password'), password]}
 
     while True:
 
@@ -88,6 +88,7 @@ def login():
         clock.tick(120)
         display.update()
 
+
 def authenticate():
     global username, password, online, token
 
@@ -131,7 +132,7 @@ def authenticate():
                 server.close()
                 return 'menu'
     except:
-        #print(traceback.format_exc())
+        # print(traceback.format_exc())
 
         server.close()
         return "crash", traceback.format_exc(), "login"
@@ -140,7 +141,7 @@ def authenticate():
 def about():
     rah.wallpaper(screen, size)
 
-    back_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', "Back")
+    back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -177,7 +178,7 @@ def about():
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 50 + y * 20))
+            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
@@ -186,30 +187,31 @@ def about():
 
         display.update()
 
+
 def crash(error, previous):
-    #wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    #screen.blit(wallpaper, (0, 0))
+    # wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
+    # screen.blit(wallpaper, (0, 0))
 
-    screen.fill((0,0,255))
+    screen.fill((0, 0, 255))
 
-    back_button = menu.Button(size[0]//4, size[1] - 50, size[0]//2, 40, previous, "Return")
+    back_button = menu.Button(size[0] // 4, size[1] - 50, size[0] // 2, 40, previous, "Return")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    error_message = list(map(str,error.split('\n')))
+    error_message = list(map(str, error.split('\n')))
 
     about_list = ['',
                   '',
                   ':( Whoops, something went wrong',
-                  '',] + error_message + ['Rahcraft (C) Rahmish Empire, All Rahs Reserved',
-                  '',
-                  'Note: If clicking the button below doesnt',
-                  'do anything, the game is beyond broken',
-                  'and needs to be restarted',
-                  '',
-                  'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
-                  'ICS3U 2017',
-                  '']
+                  '', ] + error_message + ['Rahcraft (C) Rahmish Empire, All Rahs Reserved',
+                                           '',
+                                           'Note: If clicking the button below doesnt',
+                                           'do anything, the game is beyond broken',
+                                           'and needs to be restarted',
+                                           '',
+                                           'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
+                                           'ICS3U 2017',
+                                           '']
 
     while True:
         release = False
@@ -226,7 +228,7 @@ def crash(error, previous):
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 10 + y * 20))
+            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 10 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
@@ -238,7 +240,7 @@ def crash(error, previous):
 
 def assistance():
     rah.wallpaper(screen, size)
-    back_button = menu.Button(size[0]//4, size[1] - 130, size[0]//2, 40, 'menu', "Back")
+    back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -276,7 +278,7 @@ def assistance():
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 50 + y * 20))
+            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
@@ -303,9 +305,9 @@ def server_picker():
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1] - 80)
 
     button_list = [
-        menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, size[0]//4, 40, 'custom_server_picker', 'Direct Connect'),
-        menu.Button(size[0] // 2 - 100, size[1] - 60, size[0]//4, 40, 'add_server', 'Add Server'),
-        menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, size[0]//4, 40, 'menu', 'Back')]
+        menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, size[0] // 4, 40, 'custom_server_picker', 'Direct Connect'),
+        menu.Button(size[0] // 2 - 100, size[1] - 60, size[0] // 4, 40, 'add_server', 'Add Server'),
+        menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, size[0] // 4, 40, 'menu', 'Back')]
 
     while True:
 
@@ -332,7 +334,7 @@ def server_picker():
 
         server_bar = Surface((size[0], 80))
 
-        server_bar.fill((size[0]//4, size[0]//4, 200))
+        server_bar.fill((size[0] // 4, size[0] // 4, 200))
 
         server_bar.set_alpha(90)
 
@@ -363,8 +365,8 @@ def custom_server_picker():
 
     field_selected = 'host'
 
-    fields = {'host': [menu.TextBox(size[0] // 4, size[1] // 4, size[0]//2, 40, 'Host'), host],
-              'port': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0]//2, 40, 'Port'), port]}
+    fields = {'host': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Host'), host],
+              'port': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0] // 2, 40, 'Port'), port]}
 
     while True:
 
@@ -424,13 +426,13 @@ def server_adder():
 
     name, host, port = '', '', None
 
-    field_list = ['name','port','host']
+    field_list = ['name', 'port', 'host']
 
     field_selected = 'name'
 
-    fields = {'name': [menu.TextBox(size[0] // 4, size[1] // 4, size[0]//2, 40, 'Name'), name],
-              'host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, size[0]//2, 40, 'Host'), host],
-              'port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, size[0]//2, 40, 'Port'), port]}
+    fields = {'name': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Name'), name],
+              'host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, size[0] // 2, 40, 'Host'), host],
+              'port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, size[0] // 2, 40, 'Port'), port]}
 
     while True:
 
@@ -460,11 +462,9 @@ def server_adder():
                         servers.write('%i // %s // %s // %i' % (line_count, name, host, port))
 
                 if e.key == K_TAB:
-
                     field_list.insert(0, field_list[-1])
                     del field_list[-1]
                     field_selected = field_list[0]
-
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
@@ -619,7 +619,7 @@ if __name__ == "__main__":
           'custom_server_picker': custom_server_picker,
           'add_server': server_adder,
           'auth': authenticate
-        }
+          }
 
     while navigation != 'exit':
 

@@ -1,6 +1,4 @@
 from random import *
-from pickle import *
-from pygame import *
 import numpy as np
 
 # Code to trigger Syed
@@ -32,7 +30,7 @@ def generate_tree(bx, by, world):
 def generate_world(world_seed, max_height, min_x, max_x, w, h):
     """ Creates a world object randomly generated using a user-inputted seed. """
 
-    # Set the initial seed for the randawom module (random.seed())
+    # Set the initial seed for the random module (random.seed())
     seed(world_seed)
 
     # Create a blank map (2D list filled with '0' strings

@@ -1,16 +1,13 @@
-import sys
-
 import os.path
 from collections import deque
 import socket
-import pickle
+import pickle as pkl
 from multiprocessing import *
 from numpy import *
 from components.world import *
 import glob
 from math import *
 import time
-
 from random import *
 
 with open("data/config.rah", "r") as config:
@@ -27,7 +24,7 @@ if not os.path.isfile('saves/%s.pkl' % world_name):
 
     # Dumps world to file
     with open('saves/%s.pkl' % world_name, 'wb') as file:
-        dump(world, file)
+        pkl.dump(world, file)
 
 else:
     world = pickle.load(open('saves/world.pkl', 'rb'))
@@ -49,10 +46,11 @@ class Player(object):
             return PlayerData[self.username]
         except KeyError:
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
-                                         [[[randint(0,15), randint(0,64)] for _ in range(9)] for __ in range(3)], [[randint(0,15), randint(0,64)] for _ in range(9)],
+                                         [[[randint(0, 15), randint(0, 64)] for _ in range(9)] for __ in range(3)],
+                                         [[randint(0, 15), randint(0, 64)] for _ in range(9)],
                                          10, 10]
 
-            #print(PlayerData[self.username])
+            # print(PlayerData[self.username])
             return PlayerData[self.username]
 
     def change_spawn(self, spawn_position):
@@ -250,7 +248,9 @@ if __name__ == '__main__':
                                         str(players[address].cord[1])), i))
 
             else:
-                sendQueue.put(((400, ("Connection closed by remote host\nUsername '%s' is currently in use\n\n"%players[i].username)), address))
+                sendQueue.put(((400, (
+                "Connection closed by remote host\nUsername '%s' is currently in use\n\n" % players[i].username)),
+                               address))
 
         elif command == 1:
             # Player movement
@@ -340,7 +340,7 @@ if __name__ == '__main__':
                 sys.stdout.flush()
                 in_put = messageQueue.get()
                 while in_put[0][0] != 10:
-                    #print(in_put)
+                    # print(in_put)
                     in_put = messageQueue.get()
 
                 if in_put[0][1] == 'y':
@@ -352,7 +352,7 @@ if __name__ == '__main__':
                     server.close()
 
                     exit()
-                    
+
                     break
 
                 else:
@@ -383,7 +383,6 @@ if __name__ == '__main__':
             for i in players:
                 sendQueue.put(((10, send_message), i))
                 print(send_message)
-
 
         elif command == 100:
             for p in players:
