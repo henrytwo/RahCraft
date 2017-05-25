@@ -196,7 +196,7 @@ def crash(error, previous):
 
     screen.fill((0,0,255))
 
-    back_button = menu.Button(200, 370, 400, 40, previous, "Return")
+    back_button = menu.Button(200, size[1] - 50, 400, 40, previous, "Return")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -206,6 +206,11 @@ def crash(error, previous):
                   '',
                   ':( Whoops, something went wrong',
                   '',] + error_message + ['Rahcraft (C) Rahmish Empire, All Rahs Reserved',
+                  '',
+                  'Note: If clicking the button below doesnt',
+                  'do anything, the game is beyond broken',
+                  'and needs to be restarted',
+                  '',
                   'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
                   'ICS3U 2017',
                   '']
@@ -225,7 +230,7 @@ def crash(error, previous):
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (400 - about_text.get_width() // 2, 50 + y * 20))
+            screen.blit(about_text, (400 - about_text.get_width() // 2, 10 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
@@ -427,6 +432,8 @@ def server_adder():
 
     name, host, port = '', '', None
 
+    field_list = ['name','port','host']
+
     field_selected = 'name'
 
     fields = {'name': [menu.TextBox(size[0] // 4, size[1] // 4, 400, 40, 'Name'), name],
@@ -460,7 +467,12 @@ def server_adder():
 
                         servers.write('%i // %s // %s // %i' % (line_count, name, host, port))
 
-                    return 'server_picker'
+                if e.key == K_TAB:
+
+                    field_list.insert(0, field_list[-1])
+                    del field_list[-1]
+                    field_selected = field_list[0]
+
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
@@ -484,12 +496,12 @@ def server_adder():
             else:
                 return nav_update
 
-        fields[field_selected][1] = fields[field_selected][0].update(screen, mouse, pass_event)
+        fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
             fields[field][0].draw(screen)
 
-            if fields[field][0].rect.collidepoint(mx, my) and click:
+            if fields[field][0].rect.collidepoint(mx, my) and release:
                 field_selected = field
 
         display.update()
@@ -619,16 +631,22 @@ if __name__ == "__main__":
           'crash': crash}
 
     while navigation != 'exit':
-        if navigation == 'game':
-            game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
-            navigation = game_nav
+        try:
 
-        elif navigation[0] == 'crash':
-            navigation = crash(navigation[1], navigation[2])
+            if navigation == 'game':
+                game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
-        else:
-            navigation = UI[navigation]()
+                navigation = game_nav
+
+            elif navigation[0] == 'crash':
+                navigation = crash(navigation[1], navigation[2])
+
+            else:
+                navigation = UI[navigation]()
+
+        except:
+            crash(traceback.format_exc(), 'menu')
 
     display.quit()
     raise SystemExit

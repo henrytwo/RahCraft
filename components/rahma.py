@@ -11,8 +11,6 @@ def rahprint(text):
 def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2
 
-
-# RAHMISH EMPIRE WILL DIE
 def rah(screen):
     screen.fill((255, 255, 255))
     splash = image.load('textures/menu/splash.png')
@@ -20,7 +18,6 @@ def rah(screen):
     display.flip()
 
     t.sleep(0.1)
-
 
 def text(text, size):
     minecraft_font = font.Font("fonts/minecraft.ttf", size)
