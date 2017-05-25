@@ -584,7 +584,7 @@ if __name__ == "__main__":
     navigation = 'login'
 
     size = (800, 500)
-    screen = display.set_mode(size)
+    screen = display.set_mode(size, DOUBLEBUF)
 
     rah.rah(screen)
 

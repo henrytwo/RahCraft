@@ -24,7 +24,7 @@ class Player:
 
         self.reach = reach
         self.reach_surf = Surface((reach * 40, reach * 40), SRCALPHA)
-        draw.circle(self.reach_surf, Color(255, 255, 255, 75), (reach * 20, reach * 20), reach * 20)
+        draw.circle(self.reach_surf, Color(255, 255, 255, 35), (reach * 20, reach * 20), reach * 20)
 
         self.controls = controls
         self.standing = False
