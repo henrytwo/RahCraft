@@ -6,7 +6,7 @@ import socket
 import hashlib
 import traceback
 
-from components.player import *
+from legacy.oldplayer import *
 import components.rahma as rah
 import components.menu as menu
 import Game as Game
