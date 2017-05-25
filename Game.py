@@ -21,6 +21,7 @@ except ImportError:
     except:
         print("Failed to install numpy")
         quit()
+
 import socket
 import pickle
 import components.rahma as rah
@@ -194,7 +195,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     fly = False
     inventory_visible = False
-    chat_enable = True
+    chat_enable = False
 
     send_queue.put([[2, x_offset // block_size, y_offset // block_size], SERVERADDRESS])
 
@@ -326,6 +327,17 @@ def game(surf, username, token, host, port, size, music_enable):
                     release = True
 
                 elif e.type == KEYDOWN:
+                    if e.key == K_SLASH:
+                        chat_enable = not chat_enable
+                        current_gui = 'CH'
+
+                        if current_gui == 'CH':
+                            current_gui = ''
+
+                    if chat_enable and e.key == K_RETURN:
+                        chat_queue.put(chat_content)
+                        chat.content = ''
+
                     if e.key == K_ESCAPE:
                         if current_gui == 'C':
                             crafting = False
@@ -339,14 +351,6 @@ def game(surf, username, token, host, port, size, music_enable):
                                 current_gui = 'P'
                             else:
                                 current_gui = ''
-
-                        if chat_enable and e.key == K_RETURN:
-
-                            print(chat_content)
-
-                            chat_queue.put(chat_content)
-                            chat_content = ''
-
 
                     elif not paused:
                         if e.unicode in INVENTORY_KEYS:
@@ -362,6 +366,7 @@ def game(surf, username, token, host, port, size, music_enable):
                                 current_gui = 'I'
                             else:
                                 current_gui = ''
+
 
                 elif e.type == TICKEVENT:
                     event.clear(TICKEVENT)
@@ -682,7 +687,7 @@ def game(surf, username, token, host, port, size, music_enable):
             if chat_enable:
                 chat_content = chat.update(pass_event)
 
-            chat.draw(surf)
+                chat.draw(surf)
 
 
             display.update()
