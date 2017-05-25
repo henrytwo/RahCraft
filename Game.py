@@ -1,7 +1,26 @@
 from pygame import *
 from multiprocessing import *
-# from player import *
-import numpy as np
+
+from subprocess import Popen, PIPE
+from shlex import split
+import platform
+
+try:
+    import numpy as np
+
+except ImportError:
+    print("Module Numpy wasn't found")
+    try:
+        if platform.system() == "Windows":
+            Popen(['cmd.exe', 'python -m pip install numpy'])
+            print("Numpy installed successfully")
+        else:
+            bash_command = "pip3 install numpy"
+            Popen(split(bash_command), stdout=PIPE)
+            print("Numpy installed successfully")
+    except:
+        print("Failed to install numpy")
+        quit()
 import socket
 import pickle
 import components.rahma as rah
@@ -49,14 +68,12 @@ def load_blocks(block_file):
     return blocks
 
 
-def commandline_in(commandline_queue, fn, address):
+def commandline_in(commandline_queue, fn, address, chat_queue):
     rah.rahprint('Ready for input.')
     sys.stdin = os.fdopen(fn)
 
     while True:
-        command = input('> ')
-        commandline_queue.put(((10, command), address))
-
+        commandline_queue.put(((10, chat_queue.get()), address))
 
 def game(surf, username, token, host, port, size, music_enable):
     rah.rahprint('Starting game')
@@ -77,12 +94,17 @@ def game(surf, username, token, host, port, size, music_enable):
 
     send_queue = Queue()
     message_queue = Queue()
+    chat_queue = Queue()
 
     block_size = 20
 
     tint = Surface(size)
     tint.fill((0, 0, 0))
     tint.set_alpha(99)
+
+    #Chat
+    chat = menu.TextBox(20, size[1] - 60, size[0] // 2, 40, '')
+    chat_content = ''
 
     block_properties = load_blocks("block.rah")
     breaking_animation = [
@@ -111,7 +133,7 @@ def game(surf, username, token, host, port, size, music_enable):
     receiver.start()
 
     fn = sys.stdin.fileno()
-    commandline = Process(target=commandline_in, args=(send_queue, fn, SERVERADDRESS))
+    commandline = Process(target=commandline_in, args=(send_queue, fn, SERVERADDRESS, chat_queue))
     commandline.start()
     cmd_in = ""
 
@@ -158,6 +180,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     fly = False
     inventory_visible = False
+    chat_enable = True
 
     send_queue.put([[2, x_offset // block_size, y_offset // block_size], SERVERADDRESS])
 
@@ -260,6 +283,9 @@ def game(surf, username, token, host, port, size, music_enable):
             l_click = False
 
             for e in event.get():
+
+                pass_event = e
+
                 if e.type == QUIT:
                     quit_game()
                     return 'menu'
@@ -299,6 +325,14 @@ def game(surf, username, token, host, port, size, music_enable):
                                 current_gui = 'P'
                             else:
                                 current_gui = ''
+
+                        if chat_enable and e.key == K_RETURN:
+
+                            print(chat_content)
+
+                            chat_queue.put(chat_content)
+                            chat_content = ''
+
 
                     elif not paused:
                         if e.unicode in INVENTORY_KEYS:
@@ -608,11 +642,18 @@ def game(surf, username, token, host, port, size, music_enable):
 
             text_height = rah.text("QWERTYRAHMA", 10).get_height()
 
+
             while len(chat_list) * text_height > (7 * size[1]) // 8:
                 del chat_list[0]
 
             for line in range(len(chat_list)):
                 surf.blit(rah.text(chat_list[line], 10), (20, line * (text_height + 3)))
+
+            if chat_enable:
+                chat_content = chat.update(pass_event)
+
+            chat.draw(surf)
+
 
             display.update()
             clock.tick(120)
@@ -627,8 +668,8 @@ if __name__ == "__main__":
     port = 5276
 
     size = (800, 500)
-    screen = display.set_mode(size)
+    surf = display.set_mode(size)
 
     font.init()
 
-    game(screen, "6", host, port, size)
+    game(surf, "6", host, port, size)

@@ -3,13 +3,34 @@ from collections import deque
 import socket
 import pickle as pkl
 from multiprocessing import *
-from numpy import *
+
+from subprocess import Popen, PIPE
+from shlex import split
+import platform
+
+try:
+    import numpy as np
+
+except ImportError:
+    print("Module Numpy wasn't found")
+    try:
+        if platform.system() == "Windows":
+            Popen(['cmd.exe', 'python -m pip install numpy'])
+            print("Numpy installed successfully")
+        else:
+            bash_command = "pip3 install numpy"
+            Popen(split(bash_command), stdout=PIPE)
+            print("Numpy installed successfully")
+    except:
+        print("Failed to install numpy")
+        quit()
+
 from components.world import *
-import glob
 from math import *
 import time
 from random import *
 import sys
+import traceback
 
 with open("data/config.rah", "r") as config:
     config = config.read().split("\n")
@@ -370,6 +391,16 @@ if __name__ == '__main__':
                         for i in players:
                             sendQueue.put(((10, send_message), i))
 
+            elif message[1].lower()[:4] == '/say':
+                send_message =  message[1][4:]
+
+            elif message[1].lower()[:5] == '/exec':
+
+                try:
+                    exec(message[1][6:])
+                    send_message = "Command '%s' executed by %s" % (message[1][6:], players[address].username)
+                except:
+                    send_message = "Command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
             else:
                 if address in players:
                     user_sending = players[address].username
