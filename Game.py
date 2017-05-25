@@ -138,6 +138,7 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmdIn = ""
 
+    chat_list = []
 
     while True:
         first_message = message_queue.get()
@@ -426,7 +427,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     del remote_players[username]
 
                 elif command == 10:
-                    print(message[0])
+                    chat_list.append(message[0])
 
                 elif command == 100:
                     send_time, tick = message
@@ -621,6 +622,14 @@ def game(surf, username, token, host, port, size, music_enable):
                     for y in range(0, len(players)):
                         about_text = normal_font.render(players[y], True, (255, 255, 255))
                         surf.blit(about_text, (size[0]//2 - about_text.get_width() // 2, 50 + y * 20))
+
+            text_height = rah.text("QWERTYRAHMA", 10).get_height()
+
+            while len(chat_list) * text_height > (7 * size[1]) // 8:
+                del chat_list[0]
+
+            for line in range(len(chat_list)):
+                surf.blit(rah.text(chat_list[line], 10), (20, line * (text_height + 3)))
 
             display.update()
             clock.tick(120)

@@ -239,7 +239,9 @@ if __name__ == '__main__':
                 players[address] = Player(PN, message[1])
                 sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
                                 players[address].hotbar, players[address].inventory, playerLocations), address))
-                print('Player %s has connected from %s' % (message[1], address))
+
+                messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1',)))
+                #print('Player %s has connected from %s' % (message[1], address))
                 username.add(message[1])
 
                 for i in players:
@@ -309,7 +311,8 @@ if __name__ == '__main__':
 
         elif command == 9:
 
-            print('Player %s has disconnected from the game. %s' % (players[address].username, address))
+            messageQueue.put(((10, "%s has disconnected from the game"%players[address].username), ('127.0.0.1',)))
+            #print('Player %s has disconnected from the game. %s' % (players[address].username, address))
 
             playerNDisconnect.append(players[address].number)
             PlayerData[players[address].username] = players[address].save(message[1])
@@ -358,8 +361,21 @@ if __name__ == '__main__':
             elif message[1].lower() == '/ping':
                 send_message = 'pong!'
 
+            elif message[1].lower() == '/lenin':
+                with open('data/communist.rah') as communist:
+                    for line in communist.read().split('\n'):
+                        send_message = '[Comrade Lenin] ' + line
+
+                        for i in players:
+                            sendQueue.put(((10, send_message), i))
+
             else:
-                send_message = '[%s] %s' % (players[address].username, message[1])
+                if address in players:
+                    user_sending = players[address].username
+                else:
+                    user_sending = 'Server'
+
+                send_message = '[%s] %s' % (user_sending, message[1])
 
             if send_message[0] != '[':
                 send_message = '[Server] ' + send_message
@@ -372,3 +388,4 @@ if __name__ == '__main__':
         elif command == 100:
             for p in players:
                 sendQueue.put((message, p))
+                print(message)
