@@ -326,12 +326,8 @@ def game(surf, username, token, host, port, size, music_enable):
                         if e.unicode in INVENTORY_KEYS:
                             hotbar_slot = int(e.unicode) - 1
 
-
                         if e.key == K_f:
                             fly = toggle(fly)
-
-                        if e.key == K_r:
-                            local_player.rect.y -= 50
 
                         if e.key == K_e and current_gui == '' or current_gui == 'I':
                             inventory_visible = toggle(inventory_visible)
