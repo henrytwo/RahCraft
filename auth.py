@@ -47,7 +47,7 @@ def login(credentials, user):
     if credentials[0] in user and user[credentials[0]] == credentials[1]:
         return 1, token(credentials)
     else:
-        return (400,)
+        return 400,
 
 
 def auth(credentials):
@@ -58,7 +58,7 @@ def auth(credentials):
         return 10, 0
 
 
-def recieve_info(conn, addr):
+def receive_info(conn, addr):
     global active_user
 
     message = pickle.loads(conn.recv(4096))
@@ -108,5 +108,5 @@ if __name__ == '__main__':
     while True:
         conn, addr = server.accept()
 
-        active_user[addr] = Thread(target=recieve_info, args=(conn, addr))
+        active_user[addr] = Thread(target=receive_info, args=(conn, addr))
         active_user[addr].run()
