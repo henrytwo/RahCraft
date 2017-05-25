@@ -218,9 +218,6 @@ if __name__ == '__main__':
     cmdIn = ""
 
     while True:
-
-        print(players)
-
         pickled_message = messageQueue.get()
         message, address = pickled_message
         command = message[0]
