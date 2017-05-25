@@ -19,6 +19,19 @@ def rah(screen):
 
     t.sleep(0.1)
 
+def wallpaper(screen, size):
+    if size[0] < size[1]:
+        wpw = size[0]
+        wph = int(500 / 955 * size[0])
+
+    else:
+        wph = size[1]
+        wpw = int(955 / 500 * size[1])
+
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
+    screen.blit(wallpaper, (0, 0))
+
+
 def text(text, size):
     minecraft_font = font.Font("fonts/minecraft.ttf", size)
     text_surface = minecraft_font.render(text, True, (255, 255, 255))
