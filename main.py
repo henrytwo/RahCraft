@@ -513,10 +513,10 @@ def menu_screen():
     clock = time.Clock()
 
     menu_list = [[0, 'server_picker', "Connect to server"],
-                 [1, 'assistance', "Help"],
-                 [2, 'options', "Options"],
-                 [3, 'about', "About"],
-                 [4, 'exit', "Exit"]]
+                 [1, 'options', "Options"],
+                 [2, 'about', "About"],
+                 [2, 'assistance', "Help"],
+                 [3, 'exit', "Exit"]]
 
     main_menu = menu.Menu(menu_list, 0, 0, size[0], size[1])
 
