@@ -1,17 +1,17 @@
-Air // 0, 0, 0 // 0, 0, 0 // mob_spawner.png // 1 // nothing // pass
-Grass // 0, 150, 0 // 0, 100, 0 // grass_side.png // 19 // grass // collide
-Dirt // 129, 68, 32 // 99, 38, 12 // dirt.png // 19 // grass // collide
-Stone // 150, 150, 150 // 100, 100, 100 // stone.png // 150 // stone // collide
-WoodN // 119, 58, 22 // 89, 28, 2 // log_spruce.png // 60 // wood // pass
-Wood // 119, 58, 22 // 89, 28, 2 // log_spruce.png // 60 // wood // collide
-LeavesN // 10, 160, 10 // 10, 110, 10 // leaves_oak.png // 7 // grass // pass
-Leaves // 10, 160, 10 // 10, 110, 10 // leaves_oak.png // 7 // grass // collide
-Planks // 10, 160, 10 // 10, 110, 10 // planks_oak.png // 60 // wood // collide
-Cobble Stone // 150, 150, 150 // 100, 100, 100 // cobblestone.png // 200 // stone // collide
-Crafting Bench // 119, 58, 22 // 89, 28, 2 // crafting_table_front.png // 75 // wood // collide
-Glass // 10, 160, 10 // 10, 110, 10 // glass_silver.png // 9 // stone // collide
-Bed Rock // 150, 150, 150 // 100, 100, 100 // bedrock.png // 10000000000 // stone // collide
-Diamond Ore // 0, 0, 0 // 0, 0, 0 // diamond_ore.png // 300 // stone // collide
-Gold Ore // 0, 0, 0 // 0, 0, 0 // gold_ore.png // 300 // stone // collide
-Coal Ore // 0, 0, 0 // 0, 0, 0 // coal_ore.png // 300 // stone // collide
-Iron Ore // 0, 0, 0 // 0, 0, 0 // iron_ore.png // 300 // stone // collide
+Air // 0, 0, 0 // 0, 0, 0 // mob_spawner.png // 1 // nothing // pass // null
+Grass // 0, 150, 0 // 0, 100, 0 // grass_side.png // 19 // grass // collide // shovel
+Dirt // 129, 68, 32 // 99, 38, 12 // dirt.png // 19 // grass // collide // shovel
+Stone // 150, 150, 150 // 100, 100, 100 // stone.png // 150 // stone // collide // pickaxe
+WoodN // 119, 58, 22 // 89, 28, 2 // log_spruce.png // 60 // wood // pass // axe
+Wood // 119, 58, 22 // 89, 28, 2 // log_spruce.png // 60 // wood // collide // axe
+LeavesN // 10, 160, 10 // 10, 110, 10 // leaves_oak.png // 7 // grass // pass // null
+Leaves // 10, 160, 10 // 10, 110, 10 // leaves_oak.png // 7 // grass // collide // null
+Planks // 10, 160, 10 // 10, 110, 10 // planks_oak.png // 60 // wood // collide // axe
+Cobble Stone // 150, 150, 150 // 100, 100, 100 // cobblestone.png // 200 // stone // collide // pickaxe
+Crafting Bench // 119, 58, 22 // 89, 28, 2 // crafting_table_front.png // 75 // wood // collide // axe
+Glass // 10, 160, 10 // 10, 110, 10 // glass_silver.png // 9 // stone // collide // null
+Bed Rock // 150, 150, 150 // 100, 100, 100 // bedrock.png // 10000000000 // stone // collide // null
+Diamond Ore // 0, 0, 0 // 0, 0, 0 // diamond_ore.png // 300 // stone // collide // pickaxe
+Gold Ore // 0, 0, 0 // 0, 0, 0 // gold_ore.png // 300 // stone // collide // pickaxe
+Coal Ore // 0, 0, 0 // 0, 0, 0 // coal_ore.png // 300 // stone // collide // pickaxe
+Iron Ore // 0, 0, 0 // 0, 0, 0 // iron_ore.png // 300 // stone // collide // pickaxe

@@ -438,7 +438,7 @@ class Crafting:
                             else:
                                 self.current_recipe[x][y][1] -= 1
 
-    def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
+    def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties, tool_properties):
         surf.blit(self.graphic, (self.x, self.y))
 
         for row in range(len(inventory)):
@@ -492,8 +492,12 @@ class Crafting:
         self.recipe_check()
 
         if self.resulting_item[0] != 0:
-            surf.blit(transform.scale(block_properties[self.resulting_item[0]][3], (48, 48)), (463, 146, 48, 48))
-            surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
+            if self.resulting_item[0] < 100:
+                surf.blit(transform.scale(block_properties[self.resulting_item[0]][3], (48, 48)), (463, 146, 48, 48))
+                surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
+            elif self.resulting_item[0] < 200:
+                surf.blit(transform.scale(tool_properties[self.resulting_item[0]][2], (48, 48)), (463, 146, 48, 48))
+                surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
 
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
@@ -501,7 +505,6 @@ class Crafting:
             if l_click and self.holding == [0, 0]:
                 self.holding = self.resulting_item
                 self.resulting_item = [0, 0]
-                self.crafting_grid = [[[0, 0] for _ in range(3)] for __ in range(3)]
 
         self.craft()
 

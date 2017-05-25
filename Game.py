@@ -37,17 +37,30 @@ def load_blocks(block_file):
     block_file = open("data/" + block_file).readlines()
 
     for line_number in range(len(block_file)):
-        block_type, inner_block, outline, block_image, hardness, soundpack, collision = block_file[line_number].strip(
+        block_type, inner_block, outline, block_image, hardness, soundpack, collision, block_type = block_file[line_number].strip(
             "\n").split(" // ")
         blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")),
                                (int(x) for x in outline.split(",")),
                                transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (20, 20)),
                                int(hardness),
                                soundpack, collision,
-                               transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (32, 32))]
+                               transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (32, 32)),
+                               block_type]
 
     return blocks
 
+def load_tools(tool_file):
+    tools = {}
+
+    tool_number = 0
+
+    for tool in open("data/" + tool_file):
+        tool_name, tool_image, type_bonus, breaking_speed, breaking_type = tool.strip("\n").split(" // ")
+        tools[tool_number + 100] = [tool_name, image.load("textures/items/"+tool_image), int(type_bonus), int(breaking_speed), breaking_type]#9
+
+        tool_number += 1
+
+    return tools
 
 def commandline_in(commandline_queue, fn, address):
     rah.rahprint('Ready for input.')
@@ -85,6 +98,7 @@ def game(surf, username, token, host, port, size, music_enable):
     tint.set_alpha(99)
 
     block_properties = load_blocks("block.rah")
+    tool_properties = load_tools("tools.rah")
     breaking_animation = [
         transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
         in range(10)]
@@ -450,7 +464,16 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                         if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
-                            current_breaking[3] += 1
+
+                            if hotbar_items[hotbar_slot][0] in tool_properties:
+                                current_tool = hotbar_items[hotbar_slot][0]
+
+                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]][8]:
+                                    current_breaking[3] += tool_properties[current_tool][2]
+                                else:
+                                    current_breaking[3] += tool_properties[current_tool][3]
+                            else:
+                                current_breaking[3] += 1
 
                             if current_breaking[3] >= block_properties[current_breaking[0]][4]:
                                 block_broken = True
@@ -521,7 +544,7 @@ def game(surf, username, token, host, port, size, music_enable):
                         crafting = not crafting
                         current_gui = 'C'
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
-                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0:
+                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
@@ -550,14 +573,21 @@ def game(surf, username, token, host, port, size, music_enable):
                     hotbar_slot = item
 
                 if hotbar_items[item][1] != 0:
-                    surf.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)),
-                              (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
-                    surf.blit(rah.text(str(hotbar_items[item][1]), 10),
-                              (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
+                    if hotbar_items[item][0] < 100:
+                        surf.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)),
+                                  (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
+                        surf.blit(rah.text(str(hotbar_items[item][1]), 10),
+                                  (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
+                    if hotbar_items[item][0] < 200:
+                        surf.blit(transform.scale(tool_properties[hotbar_items[item][0]][1], (32, 32)),
+                                  (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
             surf.blit(selected, (hotbarRect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))
 
-            block_name = rah.text(str(block_properties[hotbar_items[hotbar_slot][0]][0]), 13)
+            if hotbar_items[hotbar_slot][0] < 100:
+                block_name = rah.text(str(block_properties[hotbar_items[hotbar_slot][0]][0]), 13)
+            elif hotbar_items[hotbar_slot][0] < 200:
+                block_name = rah.text(str(tool_properties[hotbar_items[hotbar_slot][0]][0]), 13)
             surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 60))
 
             # Pause surf
@@ -586,7 +616,7 @@ def game(surf, username, token, host, port, size, music_enable):
             elif crafting:
                 surf.blit(tint, (0, 0))
 
-                crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties)
+                crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties, tool_properties)
 
             if not paused:
                 if key.get_pressed()[K_TAB]:
