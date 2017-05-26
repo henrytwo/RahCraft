@@ -591,7 +591,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                         hover_sound =  block_properties[world[hover_x, hover_y]]
 
-                        if hover_sound != 'nothing':
+                        if hover_sound[5] != 'nothing':
                             rah.load_sound(sound['dig'][hover_sound[5]])
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
