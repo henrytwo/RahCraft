@@ -218,7 +218,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
         sound_list = glob.glob('sound/%s/*.ogg'%(type))
 
-        sound_blocks = [sound.split("/")[-1][:-5] for sound in sound_list]
+        sound_blocks = [sound.replace('\\','/').split("/")[-1][:-5] for sound in sound_list]
 
         for block in sound_blocks:
             local_sounds = []
