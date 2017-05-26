@@ -2,6 +2,7 @@ import time as t
 from pygame import *
 from random import *
 
+
 def install_modules():
     try:
         import numpy as np
@@ -20,15 +21,18 @@ def install_modules():
             print("Failed to install numpy")
             quit()
 
+
 def load_sound(sound_list):
     sound_object = mixer.Sound(choice(sound_list))
     sound_object.play(0)
+
 
 def rahprint(text):
     printing = False
 
     if printing:
         print(text)
+
 
 def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2

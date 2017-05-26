@@ -467,68 +467,6 @@ def game(surf, username, token, host, port, size, music_enable):
             except:
                 pass
 
-            # testing==================================================
-
-            mb = mouse.get_pressed()
-            mx, my = mouse.get_pos()
-
-            hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
-
-            # display.set_caption("Rahcraft Beta v0.01 FPS: " + str(round(clock.get_fps(), 2)) + " A: " + str(
-            #     x_offset // block_size) + " Y:" + str(y_offset // block_size) + " Size:" + str(
-            #     block_size) + " Block Selected:" + str(hotbar_slot) + "  // " + block_properties[hotbar_slot][0] +
-            #                     "Mouse: " + str((mx + x_offset) // block_size) + " " + str(
-            #     (my + y_offset) // block_size))
-            caption_data = (round(clock.get_fps(), 2), x_offset // block_size, y_offset // block_size, block_size, hotbar_slot,
-                            block_properties[hotbar_slot][0], (mx + x_offset) // block_size, (my + y_offset) // block_size)
-            display.set_caption("Rahcraft Beta v0.01 // FPS - {0} // X - {1} Y - {2} // Block Size - {3} // Hotbar Slot - {4} // Block Selected - {5} // Mouse Pos - {6}, {7}".format(*caption_data))
-
-            block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
-
-            if not current_gui:
-                if mb[0] == 0:
-                    current_breaking = []
-                    breaking_block = False
-
-                elif mb[0] == 1:
-                    if not breaking_block and world[hover_x, hover_y] != 0 and (
-                            hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
-                                                                             hover_y - block_clip_cord[1]) <= reach:
-                        breaking_block = True
-                        current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
-                        if current_breaking[3] >= block_properties[current_breaking[0]][4]:
-                            block_broken = True
-
-                    elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                        if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
-
-                            if hotbar_items[hotbar_slot][0] in tool_properties:
-                                current_tool = hotbar_items[hotbar_slot][0]
-
-                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]][8]:
-                                    current_breaking[3] += tool_properties[current_tool][2]
-                                else:
-                                    current_breaking[3] += tool_properties[current_tool][3]
-                            else:
-                                current_breaking[3] += 1
-
-                            if current_breaking[3] >= block_properties[current_breaking[0]][4]:
-                                block_broken = True
-                        else:
-                            breaking_block = False
-                            current_breaking = []
-
-                    if block_broken:
-                        rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
-
-                        block_request.add((hover_x, hover_y))
-                        send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
-
-                        current_breaking = []
-                        breaking_block = False
-
-
-
             # ==================Render World==========================
             if sky_tick % SKYTICKDEFAULT != 0:  # Change SKYTICKDEFAULT to a lower number to test
                 if on_tick:
@@ -587,7 +525,58 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 block_step = under_block
 
+            # ==========================Mouse Interaction=================================
+            mb = mouse.get_pressed()
+            mx, my = mouse.get_pos()
+
+            caption_data = (round(clock.get_fps(), 2), x_offset // block_size, y_offset // block_size, block_size, hotbar_slot, block_properties[hotbar_slot][0], (mx + x_offset) // block_size, (my + y_offset) // block_size)
+            display.set_caption("Rahcraft Beta v0.01 // FPS - {0} // X - {1} Y - {2} // Block Size - {3} // Hotbar Slot - {4} // Block Selected - {5} // Mouse Pos - {6}, {7}".format(*caption_data))
+
+            hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
+
+            block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
+
             if not current_gui:
+                if mb[0] == 0:
+                    current_breaking = []
+                    breaking_block = False
+
+                elif mb[0] == 1:
+                    if not breaking_block and world[hover_x, hover_y] != 0 and (
+                            hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
+                                                                             hover_y - block_clip_cord[1]) <= reach:
+                        breaking_block = True
+                        current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
+                        if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                            block_broken = True
+
+                    elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                        if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
+
+                            if hotbar_items[hotbar_slot][0] in tool_properties:
+                                current_tool = hotbar_items[hotbar_slot][0]
+
+                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]][8]:
+                                    current_breaking[3] += tool_properties[current_tool][2]
+                                else:
+                                    current_breaking[3] += tool_properties[current_tool][3]
+                            else:
+                                current_breaking[3] += 1
+
+                            if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                                block_broken = True
+                        else:
+                            breaking_block = False
+                            current_breaking = []
+
+                    if block_broken:
+                        rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
+
+                        block_request.add((hover_x, hover_y))
+                        send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
+
+                        current_breaking = []
+                        breaking_block = False
 
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     if world[hover_x, hover_y] == 10 and current_gui == '':
@@ -607,9 +596,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]
-
-                    # if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
-                    #    hotbar_items[hotbar_slot] = world[hover_x, hover_y]
 
                 if hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     surf.blit(highlight_good, ((mx + x_offset) // block_size * block_size - x_offset,
@@ -646,7 +632,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 block_name = rah.text(str(tool_properties[hotbar_items[hotbar_slot][0]][0]), 13)
             surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 60))
 
-            # Pause surf
+            #===================Pausing====================================
             if paused:
                 surf.blit(tint, (0, 0))
 
@@ -702,7 +688,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
             if chat_enable:
                 chat_content = chat.update(pass_event)
-
                 chat.draw(surf)
 
             display.update()
