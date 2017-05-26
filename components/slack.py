@@ -1,7 +1,9 @@
 from slacker import Slacker
 
-with open('../data/slack.rah') as token:
-    slack = Slacker(token.read())
+with open('data/slack.rah') as token:
+    slack = Slacker(token.read().strip())
+
+
 
 def broadcast(message):
     # Send a message to #general channel
