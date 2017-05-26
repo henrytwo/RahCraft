@@ -17,6 +17,7 @@ import glob
 import traceback
 import sys
 import os
+from random import *
 
 
 def player_sender(send_queue, server):
@@ -65,6 +66,10 @@ def load_tools(tool_file):
         tool_number += 1
 
     return tools
+
+def load_sound(sound_list):
+    sound_object = mixer.Sound(choice(sound_list))
+    sound_object.play(0)
 
 def commandline_in(commandline_queue, fn, address, chat_queue):
     rah.rahprint('Ready for input.')
@@ -209,22 +214,24 @@ def game(surf, username, token, host, port, size, music_enable):
     sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
     moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
 
-    sound_list = glob.glob('sound/step/*.ogg')
+    sound_types = [type[6:-1] for type in glob.glob('sound/*/')]
 
-    sound_groups = [sound.split("/")[-1][:-5] for sound in sound_list]
+    sound = {sound_type:{} for sound_type in sound_types}
 
-    sound = {}
+    for type in sound_types:
 
-    for sound_title in sound_groups:
-        local_sounds = []
+        sound_list = glob.glob('sound/%s/*.ogg'%(type))
 
-        for sound_dir in sound_list:
-            if sound_title in sound_dir:
-                local_sounds.append(sound_dir)
+        sound_blocks = [sound.split("/")[-1][:-5] for sound in sound_list]
 
-        sound[sound_title] = local_sounds
+        for block in sound_blocks:
+            local_sounds = []
 
-    rah.rahprint(sound)
+            for sound_dir in sound_list:
+                if block in sound_dir:
+                    local_sounds.append(sound_dir)
+
+            sound[type][block] = local_sounds
 
     inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
@@ -314,6 +321,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif e.type == KEYDOWN:
                     if e.key == K_SLASH:
+
                         chat_enable = not chat_enable
                         current_gui = 'CH'
 
@@ -513,11 +521,15 @@ def game(surf, username, token, host, port, size, music_enable):
                             current_breaking = []
 
                     if block_broken:
+                        load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
+
                         block_request.add((hover_x, hover_y))
                         send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
 
                         current_breaking = []
                         breaking_block = False
+
+
 
             # ==================Render World==========================
             if sky_tick % SKYTICKDEFAULT != 0:  # Change SKYTICKDEFAULT to a lower number to test
@@ -580,6 +592,8 @@ def game(surf, username, token, host, port, size, music_enable):
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
+
+                        load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]
@@ -669,7 +683,6 @@ def game(surf, username, token, host, port, size, music_enable):
                         surf.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
 
             text_height = rah.text("QWERTYRAHMA", 10).get_height()
-
 
             while len(chat_list) * text_height > (5 * size[1]) // 8:
                 del chat_list[0]

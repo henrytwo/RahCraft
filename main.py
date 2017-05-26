@@ -567,7 +567,7 @@ if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5276
 
-    if platform.system() == "Windows":
+    if True:#platform.system() == "Windows":
         mixer.init()
         music_enable = True
     else:
