@@ -10,7 +10,6 @@ import platform
 import numpy as np
 
 from components.world import *
-#from components.slack import *
 from math import *
 import time
 from random import *
@@ -22,6 +21,8 @@ with open("data/config.rah", "r") as config:
     host = config[0]
     port = int(config[1])
     world_name = config[2]
+    slack_enable = config[3]
+    channel = config[3]
 
 # If world doesn't exist
 if not os.path.isfile('saves/%s.pkl' % world_name):
@@ -201,6 +202,9 @@ if __name__ == '__main__':
     itemLib = {}
     username = set()
 
+    if slack_enable:
+        from components.slack import *
+
     world = World(world_name)
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -373,7 +377,8 @@ if __name__ == '__main__':
                     for line in communist.read().split('\n'):
                         send_message = '[Comrade Lenin] ' + line
 
-                        #broadcast(send_message)
+                        if slack_enable:
+                            broadcast(channel, send_message)
 
                         for i in players:
                             sendQueue.put(((10, send_message), i))
@@ -411,7 +416,9 @@ if __name__ == '__main__':
 
             for i in players:
                 sendQueue.put(((10, send_message), i))
-                #broadcast(send_message)
+
+                if slack_enable:
+                    broadcast(channel, send_message)
                 print(send_message)
 
         elif command == 100:
