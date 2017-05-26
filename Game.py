@@ -4,23 +4,7 @@ from multiprocessing import *
 from subprocess import Popen, PIPE
 from shlex import split
 import platform
-
-try:
-    import numpy as np
-
-except ImportError:
-    print("Module Numpy wasn't found")
-    try:
-        if platform.system() == "Windows":
-            Popen(['cmd.exe', 'python -m pip install numpy'])
-            print("Numpy installed successfully")
-        else:
-            bash_command = "pip3 install numpy"
-            Popen(split(bash_command), stdout=PIPE)
-            print("Numpy installed successfully")
-    except:
-        print("Failed to install numpy")
-        quit()
+import numpy as np
 
 import socket
 import pickle
@@ -117,7 +101,7 @@ def game(surf, username, token, host, port, size, music_enable):
     tint.set_alpha(99)
 
     #Chat
-    chat = menu.TextBox(20, size[1] - 60, size[0] // 2, 40, '')
+    chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
     chat_content = ''
 
     block_properties = load_blocks("block.rah")
@@ -336,9 +320,12 @@ def game(surf, username, token, host, port, size, music_enable):
                         if current_gui == 'CH':
                             current_gui = ''
 
+
                     if chat_enable and e.key == K_RETURN:
                         chat_queue.put(chat_content)
                         chat.content = ''
+                        chat_enable = False
+                        current_gui = ''
 
                     if e.key == K_ESCAPE:
                         if current_gui == 'C':
@@ -347,6 +334,9 @@ def game(surf, username, token, host, port, size, music_enable):
                         elif current_gui == 'I':
                             inventory_visible = False
                             current_gui = ''
+                        elif current_gui == 'CH':
+                            chat_enable = False
+                            current_gui = ''
                         elif current_gui == '' or current_gui == 'P':
                             paused = not paused
                             if paused:
@@ -354,7 +344,7 @@ def game(surf, username, token, host, port, size, music_enable):
                             else:
                                 current_gui = ''
 
-                    elif not paused:
+                    elif not paused and current_gui != 'CH':
                         if e.unicode in INVENTORY_KEYS:
                             hotbar_slot = int(e.unicode) - 1
 
@@ -565,18 +555,19 @@ def game(surf, username, token, host, port, size, music_enable):
                         draw.rect(surf, (0, 0, 0),
                                   (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
-            if not current_gui:
-                surrounding_blocks = []
 
-                for x_shift, y_shift in player.surrounding_shifts:
+            surrounding_blocks = []
 
-                    if block_properties[world[(block_clip[0] - x_shift * block_size) // block_size, (
-                                block_clip[1] - y_shift * block_size) // block_size]][6] == 'collide':
-                        surrounding_blocks.append(
-                            Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size,
-                                 block_size))
+            for x_shift, y_shift in player.surrounding_shifts:
+                block_id = world[(block_clip[0] - x_shift * block_size) // block_size, (
+                            block_clip[1] - y_shift * block_size) // block_size]
 
-                local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, paused)
+                if block_id == -1 or block_properties[block_id][6] == 'collide':
+                    surrounding_blocks.append(
+                        Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size,
+                             block_size))
+
+            local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, current_gui)
 
             if not current_gui:
 
@@ -652,7 +643,7 @@ def game(surf, username, token, host, port, size, music_enable):
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
 
-                inventory_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties)
+                inventory_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties, tool_properties)
 
             elif crafting:
                 surf.blit(tint, (0, 0))
@@ -680,7 +671,7 @@ def game(surf, username, token, host, port, size, music_enable):
             text_height = rah.text("QWERTYRAHMA", 10).get_height()
 
 
-            while len(chat_list) * text_height > (7 * size[1]) // 8:
+            while len(chat_list) * text_height > (5 * size[1]) // 8:
                 del chat_list[0]
 
             for line in range(len(chat_list)):
@@ -690,7 +681,6 @@ def game(surf, username, token, host, port, size, music_enable):
                 chat_content = chat.update(pass_event)
 
                 chat.draw(surf)
-
 
             display.update()
             clock.tick(120)

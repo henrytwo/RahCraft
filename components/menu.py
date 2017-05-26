@@ -157,6 +157,7 @@ class TextBox:
         self.font = font.Font("fonts/minecraft.ttf", 14)
         self.label = self.font.render(label, True, (255, 255, 255))
         self.name = label
+        self.charwidth = self.font.render("X", True, (255, 255, 255)).get_width()
 
         self.allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
                         't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
@@ -180,7 +181,7 @@ class TextBox:
 
     def update(self, e):
         if e and e.type == KEYDOWN:
-            if e.unicode in self.allowed and len(self.content) < 35:
+            if e.unicode in self.allowed and len(self.content) < self.rect.w//self.charwidth - 1:
                 self.content += e.unicode
 
             elif e.key == K_BACKSPACE:
@@ -329,14 +330,17 @@ class Inventory:
                 return [item[0], self.MAX_STACK]
 
 
-    def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
+    def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties, tool_properties):
         surf.blit(self.graphic, (self.x, self.y))
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
                 if inventory[row][item][1] != 0:
-                    surf.blit(block_properties[inventory[row][item][0]][7],
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+                    if inventory[row][item][0] < 100:
+                        surf.blit(block_properties[inventory[row][item][0]][7], (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                    elif inventory[row][item][0] < 200:
+                        surf.blit(tool_properties[inventory[row][item][0]][7], (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     surf.blit(rah.text(str(inventory[row][item][1]), 10),
                               (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
@@ -351,7 +355,8 @@ class Inventory:
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
-                surf.blit(block_properties[hotbar[item][0]][7], (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+                #surf.blit(block_properties[hotbar[item][0]][7], (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 surf.blit(rah.text(str(hotbar[item][1]), 10), (self.x + 16 + item * 36, self.y + 283, 32, 32))
 

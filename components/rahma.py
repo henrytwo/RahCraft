@@ -1,13 +1,29 @@
 import time as t
 from pygame import *
 
+def install_modules():
+    try:
+        import numpy as np
+
+    except ImportError:
+        print("Module Numpy wasn't found")
+        try:
+            if platform.system() == "Windows":
+                Popen(['cmd.exe', 'python -m pip install numpy'])
+                print("Numpy installed successfully")
+            else:
+                bash_command = "pip3 install numpy"
+                Popen(split(bash_command), stdout=PIPE)
+                print("Numpy installed successfully")
+        except:
+            print("Failed to install numpy")
+            quit()
 
 def rahprint(text):
     printing = False
 
     if printing:
         print(text)
-
 
 def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2

@@ -120,9 +120,9 @@ class Player:
         # else:
         #     self.vy -= 0
 
-    def update(self, surf, collision_blocks, x_offset, y_offset, fly, paused):
+    def update(self, surf, collision_blocks, x_offset, y_offset, fly, ui):
 
-        if not paused:
+        if not ui:
             self.control(fly)
 
         self.collide(collision_blocks, fly)

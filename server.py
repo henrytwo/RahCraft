@@ -7,23 +7,7 @@ from multiprocessing import *
 from subprocess import Popen, PIPE
 from shlex import split
 import platform
-
-try:
-    import numpy as np
-
-except ImportError:
-    print("Module Numpy wasn't found")
-    try:
-        if platform.system() == "Windows":
-            Popen(['cmd.exe', 'python -m pip install numpy'])
-            print("Numpy installed successfully")
-        else:
-            bash_command = "pip3 install numpy"
-            Popen(split(bash_command), stdout=PIPE)
-            print("Numpy installed successfully")
-    except:
-        print("Failed to install numpy")
-        quit()
+import numpy as np
 
 from components.world import *
 from math import *
@@ -401,6 +385,16 @@ if __name__ == '__main__':
                     send_message = "Command '%s' executed by %s" % (message[1][6:], players[address].username)
                 except:
                     send_message = "Command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+
+            elif message[1].lower()[:5] == '/bash':
+
+                try:
+                    print(Popen(split(message[1][6:]), stdout=PIPE))
+                    send_message = "Bash command '%s' executed by %s" % (message[1][6:], players[address].username)
+                except:
+                    send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+
+
             else:
                 if address in players:
                     user_sending = players[address].username

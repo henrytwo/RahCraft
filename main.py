@@ -9,22 +9,8 @@ from subprocess import Popen, PIPE
 from shlex import split
 import platform
 
-try:
-    import numpy as np
+import numpy as np
 
-except ImportError:
-    print("Module Numpy wasn't found")
-    try:
-        if platform.system() == "Windows":
-            Popen(['cmd.exe', 'python -m pip install numpy'])
-            print("Numpy installed successfully")
-        else:
-            bash_command = "pip3 install numpy"
-            Popen(split(bash_command), stdout=PIPE)
-            print("Numpy installed successfully")
-    except:
-        print("Failed to install numpy")
-        quit()
 
 import components.rahma as rah
 import components.menu as menu
