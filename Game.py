@@ -75,10 +75,6 @@ def commandline_in(commandline_queue, fn, address, chat_queue):
         commandline_queue.put(((10, chat_queue.get()), address))
 
 def game(surf, username, token, host, port, size, music_enable):
-    rah.rahprint('Starting game')
-
-    font.init()
-
     def quit_game():
         send_queue.put(((9, block_size), SERVERADDRESS))
         time.wait(50)
@@ -88,41 +84,24 @@ def game(surf, username, token, host, port, size, music_enable):
     def get_neighbours(x, y):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
+    # Loading Screen
+    # =====================================================================
+    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
+    surf.blit(wallpaper, (0, 0))
+
+    connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
+    surf.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+
+    display.update()
+
+    # Setting Up Socket I/O and Multiprocessing
+    # =====================================================================
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     SERVERADDRESS = (host, port)
 
     send_queue = Queue()
     message_queue = Queue()
     chat_queue = Queue()
-
-    block_size = 20
-
-    tint = Surface(size)
-    tint.fill((0, 0, 0))
-    tint.set_alpha(99)
-
-    #Chat
-    chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
-    chat_content = ''
-
-    block_properties = load_blocks("block.rah")
-    tool_properties = load_tools("tools.rah")
-    breaking_animation = [
-        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
-        in range(10)]
-
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
-    surf.blit(wallpaper, (0, 0))
-
-    connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
-    surf.blit(connecting_text,
-              rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
-
-    display.update()
-
-    clock = time.Clock()
-
-    rah.rahprint("Client connecting to %s:%i" % SERVERADDRESS)
 
     server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
 
@@ -137,8 +116,24 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
+    # Chat
+    # =====================================================================
+    chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
+    chat_content = ''
     chat_list = []
 
+    # Loading Textures
+    # =====================================================================
+    block_properties = load_blocks("block.rah")
+    tool_properties = load_tools("tools.rah")
+    breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i in range(10)]
+
+    tint = Surface(size)
+    tint.fill((0, 0, 0))
+    tint.set_alpha(99)
+
+    # Receiving First Messages, Initing World, and Player
+    # =====================================================================
     while True:
         first_message = message_queue.get()
         if first_message[0] == 400:
@@ -150,38 +145,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory_items, r_players = first_message[1:]
 
-    rah.rahprint("player done")
-
-    reach = 5
-    player_x = int(player_x) * 20 - size[0] // 2
-    player_y = int(player_y) * 20 - size[1] // 2
-
-    world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
-
-    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
-                                 (K_a, K_d, K_w, K_s, K_SPACE))
-    x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
-    y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
-
-    remote_players = {}
-
-    TICKEVENT = USEREVENT + 1
-    tick_timer = time.set_timer(TICKEVENT, 50)
-    current_tick = 0
-
-    block_request = set()
-    render_request = set()
-
-    x, y = 0, 0
-    paused = False
-
-    current_breaking = []
-    breaking_block = False
-
-    fly = False
-    inventory_visible = False
-    chat_enable = False
-
     send_queue.put([[2, x_offset // block_size, y_offset // block_size], SERVERADDRESS])
 
     while True:
@@ -192,6 +155,51 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
 
+    block_size = 20
+
+    rah.rahprint("player done")
+
+    reach = 5
+    player_x = int(player_x) * 20 - size[0] // 2
+    player_y = int(player_y) * 20 - size[1] // 2
+
+    world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
+
+    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5, (K_a, K_d, K_w, K_s, K_SPACE))
+    x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
+    y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
+
+    remote_players = {}
+
+    # Initing Pygame Components
+    # =====================================================================
+    clock = time.Clock()
+
+    # Initing Ticks and Sky
+    # =====================================================================
+    TICKEVENT = USEREVENT + 1
+    tick_timer = time.set_timer(TICKEVENT, 50)
+    current_tick = 0
+
+    sky = transform.scale(image.load("textures/sky/sky.png"), (5600, 800))
+    sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
+    moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
+
+    # Initing Anti-Lag
+    # =====================================================================
+    block_request = set()
+    render_request = set()
+
+    x, y = 0, 0
+
+    # Initing Pausing/Inventories
+    # =====================================================================
+    paused = False
+
+    fly = False
+    inventory_visible = False
+    chat_enable = False
+
     pause_list = [[0, 'unpause', "Back to game"],
                   [1, 'options', "Options"],
                   [2, 'assistance', "Help"],
@@ -200,16 +208,27 @@ def game(surf, username, token, host, port, size, music_enable):
 
     pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
 
-    # =============================init inventory==========================
+    # Initing Block Breaking
+    # =====================================================================
+    current_breaking = []
+    breaking_block = False
 
+    # Init Inventory
+    # =====================================================================
     hotbar = image.load("textures/gui/toolbar/toolbar.png").convert()
     selected = image.load("textures/gui/toolbar/selected.png").convert_alpha()
 
-    sky = transform.scale(image.load("textures/sky/sky.png"), (5600, 800))
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
-    moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
+    inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
+    hotbarRect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
+    hotbar_slot = 1
+
+    INVENTORY_KEYS = {str(x) for x in range(1, 10)}
+
+    # Initing Sound
+    # =====================================================================
     sound_types = [type[6:-1] for type in glob.glob('sound/*/')]
 
     sound = {sound_type:{} for sound_type in sound_types}
@@ -231,18 +250,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     block_step = None
 
-    inventory_object = menu.Inventory(0, 0, size[0], size[1])
-
-    hotbarRect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
-    hotbar_slot = 1
-
-    INVENTORY_KEYS = {str(x) for x in range(1, 10)}
-
-    rah.rahprint("ini done")
-
-    normal_font = font.Font("fonts/minecraft.ttf", 14)
-
-    # ==============================Sky=====================================
+    # Sky
+    # =====================================================================
     DEFAULTSKYCOLOR = [135, 206, 235]
     sky_color = [-65, 6, 35]
     normalized_color = [max(x, 0) for x in sky_color]
@@ -252,15 +261,16 @@ def game(surf, username, token, host, port, size, music_enable):
     sky_tick = 1
     SKYTICKDEFAULT = 120
 
-    # ==========================Crafting====================================
+    # Crafting
+    # =====================================================================
     crafting_object = menu.Crafting(size[0], size[1])
 
     crafting = False
 
     current_gui = ''
 
-    # ========================stuff=====================================
-
+    # Block highlight
+    # =====================================================================
     highlight_good = Surface((block_size, block_size))
     highlight_good.fill((255, 255, 255))
     highlight_good.set_alpha(50)
@@ -269,13 +279,14 @@ def game(surf, username, token, host, port, size, music_enable):
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
 
+    # Init Existing Remote Players
+    # =====================================================================
+    for Rp in r_players:
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5, 2 * block_size - 5)
+
+    rah.rahprint("ini done")
+
     try:
-
-        # ====================Init remote players================================
-
-        for Rp in r_players:
-            remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
-                                                     2 * block_size - 5)
 
         while True:
 

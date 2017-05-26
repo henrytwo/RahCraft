@@ -157,6 +157,8 @@ class RemotePlayer:
         self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height() + 10), SRCALPHA)
         self.name_back.fill(Color(75, 75, 75, 150))
 
+        self.MAX_MOVE = 90
+
     def calculate_velocity(self, ncord, fpt):
         self.vy = (ncord[1] - self.y) // fpt
         self.vx = (ncord[0] - self.x) // fpt
