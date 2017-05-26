@@ -10,7 +10,7 @@ import platform
 import numpy as np
 
 from components.world import *
-from components.slack import *
+#from components.slack import *
 from math import *
 import time
 from random import *
