@@ -373,7 +373,7 @@ if __name__ == '__main__':
                     for line in communist.read().split('\n'):
                         send_message = '[Comrade Lenin] ' + line
 
-                        broadcast(send_message)
+                        #broadcast(send_message)
 
                         for i in players:
                             sendQueue.put(((10, send_message), i))
@@ -411,7 +411,7 @@ if __name__ == '__main__':
 
             for i in players:
                 sendQueue.put(((10, send_message), i))
-                broadcast(send_message)
+                #broadcast(send_message)
                 print(send_message)
 
         elif command == 100:
