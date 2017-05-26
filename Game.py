@@ -67,10 +67,6 @@ def load_tools(tool_file):
 
     return tools
 
-def load_sound(sound_list):
-    sound_object = mixer.Sound(choice(sound_list))
-    sound_object.play(0)
-
 def commandline_in(commandline_queue, fn, address, chat_queue):
     rah.rahprint('Ready for input.')
     sys.stdin = os.fdopen(fn)
@@ -163,7 +159,7 @@ def game(surf, username, token, host, port, size, music_enable):
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
     local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
-                                 (K_a, K_d, K_w, K_s))
+                                 (K_a, K_d, K_w, K_s, K_SPACE))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -232,6 +228,8 @@ def game(surf, username, token, host, port, size, music_enable):
                     local_sounds.append(sound_dir)
 
             sound[type][block] = local_sounds
+
+    block_step = None
 
     inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
@@ -521,7 +519,7 @@ def game(surf, username, token, host, port, size, music_enable):
                             current_breaking = []
 
                     if block_broken:
-                        load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
+                        rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
 
                         block_request.add((hover_x, hover_y))
                         send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
@@ -581,6 +579,14 @@ def game(surf, username, token, host, port, size, music_enable):
 
             local_player.update(surf, surrounding_blocks, x_offset, y_offset, fly, current_gui)
 
+            under_block = (x_offset // block_size, y_offset //block_size + 1)
+
+            if world[under_block] > 0 and block_step != under_block:
+
+                rah.load_sound(sound['step'][block_properties[world[under_block]][5]])
+
+                block_step = under_block
+
             if not current_gui:
 
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
@@ -593,7 +599,11 @@ def game(surf, username, token, host, port, size, music_enable):
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
 
-                        load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
+
+                        hover_sound =  block_properties[world[hover_x, hover_y]]
+
+                        if hover_sound != 'nothing':
+                            rah.load_sound(sound['dig'][hover_sound[5]])
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]

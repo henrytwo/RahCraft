@@ -41,12 +41,12 @@ class Player:
             self.vx = self.run_speed
 
         if fly:
-            if key.get_pressed()[self.controls[2]]:
+            if key.get_pressed()[self.controls[2]] or key.get_pressed()[self.controls[4]]:
                 self.vy = -self.run_speed
             if key.get_pressed()[self.controls[3]]:
                 self.vy = self.run_speed
 
-        if key.get_pressed()[self.controls[2]] and self.standing:
+        if (key.get_pressed()[self.controls[2]] or key.get_pressed()[self.controls[4]]) and self.standing:
             self.vy = self.jump_height
 
         self.standing = False

@@ -1,5 +1,6 @@
 import time as t
 from pygame import *
+from random import *
 
 def install_modules():
     try:
@@ -18,6 +19,10 @@ def install_modules():
         except:
             print("Failed to install numpy")
             quit()
+
+def load_sound(sound_list):
+    sound_object = mixer.Sound(choice(sound_list))
+    sound_object.play(0)
 
 def rahprint(text):
     printing = False

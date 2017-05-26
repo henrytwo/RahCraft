@@ -628,9 +628,6 @@ if __name__ == "__main__":
           }
 
     while navigation != 'exit':
-
-        print(navigation)
-
         try:
 
             if navigation == 'game':
