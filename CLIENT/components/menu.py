@@ -33,7 +33,7 @@ class Button:
             elif release:
                 mouse.set_cursor(*cursors.tri_left)
                 # mixer.Sound('sound/random/click.ogg').play()
-
+                rah.load_sound(['sound/random/click.ogg'])
                 return self.func
 
             else:
@@ -220,6 +220,8 @@ class ServerButton:
 
             elif release:
                 mouse.set_cursor(*cursors.tri_left)
+
+                rah.load_sound(['sound/random/click.ogg'])
 
                 return ['game', self.host, self.port]
 
