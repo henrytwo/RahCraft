@@ -38,7 +38,7 @@ class Player:
         self.vy = 0
 
         self.run_speed = int(self.rect.w * 0.3)
-        self.jump_height = -(3 * self.rect.h // 4)
+        self.jump_height = -(3 * self.rect.h // 5)
         self.gravity = 0.5
 
         self.controls = controls
@@ -102,7 +102,6 @@ class Player:
             else:
                 if int(self.vy) == 0:
                     self.vy = 1
-                    print("run")
 
                 self.vy = self.vy / self.gravity
 
@@ -164,7 +163,7 @@ while True:
         player.detect()
         player.update()
 
-        clock.tick(60)
+        clock.tick(5)
 
         display.set_caption("New Physics Idea! // FPS - {0:.0f}".format(clock.get_fps()))
 
