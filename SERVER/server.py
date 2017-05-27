@@ -456,4 +456,4 @@ if __name__ == '__main__':
         elif command == 100:
             for p in players:
                 sendQueue.put((message, p))
-            broadcast(channel, '[Tick] %s''%message[2])
+            broadcast(channel, '[Tick] %s'%message[2])
