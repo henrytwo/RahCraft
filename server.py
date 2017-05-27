@@ -290,7 +290,7 @@ if __name__ == '__main__':
 
             else:
                 sendQueue.put(((400, (
-                "Connection closed by remote host\nUsername '%s' is currently in use\n\n" % message[1])), address))
+                "Connection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)")), address))
 
         elif command == 1:
             # Player movement
