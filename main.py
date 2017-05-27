@@ -117,8 +117,6 @@ def authenticate():
 
     host, port = 'rahmish.com', 1111
 
-    send_queue = Queue()
-    message_queue = Queue()
     socket.setdefaulttimeout(10)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     SERVERADDRESS = (host, port)
@@ -155,6 +153,10 @@ def authenticate():
 
             else:
                 server.close()
+
+                with open('data/session.rah','w') as session_file:
+                    session_file.write('')
+
                 return 'login'
     except:
         server.close()
