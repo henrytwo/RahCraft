@@ -38,8 +38,8 @@ class Player:
         self.vy = 0
 
         self.run_speed = int(self.rect.w * 0.3)
-        self.jump_height = -(self.rect.h // 2)
-        self.gravity = self.rect.h * 2 / 45
+        self.jump_height = -(3 * self.rect.h // 4)
+        self.gravity = 0.5
 
         self.controls = controls
 
@@ -95,7 +95,16 @@ class Player:
                     self.rect.left = block.rect.right
 
         self.vx = 0
-        self.vy += self.gravity if self.vy + self.gravity < self.rect.h else 0
+        if self.vy / self.gravity < self.rect.h:
+            if self.vy < 0:
+                self.vy *= self.gravity
+                self.vy = round(self.vy)
+            else:
+                if int(self.vy) == 0:
+                    self.vy = 1
+                    print("run")
+
+                self.vy = self.vy / self.gravity
 
     def update(self):
         draw.rect(screen, (255, 0, 0), self.rect)
