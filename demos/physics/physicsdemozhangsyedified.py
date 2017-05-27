@@ -40,7 +40,7 @@ class Player:
         self.vx = 0
         self.vy = 0
 
-        self.vx_inc = 0
+        self.vx_inc = 0.15
         self.vy_inc = 0.5
 
         self.base_vy = -(cap // 10 + 2.25)
@@ -55,10 +55,15 @@ class Player:
         self.surrounding_blocks = []
 
     def control(self):
-        if key.get_pressed()[self.controls[0]]:
-            self.vx = -self.max_vx
-        if key.get_pressed()[self.controls[1]]:
-            self.vx = self.max_vx
+        # if key.get_pressed()[self.controls[0]] and self.vx > self.max_vx:
+        #     self.vx -= self.vx_inc
+        # elif self.vx < 0:
+        #     self.vx += self.vx_inc
+        if key.get_pressed()[self.controls[1]] and self.vx < self.max_vx:
+            self.vx += self.vx_inc
+        elif self.vx > 0:
+            self.vx -= self.vx_inc
+
         if key.get_pressed()[self.controls[2]] and self.standing:
             self.vy = self.base_vy
 
@@ -94,7 +99,10 @@ class Player:
                 self.actual_y = self.rect.y
                 self.vy = 0
 
-        self.actual_x += self.vx
+        if 0 > round(self.vx) > -1:
+            self.actual_x += self.vx - 1
+        else:
+            self.actual_x += self.vx
         self.rect.x = self.actual_x
 
         for block in blocks:
@@ -105,8 +113,9 @@ class Player:
                     self.rect.left = block.rect.right
 
                 self.actual_x = self.rect.x
+                self.vx = 0
 
-        self.vx = 0
+        # self.vx = self.max_vx if 0
         self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
 
     def respawn(self, pos):
@@ -116,14 +125,14 @@ class Player:
         draw.rect(screen, (255, 0, 0), self.rect)
 
 
-def make_world(row_num, col_num):
+def make_world(row_num, col_num, world_type):
     world_list = []
 
     for y in range(row_num):
         row_list = []
 
         for x in range(col_num):
-            if randrange(rows - len(world_list)):
+            if y not in range(row_num)[-world_type:] or randrange(rows - len(world_list)):
                 row_list.append(Air(b_width * x, b_height * y, b_width, b_height))
             else:
                 row_list.append(Block(b_width * x, b_height * y, b_width, b_height))
@@ -147,7 +156,7 @@ columns = 16 * complexity
 b_width = screenSize[0] // columns
 b_height = screenSize[1] // rows
 
-gameWorld = make_world(rows, columns)
+gameWorld = make_world(rows, columns, 2)
 
 player = Player(b_width, b_height, b_width, b_height, b_height, [K_a, K_d, K_w, K_s])
 
