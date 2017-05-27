@@ -17,7 +17,7 @@ import sys
 import traceback
 
 with open("data/config.rah", "r") as config:
-    config = config.read().split("\n")
+    config = config.read().strip().split("\n")
     host = config[0]
     port = int(config[1])
     world_name = config[2]

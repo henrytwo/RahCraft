@@ -6,20 +6,23 @@ import uuid
 import MySQLdb
 import time
 
-with open("data/config.rah", "r") as config:
-    config = config.read().split("\n")
-    host = config[0]
-    port = int(config[1])
-    world_name = config[2]
-    slack_enable = config[3]
-    channel = config[4]
+with open("data/config.rah", "r") as config_file:
+    config = config_file.read().strip().split('\n')
+    
+    channel = config[0]
+    slack_enable = config[1]
+
+with open("data/mysql.rah") as sql:
+    passwd = sql.read().strip()
 
 
 def import_users(que):
+    global passwd
+    
     while True:
         user = {}
 
-        db = MySQLdb.connect(host='localhost', user='root', passwd='', db='Rahmish')
+        db = MySQLdb.connect(host='localhost', user='root', passwd, db='Rahmish')
 
         cur = db.cursor()
 
