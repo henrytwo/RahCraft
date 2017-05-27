@@ -1,16 +1,8 @@
 from pygame import *
-from multiprocessing import *
 import pickle
 import socket
 import hashlib
 import traceback
-
-from subprocess import Popen, PIPE
-from shlex import split
-import platform
-
-import numpy as np
-
 
 import components.rahma as rah
 import components.menu as menu
