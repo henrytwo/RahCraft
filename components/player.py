@@ -1,12 +1,10 @@
 from pygame import *
+import numpy
 import components.rahma as rah
 
 font.init()
 
 normal_font = font.Font("fonts/minecraft.ttf", 14)
-
-surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 4)]
-
 
 class Player:
     def __init__(self, x, y, w, h, g_cap, reach, controls):
@@ -33,6 +31,8 @@ class Player:
 
         self.controls = controls
         self.standing = False
+
+        self.surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 4)]
 
     def control(self, fly):
         if key.get_pressed()[self.controls[0]]:
@@ -120,7 +120,20 @@ class Player:
         # else:
         #     self.vy -= 0
 
-    def update(self, surf, collision_blocks, x_offset, y_offset, fly, ui):
+    def detect(self, world, block_size, block_clip, block_properties):
+        surrounding_blocks = []
+
+        for x_shift, y_shift in self.surrounding_shifts:
+            block_id = world[(block_clip[0] - x_shift * block_size) // block_size, (
+                block_clip[1] - y_shift * block_size) // block_size]
+
+            if block_id == -1 or block_properties[block_id][6] == 'collide':
+                surrounding_blocks.append(Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size, block_size))
+
+        return surrounding_blocks
+
+    def update(self, surf, x_offset, y_offset, fly, ui, block_clip, world, block_size, block_properties):
+        collision_blocks = self.detect(world, block_size, block_clip, block_properties)
 
         if not ui:
             self.control(fly)
