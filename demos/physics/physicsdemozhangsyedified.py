@@ -48,6 +48,8 @@ class Player:
         self.max_vx = cap // 10
         self.max_vy = cap
 
+        self.friction = 0.95
+
         self.controls = controls
 
         self.standing = False
@@ -59,10 +61,12 @@ class Player:
         #     self.vx -= self.vx_inc
         # elif self.vx < 0:
         #     self.vx += self.vx_inc
-        if key.get_pressed()[self.controls[1]] and self.vx < self.max_vx:
+        if key.get_pressed()[self.controls[1]] and (self.vx < self.max_vx or self.vx < 0):
             self.vx += self.vx_inc
-        elif self.vx > 0:
+        elif key.get_pressed()[self.controls[0]] and (abs(self.vx) < self.max_vx or self.vx > 0):
             self.vx -= self.vx_inc
+        else:
+            self.vx *= self.friction
 
         if key.get_pressed()[self.controls[2]] and self.standing:
             self.vy = self.base_vy
