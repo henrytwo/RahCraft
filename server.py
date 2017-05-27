@@ -23,6 +23,7 @@ with open("data/config.rah", "r") as config:
     world_name = config[2]
     slack_enable = config[3]
     channel = config[4]
+    online = config[5]
 
 # If world doesn't exist
 if not os.path.isfile('saves/%s.pkl' % world_name):
@@ -187,6 +188,11 @@ def heart_beats(message_queue, tick):
                 tick = 1
 
 def authenticate(message):
+    global online
+
+    if not online:
+        return True
+
     user, token = message
 
     host, port = 'rahmish.com', 1111

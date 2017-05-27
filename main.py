@@ -154,6 +154,9 @@ def authenticate():
             else:
                 server.close()
 
+                username = ''
+                token = ''
+
                 with open('data/session.rah','w') as session_file:
                     session_file.write('')
 
