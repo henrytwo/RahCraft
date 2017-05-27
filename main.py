@@ -19,7 +19,7 @@ import Game as Game
 
 
 def login():
-    global username, password, host, port
+    global username, password, host, port, token
 
     def hash_creds(target):
         return hashlib.sha512(target.encode('utf-8')).hexdigest()
@@ -27,6 +27,16 @@ def login():
     clock = time.Clock()
 
     rah.wallpaper(screen, size)
+
+    with open('data/session.rah','r') as session_file:
+        session = session_file.read().strip().split()
+
+        if session:
+
+            token = session[0]
+            username = session[1]
+
+            return 'auth'
 
     login_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu',
                                'Login offline (Some features restricted)')
@@ -114,32 +124,39 @@ def authenticate():
     SERVERADDRESS = (host, port)
     socket.setdefaulttimeout(None)
 
-    credentials = [username, password]
-
     try:
         server.connect(SERVERADDRESS)
-        server.send(pickle.dumps([0, credentials]))
+
+        if token:
+            server.send(pickle.dumps([1, [username, token]]))
+        else:
+            credentials = [username, password]
+            server.send(pickle.dumps([0, credentials]))
 
         while True:
 
             first_message = pickle.loads(server.recv(4096))
 
-            if first_message == (400,):
+            if first_message[0] == 1:
 
-                rah.rahprint("Invalid credentials")
-                server.close()
-                return 'login'
+                if token:
+                    token = first_message[1][1]
+                    username = first_message[1][0]
 
-            elif first_message[0] == 1:
-                token = str(first_message[1])
-                rah.rahprint("Login successful " + token)
+                else:
+                    token = str(first_message[1])
+
+                with open('data/session.rah','w') as session_file:
+                    session_file.write('%s\n%s'%(token,username))
 
                 online = True
                 server.close()
                 return 'menu'
-    except:
-        # print(traceback.format_exc())
 
+            else:
+                server.close()
+                return 'login'
+    except:
         server.close()
         return "crash", traceback.format_exc(), "login"
 

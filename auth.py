@@ -7,7 +7,7 @@ import MySQLdb
 import time
 
 
-def import_users(que, thing):
+def import_users(que):
     while True:
         user = {}
 
@@ -33,13 +33,16 @@ tokens = {}
 
 
 def token(credentials):
+
+    global tokens
+
     username = credentials[0]
     tokens[username] = str(uuid.uuid4())
 
     return tokens[username]
 
 
-def login(credentials, user):
+def credential_login(credentials, user):
     print("[Login]", user, credentials)
 
     print("[Tokens]", tokens)
@@ -49,6 +52,13 @@ def login(credentials, user):
     else:
         return 400,
 
+def token_login(token, user, tokens):
+    print("[Login]", token)
+
+    if token[0] in user and token[0] in tokens and tokens[token[0]] == token[1]:
+        return 1, token
+    else:
+        return 400,
 
 def auth(credentials):
     if credentials[0] in tokens and tokens[credentials[0]] == credentials[1]:
@@ -66,10 +76,15 @@ def receive_info(conn, addr):
     command = message[0]
     if command == 0:
         # Login
-        reply = login(message[1], user)
+        reply = credential_login(message[1], user)
         conn.send(pickle.dumps(reply))
 
     elif command == 1:
+        # Login
+        reply = token_login(message[1], user, tokens)
+        conn.send(pickle.dumps(reply))
+
+    elif command == 2:
         # Auth request
         reply = auth(message[1])
         conn.send(pickle.dumps(reply))
@@ -99,7 +114,7 @@ if __name__ == '__main__':
 
     user_queue = Queue()
 
-    user_update = Process(target=import_users, args=(user_queue, thing))
+    user_update = Process(target=import_users, args=(user_queue,))
     user_update.start()
 
     local_update = Thread(target=local_user_update)
