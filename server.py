@@ -186,6 +186,36 @@ def heart_beats(message_queue, tick):
             if tick >= 24000:
                 tick = 1
 
+def authenticate(message):
+    user, token = message
+
+    host, port = 'rahmish.com', 1111
+
+    socket.setdefaulttimeout(10)
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    SERVERADDRESS = (host, port)
+    socket.setdefaulttimeout(None)
+
+    try:
+        server.connect(SERVERADDRESS)
+        server.send(pkl.dumps([2, [user, token]]))
+
+        while True:
+
+            first_message = pkl.loads(server.recv(4096))
+
+            if first_message[0] == 1:
+                server.close()
+                return True
+
+            else:
+                server.close()
+                return False
+    except:
+        server.close()
+        return False
+
+
 
 if __name__ == '__main__':
     players = {}
@@ -235,7 +265,7 @@ if __name__ == '__main__':
             # Player login and authentication
             # Data: [0,<username>, <token>]
 
-            if message[1] not in username:
+            if message[1] not in username and authenticate(message[1:3]):
 
                 if not playerNDisconnect:
                     PN = player_number
@@ -260,8 +290,7 @@ if __name__ == '__main__':
 
             else:
                 sendQueue.put(((400, (
-                "Connection closed by remote host\nUsername '%s' is currently in use\n\n" % players[i].username)),
-                               address))
+                "Connection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)")), address))
 
         elif command == 1:
             # Player movement

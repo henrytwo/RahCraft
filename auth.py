@@ -6,6 +6,14 @@ import uuid
 import MySQLdb
 import time
 
+with open("data/config.rah", "r") as config:
+    config = config.read().split("\n")
+    host = config[0]
+    port = int(config[1])
+    world_name = config[2]
+    slack_enable = config[3]
+    channel = config[4]
+
 
 def import_users(que):
     while True:
@@ -32,7 +40,7 @@ def import_users(que):
 tokens = {}
 
 
-def token(credentials):
+def gen_token(credentials):
 
     global tokens
 
@@ -45,10 +53,8 @@ def token(credentials):
 def credential_login(credentials, user):
     print("[Login]", user, credentials)
 
-    print("[Tokens]", tokens)
-
     if credentials[0] in user and user[credentials[0]] == credentials[1]:
-        return 1, token(credentials)
+        return 1, gen_token(credentials)
     else:
         return 400,
 
@@ -60,13 +66,12 @@ def token_login(token, user, tokens):
     else:
         return 400,
 
-def auth(credentials):
-    if credentials[0] in tokens and tokens[credentials[0]] == credentials[1]:
-        return 10, 1
+def auth(token, user, tokens):
 
+    if token[0] in user and token[0] in tokens and tokens[token[0]] == token[1]:
+        return 1,
     else:
-        return 10, 0
-
+        return 400,
 
 def receive_info(conn, addr):
     global active_user
@@ -86,7 +91,7 @@ def receive_info(conn, addr):
 
     elif command == 2:
         # Auth request
-        reply = auth(message[1])
+        reply = auth(message[1], user, tokens)
         conn.send(pickle.dumps(reply))
 
     del active_user[addr]
@@ -109,6 +114,9 @@ if __name__ == '__main__':
     server.listen(50)
 
     print("Auth Server binded to %s:%i" % (host, port))
+
+    if slack_enable:
+        from components.slack import *
 
     thing = None
 
