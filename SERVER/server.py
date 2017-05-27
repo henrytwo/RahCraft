@@ -413,9 +413,6 @@ if __name__ == '__main__':
                     for line in communist.read().split('\n'):
                         send_message = '[Comrade Lenin] ' + line
 
-                        if slack_enable:
-                            broadcast(channel, send_message)
-
                         for i in players:
                             sendQueue.put(((10, send_message), i))
 
@@ -453,11 +450,10 @@ if __name__ == '__main__':
             for i in players:
                 sendQueue.put(((10, send_message), i))
 
-                if slack_enable:
-                    broadcast(channel, send_message)
-                print(send_message)
+            if slack_enable:
+                broadcast(channel, send_message)
 
         elif command == 100:
             for p in players:
                 sendQueue.put((message, p))
-                print(message)
+            broadcast(channel, '[Tick] %s''%message[2])
