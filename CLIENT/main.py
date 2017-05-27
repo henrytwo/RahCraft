@@ -599,6 +599,11 @@ def menu_screen():
 
 
 if __name__ == "__main__":
+    size = (800, 500)
+    screen = display.set_mode(size, DOUBLEBUF)
+
+    rah.rah(screen)
+
     host = "127.0.0.1"
     port = 5276
 
@@ -614,11 +619,6 @@ if __name__ == "__main__":
     token = ''
 
     navigation = 'login'
-
-    size = (800, 500)
-    screen = display.set_mode(size, DOUBLEBUF)
-
-    rah.rah(screen)
 
     font.init()
 
