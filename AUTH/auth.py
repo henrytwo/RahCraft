@@ -13,16 +13,15 @@ with open("data/config.rah", "r") as config_file:
     slack_enable = config[1]
 
 with open("data/mysql.rah") as sql:
-    passwd = sql.read().strip()
-
+    sqlpasswd = sql.read().strip()
 
 def import_users(que):
-    global passwd
+    global sqlpasswd
     
     while True:
         user = {}
 
-        db = MySQLdb.connect(host='localhost', user='root', passwd, db='Rahmish')
+        db = MySQLdb.connect(host='localhost', user='root', passwd=sqlpasswd, db='Rahmish')
 
         cur = db.cursor()
 
@@ -34,6 +33,9 @@ def import_users(que):
         db.close()
 
         print("[Update]", user)
+
+        if slack_enable:
+            broadcast(channel, "[Update] %s"%user)
 
         que.put(user)
 
@@ -56,6 +58,9 @@ def gen_token(credentials):
 def credential_login(credentials, user):
     print("[Login]", user, credentials)
 
+    if slack_enable:
+        broadcast(channel, "[Login] %s"%credentials)
+
     if credentials[0] in user and user[credentials[0]] == credentials[1]:
         return 1, gen_token(credentials)
     else:
@@ -63,6 +68,9 @@ def credential_login(credentials, user):
 
 def token_login(token, user, tokens):
     print("[Login]", token)
+
+    if slack_enable:
+        broadcast(channel, "[Login] %s"%token)
 
     if token[0] in user and token[0] in tokens and tokens[token[0]] == token[1]:
         return 1, token
@@ -120,6 +128,7 @@ if __name__ == '__main__':
 
     if slack_enable:
         from components.slack import *
+        config_slack()
 
     thing = None
 

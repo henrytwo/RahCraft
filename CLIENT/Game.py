@@ -80,6 +80,7 @@ def game(surf, username, token, host, port, size, music_enable):
         time.wait(50)
         sender.terminate()
         receiver.terminate()
+        commandline.terminate()
 
     def get_neighbours(x, y):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
@@ -178,6 +179,7 @@ def game(surf, username, token, host, port, size, music_enable):
         if first_message[0] == 400:
             sender.terminate()
             receiver.terminate()
+            commandline.terminate()
             return "crash", first_message[1], 'login'
         elif first_message[0] == 0:
             break
