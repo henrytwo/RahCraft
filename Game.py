@@ -99,7 +99,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 elif block < 0:
                     draw.rect(surf, (0, 0, 0), (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
-    def render_hotbar():
+    def render_hotbar(hotbar_slot):
         surf.blit(hotbar, hotbarRect)
         for item in range(9):
             if Rect(hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6, 32, 32).collidepoint(mx, my) and mb[0]:
@@ -603,7 +603,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             # ====================Inventory/hotbar========================
 
-            render_hotbar()
+            render_hotbar(hotbar_slot)
 
             #===================Pausing====================================
             if paused:
