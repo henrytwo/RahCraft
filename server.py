@@ -22,7 +22,7 @@ with open("data/config.rah", "r") as config:
     port = int(config[1])
     world_name = config[2]
     slack_enable = config[3]
-    channel = config[3]
+    channel = config[4]
 
 # If world doesn't exist
 if not os.path.isfile('saves/%s.pkl' % world_name):
