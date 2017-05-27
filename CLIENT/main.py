@@ -97,7 +97,7 @@ def login():
         if nav_update and username:
             return nav_update
 
-        username, password = fields['user'][1], hash_creds(fields['pass'][1] + fields['user'][1])
+        username, password = fields['user'][1], hash_creds(fields['pass'][1] + hash_creds(fields['user'][1]))
 
         clock.tick(120)
         display.update()
