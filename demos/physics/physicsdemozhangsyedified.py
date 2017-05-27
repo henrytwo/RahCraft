@@ -31,15 +31,22 @@ class Block:
 
 
 class Player:
-    def __init__(self, x, y, w, h, controls):
+    def __init__(self, x, y, w, h, cap, controls):
         self.rect = Rect(x, y, w, h)
+
+        self.actual_x = x
+        self.actual_y = y
 
         self.vx = 0
         self.vy = 0
 
-        self.run_speed = int(self.rect.w * 0.3)
-        self.jump_height = -(self.rect.h // 2)
-        self.gravity = self.rect.h * 2 / 45
+        self.vx_inc = 0
+        self.vy_inc = 0.5
+
+        self.base_vy = -(cap // 10 + 2.25)
+
+        self.max_vx = cap // 10
+        self.max_vy = cap
 
         self.controls = controls
 
@@ -49,11 +56,11 @@ class Player:
 
     def control(self):
         if key.get_pressed()[self.controls[0]]:
-            self.vx = -self.run_speed
+            self.vx = -self.max_vx
         if key.get_pressed()[self.controls[1]]:
-            self.vx = self.run_speed
+            self.vx = self.max_vx
         if key.get_pressed()[self.controls[2]] and self.standing:
-            self.vy = self.jump_height
+            self.vy = self.base_vy
 
         self.standing = False
 
@@ -73,7 +80,8 @@ class Player:
         self.collide(self.surrounding_blocks)
 
     def collide(self, blocks):
-        self.rect.y += int(self.vy)
+        self.actual_y += self.vy
+        self.rect.y = self.actual_y
 
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):
@@ -83,9 +91,11 @@ class Player:
                 elif self.vy < 0:
                     self.rect.top = block.rect.bottom
 
+                self.actual_y = self.rect.y
                 self.vy = 0
 
-        self.rect.centerx = (self.rect.centerx + self.vx) % screenSize[0]
+        self.actual_x += self.vx
+        self.rect.x = self.actual_x
 
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):
@@ -94,8 +104,13 @@ class Player:
                 elif self.vx < 0:
                     self.rect.left = block.rect.right
 
+                self.actual_x = self.rect.x
+
         self.vx = 0
-        self.vy += self.gravity if self.vy + self.gravity < self.rect.h else 0
+        self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
+
+    def respawn(self, pos):
+        self.actual_x, self.actual_y = pos
 
     def update(self):
         draw.rect(screen, (255, 0, 0), self.rect)
@@ -134,7 +149,7 @@ b_height = screenSize[1] // rows
 
 gameWorld = make_world(rows, columns)
 
-player = Player(b_width, b_height, b_width, b_height, [K_a, K_d, K_w, K_s])
+player = Player(b_width, b_height, b_width, b_height, b_height, [K_a, K_d, K_w, K_s])
 
 surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
                       (-1, 0), (0, 0), (1, 0),
@@ -147,6 +162,9 @@ while True:
             break
 
     else:
+        keys = key.get_pressed()
+        mouse_pos = mouse.get_pos()
+
         for r in range(rows):
             for c in range(columns):
                 gameWorld[r, c].update()
@@ -154,6 +172,9 @@ while True:
         player.control()
         player.detect()
         player.update()
+
+        if keys[K_e]:
+            player.respawn(mouse_pos)
 
         clock.tick(60)
 
