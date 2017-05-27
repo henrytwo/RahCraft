@@ -15,6 +15,7 @@ import numpy as np
 import components.rahma as rah
 import components.menu as menu
 import Game as Game
+import webbrowser
 
 
 
@@ -28,6 +29,10 @@ def login():
 
     rah.wallpaper(screen, size)
 
+
+    title_text = rah.text('Welcome to Rahcraft! Login to continue', 20)
+    screen.blit(title_text, (size[0]//2 - title_text.get_width()//2, size[1] // 4 - title_text.get_height() - 30))
+
     with open('data/session.rah','r') as session_file:
         session = session_file.read().strip().split()
 
@@ -38,17 +43,15 @@ def login():
 
             return 'auth'
 
-    login_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu',
-                               'Login offline (Some features restricted)')
-
-    auth_button = menu.Button(size[0] // 4, 320, size[0] // 2, 40, 'auth', 'AUTHENTICATE WITH SERVER')
-
     username, password = '', ''
 
     field_selected = 'user'
 
-    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Username'), username],
-              'pass': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0] // 2, 40, 'Password'), password]}
+    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 2 - 100, size[0] // 2, 40, 'Username'), username],
+              'pass': [menu.TextBox(size[0] // 4, size[1] // 2 - 30, size[0] // 2, 40, 'Password'), password]}
+
+    auth_button = menu.Button(size[0] // 4, size[1]//2 + 50, size[0] // 2, 40, 'auth', 'Login')
+    signup_button = menu.Button(size[0] // 4, size[1]//2 + 100, size[0] // 2, 40, 'signup', 'Need an account? Signup here')
 
     while True:
 
@@ -71,8 +74,12 @@ def login():
                 release = True
 
             if e.type == KEYDOWN:
-                if e.key == K_RETURN and username and password:
-                    return 'auth'
+                if key.get_mods() & KMOD_CTRL and key.get_mods() & KMOD_SHIFT:
+                    if e.key == K_RETURN and username:
+                        return 'menu'
+
+                elif e.key == K_RETURN and username and password:
+                            return 'auth'
 
                 if e.key == K_TAB:
                     if field_selected == 'user':
@@ -91,9 +98,8 @@ def login():
             if fields[field][0].rect.collidepoint(mx, my) and click:
                 field_selected = field
 
-        nav_update = login_button.update(screen, mx, my, m_press, 15, release)
-        if nav_update and username:
-            return nav_update
+        if signup_button.update(screen, mx, my, m_press, 15, release):
+            webbrowser.open('http://rahmish.com/management.php')
 
         nav_update = auth_button.update(screen, mx, my, m_press, 15, release)
         if nav_update and username:
@@ -163,7 +169,11 @@ def authenticate():
                 return 'login'
     except:
         server.close()
-        return "crash", traceback.format_exc(), "login"
+
+        with open('data/session.rah', 'w') as session_file:
+            session_file.write('')
+
+        return "crash", 'Unable to connect to authentication servers\nTry again later\n', "login"
 
 
 def about():
@@ -536,7 +546,8 @@ def menu_screen():
                  [1, 'options', "Options"],
                  [2, 'about', "About"],
                  [2, 'assistance', "Help"],
-                 [3, 'exit', "Exit"]]
+                 [3, 'exit', "Exit"],
+                 [4, 'logout', "Logout"]]
 
     main_menu = menu.Menu(menu_list, 0, 0, size[0], size[1])
 
@@ -580,7 +591,17 @@ def menu_screen():
         nav_update = main_menu.update(screen, release, mx, my, m_press)
 
         if nav_update:
-            return nav_update
+            if nav_update == 'logout':
+                username = ''
+                token = ''
+
+                with open('data/session.rah', 'w') as session_file:
+                    session_file.write('')
+
+                return 'login'
+
+            else:
+                return nav_update
 
         display.update()
 

@@ -21,9 +21,9 @@ with open("data/config.rah", "r") as config:
     host = config[0]
     port = int(config[1])
     world_name = config[2]
-    slack_enable = config[3]
+    slack_enable = int(config[3])
     channel = config[4]
-    online = config[5]
+    online = int(config[5])
 
 # If world doesn't exist
 if not os.path.isfile('saves/%s.pkl' % world_name):
@@ -240,6 +240,7 @@ if __name__ == '__main__':
 
     if slack_enable:
         from components.slack import *
+        config_slack()
 
     world = World(world_name)
 
@@ -296,7 +297,7 @@ if __name__ == '__main__':
 
             else:
                 sendQueue.put(((400, (
-                "Connection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)")), address))
+                "\n\nConnection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)\n\n")), address))
 
         elif command == 1:
             # Player movement
