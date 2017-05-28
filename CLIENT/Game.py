@@ -152,6 +152,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Loading Screen
     # =====================================================================
+    display.set_caption("RahCraft")
+
     wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
     surf.blit(wallpaper, (0, 0))
 
@@ -664,7 +666,7 @@ def game(surf, username, token, host, port, size, music_enable):
             if not paused:
                 if key.get_pressed()[K_TAB]:
 
-                    players = ['Rahcraft',
+                    players = ['RahCraft',
                                '---------',
                                username] + [player for player in remote_players]
 
@@ -691,7 +693,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 chat_content = chat.update(pass_event)
                 chat.draw(surf)
 
-            display.set_caption("Rahcraft Beta v0.01 // FPS - {0} // X - {1} Y - {2} // Block Size - {3} // Hotbar Slot - {4} // Block Selected - {5} // Mouse Pos - {6}, {7}".format(*caption_data))
+            #display.set_caption("RahCraft Beta v0.01 // FPS - {0} // X - {1} Y - {2} // Block Size - {3} // Hotbar Slot - {4} // Block Selected - {5} // Mouse Pos - {6}, {7}".format(*caption_data))
             display.update()
             clock.tick(120)
 

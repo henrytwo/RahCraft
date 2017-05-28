@@ -11,6 +11,8 @@ import webbrowser
 
 
 def login():
+    display.set_caption("RahCraft Authentication Service")
+    
     global username, password, host, port, token
 
     def hash_creds(target):
@@ -20,7 +22,7 @@ def login():
 
     rah.wallpaper(screen, size)
 
-    title_text = rah.text('Welcome to Rahcraft! Login to continue', 20)
+    title_text = rah.text('Welcome to RahCraft! Login to continue', 20)
     screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 30))
 
     with open('data/session.rah', 'r') as session_file:
@@ -232,7 +234,7 @@ def crash(error, previous):
     about_list = ['',
                   '',
                   ':( Whoops, something went wrong',
-                  '', ] + error_message + ['Rahcraft (C) Rahmish Empire, All Rahs Reserved',
+                  '', ] + error_message + ['RahCraft (C) Rahmish Empire, All Rahs Reserved',
                                            '',
                                            'Note: If clicking the button below doesnt',
                                            'do anything, the game is beyond broken',
@@ -529,6 +531,8 @@ def server_adder():
 
 
 def menu_screen():
+    display.set_caption("RahCraft")
+    
     global username, online, token
 
     clock = time.Clock()
@@ -549,7 +553,7 @@ def menu_screen():
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    version_text = normal_font.render("Rahcraft 0.0.1 Beta", True, (255, 255, 255))
+    version_text = normal_font.render("RahCraft 0.0.1 Beta", True, (255, 255, 255))
     screen.blit(version_text, (10, size[1] - 20))
 
     about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
@@ -600,6 +604,9 @@ def menu_screen():
 if __name__ == "__main__":
     size = (800, 500)
     screen = display.set_mode(size, DOUBLEBUF)
+
+    display.set_caption("RahCraft")
+    display.set_icon(transform.scale(image.load('textures/gui/icon.png'),(32,32)))
 
     rah.rah(screen)
 
