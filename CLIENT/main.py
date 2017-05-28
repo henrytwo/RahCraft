@@ -91,7 +91,7 @@ def login():
                 field_selected = field
 
         if signup_button.update(screen, mx, my, m_press, 15, release):
-            webbrowser.open('http://rahmish.com/management.php')
+            webbrowser.open('http://rahmish.com/join.php')
 
         nav_update = auth_button.update(screen, mx, my, m_press, 15, release)
         if nav_update and username:
