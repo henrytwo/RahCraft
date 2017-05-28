@@ -83,8 +83,11 @@ class Player:
                 elif e.key == self.controls[1] and not self.moving_left:
                     self.moving_right = True
                     print('start right')
-                elif e.key == self.controls[2] and self.standing:
-                    self.vy += self.base_vy
+                elif e.key in [self.controls[2], self.controls[4]]:
+                    print('attempting jump')
+                    if self.standing:
+                        self.vy += self.base_vy
+                        print('jump')
 
             elif e.type == KEYUP:
                 if e.key == self.controls[0]:
@@ -101,7 +104,7 @@ class Player:
         else:
             self.vx *= self.friction
 
-        self.standing = False
+        # self.standing = False
 
     def detect(self):
         self.surrounding_blocks = []
@@ -122,16 +125,18 @@ class Player:
         self.actual_y += self.vy
         self.rect.y = self.actual_y
 
+        self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
+
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):
                 if self.vy > 0:
                     self.rect.bottom = block.rect.top
-                    self.standing = True
+                    self.standing = False
                 elif self.vy < 0:
                     self.rect.top = block.rect.bottom
 
-                self.actual_y = self.rect.y
                 self.vy = 0
+                self.actual_y = self.rect.y
 
         if 0 > round(self.vx) > -1:
             self.actual_x += self.vx - 1
@@ -148,9 +153,6 @@ class Player:
 
                 self.actual_x = self.rect.x
                 self.vx = 0
-
-        # self.vx = self.max_vx if 0
-        self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
 
     def respawn(self, pos):
         self.actual_x, self.actual_y = pos
@@ -192,7 +194,7 @@ b_height = screenSize[1] // rows
 
 gameWorld = make_world(rows, columns, 1)
 
-player = Player(b_width, b_height, b_width, b_height, b_height, [K_a, K_d, K_w, K_s])
+player = Player(b_width, b_height, b_width, b_height, b_height, [K_a, K_d, K_w, K_s, K_SPACE])
 
 surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
                       (-1, 0), (0, 0), (1, 0),
@@ -204,14 +206,16 @@ uselessEventList = [MOUSEMOTION, MOUSEBUTTONUP, MOUSEBUTTONDOWN,
                     JOYAXISMOTION, JOYBALLMOTION, JOYHATMOTION, JOYBUTTONUP, JOYBUTTONDOWN,
                     VIDEORESIZE, VIDEOEXPOSE]
 
+event.set_blocked(uselessEventList)
+
 while True:
-    event.clear(uselessEventList)
+    # event.clear(uselessEventList)
     for e in event.get(screenEventList):
         if e.type == QUIT:
             break
 
     else:
-        keys = key.get_pressed()
+        mouse_state = mouse.get_pressed()
         mouse_pos = mouse.get_pos()
 
         for r in range(rows):
@@ -222,7 +226,7 @@ while True:
         player.detect()
         player.update()
 
-        if keys[K_e]:
+        if mouse_state[0]:
             player.respawn(mouse_pos)
 
         clock.tick(60)
