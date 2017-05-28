@@ -185,6 +185,7 @@ def game(surf, username, token, host, port, size, music_enable):
             break
 
     world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory_items, r_players = first_message[1:]
+    print(hotbar_items)
 
     block_size = 20
 
