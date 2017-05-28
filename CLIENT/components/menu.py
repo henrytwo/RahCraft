@@ -404,28 +404,21 @@ class Crafting:
 
             # self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
 
-            def check_stacking(self, item):
-                if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
-                    previous_holding = self.holding[:]
-                    self.holding = item[:]
-                    return previous_holding
-                else:
-                    calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
-                    amount_holding = self.holding[1]
+    def check_stacking(self, item, item_lib):
+        if self.holding[0] != item[0] or item[1] == item_lib[item[0]][-1]:
+            previous_holding = self.holding[:]
+            self.holding = item[:]
+            return previous_holding
+        else:
+            calculate_stack = item_lib[item[0]][-1] - self.holding[1] - item[1]
+            amount_holding = self.holding[1]
 
-                print(self.current_recipe)
-
-                if calculate_stack >= 0:
-                    self.holding = [0, 0]
-                    return [item[0], item[1] + amount_holding]
-
-                for x in range(len(self.current_recipe)):
-                    for y in range(3):
-                        if self.current_recipe[x][y][0] != 0:
-                            if self.current_recipe[x][y][1] == 1:
-                                self.current_recipe[x][y] = [0, 0]
-                            else:
-                                self.current_recipe[x][y][1] -= 1
+            if calculate_stack >= 0:
+                self.holding = [0, 0]
+                return [item[0], item[1] + amount_holding]
+            else:
+                self.holding = [item[0], abs(calculate_stack)]
+                return [item[0], item_lib[item[0]][-1]]
 
     def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, item_lib):
         surf.blit(self.graphic, (self.x, self.y))
@@ -443,9 +436,7 @@ class Crafting:
                     surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     if l_click:
-                        tempstorage = self.holding[:]
-                        self.holding = inventory[row][item][:]
-                        inventory[row][item] = tempstorage[:]
+                        inventory[row][item] = self.check_stacking(inventory[row][item][:], item_lib)
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
@@ -457,9 +448,7 @@ class Crafting:
                 surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 if l_click:
-                    tempstorage = self.holding[:]
-                    self.holding = hotbar[item][:]
-                    hotbar[item] = tempstorage[:]
+                    hotbar[item] = self.check_stacking(hotbar[item], item_lib)
 
         for row in range(len(self.crafting_grid)):
             for item in range(3):
@@ -474,9 +463,7 @@ class Crafting:
                     surf.blit(self.highlight, (self.x + item * 36 + 60, self.y + 36 * row + 34, 32, 32))
 
                     if l_click:
-                        tempstorage = self.holding[:]
-                        self.holding = self.crafting_grid[row][item][:]
-                        self.crafting_grid[row][item] = tempstorage[:]
+                        self.crafting_grid[row][item] = self.check_stacking(self.crafting_grid[row][item][:], item_lib)
 
         self.recipe_check()
 
@@ -487,7 +474,7 @@ class Crafting:
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
 
-            if l_click and self.holding == [0, 0]:
+            if l_click and self.holding[0] == 0:
                 self.holding = self.resulting_item
                 self.resulting_item = [0, 0]
 

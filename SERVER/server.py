@@ -3,6 +3,7 @@ from collections import deque
 import socket
 import pickle as pkl
 from multiprocessing import *
+from copy import deepcopy
 
 from subprocess import Popen, PIPE
 from shlex import split
@@ -55,7 +56,7 @@ class Player(object):
             return PlayerData[self.username]
         except KeyError:
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
-                                         [[[randint(0, 15), randint(0, 64)] for _ in range(9)] for __ in range(3)],
+                                         [[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)],
                                          [[randint(100, 102), 1] for _ in range(9)],
                                          10, 10]
 
@@ -76,6 +77,10 @@ class Player(object):
 
         if self.inventory[slot][1] == 0:
             self.inventory[slot][0] = 0
+
+    def change_inventory_all(self, cinventory, chotbar):
+        self.inventory = deepcopy(cinventory)
+        self.hotbar = deepcopy(chotbar)
 
     def take_damage(self, damage):
         self.health -= damage
@@ -222,7 +227,6 @@ def authenticate(message):
         return False
 
 
-
 if __name__ == '__main__':
     players = {}
     player_number = 1
@@ -353,8 +357,8 @@ if __name__ == '__main__':
             for i in players:
                 sendQueue.put(((4, message[1], message[2], message[3]), i))
 
-                # elif command == 5:
-                # player[address][0].change_inventory()
+        elif command == 5:
+            players[address].change_inventory_all(message[1], message[2])
 
         elif command == 9:
 

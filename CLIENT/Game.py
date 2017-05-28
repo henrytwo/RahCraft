@@ -201,14 +201,12 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Loading Textures
     # =====================================================================
-    block_properties = load_blocks("block.json")
+    block_properties = load_blocks("block.rah")
     tool_properties = load_tools("tools.rah")
 
     item_lib = create_item_dictionary([block_properties, 7, -1], [tool_properties, 1, -1])
     print(item_lib)
-    breaking_animation = [
-        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
-        in range(10)]
+    breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i in range(10)]
 
     tint = Surface(size)
     tint.fill((0, 0, 0))
@@ -239,8 +237,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
-    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
-                                 (K_a, K_d, K_w, K_s, K_SPACE))
+    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5, (K_a, K_d, K_w, K_s, K_SPACE))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -260,8 +257,7 @@ def game(surf, username, token, host, port, size, music_enable):
     # Init Existing Remote Players
     # =====================================================================
     for Rp in r_players:
-        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
-                                                 2 * block_size - 5)
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5, 2 * block_size - 5)
 
     # Initing Pygame Components
     # =====================================================================
@@ -458,8 +454,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
-            block_clip = (
-            local_player.rect.centerx // block_size * block_size, local_player.rect.centery // block_size * block_size)
+            block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
             if on_tick:
@@ -488,13 +483,11 @@ def game(surf, username, token, host, port, size, music_enable):
                             current_x = int(current_x) * 20
                             current_y = int(current_y) * 20
 
-                        remote_players[remote_username] = player.RemotePlayer(remote_username, current_x, current_y,
-                                                                              block_size - 5, 2 * block_size - 5)
+                        remote_players[remote_username] = player.RemotePlayer(remote_username, current_x, current_y, block_size - 5, 2 * block_size - 5)
 
                 elif command == 2:
                     chunk_position_x, chunk_position_y, world_chunk = message
-                    world[chunk_position_x - 5:chunk_position_x + 45,
-                    chunk_position_y - 5:chunk_position_y + 31] = np.array(world_chunk, copy=True)
+                    world[chunk_position_x - 5:chunk_position_x + 45, chunk_position_y - 5:chunk_position_y + 31] = np.array(world_chunk, copy=True)
 
                     if (chunk_position_x, chunk_position_y) in render_request:
                         render_request.remove((chunk_position_x, chunk_position_y))
@@ -563,8 +556,7 @@ def game(surf, username, token, host, port, size, music_enable):
             # =======================================================
             render_world()
 
-            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
-                                block_properties)
+            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties)
 
             under_block = (offset_clip.x, y_offset // block_size + 1)
 
@@ -577,9 +569,7 @@ def game(surf, username, token, host, port, size, music_enable):
             mb = mouse.get_pressed()
             mx, my = mouse.get_pos()
 
-            caption_data = (round(clock.get_fps(), 2), offset_clip.x, y_offset // block_size, block_size, hotbar_slot,
-                            block_properties[hotbar_slot][0], (mx + x_offset) // block_size,
-                            (my + y_offset) // block_size)
+            caption_data = (round(clock.get_fps(), 2), offset_clip.x, y_offset // block_size, block_size, hotbar_slot, block_properties[hotbar_slot][0], (mx + x_offset) // block_size, (my + y_offset) // block_size)
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
 
@@ -589,9 +579,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     breaking_block = False
 
                 elif mb[0] == 1:
-                    if not breaking_block and world[hover_x, hover_y] != 0 and (
-                    hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
-                                                                     hover_y - block_clip_cord[1]) <= reach:
+                    if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                         breaking_block = True
                         current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
                         if current_breaking[3] >= block_properties[current_breaking[0]][4]:
@@ -630,8 +618,7 @@ def game(surf, username, token, host, port, size, music_enable):
                         crafting = not crafting
                         current_gui = 'C'
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
-                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and \
-                                    hotbar_items[hotbar_slot][0] in block_properties:
+                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
@@ -683,8 +670,7 @@ def game(surf, username, token, host, port, size, music_enable):
             elif crafting:
                 surf.blit(tint, (0, 0))
 
-                crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties,
-                                       tool_properties)
+                crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, item_lib)
 
             if not paused:
                 if key.get_pressed()[K_TAB]:
