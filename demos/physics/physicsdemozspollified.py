@@ -193,7 +193,9 @@ columns = 16 * complexity
 b_width = screenSize[0] // columns
 b_height = screenSize[1] // rows
 
-gameWorld = make_world(rows, columns, 1)
+levels = abs(int(input('Levels in world? (use a positive integer, 0 for full world)\n')))
+
+gameWorld = make_world(rows, columns, levels)
 
 player = Player(b_width, b_height, b_width, b_height, b_height, [K_a, K_d, K_w, K_s, K_SPACE])
 
