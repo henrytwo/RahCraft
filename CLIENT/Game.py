@@ -357,12 +357,12 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif e.type == KEYDOWN:
                     if e.key == K_SLASH:
+                        if current_gui == 'CH':
+                            current_gui = ''
 
                         chat_enable = not chat_enable
                         current_gui = 'CH'
 
-                        if current_gui == 'CH':
-                            current_gui = ''
 
                     if chat_enable and e.key == K_RETURN:
                         chat_queue.put(chat_content)
