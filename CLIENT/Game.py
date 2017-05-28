@@ -201,7 +201,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Loading Textures
     # =====================================================================
-    block_properties = load_blocks("block.jsonhenr")
+    block_properties = load_blocks("block.json")
     tool_properties = load_tools("tools.rah")
 
     item_lib = create_item_dictionary([block_properties, 7, -1], [tool_properties, 1, -1])
@@ -368,6 +368,7 @@ def game(surf, username, token, host, port, size, music_enable):
             r_click = False
             l_click = False
             pass_event = None
+            inventory_updated = False
 
             for e in event.get():
                 pass_event = e
@@ -412,9 +413,11 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     if e.key == K_ESCAPE:
                         if current_gui == 'C':
+                            inventory_updated = True
                             crafting = False
                             current_gui = ''
                         elif current_gui == 'I':
+                            inventory_updated = True
                             inventory_visible = False
                             current_gui = ''
                         elif current_gui == 'CH':
@@ -435,6 +438,9 @@ def game(surf, username, token, host, port, size, music_enable):
                             fly = not fly
 
                         if e.key == K_e and current_gui == '' or current_gui == 'I':
+                            if current_gui == 'I':
+                                inventory_updated = True
+
                             inventory_visible = not inventory_visible
 
                             if inventory_visible:
@@ -457,6 +463,8 @@ def game(surf, username, token, host, port, size, music_enable):
             block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
+            if inventory_updated:
+                send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
             if on_tick:
                 send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
 
