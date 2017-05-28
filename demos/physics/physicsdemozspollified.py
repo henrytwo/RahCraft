@@ -104,7 +104,7 @@ class Player:
         else:
             self.vx *= self.friction
 
-        # self.standing = False
+        self.standing = False
 
     def detect(self):
         self.surrounding_blocks = []
@@ -125,18 +125,16 @@ class Player:
         self.actual_y += self.vy
         self.rect.y = self.actual_y
 
-        self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
-
         for block in blocks:
             if type(block) is Block and self.rect.colliderect(block.rect):
                 if self.vy > 0:
                     self.rect.bottom = block.rect.top
-                    self.standing = False
+                    self.standing = True
                 elif self.vy < 0:
                     self.rect.top = block.rect.bottom
 
-                self.vy = 0
                 self.actual_y = self.rect.y
+                self.vy = 0
 
         if 0 > round(self.vx) > -1:
             self.actual_x += self.vx - 1
@@ -154,6 +152,9 @@ class Player:
                 self.actual_x = self.rect.x
                 self.vx = 0
 
+        # self.vx = self.max_vx if 0
+        self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
+
     def respawn(self, pos):
         self.actual_x, self.actual_y = pos
 
@@ -161,14 +162,14 @@ class Player:
         draw.rect(screen, (255, 0, 0), self.rect)
 
 
-def make_world(row_num, col_num, world_type):
+def make_world(row_num, col_num, levels):
     world_list = []
 
     for y in range(row_num):
         row_list = []
 
         for x in range(col_num):
-            if y not in range(row_num)[-world_type:] or randrange(rows - len(world_list)):
+            if y not in range(row_num)[-levels:] or randrange(rows - len(world_list)):
                 row_list.append(Air(b_width * x, b_height * y, b_width, b_height))
             else:
                 row_list.append(Block(b_width * x, b_height * y, b_width, b_height))
@@ -215,7 +216,7 @@ while True:
             break
 
     else:
-        mouse_state = mouse.get_pressed()
+        keys = key.get_pressed()
         mouse_pos = mouse.get_pos()
 
         for r in range(rows):
@@ -226,7 +227,7 @@ while True:
         player.detect()
         player.update()
 
-        if mouse_state[0]:
+        if keys[K_e]:
             player.respawn(mouse_pos)
 
         clock.tick(60)
