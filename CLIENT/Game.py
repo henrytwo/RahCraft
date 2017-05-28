@@ -42,17 +42,21 @@ def load_blocks(block_file):
     block_file = open("data/" + block_file).readlines()
 
     for line_number in range(len(block_file)):
-        block_type, inner_block, outline, block_image, hardness, soundpack, collision, block_type = block_file[line_number].strip(
+        block_type, inner_block, outline, block_image, hardness, soundpack, collision, block_type, max_stack = block_file[line_number].strip(
             "\n").split(" // ")
-        blocks[line_number] = [block_type, (int(x) for x in inner_block.split(",")),
+        blocks[line_number] = [block_type,
+                               (int(x) for x in inner_block.split(",")),
                                (int(x) for x in outline.split(",")),
                                transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (20, 20)),
                                int(hardness),
-                               soundpack, collision,
+                               soundpack,
+                               collision,
                                transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (32, 32)),
-                               block_type]
+                               block_type,
+                               int(max_stack)]
 
     return blocks
+
 
 def load_tools(tool_file):
     tools = {}
@@ -61,11 +65,22 @@ def load_tools(tool_file):
 
     for tool in open("data/" + tool_file):
         tool_name, tool_image, type_bonus, breaking_speed, breaking_type = tool.strip("\n").split(" // ")
-        tools[tool_number + 100] = [tool_name, image.load("textures/items/"+tool_image), int(type_bonus), int(breaking_speed), breaking_type]#9
+        tools[tool_number + 100] = [tool_name, image.load("textures/items/" + tool_image), int(type_bonus), int(breaking_speed), breaking_type, 1]  # 9
 
         tool_number += 1
 
     return tools
+
+
+def create_item_dictionary(*libraries):
+    item_lib = {}
+
+    for di, image_index, stack_index in libraries:
+        for item in di:
+            item_lib[item] = [di[item][0], di[item][image_index], di[item][stack_index]]
+
+    return item_lib
+
 
 def commandline_in(commandline_queue, fn, address, chat_queue):
     rah.rahprint('Ready for input.')
@@ -73,6 +88,7 @@ def commandline_in(commandline_queue, fn, address, chat_queue):
 
     while True:
         commandline_queue.put(((10, chat_queue.get()), address))
+
 
 def game(surf, username, token, host, port, size, music_enable):
     def quit_game():
@@ -107,21 +123,13 @@ def game(surf, username, token, host, port, size, music_enable):
                 hotbar_slot = item
 
             if hotbar_items[item][1] != 0:
-                if hotbar_items[item][0] < 100:
-                    surf.blit(transform.scale(block_properties[hotbar_items[item][0]][3], (32, 32)),
-                              (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
-                    surf.blit(rah.text(str(hotbar_items[item][1]), 10),
-                              (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
-                elif hotbar_items[item][0] < 200:
-                    surf.blit(transform.scale(tool_properties[hotbar_items[item][0]][1], (32, 32)),
-                              (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
+                surf.blit(item_lib[hotbar_items[item][0]][1], (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
+                if hotbar_items[item][1] > 1:
+                    surf.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbarRect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
         surf.blit(selected, (hotbarRect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))
 
-        if hotbar_items[hotbar_slot][0] < 100:
-            block_name = rah.text(str(block_properties[hotbar_items[hotbar_slot][0]][0]), 13)
-        elif hotbar_items[hotbar_slot][0] < 200:
-            block_name = rah.text(str(tool_properties[hotbar_items[hotbar_slot][0]][0]), 13)
+        block_name = rah.text(str(item_lib[hotbar_items[hotbar_slot][0]][0]), 13)
         surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 60))
 
     # Loading Screen
@@ -166,6 +174,9 @@ def game(surf, username, token, host, port, size, music_enable):
     # =====================================================================
     block_properties = load_blocks("block.rah")
     tool_properties = load_tools("tools.rah")
+
+    item_lib = create_item_dictionary([block_properties, 7, -1], [tool_properties, 1, -1])
+    print(item_lib)
     breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i in range(10)]
 
     tint = Surface(size)
@@ -280,13 +291,13 @@ def game(surf, username, token, host, port, size, music_enable):
     # =====================================================================
     sound_types = [stype[6:-1] for stype in glob.glob('sound/*/')]
 
-    sound = {sound_type:{} for sound_type in sound_types}
+    sound = {sound_type: {} for sound_type in sound_types}
 
     for stype in sound_types:
 
         sound_list = glob.glob('sound/%s/*.ogg' % stype)
 
-        sound_blocks = [sound.replace('\\','/').split("/")[-1][:-5] for sound in sound_list]
+        sound_blocks = [sound.replace('\\', '/').split("/")[-1][:-5] for sound in sound_list]
 
         for block in sound_blocks:
             local_sounds = []
@@ -363,7 +374,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
                         chat_enable = not chat_enable
                         current_gui = 'CH'
-
 
                     if chat_enable and e.key == K_RETURN:
                         chat_queue.put(chat_content)
@@ -522,7 +532,6 @@ def game(surf, username, token, host, port, size, music_enable):
             under_block = (offset_clip.x, y_offset // block_size + 1)
 
             if world[under_block] > 0 and block_step != under_block:
-
                 rah.load_sound(sound['step'][block_properties[world[under_block]][5]])
 
                 block_step = under_block
@@ -585,8 +594,7 @@ def game(surf, username, token, host, port, size, music_enable):
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
 
-
-                        hover_sound =  block_properties[world[hover_x, hover_y]]
+                        hover_sound = block_properties[world[hover_x, hover_y]]
 
                         if hover_sound[5] != 'nothing':
                             rah.load_sound(sound['dig'][hover_sound[5]])
@@ -608,7 +616,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             render_hotbar(hotbar_slot)
 
-            #===================Pausing====================================
+            # ===================Pausing====================================
             if paused:
                 surf.blit(tint, (0, 0))
 
@@ -628,8 +636,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
-
-                inventory_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, block_properties, tool_properties)
+                inventory_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, item_lib)
 
             elif crafting:
                 surf.blit(tint, (0, 0))
