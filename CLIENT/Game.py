@@ -201,7 +201,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Loading Textures
     # =====================================================================
-    block_properties = load_blocks("block.rah")
+    block_properties = load_blocks("block.jsonhenr")
     tool_properties = load_tools("tools.rah")
 
     item_lib = create_item_dictionary([block_properties, 7, -1], [tool_properties, 1, -1])
