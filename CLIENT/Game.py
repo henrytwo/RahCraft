@@ -17,6 +17,7 @@ import glob
 import traceback
 import sys
 import os
+import json
 from random import *
 
 
@@ -39,21 +40,38 @@ def receive_message(message_queue, server):
 def load_blocks(block_file):
     blocks = {}
 
-    block_file = open("data/" + block_file).readlines()
+    block_data = json.load(open("data/" + block_file))
 
-    for line_number in range(len(block_file)):
-        block_type, inner_block, outline, block_image, hardness, soundpack, collision, block_type, max_stack = block_file[line_number].strip(
-            "\n").split(" // ")
-        blocks[line_number] = [block_type,
-                               (int(x) for x in inner_block.split(",")),
-                               (int(x) for x in outline.split(",")),
-                               transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (20, 20)),
-                               int(hardness),
-                               soundpack,
-                               collision,
-                               transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (32, 32)),
-                               block_type,
-                               int(max_stack)]
+    for block in block_data:
+        #blocks[int(block)] = block_data[block][0]
+
+        blocks[int(block)] = [block_data[block][0]['name'],
+                              0,
+                              0,
+                              transform.scale(image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(), (20, 20)),
+                              int(block_data[block][0]['hardness']),
+                              block_data[block][0]['sound'],
+                              block_data[block][0]['collision'],
+                              transform.scale(image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(), (32, 32)),
+                              block_data[block][0]['tool'],
+                              int(block_data[block][0]['maxstack'])]
+
+
+    print(blocks)
+
+    # for line_number in range(len(block_data)):
+    #     block_type, inner_block, outline, block_image, hardness, soundpack, collision, block_type, max_stack = block_file[line_number].strip(
+    #         "\n").split(" // ")
+    #     blocks[line_number] = [block_type,
+    #                            (int(x) for x in inner_block.split(",")),
+    #                            (int(x) for x in outline.split(",")),
+    #                            transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (20, 20)),
+    #                            int(hardness),
+    #                            soundpack,
+    #                            collision,
+    #                            transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (32, 32)),
+    #                            block_type,
+    #                            int(max_stack)]
 
     return blocks
 
@@ -172,7 +190,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Loading Textures
     # =====================================================================
-    block_properties = load_blocks("block.rah")
+    block_properties = load_blocks("block.json")
     tool_properties = load_tools("tools.rah")
 
     item_lib = create_item_dictionary([block_properties, 7, -1], [tool_properties, 1, -1])
