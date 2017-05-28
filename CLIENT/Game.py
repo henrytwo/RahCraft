@@ -277,13 +277,13 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Initing Sound
     # =====================================================================
-    sound_types = [type[6:-1] for type in glob.glob('sound/*/')]
+    sound_types = [stype[6:-1] for stype in glob.glob('sound/*/')]
 
     sound = {sound_type:{} for sound_type in sound_types}
 
-    for type in sound_types:
+    for stype in sound_types:
 
-        sound_list = glob.glob('sound/%s/*.ogg'%(type))
+        sound_list = glob.glob('sound/%s/*.ogg' % stype)
 
         sound_blocks = [sound.replace('\\','/').split("/")[-1][:-5] for sound in sound_list]
 
@@ -294,7 +294,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 if block in sound_dir:
                     local_sounds.append(sound_dir)
 
-            sound[type][block] = local_sounds
+            sound[stype][block] = local_sounds
 
     block_step = None
 
