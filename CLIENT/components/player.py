@@ -22,17 +22,16 @@ class Player:
 
         self.base_vy = -(cap // 10 + 3)
 
-        self.max_vx = cap // 10
+        self.max_walk_vx = cap // 10
+        self.max_dash_vx = cap // 5
+        self.max_sneak_vx = 1
+
+        self.max_vx = self.max_walk_vx
         self.max_vy = cap
 
         self.vfly = cap
 
         self.friction = 0.8
-
-        # self.run_speed = int(self.rect.w * 0.3)
-        # self.jump_height = -(self.rect.h // 2)
-        # self.gravity = self.rect.h * 2 / 45
-        # self.grav_cap = g_cap
 
         self.reach = reach
 
@@ -57,6 +56,14 @@ class Player:
 
         else:
             self.dir = 0
+
+            if keys[K_LSHIFT] != keys[K_LCTRL]:
+                if keys[K_LSHIFT]:
+                    self.max_vx = self.max_sneak_vx
+                elif keys[K_LCTRL]:
+                    self.max_vx = self.max_dash_vx
+            else:
+                self.max_vx = self.max_walk_vx
 
             if keys[self.controls[0]] != keys[self.controls[1]]:
                 if keys[self.controls[0]] and (abs(self.vx) < self.max_vx or self.vx > 0):
