@@ -10,7 +10,6 @@ import Game as Game
 import webbrowser
 
 
-
 def login():
     global username, password, host, port, token
 
@@ -21,15 +20,13 @@ def login():
 
     rah.wallpaper(screen, size)
 
-
     title_text = rah.text('Welcome to Rahcraft! Login to continue', 20)
-    screen.blit(title_text, (size[0]//2 - title_text.get_width()//2, size[1] // 4 - title_text.get_height() - 30))
+    screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 30))
 
-    with open('data/session.rah','r') as session_file:
+    with open('data/session.rah', 'r') as session_file:
         session = session_file.read().strip().split()
 
         if session:
-
             token = session[0]
             username = session[1]
 
@@ -42,8 +39,9 @@ def login():
     fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 2 - 100, size[0] // 2, 40, 'Username'), username],
               'pass': [menu.TextBox(size[0] // 4, size[1] // 2 - 30, size[0] // 2, 40, 'Password'), password]}
 
-    auth_button = menu.Button(size[0] // 4, size[1]//2 + 50, size[0] // 2, 40, 'auth', 'Login')
-    signup_button = menu.Button(size[0] // 4, size[1]//2 + 100, size[0] // 2, 40, 'signup', 'Need an account? Signup here')
+    auth_button = menu.Button(size[0] // 4, size[1] // 2 + 50, size[0] // 2, 40, 'auth', 'Login')
+    signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup',
+                                'Need an account? Signup here')
 
     while True:
 
@@ -71,7 +69,7 @@ def login():
                         return 'menu'
 
                 elif e.key == K_RETURN and username and password:
-                            return 'auth'
+                    return 'auth'
 
                 if e.key == K_TAB:
                     if field_selected == 'user':
@@ -97,7 +95,8 @@ def login():
         if nav_update and username:
             return nav_update
 
-        username, password = fields['user'][1], hash_creds(hash_creds(fields['pass'][1]) + hash_creds(fields['user'][1]))
+        username, password = fields['user'][1], hash_creds(
+            hash_creds(fields['pass'][1]) + hash_creds(fields['user'][1]))
 
         clock.tick(120)
         display.update()
@@ -142,8 +141,8 @@ def authenticate():
                 else:
                     token = str(first_message[1])
 
-                with open('data/session.rah','w') as session_file:
-                    session_file.write('%s\n%s'%(token,username))
+                with open('data/session.rah', 'w') as session_file:
+                    session_file.write('%s\n%s' % (token, username))
 
                 online = True
                 server.close()
@@ -155,7 +154,7 @@ def authenticate():
                 username = ''
                 token = ''
 
-                with open('data/session.rah','w') as session_file:
+                with open('data/session.rah', 'w') as session_file:
                     session_file.write('')
 
                 return 'login'
@@ -607,7 +606,7 @@ if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5276
 
-    if True:#platform.system() == "Windows":
+    if True:  # platform.system() == "Windows":
         mixer.init()
         music_enable = True
     else:

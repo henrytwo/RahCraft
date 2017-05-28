@@ -17,15 +17,17 @@ class Player:
         self.vx = 0
         self.vy = 0
 
-        self.vx_inc = 0
+        self.vx_inc = 0.15
         self.vy_inc = 0.5
 
-        self.base_vy = -(cap / 10 + 2.25)
+        self.base_vy = -(cap // 10 + 3)
 
         self.max_vx = cap // 10
         self.max_vy = cap
 
         self.vfly = cap
+
+        self.friction = 0.8
 
         # self.run_speed = int(self.rect.w * 0.3)
         # self.jump_height = -(self.rect.h // 2)
@@ -35,36 +37,48 @@ class Player:
         self.reach = reach
 
         self.controls = controls
+
+        self.dir = 0
         self.standing = False
 
         self.surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 4)]
 
-    def control(self, fly):
-
+    def control(self, keys, fly):
         if fly:
-            if key.get_pressed()[self.controls[0]]:
+            if keys[self.controls[0]]:
                 self.vx = -self.vfly
-            if key.get_pressed()[self.controls[1]]:
+            if keys[self.controls[1]]:
                 self.vx = self.vfly
 
-            if key.get_pressed()[self.controls[2]] or key.get_pressed()[self.controls[4]]:
+            if keys[self.controls[2]] or keys[self.controls[4]]:
                 self.vy = -self.vfly
-            if key.get_pressed()[self.controls[3]]:
+            if keys[self.controls[3]]:
                 self.vy = self.vfly
 
         else:
-            if key.get_pressed()[self.controls[0]]:
-                self.vx = -self.max_vx
-            if key.get_pressed()[self.controls[1]]:
-                self.vx = self.max_vx
+            self.dir = 0
 
-            if (key.get_pressed()[self.controls[2]] or key.get_pressed()[self.controls[4]]) and self.standing:
+            if keys[self.controls[0]] != keys[self.controls[1]]:
+                if keys[self.controls[0]] and (abs(self.vx) < self.max_vx or self.vx > 0):
+                    self.dir = -1
+                if keys[self.controls[1]] and (self.vx < self.max_vx or self.vx < 0):
+                    self.dir = 1
+            else:
+                self.dir = 0
+
+            if self.dir:
+                self.vx += self.vx_inc * self.dir
+            else:
+                self.vx *= self.friction
+
+            if (keys[self.controls[2]] or keys[self.controls[4]]) and self.standing:
                 self.vy = self.base_vy
 
         self.standing = False
 
     def collide(self, blocks, fly):
-        self.rect.y += self.vy
+        self.actual_y += self.vy
+        self.rect.y = self.actual_y
 
         for block in blocks:
             if self.rect.colliderect(block):
@@ -74,6 +88,7 @@ class Player:
                 elif self.vy < 0:
                     self.rect.top = block.bottom
 
+                self.actual_y = self.rect.y
                 self.vy = 0
 
         if fly:
@@ -81,7 +96,11 @@ class Player:
         else:
             self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
 
-        self.rect.x += self.vx
+        if 0 > round(self.vx) > -1:
+            self.actual_x += self.vx - 1
+        else:
+            self.actual_x += self.vx
+        self.rect.x = self.actual_x
 
         for block in blocks:
             if self.rect.colliderect(block):
@@ -90,7 +109,8 @@ class Player:
                 elif self.vx < 0:
                     self.rect.left = block.right
 
-        self.vx = 0
+                self.actual_x = self.rect.x
+                self.vx = 0
 
     def detect(self, world, block_size, block_clip, block_properties):
         surrounding_blocks = []
@@ -110,7 +130,7 @@ class Player:
         collision_blocks = self.detect(world, block_size, block_clip, block_properties)
 
         if not ui:
-            self.control(fly)
+            self.control(key.get_pressed(), fly)
 
         self.collide(collision_blocks, fly)
 
