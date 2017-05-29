@@ -534,6 +534,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     sky_tick = tick_offset + tick
 
+                    send_queue.put(([(101, username), SERVERADDRESS]))
+
             except:
                 pass
 

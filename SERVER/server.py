@@ -187,7 +187,7 @@ def heart_beats(message_queue, tick):
     while True:
         time.sleep(.06)
         tick += 1
-        if tick % 1200 == 0:
+        if tick % 100 == 0:
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
             if tick >= 24000:
                 tick = 1
@@ -230,6 +230,8 @@ def authenticate(message):
 if __name__ == '__main__':
     players = {}
     player_number = 1
+
+    active_players = []
 
     playerNDisconnect = deque([])
     move = ''
@@ -289,6 +291,8 @@ if __name__ == '__main__':
                 players[address] = Player(PN, message[1])
                 sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
                                 players[address].hotbar, players[address].inventory, playerLocations), address))
+
+                active_players.append(address)
 
                 messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1',)))
                 #print('Player %s has connected from %s' % (message[1], address))
@@ -458,6 +462,39 @@ if __name__ == '__main__':
                 broadcast(channel, send_message)
 
         elif command == 100:
+
+            print(players)
+
+            kill_list = []
+
             for p in players:
-                sendQueue.put((message, p))
+
+                if p in active_players:
+                    sendQueue.put((message, p))
+
+                else:
+
+                    kill_list.append(p)
+
+            for p in kill_list:
+
+                print('Server has disconnected %s for not responding'%(players[p].username))
+
+                playerNDisconnect.append(players[p].number)
+                PlayerData[players[p].username] = players[p].save(message[1])
+                offPlayer = players[p].username
+                username.remove(offPlayer)
+
+                del players[p]
+
+                for i in players:
+                    sendQueue.put(((9, offPlayer), i))
+
+
             broadcast(channel, '[Tick] %s'%message[2])
+
+            active_players = []
+
+        elif command == 101:
+            active_players.append(address)
+            print('[Server] %s has responded to heartbeat'%message[1])
