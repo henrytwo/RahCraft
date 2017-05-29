@@ -298,12 +298,15 @@ def reject():
 
 
 def crash(error, previous):
+
+    global screen
+
     # wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     # screen.blit(wallpaper, (0, 0))
 
     screen.fill((0, 0, 255))
 
-    back_button = menu.Button(size[0] // 4, size[1] - 50, size[0] // 2, 40, previous, "Return")
+    back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -331,6 +334,10 @@ def crash(error, previous):
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'crash', error, previous
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
