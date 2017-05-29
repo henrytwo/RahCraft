@@ -13,7 +13,7 @@ import webbrowser
 def login():
     display.set_caption("RahCraft Authentication Service")
     
-    global username, password, host, port, token
+    global username, password, host, port, token, screen
 
     def hash_creds(target):
         return hashlib.sha512(target.encode('utf-8')).hexdigest()
@@ -36,10 +36,10 @@ def login():
 
     username, password = '', ''
 
-    field_selected = 'user'
+    field_selected = 'Username'
 
-    fields = {'user': [menu.TextBox(size[0] // 4, size[1] // 2 - 100, size[0] // 2, 40, 'Username'), username],
-              'pass': [menu.TextBox(size[0] // 4, size[1] // 2 - 30, size[0] // 2, 40, 'Password'), password]}
+    fields = {'Username': [menu.TextBox(size[0] // 4, size[1] // 2 - 100, size[0] // 2, 40, 'Username'), username],
+              'Password': [menu.TextBox(size[0] // 4, size[1] // 2 - 30, size[0] // 2, 40, 'Password'), password]}
 
     auth_button = menu.Button(size[0] // 4, size[1] // 2 + 50, size[0] // 2, 40, 'auth', 'Login')
     signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup',
@@ -74,10 +74,14 @@ def login():
                     return 'auth'
 
                 if e.key == K_TAB:
-                    if field_selected == 'user':
-                        field_selected = 'pass'
+                    if field_selected == 'Username':
+                        field_selected = 'Password'
                     else:
-                        field_selected = 'user'
+                        field_selected = 'Username'
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'login'
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
@@ -85,7 +89,7 @@ def login():
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
-            fields[field][0].draw(screen)
+            fields[field][0].draw(screen, field_selected)
 
             if fields[field][0].rect.collidepoint(mx, my) and click:
                 field_selected = field
@@ -97,8 +101,8 @@ def login():
         if nav_update and username:
             return nav_update
 
-        username, password = fields['user'][1], hash_creds(
-            hash_creds(fields['pass'][1]) + hash_creds(fields['user'][1]))
+        username, password = fields['Username'][1], hash_creds(
+            hash_creds(fields['Password'][1]) + hash_creds(fields['Username'][1]))
 
         clock.tick(120)
         display.update()
@@ -170,6 +174,9 @@ def authenticate():
 
 
 def about():
+
+    global screen
+
     rah.wallpaper(screen, size)
 
     back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
@@ -203,6 +210,10 @@ def about():
 
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'about'
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
@@ -270,6 +281,8 @@ def crash(error, previous):
 
 
 def assistance():
+    global screen
+
     rah.wallpaper(screen, size)
     back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
 
@@ -304,6 +317,10 @@ def assistance():
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'assistance'
+
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
@@ -324,7 +341,7 @@ def options():
 
 
 def server_picker():
-    global host, port
+    global host, port, screen
 
     with open('data/servers.rah', 'r') as servers:
         server_list = [server.split(' // ') for server in servers.read().split('\n')]
@@ -354,6 +371,10 @@ def server_picker():
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'server_picker'
+
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
@@ -365,7 +386,7 @@ def server_picker():
 
         server_bar = Surface((size[0], 80))
 
-        server_bar.fill((size[0] // 4, size[0] // 4, 200))
+        server_bar.fill((200, 200, 200))
 
         server_bar.set_alpha(90)
 
@@ -385,19 +406,22 @@ def server_picker():
 
 
 def custom_server_picker():
-    global host, port
+    global host, port, screen
 
     rah.wallpaper(screen, size)
 
     buttons = [[0, 'game', "Connect"],
-               [0, 'menu', "Back"]]
+               [0, 'server_picker', "Back"]]
 
     ip_menu = menu.Menu(buttons, 0, size[1] // 2, size[0], size[1] // 2)
 
-    field_selected = 'host'
+    field_selected = 'Host'
 
-    fields = {'host': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Host'), host],
-              'port': [menu.TextBox(size[0] // 4, 7 * size[1] // 16, size[0] // 2, 40, 'Port'), port]}
+    field_list = ['Port', 'Host']
+
+
+    fields = {'Host': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Host'), host],
+              'Port': [menu.TextBox(size[0] // 4, size[1] // 4 + 80, size[0] // 2, 40, 'Port'), port]}
 
     while True:
 
@@ -420,6 +444,15 @@ def custom_server_picker():
                     host, port = fields['host'][1], int(fields['port'][1])
                     return 'game'
 
+                if e.key == K_TAB:
+                    field_list.insert(0, field_list[-1])
+                    del field_list[-1]
+                    field_selected = field_list[0]
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'custom_server_adder'
+
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
@@ -437,15 +470,18 @@ def custom_server_picker():
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
-            fields[field][0].draw(screen)
+            fields[field][0].draw(screen, field_selected)
 
-            if fields[field][0].rect.collidepoint(mx, my) and click:
+            if fields[field][0].rect.collidepoint(mx, my) and release:
                 field_selected = field
 
         display.update()
 
 
 def server_adder():
+
+    global screen
+
     clock = time.Clock()
 
     rah.wallpaper(screen, size)
@@ -457,13 +493,13 @@ def server_adder():
 
     name, host, port = '', '', None
 
-    field_list = ['name', 'port', 'host']
+    field_list = ['Name', 'Port', 'Host']
 
-    field_selected = 'name'
+    field_selected = 'Name'
 
-    fields = {'name': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Name'), name],
-              'host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, size[0] // 2, 40, 'Host'), host],
-              'port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, size[0] // 2, 40, 'Port'), port]}
+    fields = {'Name': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Name'), name],
+              'Host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, size[0] // 2, 40, 'Host'), host],
+              'Port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, size[0] // 2, 40, 'Port'), port]}
 
     while True:
 
@@ -497,6 +533,10 @@ def server_adder():
                     del field_list[-1]
                     field_selected = field_list[0]
 
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'add_server'
+
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
@@ -504,9 +544,9 @@ def server_adder():
 
         if nav_update:
 
-            if nav_update == 'server_picker' and fields['name'][1] and fields['host'][1] and fields['port'][1]:
+            if nav_update == 'server_picker' and fields['Name'][1] and fields['Host'][1] and fields['Port'][1]:
 
-                name, host, port = fields['name'][1], fields['host'][1], int(fields['port'][1])
+                name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
 
                 with open('data/servers.rah', 'r+') as servers:
 
@@ -522,7 +562,7 @@ def server_adder():
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
-            fields[field][0].draw(screen)
+            fields[field][0].draw(screen, field_selected)
 
             if fields[field][0].rect.collidepoint(mx, my) and release:
                 field_selected = field
@@ -533,7 +573,7 @@ def server_adder():
 def menu_screen():
     display.set_caption("RahCraft")
     
-    global username, online, token
+    global username, online, token, screen
 
     clock = time.Clock()
 
@@ -580,6 +620,10 @@ def menu_screen():
             if e.type == KEYDOWN and e.key == K_ESCAPE:
                 return 'login'
 
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h),RESIZABLE)
+                return 'menu'
+
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
@@ -602,8 +646,8 @@ def menu_screen():
 
 
 if __name__ == "__main__":
-    size = (800, 500)
-    screen = display.set_mode(size, DOUBLEBUF)
+    size = (800, 800)
+    screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 
     display.set_caption("RahCraft")
     display.set_icon(transform.scale(image.load('textures/gui/icon.png'),(32,32)))
@@ -669,6 +713,7 @@ if __name__ == "__main__":
           }
 
     while navigation != 'exit':
+        size = (screen.get_width(), screen.get_height())
         try:
 
             if navigation == 'game':

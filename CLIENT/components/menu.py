@@ -166,7 +166,8 @@ class TextBox:
                         '/', ' ', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'",
                         "'"]
 
-    def draw(self, surf):
+    def draw(self, surf, selected):
+
         surf.blit(self.label, (self.rect.x, self.rect.y - self.label.get_height() - 2))
 
         draw.rect(surf, (0, 0, 0), self.rect)
@@ -179,7 +180,11 @@ class TextBox:
 
         surf.blit(self.font.render(text, True, (255, 255, 255)), (self.rect.x + 10, self.rect.y + 15))
 
+        if selected == self.name:
+            draw.rect(surf, (255, 255, 255), self.rect, 2)
+
     def update(self, e):
+
         if e and e.type == KEYDOWN:
             if e.unicode in self.allowed and len(self.content) < self.rect.w//self.charwidth - 1:
                 self.content += e.unicode
