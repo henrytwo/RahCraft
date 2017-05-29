@@ -11,6 +11,8 @@ import webbrowser
 
 
 def login():
+
+
     display.set_caption("RahCraft Authentication Service")
     
     global username, password, host, port, token, screen
@@ -169,7 +171,7 @@ def authenticate():
                 with open('data/session.rah', 'w') as session_file:
                     session_file.write('')
 
-                return 'login'
+                return 'reject'
     except:
         server.close()
 
@@ -226,6 +228,65 @@ def about():
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
+
+        nav_update = back_button.update(screen, mx, my, m_press, 15, release)
+
+        if nav_update is not None:
+            return nav_update
+
+        display.update()
+
+
+
+def reject():
+
+    global screen
+
+    rah.wallpaper(screen, size)
+
+    back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'login', "Back")
+
+    normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+    auth_list = ['',
+                 '',
+                 '',
+                 'AUTHENTICATION FAILED',
+                 '',
+                 'Username or Password is invalid',
+                 'Ensure capslock is disabled and credentials',
+                 'match those provided at time of account creation',
+                 '',
+                 'If you forget your password, reset it at',
+                 'rahmish.com/management.php',
+                 '',
+                 '',
+                 'RahCraft (C) Rahmish Empire, All Rahs Reserved',
+                 '',
+                 'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
+                 'ICS3U 2017'
+                 ]
+
+    while True:
+        release = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'reject'
+
+        mx, my = mouse.get_pos()
+        m_press = mouse.get_pressed()
+
+        for y in range(0, len(auth_list)):
+            about_text = normal_font.render(auth_list[y], True, (255, 255, 255))
             screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
@@ -715,7 +776,8 @@ if __name__ == "__main__":
           'server_picker': server_picker,
           'custom_server_picker': custom_server_picker,
           'add_server': server_adder,
-          'auth': authenticate
+          'auth': authenticate,
+          'reject':reject
           }
 
     while navigation != 'exit':
