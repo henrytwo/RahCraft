@@ -708,7 +708,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             if chat_enable:
                 chat_content = chat.update(pass_event)
-                chat.draw(surf)
+                chat.draw(surf,'')
 
             # display.set_caption("RahCraft Beta v0.01 // FPS - {0} // X - {1} Y - {2} // Block Size - {3} // Hotbar Slot - {4} // Block Selected - {5} // Mouse Pos - {6}, {7}".format(*caption_data))
             display.update()

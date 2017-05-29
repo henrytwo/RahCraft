@@ -41,6 +41,8 @@ def login():
     fields = {'Username': [menu.TextBox(size[0] // 4, size[1] // 2 - 100, size[0] // 2, 40, 'Username'), username],
               'Password': [menu.TextBox(size[0] // 4, size[1] // 2 - 30, size[0] // 2, 40, 'Password'), password]}
 
+    exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
+
     auth_button = menu.Button(size[0] // 4, size[1] // 2 + 50, size[0] // 2, 40, 'auth', 'Login')
     signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup',
                                 'Need an account? Signup here')
@@ -99,6 +101,10 @@ def login():
 
         nav_update = auth_button.update(screen, mx, my, m_press, 15, release)
         if nav_update and username:
+            return nav_update
+
+        nav_update = exit_button.update(screen, mx, my, m_press, 15, release)
+        if nav_update:
             return nav_update
 
         username, password = fields['Username'][1], hash_creds(
