@@ -520,9 +520,9 @@ def game(surf, username, token, host, port, size, music_enable):
                     inventory_items[slot] = meta_data[:]
 
                 elif command == 9:
-                    username = message[0]
+                    remote_username = message[0]
 
-                    del remote_players[username]
+                    del remote_players[remote_username]
 
                 elif command == 10:
                     chat_list.append(message[0])

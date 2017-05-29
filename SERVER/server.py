@@ -10,6 +10,7 @@ from shlex import split
 import platform
 import numpy as np
 
+from components.slack import *
 from components.world import *
 from math import *
 import time
@@ -245,7 +246,6 @@ if __name__ == '__main__':
     username = set()
 
     if slack_enable:
-        from components.slack import *
         config_slack()
 
     world = World(world_name)
@@ -463,8 +463,6 @@ if __name__ == '__main__':
 
         elif command == 100:
 
-            print(players)
-
             kill_list = []
 
             for p in players:
@@ -478,7 +476,13 @@ if __name__ == '__main__':
 
             for p in kill_list:
 
-                print('Server has disconnected %s for not responding'%(players[p].username))
+                send_message = '[Server] %s was disconnected for not responding'%(players[p].username)
+
+                for i in players:
+                    sendQueue.put(((10, send_message), i))
+
+                if slack_enable:
+                    broadcast(channel, send_message)
 
                 playerNDisconnect.append(players[p].number)
                 PlayerData[players[p].username] = players[p].save(message[1])
@@ -489,7 +493,6 @@ if __name__ == '__main__':
 
                 for i in players:
                     sendQueue.put(((9, offPlayer), i))
-
 
             broadcast(channel, '[Tick] %s'%message[2])
 
