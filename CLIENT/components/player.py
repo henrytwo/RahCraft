@@ -129,7 +129,7 @@ class Player:
             block_id = world[(block_clip[0] - x_shift * block_size) // block_size, (
                 block_clip[1] - y_shift * block_size) // block_size]
 
-            if block_id == -1 or block_properties[block_id][6] == 'collide':
+            if block_id == -1 or block_properties[block_id]['collision'] == 'collide':
                 surrounding_blocks.append(
                     Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size,
                          block_size))

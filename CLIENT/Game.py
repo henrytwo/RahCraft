@@ -43,24 +43,18 @@ def load_blocks(block_file):
     block_data = json.load(open("data/" + block_file))
 
     for block in block_data:
-        # blocks[int(block)] = block_data[block][0]
+        blocks[int(block)] = block_data[block][0]
 
-        blocks[int(block)] = [block_data[block][0]['name'],
-                              0,
-                              0,
-                              transform.scale(
-                                  image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(),
-                                  (20, 20)),
-                              int(block_data[block][0]['hardness']),
-                              block_data[block][0]['sound'],
-                              block_data[block][0]['collision'],
-                              transform.scale(
-                                  image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(),
-                                  (32, 32)),
-                              block_data[block][0]['tool'],
-                              int(block_data[block][0]['maxstack'])]
+        blocks[int(block)] = {'name':block_data[block][0]['name'],
+                              'texture':transform.scale(image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(), (20, 20)),
+                              'hardness':int(block_data[block][0]['hardness']),
+                              'sound':block_data[block][0]['sound'],
+                              'collision':block_data[block][0]['collision'],
+                              'icon':transform.scale(image.load("textures/blocks/" + block_data[block][0]['icon']).convert_alpha(), (32, 32)),
+                              'tool':block_data[block][0]['tool'],
+                              'maxstack':int(block_data[block][0]['maxstack'])}
 
-    print(blocks)
+    #print(blocks)
 
     # for line_number in range(len(block_data)):
     #     block_type, inner_block, outline, block_image, hardness, soundpack, collision, block_type, max_stack = block_file[line_number].strip(
@@ -95,11 +89,12 @@ def load_tools(tool_file):
 
 
 def create_item_dictionary(*libraries):
+
     item_lib = {}
 
-    for di, image_index, stack_index in libraries:
+    for di in libraries:
         for item in di:
-            item_lib[item] = [di[item][0], di[item][image_index], di[item][stack_index]]
+            item_lib[item] = [di[item]['name'], di[item]['icon'], di[item]['maxstack']]
 
     return item_lib
 
@@ -129,11 +124,11 @@ def game(surf, username, token, host, port, size, music_enable):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
                 if len(block_properties) > block > 0:
-                    surf.blit(block_properties[block][3], (x - x_offset % block_size, y - y_offset % block_size))
+                    surf.blit(block_properties[block]['texture'], (x - x_offset % block_size, y - y_offset % block_size))
 
                     if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[
                         2] == (y + y_offset) // block_size:
-                        percent_broken = (current_breaking[3] / block_properties[current_breaking[0]][4]) * 10
+                        percent_broken = (current_breaking[3] / block_properties[current_breaking[0]]['hardness']) * 10
                         surf.blit(breaking_animation[int(percent_broken)],
                                   (x - x_offset % block_size, y - y_offset % block_size))
 
@@ -204,7 +199,7 @@ def game(surf, username, token, host, port, size, music_enable):
     block_properties = load_blocks("block.json")
     tool_properties = load_tools("tools.rah")
 
-    item_lib = create_item_dictionary([block_properties, 7, -1], [tool_properties, 1, -1])
+    item_lib = create_item_dictionary(block_properties)#, [tool_properties, 1, -1])
     print(item_lib)
     breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i in range(10)]
 
@@ -569,7 +564,7 @@ def game(surf, username, token, host, port, size, music_enable):
             under_block = (offset_clip.x, y_offset // block_size + 1)
 
             if world[under_block] > 0 and block_step != under_block:
-                rah.load_sound(sound['step'][block_properties[world[under_block]][5]])
+                rah.load_sound(sound['step'][block_properties[world[under_block]]['sound']])
 
                 block_step = under_block
 
@@ -577,7 +572,7 @@ def game(surf, username, token, host, port, size, music_enable):
             mb = mouse.get_pressed()
             mx, my = mouse.get_pos()
 
-            caption_data = (round(clock.get_fps(), 2), offset_clip.x, y_offset // block_size, block_size, hotbar_slot, block_properties[hotbar_slot][0], (mx + x_offset) // block_size, (my + y_offset) // block_size)
+            caption_data = (round(clock.get_fps(), 2), offset_clip.x, y_offset // block_size, block_size, hotbar_slot, block_properties[hotbar_slot]['name'], (mx + x_offset) // block_size, (my + y_offset) // block_size)
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
 
@@ -587,10 +582,10 @@ def game(surf, username, token, host, port, size, music_enable):
                     breaking_block = False
 
                 elif mb[0] == 1:
-                    if not breaking_block and world[hover_x, hover_y] != 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    if not breaking_block and world[hover_x, hover_y] > 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                         breaking_block = True
                         current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
-                        if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                        if current_breaking[3] >= block_properties[current_breaking[0]]['hardness']:
                             block_broken = True
 
                     elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
@@ -599,21 +594,24 @@ def game(surf, username, token, host, port, size, music_enable):
                             if hotbar_items[hotbar_slot][0] in tool_properties:
                                 current_tool = hotbar_items[hotbar_slot][0]
 
-                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]][8]:
+                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]]['tool']:
                                     current_breaking[3] += tool_properties[current_tool][2]
                                 else:
                                     current_breaking[3] += tool_properties[current_tool][3]
                             else:
                                 current_breaking[3] += 1
 
-                            if current_breaking[3] >= block_properties[current_breaking[0]][4]:
+                            if current_breaking[3] >= block_properties[current_breaking[0]]['hardness']:
                                 block_broken = True
+
+                                rah.load_sound(sound['step'][block_properties[world[hover_x, hover_y]]['sound']])
+
                         else:
                             breaking_block = False
                             current_breaking = []
 
                     if block_broken:
-                        rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]][5]])
+                        rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]]['sound']])
 
                         block_request.add((hover_x, hover_y))
                         send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
@@ -631,10 +629,10 @@ def game(surf, username, token, host, port, size, music_enable):
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
 
-                        hover_sound = block_properties[world[hover_x, hover_y]]
+                        hover_sound = block_properties[hotbar_items[hotbar_slot][0]]
 
-                        if hover_sound[5] != 'nothing':
-                            rah.load_sound(sound['dig'][hover_sound[5]])
+                        if hover_sound['sound'] != 'nothing':
+                            rah.load_sound(sound['dig'][hover_sound['sound']])
 
                 if mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]
