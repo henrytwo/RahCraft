@@ -123,5 +123,9 @@ def generate_world(world_seed, max_height, min_x, max_x, w, h):
                 if y > 92 or y > 87 and randint(0, 3) == 0:
                     world[x][y] = block_lookup["Bed Rock"]
 
+    # Last edit, adding extras to the top of the world to prevent problems
+
+    world = [[0] * 40 + x for x in world]
+
     # Return the world object for use
     return np.array(world)

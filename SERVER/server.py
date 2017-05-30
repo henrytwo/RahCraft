@@ -131,7 +131,7 @@ class World:
         x = len(self.overworld) // 2
         spawn_offset = 0
         spawn_found = False
-        search_cords = self.overworld[x, :len(self.overworld[x]) // 2]
+        search_cords = self.overworld[x, :len(self.overworld[x])]
 
         while not spawn_found:
             for y in range(len(search_cords)):
@@ -148,7 +148,7 @@ class World:
             else:
                 spawn_offset -= 1
 
-            search_cords = self.overworld[x + spawn_offset, :len(self.overworld[x + spawn_offset]) // 2]
+            search_cords = self.overworld[x + spawn_offset, :len(self.overworld[x + spawn_offset])]
 
         return x, y
 

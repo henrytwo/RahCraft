@@ -230,7 +230,7 @@ def game(surf, username, token, host, port, size, music_enable):
     player_x = int(player_x) * 20 - size[0] // 2
     player_y = int(player_y) * 20 - size[1] // 2
 
-    world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
+    world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
     local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5, (K_a, K_d, K_w, K_s, K_SPACE))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
