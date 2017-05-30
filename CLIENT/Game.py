@@ -54,22 +54,6 @@ def load_blocks(block_file):
                               'tool':block_data[block][0]['tool'],
                               'maxstack':int(block_data[block][0]['maxstack'])}
 
-    #print(blocks)
-
-    # for line_number in range(len(block_data)):
-    #     block_type, inner_block, outline, block_image, hardness, soundpack, collision, block_type, max_stack = block_file[line_number].strip(
-    #         "\n").split(" // ")
-    #     blocks[line_number] = [block_type,
-    #                            (int(x) for x in inner_block.split(",")),
-    #                            (int(x) for x in outline.split(",")),
-    #                            transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (20, 20)),
-    #                            int(hardness),
-    #                            soundpack,
-    #                            collision,
-    #                            transform.scale(image.load("textures/blocks/" + block_image).convert_alpha(), (32, 32)),
-    #                            block_type,
-    #                            int(max_stack)]
-
     return blocks
 
 
@@ -86,6 +70,17 @@ def load_tools(tool_file):
         tool_number += 1
 
     return tools
+
+
+def load_items(item_file):
+    items = {}
+
+    item_number = 0
+
+    for item in open("data/" + item_file):
+        # item_number, item_image, max
+        pass
+
 
 
 def create_item_dictionary(*libraries):
@@ -677,12 +672,12 @@ def game(surf, username, token, host, port, size, music_enable):
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
-                inventory_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, item_lib)
+                inventory_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
             elif crafting:
                 surf.blit(tint, (0, 0))
 
-                crafting_object.update(surf, mx, my, mb, l_click, inventory_items, hotbar_items, item_lib)
+                crafting_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
             if not paused:
                 if key.get_pressed()[K_TAB]:
