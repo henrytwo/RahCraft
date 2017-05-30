@@ -37,7 +37,7 @@ def receive_message(message_queue, server):
         message_queue.put(pickle.loads(msg[0]))
 
 
-def load_blocks(block_file):
+def load_blocks(block_file, block_size):
     blocks = {}
 
     block_data = json.load(open("data/" + block_file))
@@ -46,7 +46,7 @@ def load_blocks(block_file):
         blocks[int(block)] = block_data[block][0]
 
         blocks[int(block)] = {'name':block_data[block][0]['name'],
-                              'texture':transform.scale(image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(), (20, 20)),
+                              'texture':transform.scale(image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(), (block_size, block_size)),
                               'hardness':int(block_data[block][0]['hardness']),
                               'sound':block_data[block][0]['sound'],
                               'collision':block_data[block][0]['collision'],
@@ -183,6 +183,9 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
+    block_size = 24
+    build = 'RahCraft v0.1.1 EVALUATION'
+
     # Chat
     # =====================================================================
     chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
@@ -191,7 +194,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Loading Textures
     # =====================================================================
-    block_properties = load_blocks("block.json")
+    block_properties = load_blocks("block.json", block_size)
     tool_properties = load_tools("tools.rah")
 
     item_lib = create_item_dictionary(block_properties)#, [tool_properties, 1, -1])
@@ -216,9 +219,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players = first_message[1:]
     print(hotbar_items)
-
-    block_size = 20
-    build = 'RahCraft v0.1.1 EVALUATION'
 
     rah.rahprint("player done")
 
