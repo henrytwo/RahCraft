@@ -36,6 +36,10 @@ def login():
 
             return 'auth'
 
+    test = menu.Switch(20, 20, 100, 40, False, 'Test')
+    test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
+
+
     username, password = '', ''
 
     field_selected = 'Username'
@@ -111,6 +115,9 @@ def login():
 
         username, password = fields['Username'][1], hash_creds(
             hash_creds(fields['Password'][1]) + hash_creds(fields['Username'][1]))
+
+        test.update(screen, mx, my, m_press, 15, release)
+        test1.update(screen, mx, my, m_press, 15, release)
 
         clock.tick(120)
         display.update()
@@ -411,7 +418,35 @@ def assistance():
 
 
 def options():
-    return 'menu'
+    global screen
+
+    rah.wallpaper(screen, size)
+    back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
+
+    while True:
+
+        release = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'assistance'
+
+        mx, my = mouse.get_pos()
+        m_press = mouse.get_pressed()
+
+        nav_update = back_button.update(screen, mx, my, m_press, 15, release)
+
+        if nav_update is not None:
+            return nav_update
+
+        display.update()
 
 
 def server_picker():
@@ -667,7 +702,7 @@ def menu_screen():
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    version_text = normal_font.render("RahCraft 0.0.1 Beta", True, (255, 255, 255))
+    version_text = normal_font.render("RahCraft v0.1 EVALUATION", True, (255, 255, 255))
     screen.blit(version_text, (10, size[1] - 20))
 
     about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
