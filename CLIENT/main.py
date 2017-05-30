@@ -702,7 +702,7 @@ def menu_screen():
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    version_text = normal_font.render("RahCraft v0.1 EVALUATION", True, (255, 255, 255))
+    version_text = normal_font.render("RahCraft v0.1.1 EVALUATION", True, (255, 255, 255))
     screen.blit(version_text, (10, size[1] - 20))
 
     about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))

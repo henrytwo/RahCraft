@@ -218,6 +218,7 @@ def game(surf, username, token, host, port, size, music_enable):
     print(hotbar_items)
 
     block_size = 20
+    build = 'RahCraft v0.1.1 EVALUATION'
 
     rah.rahprint("player done")
 
@@ -279,6 +280,7 @@ def game(surf, username, token, host, port, size, music_enable):
     fly = False
     inventory_visible = False
     chat_enable = False
+    debug = False
 
     pause_list = [[0, 'unpause', "Back to game"],
                   [1, 'options', "Options"],
@@ -389,6 +391,10 @@ def game(surf, username, token, host, port, size, music_enable):
                     release = True
 
                 elif e.type == KEYDOWN:
+
+                    if e.key == K_F3:
+                        debug = not debug
+
                     if e.key == K_SLASH:
                         if current_gui == 'CH':
                             current_gui = ''
@@ -466,7 +472,7 @@ def game(surf, username, token, host, port, size, music_enable):
             update_cost = displaying_world.flatten()
             update_cost = np.count_nonzero(update_cost == -1)
 
-            if update_cost > 10 and on_tick and (offset_clip.x, offset_clip.y) not in render_request:
+            if update_cost > 0 and on_tick and (offset_clip.x, offset_clip.y) not in render_request:
                 send_queue.put([[2, offset_clip.x, offset_clip.y, size, block_size], SERVERADDRESS])
                 render_request.add((offset_clip.x, offset_clip.y))
             # ===================Decode Message======================
@@ -489,7 +495,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif command == 2:
                     chunk_position_x, chunk_position_y, world_chunk = message
-                    world[chunk_position_x - 5:chunk_position_x + 45, chunk_position_y - 5:chunk_position_y + 31] = np.array(world_chunk, copy=True)
+                    world[chunk_position_x - 5:chunk_position_x + size[0]//block_size + 5, chunk_position_y - 5:chunk_position_y + size[1]//block_size + 5] = np.array(world_chunk, copy=True)
 
                     if (chunk_position_x, chunk_position_y) in render_request:
                         render_request.remove((chunk_position_x, chunk_position_y))
@@ -573,7 +579,6 @@ def game(surf, username, token, host, port, size, music_enable):
             mb = mouse.get_pressed()
             mx, my = mouse.get_pos()
 
-            caption_data = (round(clock.get_fps(), 2), offset_clip.x, y_offset // block_size, block_size, hotbar_slot, block_properties[hotbar_slot]['name'], (mx + x_offset) // block_size, (my + y_offset) // block_size)
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
 
@@ -709,7 +714,20 @@ def game(surf, username, token, host, port, size, music_enable):
                 chat_content = chat.update(pass_event)
                 chat.draw(surf,'')
 
-            # display.set_caption("RahCraft Beta v0.01 // FPS - {0} // X - {1} Y - {2} // Block Size - {3} // Hotbar Slot - {4} // Block Selected - {5} // Mouse Pos - {6}, {7}".format(*caption_data))
+            if debug:
+
+                debug_list = ["%s"%build,
+                              "FPS: %i"%round(clock.get_fps(), 2),
+                              "X:%i Y:%i"%(offset_clip.x, y_offset // block_size),
+                              "Block Size: %i"%block_size,
+                              "Hotbar Slot: %i"%hotbar_slot,
+                              "Block Selected: %s"%str(item_lib[hotbar_items[hotbar_slot][0]][0]),
+                              "Mouse Pos: %i, %i"%((mx + x_offset) // block_size, (my + y_offset) // block_size)]
+
+                for y in range(0, len(debug_list)):
+                    about_text = rah.text(debug_list[y], 15)
+                    surf.blit(about_text, (size[0] - about_text.get_width() - 10, 10 + y * 20))
+
             display.update()
             clock.tick(120)
 
