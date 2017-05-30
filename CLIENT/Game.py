@@ -33,7 +33,7 @@ def receive_message(message_queue, server):
     rah.rahprint('Ready to receive command...')
 
     while True:
-        msg = server.recvfrom(16384)
+        msg = server.recvfrom(163840)
         message_queue.put(pickle.loads(msg[0]))
 
 
@@ -43,16 +43,16 @@ def load_blocks(block_file, block_size):
     block_data = json.load(open("data/" + block_file))
 
     for block in block_data:
-        blocks[int(block)] = block_data[block][0]
+        blocks[int(block)] = block_data[block]
 
-        blocks[int(block)] = {'name':block_data[block][0]['name'],
-                              'texture':transform.scale(image.load("textures/blocks/" + block_data[block][0]['texture']).convert_alpha(), (block_size, block_size)),
-                              'hardness':int(block_data[block][0]['hardness']),
-                              'sound':block_data[block][0]['sound'],
-                              'collision':block_data[block][0]['collision'],
-                              'icon':transform.scale(image.load("textures/blocks/" + block_data[block][0]['icon']).convert_alpha(), (32, 32)),
-                              'tool':block_data[block][0]['tool'],
-                              'maxstack':int(block_data[block][0]['maxstack'])}
+        blocks[int(block)] = {'name':block_data[block]['name'],
+                              'texture':transform.scale(image.load("textures/blocks/" + block_data[block]['texture']).convert_alpha(), (block_size, block_size)),
+                              'hardness':block_data[block]['hardness'],
+                              'sound':block_data[block]['sound'],
+                              'collision':block_data[block]['collision'],
+                              'icon':transform.scale(image.load("textures/blocks/" + block_data[block]['icon']).convert_alpha(), (32, 32)),
+                              'tool':block_data[block]['tool'],
+                              'maxstack':block_data[block]['maxstack']}
 
     return blocks
 
@@ -152,9 +152,6 @@ def game(surf, username, token, host, port, size, music_enable):
     # =====================================================================
     display.set_caption("RahCraft")
 
-    wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (955, 500))
-    surf.blit(wallpaper, (0, 0))
-
     connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
     surf.blit(connecting_text,
               rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
@@ -183,7 +180,7 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
-    block_size = 24
+    block_size = 25
     build = 'RahCraft v0.1.1 EVALUATION'
 
     # Chat
@@ -376,12 +373,18 @@ def game(surf, username, token, host, port, size, music_enable):
                         r_click = True
 
                     if e.button == 4:
+
+                        block_size += 10
+
                         hotbar_slot = max(-1, hotbar_slot - 1)
 
                         if hotbar_slot == -1:
                             hotbar_slot = 8
 
                     elif e.button == 5:
+
+                        block_size -= 10
+
                         hotbar_slot = min(9, hotbar_slot + 1)
 
                         if hotbar_slot == 9:
@@ -468,7 +471,7 @@ def game(surf, username, token, host, port, size, music_enable):
             if on_tick:
                 send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
 
-            displaying_world = world[offset_clip.x:offset_clip.x + 41, offset_clip.y:offset_clip.y + 26]
+            displaying_world = world[offset_clip.x:offset_clip.x + size[0]//block_size + 5, offset_clip.y:offset_clip.y + size[1]//block_size + 5]
             update_cost = displaying_world.flatten()
             update_cost = np.count_nonzero(update_cost == -1)
 
@@ -722,7 +725,8 @@ def game(surf, username, token, host, port, size, music_enable):
                               "Block Size: %i"%block_size,
                               "Hotbar Slot: %i"%hotbar_slot,
                               "Block Selected: %s"%str(item_lib[hotbar_items[hotbar_slot][0]][0]),
-                              "Mouse Pos: %i, %i"%((mx + x_offset) // block_size, (my + y_offset) // block_size)]
+                              "Mouse Pos: %i, %i"%((mx + x_offset) // block_size, (my + y_offset) // block_size),
+                              "Update Cost: %i"%update_cost]
 
                 for y in range(0, len(debug_list)):
                     about_text = rah.text(debug_list[y], 15)

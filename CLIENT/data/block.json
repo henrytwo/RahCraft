@@ -1,190 +1,190 @@
 {
 
-    	"0":[{
-		"name":"Air",
+    	"0":{
+		    "name":"Air",
 	    	"texture":"mob_spawner.png",
         	"icon":"mob_spawner.png",
         	"collision":"pass",
         	"sound":"nothing",
-        	"hardness":"1",
+        	"hardness":1,
         	"tool":"null",
-        	"maxstack":"0"
-        }],
+        	"maxstack":0
+        },
 
-    	"1":[{
-		"name":"Grass",
+    	"1":{
+		    "name":"Grass",
 	    	"texture":"grass_side.png",
         	"icon":"grass_side.png",
         	"collision":"collide",
         	"sound":"grass",
-        	"hardness":"19",
+        	"hardness":19,
         	"tool":"shovel",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"2":[{
-		"name":"Dirt",
+    	"2":{
+		    "name":"Dirt",
 	    	"texture":"dirt.png",
         	"icon":"dirt.png",
         	"collision":"collide",
         	"sound":"grass",
-        	"hardness":"19",
+        	"hardness":19,
         	"tool":"shovel",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"3":[{
-		"name":"Stone",
+    	"3":{
+		    "name":"Stone",
 	    	"texture":"stone.png",
         	"icon":"stone.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"150",
+        	"hardness":150,
         	"tool":"pickaxe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"4":[{
-		"name":"WoodN",
+    	"4":{
+		    "name":"WoodN",
 	    	"texture":"log_spruce.png",
         	"icon":"log_spruce.png",
         	"collision":"pass",
         	"sound":"wood",
-        	"hardness":"60",
+        	"hardness":60,
         	"tool":"axe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"5":[{
-		"name":"Wood",
+    	"5":{
+		    "name":"Wood",
 	    	"texture":"log_spruce.png",
         	"icon":"log_spruce.png",
         	"collision":"collide",
         	"sound":"wood",
-        	"hardness":"60",
+        	"hardness":60,
         	"tool":"axe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"6":[{
-		"name":"LeavesN",
+    	"6":{
+		    "name":"LeavesN",
 	    	"texture":"leaves_oak.png",
         	"icon":"leaves_oak.png",
         	"collision":"pass",
         	"sound":"grass",
-        	"hardness":"7",
+        	"hardness":7,
         	"tool":"null",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"7":[{
-		"name":"Leaves",
+    	"7":{
+		    "name":"Leaves",
 	    	"texture":"leaves_oak.png",
         	"icon":"leaves_oak.png",
         	"collision":"collide",
         	"sound":"grass",
-        	"hardness":"7",
+        	"hardness":7,
         	"tool":"null",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"8":[{
-		"name":"Planks",
+    	"8":{
+		    "name":"Planks",
 	    	"texture":"planks_oak.png",
         	"icon":"planks_oak.png",
         	"collision":"collide",
         	"sound":"wood",
-        	"hardness":"60",
+        	"hardness":60,
         	"tool":"axe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"9":[{
-		"name":"Cobble Stone",
+    	"9":{
+		    "name":"Cobble Stone",
 	    	"texture":"cobblestone.png",
         	"icon":"cobblestone.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"200",
+        	"hardness":200,
         	"tool":"pickaxe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"10":[{
-		"name":"Crafting Bench",
+    	"10":{
+		    "name":"Crafting Bench",
 	    	"texture":"crafting_table_front.png",
         	"icon":"crafting_table_front.png",
         	"collision":"collide",
         	"sound":"wood",
-        	"hardness":"75",
+        	"hardness":75,
         	"tool":"axe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"11":[{
-		"name":"Glass",
+    	"11":{
+		    "name":"Glass",
 	    	"texture":"glass_silver.png",
         	"icon":"glass_silver.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"9",
+        	"hardness":9,
         	"tool":"null",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"12":[{
-		"name":"Bed Rock",
+    	"12":{
+		    "name":"Bed Rock",
 	    	"texture":"bedrock.png",
         	"icon":"bedrock.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"10000000000",
+        	"hardness":10000000000,
         	"tool":"null",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"13":[{
-		"name":"Diamond Ore",
+    	"13":{
+		    "name":"Diamond Ore",
 	    	"texture":"diamond_ore.png",
         	"icon":"diamond_ore.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"300",
+        	"hardness":300,
         	"tool":"pickaxe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"14":[{
-		"name":"Gold Ore",
+    	"14":{
+		    "name":"Gold Ore",
 	    	"texture":"gold_ore.png",
         	"icon":"gold_ore.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"300",
+        	"hardness":300,
         	"tool":"pickaxe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"15":[{
-		"name":"Coal Ore",
+    	"15":{
+		    "name":"Coal Ore",
 	    	"texture":"coal_ore.png",
         	"icon":"coal_ore.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"300",
+        	"hardness":300,
         	"tool":"pickaxe",
-        	"maxstack":"64"
-        }],
+        	"maxstack":64
+        },
 
-    	"16":[{
-		"name":"Iron Ore",
+    	"16":{
+		    "name":"Iron Ore",
 	    	"texture":"iron_ore.png",
         	"icon":"iron_ore.png",
         	"collision":"collide",
         	"sound":"stone",
-        	"hardness":"300",
+        	"hardness":300,
         	"tool":"pickaxe",
-        	"maxstack":"64"
-        }]
+        	"maxstack":64
+        }
 
 }

@@ -12,21 +12,21 @@ with open('block.json','w') as block_json:
 
     for block in block_list:
         block_json.write('''
-    	"%s":[{
-		"name":"%s",
+    	"%s":{
+		    "name":"%s",
 	    	"texture":"%s",
         	"icon":"%s",
         	"collision":"%s",
         	"sound":"%s",
-        	"hardness":"%s",
+        	"hardness":%s,
         	"tool":"%s",
-        	"maxstack":"%s"
+        	"maxstack":%s
         '''%(block_list.index(block),block[0], block[3],block[3], block[6], block[5], block[4], block[7], block[8]))
 
         if block != block_list[-1]:
-            block_json.write('}],\n')
+            block_json.write('},\n')
         else:
-            block_json.write('}]\n')
+            block_json.write('}\n')
 
     block_json.write('\n}')
 

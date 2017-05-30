@@ -311,11 +311,13 @@ def crash(error, previous):
     # wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
     # screen.blit(wallpaper, (0, 0))
 
-    screen.fill((0, 0, 255))
+    tint = Surface(size)
+    tint.fill((0, 0, 255))
+    tint.set_alpha(99)
+
+    screen.blit(tint, (0,0))
 
     back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
-
-    normal_font = font.Font("fonts/minecraft.ttf", 14)
 
     error_message = list(map(str, error.split('\n')))
 
@@ -350,7 +352,7 @@ def crash(error, previous):
         m_press = mouse.get_pressed()
 
         for y in range(0, len(about_list)):
-            about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+            about_text = rah.text(about_list[y], 15)
             screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 10 + y * 20))
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
