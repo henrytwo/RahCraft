@@ -219,7 +219,7 @@ def game(surf, username, token, host, port, size, music_enable):
         elif first_message[0] == 0:
             break
 
-    world_size_x, world_size_y, player_x, player_y, hotbar_items, inventory_items, r_players = first_message[1:]
+    world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players = first_message[1:]
     print(hotbar_items)
 
     block_size = 20
@@ -227,8 +227,9 @@ def game(surf, username, token, host, port, size, music_enable):
     rah.rahprint("player done")
 
     reach = 5
-    player_x = int(player_x) * 20 - size[0] // 2
-    player_y = int(player_y) * 20 - size[1] // 2
+
+    player_x = int(float(player_x_) * 20 - size[0] // 2)
+    player_y = int(float(player_y_) * 20 - size[1] // 2)
 
     world = np.array([[-1] * world_size_y for _ in range(world_size_x)])
 
@@ -239,7 +240,7 @@ def game(surf, username, token, host, port, size, music_enable):
     remote_players = {}
     x, y = 0, 0
 
-    send_queue.put([[2, x_offset // block_size, y_offset // block_size], SERVERADDRESS])
+    send_queue.put([[2, x_offset // block_size, y_offset // block_size, size, block_size], SERVERADDRESS])
 
     while True:
         world_msg = message_queue.get()
@@ -247,7 +248,7 @@ def game(surf, username, token, host, port, size, music_enable):
         if world_msg[0] == 2:
             break
 
-    world[world_msg[1] - 5:world_msg[1] + 45, world_msg[2] - 5:world_msg[2] + 31] = np.array(world_msg[3], copy=True)
+    world[world_msg[1] - 5:world_msg[1] + size[0]//block_size + 5, world_msg[2] - 5:world_msg[2] + size[1]//block_size + 5] = np.array(world_msg[3], copy=True)
 
     # Init Existing Remote Players
     # =====================================================================
@@ -432,6 +433,9 @@ def game(surf, username, token, host, port, size, music_enable):
                         if e.key == K_f:
                             fly = not fly
 
+                        if e.key == K_r:
+                            local_player.rect.y -= 40
+
                         if e.key == K_e and current_gui == '' or current_gui == 'I':
                             if current_gui == 'I':
                                 inventory_updated = True
@@ -468,7 +472,7 @@ def game(surf, username, token, host, port, size, music_enable):
             update_cost = np.count_nonzero(update_cost == -1)
 
             if update_cost > 10 and on_tick and (offset_clip.x, offset_clip.y) not in render_request:
-                send_queue.put([[2, offset_clip.x, offset_clip.y], SERVERADDRESS])
+                send_queue.put([[2, offset_clip.x, offset_clip.y, size, block_size], SERVERADDRESS])
                 render_request.add((offset_clip.x, offset_clip.y))
             # ===================Decode Message======================
 

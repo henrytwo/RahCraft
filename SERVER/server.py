@@ -118,8 +118,10 @@ class World:
     def load_world(self, worldn):
         return pkl.load(open("saves/" + worldn + ".pkl", "rb"))
 
-    def get_world(self, x, y):
-        return self.overworld[x - 5:x + 45, y - 5:y + 31]
+    def get_world(self, x, y, size, block_size):
+        width, height = size[0] // block_size, size[1] // block_size
+
+        return self.overworld[x - 5:x + width + 5, y - 5:y + height + 5]
 
     def break_block(self, x, y):
         self.overworld[x, y] = 0
@@ -318,8 +320,8 @@ if __name__ == '__main__':
 
         elif command == 2:
             # Render world
-            # Data: [2, <cordx>, <cordy>]
-            sendQueue.put(((2, message[1], message[2], world.get_world(message[1], message[2])), address))
+            # Data: [2, <cordx>, <cordy>, <size>]
+            sendQueue.put(((2, message[1], message[2], world.get_world(message[1], message[2], message[3], message[4])), address))
 
         elif command == 3:
             # Break block

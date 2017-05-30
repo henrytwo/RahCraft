@@ -5,7 +5,6 @@ button_hover = image.load("textures/menu/button_hover.png")
 button_pressed = image.load("textures/menu/button_pressed.png")
 button_idle = image.load("textures/menu/button_idle.png")
 
-
 class Button:
     def __init__(self, x, y, w, h, func, text):
         self.rect = Rect(x, y, w, h)
@@ -32,7 +31,7 @@ class Button:
 
             elif release:
                 mouse.set_cursor(*cursors.tri_left)
-                # mixer.Sound('sound/random/click.ogg').play()
+
                 rah.load_sound(['sound/random/click.ogg'])
                 return self.func
 
@@ -43,6 +42,72 @@ class Button:
 
         text_surf = rah.text(self.text, size)
         surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
+
+
+class Toggle:
+    def __init__(self, x, y, w, h, state, text):
+        self.rect = Rect(x, y, w, h)
+        self.text = text
+        self.state = state
+
+        self.slider_x = 0
+        self.slider_v = 0
+
+        slider_w = self.rect.w//2 - 5
+        slider_h = self.rect.h - 6
+
+        self.texture = {'hover':transform.scale(button_hover, (slider_w, slider_h)),
+                        'idle':transform.scale(button_idle, (slider_w, slider_h))}
+
+    def draw_button(self, surf, offset, type, size):
+        draw.rect(surf, (200, 200, 200), self.rect)
+        draw.rect(surf, (20,20,20), (self.rect.x + 2, self.rect.y + 2, self.rect.w - 4, self.rect.h - 4))
+
+        surf.blit(self.texture[type], (self.rect.x + 3 + offset, self.rect.y + 3))
+
+        text_surf = rah.text(self.text, size)
+        surf.blit(text_surf, rah.center(self.rect.x + 3 + offset, self.rect.y + 3, *self.texture['idle'].get_size(),\
+                                        text_surf.get_width(), text_surf.get_height()))
+
+
+    def turn_on(self):
+        self.state = True
+        self.slider_v = 15
+
+    def turn_off(self):
+        self.state = False
+        self.slider_v = -15
+
+    def update(self, surf, mx, my, m_press, size, release):
+
+        self.slider_x += self.slider_v
+
+        if self.slider_x <= 0 or self.slider_x > self.rect.w//2:
+            self.slider_v = 0
+
+        if self.slider_x < 0:
+            self.slider_x = 0
+
+        elif self.slider_x > self.rect.w//2:
+            self.slider_x = self.rect.w//2
+
+        if self.rect.collidepoint(mx, my):
+
+            if release:
+                mouse.set_cursor(*cursors.tri_left)
+
+                rah.load_sound(['sound/random/click.ogg'])
+
+                if self.state:
+                    self.turn_off()
+                else:
+                    self.turn_on()
+
+            else:
+                 self.draw_button(surf, self.slider_x, 'hover', size)
+
+        else:
+            self.draw_button(surf, self.slider_x, 'idle', size)
 
 
 click_cursor = ["      ..                ",
