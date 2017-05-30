@@ -50,6 +50,48 @@ class Toggle:
         self.text = text
         self.state = state
 
+        self.texture = {'hover':transform.scale(button_hover, (w, h)),
+                        'idle':transform.scale(button_idle, (w, h)),
+                        'press':transform.scale(button_pressed, (w, h))}
+
+    def draw_button(self, surf, type, size):
+
+        surf.blit(self.texture[type], (self.rect.x, self.rect.y))
+
+        text_surf = rah.text(self.text, size)
+        surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
+
+
+    def update(self, surf, mx, my, m_press, size, release):
+
+        if self.rect.collidepoint(mx, my):
+            if m_press[0]:
+                self.draw_button(surf, 'press', size)
+
+            elif release:
+                mouse.set_cursor(*cursors.tri_left)
+
+                rah.load_sound(['sound/random/click.ogg'])
+
+                self.state = not self.state
+
+            else:
+                 self.draw_button(surf, 'hover', size)
+
+        else:
+            if self.state:
+                self.draw_button(surf, 'press', size)
+            else:
+                self.draw_button(surf, 'idle', size)
+
+
+
+class Switch:
+    def __init__(self, x, y, w, h, state, text):
+        self.rect = Rect(x, y, w, h)
+        self.text = text
+        self.state = state
+
         self.slider_x = 0
         self.slider_v = 0
 

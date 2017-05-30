@@ -36,7 +36,8 @@ def login():
 
             return 'auth'
 
-    test = menu.Toggle(20, 20, 400, 40, False, 'Test')
+    test = menu.Switch(20, 20, 100, 40, False, 'Test')
+    test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
 
 
     username, password = '', ''
@@ -116,6 +117,7 @@ def login():
             hash_creds(fields['Password'][1]) + hash_creds(fields['Username'][1]))
 
         test.update(screen, mx, my, m_press, 15, release)
+        test1.update(screen, mx, my, m_press, 15, release)
 
         clock.tick(120)
         display.update()
