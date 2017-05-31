@@ -1,108 +1,107 @@
 {
-	"200": {
+	"100": {
 		"name": "Wooden Pickaxe",
-		"texture": "wood_pickaxe.png",
+		"icon": "wood_pickaxe.png",
 		"bonus": 2,
 		"speed": 1,
 		"type": "pickaxe"
 	},
-	"201": {
+	"101": {
 		"name": "Wooden Shovel",
-		"texture": "wood_shovel.png",
+		"icon": "wood_shovel.png",
 		"bonus": 2,
 		"speed": 1,
 		"type": "shovel"
 	},
-	"202": {
+	"102": {
 		"name": "Wooden Axe",
-		"texture": "wood_axe.png",
+		"icon": "wood_axe.png",
 		"bonus": 2,
 		"speed": 1,
 		"type": "axe"
 	},
-	"203": {
+	"103": {
 		"name": "Stone Pickaxe",
-		"texture": "stone_pickaxe.png",
+		"icon": "stone_pickaxe.png",
 		"bonus": 3,
 		"speed": 1,
 		"type": "pickaxe"
 	},
-	"204": {
+	"104": {
 		"name": "Stone Shovel",
-		"texture": "stone_pickaxe.png",
+		"icon": "stone_pickaxe.png",
 		"bonus": 3,
 		"speed": 1,
 		"type": "shovel"
 	},
-	"205": {
+	"105": {
 		"name": "Stone Axe",
-		"texture": "stone_pickaxe.png",
+		"icon": "stone_pickaxe.png",
 		"bonus": 3,
 		"speed": 1,
 		"type": "axe"
 	},
-	"206": {
+	"106": {
 		"name": "Iron Pickaxe",
-		"texture": "iron_pickaxe.png",
+		"icon": "iron_pickaxe.png",
 		"bonus": 5,
 		"speed": 1,
 		"type": "pickaxe"
 	},
-	"207": {
+	"107": {
 		"name": "Iron Shovel",
-		"texture": "iron_pickaxe.png",
+		"icon": "iron_pickaxe.png",
 		"bonus": 5,
 		"speed": 1,
 		"type": "shovel"
 	},
-	"208": {
+	"108": {
 		"name": "Iron Axe",
-		"texture": "iron_pickaxe.png",
+		"icon": "iron_pickaxe.png",
 		"bonus": 5,
 		"speed": 1,
 		"type": "axe"
 	},
-	"209": {
+	"109": {
 		"name": "Gold Pickaxe",
-		"texture": "gold_pickaxe.png",
+		"icon": "gold_pickaxe.png",
 		"bonus": 10,
 		"speed": 1,
 		"type": "pickaxe"
 	},
-	"210": {
+	"110": {
 		"name": "Gold Shovel",
-		"texture": "gold_shovel.png",
+		"icon": "gold_shovel.png",
 		"bonus": 10,
 		"speed": 1,
 		"type": "shovel"
 	},
-	"211": {
+	"111": {
 		"name": "Gold Axe",
-		"texture": "gold_axe.png",
+		"icon": "gold_axe.png",
 		"bonus": 10,
 		"speed": 1,
 		"type": "axe"
 	},
-	"212": {
+	"112": {
 		"name": "Diamond Pickaxe",
-		"texture": "diamond_pickaxe.png",
+		"icon": "diamond_pickaxe.png",
 		"bonus": 8,
 		"speed": 1,
 		"type": "pickaxe"
 	},
-	"213": {
+	"113": {
 		"name": "Diamond Shovel",
-		"texture": "diamond_pickaxe.png",
+		"icon": "diamond_pickaxe.png",
 		"bonus": 8,
 		"speed": 1,
 		"type": "shovel"
 	},
-	"214": {
+	"114": {
 		"name": "Diamond Axe",
-		"texture": "diamond_pickaxe.png",
+		"icon": "diamond_pickaxe.png",
 		"bonus": 8,
 		"speed": 1,
 		"type": "axe"
 	}
-
 }

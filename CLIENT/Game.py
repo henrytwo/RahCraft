@@ -43,9 +43,7 @@ def load_blocks(block_file, block_size):
     block_data = json.load(open("data/" + block_file))
 
     for block in block_data:
-        blocks[block] = block_data[block]
-
-        blocks[block] = {'name':block_data[block]['name'],
+        blocks[int(block)] = {'name': block_data[block]['name'],
                               'texture':transform.scale(image.load("textures/blocks/" + block_data[block]['texture']).convert_alpha(), (block_size, block_size)),
                               'hardness':block_data[block]['hardness'],
                               'sound':block_data[block]['sound'],
@@ -62,10 +60,13 @@ def load_tools(tool_file):
 
     tool_data = json.load(open("data/" + tool_file))
 
-    for tool in open("data/" + tool_file):
-        tool_name, tool_image, type_bonus, breaking_speed, breaking_type = tool.strip("\n").split(" // ")
-        tools[tool_number + 100] = [tool_name, image.load("textures/items/" + tool_image), int(type_bonus),
-                                    int(breaking_speed), breaking_type, 1]  # 9
+    for tool in tool_data:
+        tools[int(tool)] = {'name': tool_data[tool]['name'],
+                            'icon': transform.scale(image.load("textures/items/" + tool_data[tool]['icon']).convert_alpha(), (32, 32)),
+                            'bonus': tool_data[tool]['bonus'],
+                            'speed': tool_data[tool]['speed'],
+                            'type': tool_data[tool]['type'],
+                            'maxstack': 1}
 
     return tools
 
@@ -73,11 +74,14 @@ def load_tools(tool_file):
 def load_items(item_file):
     items = {}
 
-    item_number = 0
+    item_data = json.load(open("data/" + item_file))
 
-    for item in open("data/" + item_file):
-        # item_number, item_image, max
-        pass
+    for item in item_data:
+        items[int(item)] = {'name': item_data[item]['name'],
+                            'icon': transform.scale(image.load("textures/items/" + item_data[item]['icon']).convert_alpha(), (32, 32)),
+                            'maxstack': item_data[item]['maxstack']}
+
+    return items
 
 
 def create_item_dictionary(*libraries):
@@ -189,9 +193,10 @@ def game(surf, username, token, host, port, size, music_enable):
     # Loading Textures
     # =====================================================================
     block_properties = load_blocks("block.json", block_size)
-    tool_properties = load_tools("tools.rah")
+    tool_properties = load_tools("tools.json")
+    item_properties = load_items("items.json")
 
-    item_lib = create_item_dictionary(block_properties)  # , [tool_properties, 1, -1])
+    item_lib = create_item_dictionary(block_properties, tool_properties, item_properties)
     print(item_lib)
     breaking_animation = [
         transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
@@ -214,7 +219,6 @@ def game(surf, username, token, host, port, size, music_enable):
             break
 
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players = first_message[1:]
-    print(hotbar_items)
 
     rah.rahprint("player done")
 
@@ -376,16 +380,12 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     if e.button == 4:
 
-                        block_size += 10
-
                         hotbar_slot = max(-1, hotbar_slot - 1)
 
                         if hotbar_slot == -1:
                             hotbar_slot = 8
 
                     elif e.button == 5:
-
-                        block_size -= 10
 
                         hotbar_slot = min(9, hotbar_slot + 1)
 
@@ -574,7 +574,10 @@ def game(surf, username, token, host, port, size, music_enable):
 
             # Render World
             # =======================================================
-            render_world()
+            try:
+                render_world()
+            except:
+                pass
 
             local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
                                 block_properties)
@@ -613,11 +616,10 @@ def game(surf, username, token, host, port, size, music_enable):
                             if hotbar_items[hotbar_slot][0] in tool_properties:
                                 current_tool = hotbar_items[hotbar_slot][0]
 
-                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]][
-                                    'tool']:
-                                    current_breaking[3] += tool_properties[current_tool][2]
+                                if tool_properties[current_tool]['type'] == block_properties[world[hover_x, hover_y]]['tool']:
+                                    current_breaking[3] += tool_properties[current_tool]['bonus']
                                 else:
-                                    current_breaking[3] += tool_properties[current_tool][3]
+                                    current_breaking[3] += tool_properties[current_tool]['speed']
                             else:
                                 current_breaking[3] += 1
 

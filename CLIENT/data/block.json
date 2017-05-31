@@ -1,6 +1,5 @@
 {
-
-    	0:{
+  "0": {
 		    "name":"Air",
 	    	"texture":"mob_spawner.png",
         	"icon":"mob_spawner.png",
@@ -10,8 +9,7 @@
         	"tool":"null",
         	"maxstack":0
         },
-
-    	1:{
+  "1": {
 		    "name":"Grass",
 	    	"texture":"grass_side.png",
         	"icon":"grass_side.png",
@@ -21,8 +19,7 @@
         	"tool":"shovel",
         	"maxstack":64
         },
-
-    	2:{
+  "2": {
 		    "name":"Dirt",
 	    	"texture":"dirt.png",
         	"icon":"dirt.png",
@@ -32,8 +29,7 @@
         	"tool":"shovel",
         	"maxstack":64
         },
-
-    	3:{
+  "3": {
 		    "name":"Stone",
 	    	"texture":"stone.png",
         	"icon":"stone.png",
@@ -43,8 +39,7 @@
         	"tool":"pickaxe",
         	"maxstack":64
         },
-
-    	4:{
+  "4": {
 		    "name":"WoodN",
 	    	"texture":"log_spruce.png",
         	"icon":"log_spruce.png",
@@ -54,8 +49,7 @@
         	"tool":"axe",
         	"maxstack":64
         },
-
-    	5:{
+  "5": {
 		    "name":"Wood",
 	    	"texture":"log_spruce.png",
         	"icon":"log_spruce.png",
@@ -65,8 +59,7 @@
         	"tool":"axe",
         	"maxstack":64
         },
-
-    	6:{
+  "6": {
 		    "name":"LeavesN",
 	    	"texture":"leaves_oak.png",
         	"icon":"leaves_oak.png",
@@ -76,8 +69,7 @@
         	"tool":"null",
         	"maxstack":64
         },
-
-    	7:{
+  "7": {
 		    "name":"Leaves",
 	    	"texture":"leaves_oak.png",
         	"icon":"leaves_oak.png",
@@ -87,8 +79,7 @@
         	"tool":"null",
         	"maxstack":64
         },
-
-    	8:{
+  "8": {
 		    "name":"Planks",
 	    	"texture":"planks_oak.png",
         	"icon":"planks_oak.png",
@@ -98,8 +89,7 @@
         	"tool":"axe",
         	"maxstack":64
         },
-
-    	9:{
+  "9": {
 		    "name":"Cobble Stone",
 	    	"texture":"cobblestone.png",
         	"icon":"cobblestone.png",
@@ -109,8 +99,7 @@
         	"tool":"pickaxe",
         	"maxstack":64
         },
-
-    	10:{
+  "10": {
 		    "name":"Crafting Bench",
 	    	"texture":"crafting_table_front.png",
         	"icon":"crafting_table_front.png",
@@ -120,8 +109,7 @@
         	"tool":"axe",
         	"maxstack":64
         },
-
-    	11:{
+  "11": {
 		    "name":"Glass",
 	    	"texture":"glass_silver.png",
         	"icon":"glass_silver.png",
@@ -131,8 +119,7 @@
         	"tool":"null",
         	"maxstack":64
         },
-
-    	12:{
+  "12": {
 		    "name":"Bed Rock",
 	    	"texture":"bedrock.png",
         	"icon":"bedrock.png",
@@ -142,8 +129,7 @@
         	"tool":"null",
         	"maxstack":64
         },
-
-    	13:{
+  "13": {
 		    "name":"Diamond Ore",
 	    	"texture":"diamond_ore.png",
         	"icon":"diamond_ore.png",
@@ -153,8 +139,7 @@
         	"tool":"pickaxe",
         	"maxstack":64
         },
-
-    	14:{
+  "14": {
 		    "name":"Gold Ore",
 	    	"texture":"gold_ore.png",
         	"icon":"gold_ore.png",
@@ -164,8 +149,7 @@
         	"tool":"pickaxe",
         	"maxstack":64
         },
-
-    	15:{
+  "15": {
 		    "name":"Coal Ore",
 	    	"texture":"coal_ore.png",
         	"icon":"coal_ore.png",
@@ -175,8 +159,7 @@
         	"tool":"pickaxe",
         	"maxstack":64
         },
-
-    	16:{
+  "16": {
 		    "name":"Iron Ore",
 	    	"texture":"iron_ore.png",
         	"icon":"iron_ore.png",

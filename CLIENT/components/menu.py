@@ -1,5 +1,6 @@
 import components.rahma as rah
 from pygame import *
+import json
 
 button_hover = image.load("textures/menu/button_hover.png")
 button_pressed = image.load("textures/menu/button_pressed.png")
@@ -499,11 +500,7 @@ class Crafting:
         self.holding = [0, 0]
 
         self.crafting_grid = [[[0, 0] for _ in range(3)] for __ in range(3)]
-
-        with open('data/crafting.rah', 'r') as recipes:
-            recipe_list = [recipe.split(' // ') for recipe in recipes.read().split('\n')]
-
-        self.recipes = {recipe[0]: [int(recipe[1]), int(recipe[2])] for recipe in recipe_list}
+        self.recipes = json.load(open('data/crafting.json'))
 
         rah.rahprint(self.recipes)
 
@@ -515,21 +512,31 @@ class Crafting:
         current_recipe = [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)]
         current_recipe = " ".join(list(map(str, current_recipe)))
         if current_recipe in self.recipes:
-            self.resulting_item = self.recipes[current_recipe]
+            self.resulting_item = [self.recipes[current_recipe]['result'], self.recipes[current_recipe]['quantity']]
 
         else:
             self.resulting_item = [0, 0]
 
-    def craft(self):
-        if self.holding == [0, 0] and self.resulting_item != [0, 0]:
-            self.holding = self.resulting_item
-            for x in range(len(self.crafting_grid)):
-                for y in range(3):
-                    if self.crafting_grid[x][y][0] != 0:
-                        if self.crafting_grid[x][y][1] == 1:
-                            self.crafting_grid[x][y] = [0, 0]
-                        else:
-                            self.crafting_grid[x][y][1] -= 1
+    def craft(self, item_lib):
+        if self.resulting_item != [0, 0]:
+            if self.holding == [0, 0]:
+                self.holding = self.resulting_item
+                for x in range(len(self.crafting_grid)):
+                    for y in range(3):
+                        if self.crafting_grid[x][y][0] != 0:
+                            if self.crafting_grid[x][y][1] == 1:
+                                self.crafting_grid[x][y] = [0, 0]
+                            else:
+                                self.crafting_grid[x][y][1] -= 1
+            elif self.holding[0] == self.resulting_item[0] and self.holding[1] + self.resulting_item[1] < item_lib[self.holding[0]][-1]:
+                self.holding[1] += self.resulting_item[1]
+                for x in range(len(self.crafting_grid)):
+                    for y in range(3):
+                        if self.crafting_grid[x][y][0] != 0:
+                            if self.crafting_grid[x][y][1] == 1:
+                                self.crafting_grid[x][y] = [0, 0]
+                            else:
+                                self.crafting_grid[x][y][1] -= 1
 
             # self.holding = self.recipes[" ".join(list(map(str, [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)])))][:]
 
@@ -619,15 +626,12 @@ class Crafting:
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
 
-            if l_click and self.holding[0] == 0:
-                self.holding = self.resulting_item
-                self.resulting_item = [0, 0]
-
-        if l_click:
-            self.craft()
+            if l_click:
+                self.craft(item_lib)
 
         if self.holding[0] > 0:
             surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
+            surf.blit(rah.text(str(self.holding[1]), 10), (mx - 10, my - 10))
 
 
 class Chest:

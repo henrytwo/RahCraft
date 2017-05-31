@@ -1,25 +1,25 @@
 {
-  "400": {
+  "200": {
     "name": "Stick",
     "icon": "stick.png",
     "maxstack": 64
   },
-  "401": {
+  "201": {
     "name": "Coal",
     "icon": "coal.png",
     "maxstack": 64
   },
-  "402": {
+  "202": {
     "name": "Iron Ingot",
     "icon": "iron_ingot.png",
     "maxstack": 64
   },
-  "403": {
+  "203": {
     "name": "Gold Ingot",
     "icon": "gold_ingot.png",
     "maxstack": 64
   },
-  "404": {
+  "204": {
     "name": "Diamond",
     "icon": "diamond.png",
     "maxstack": 64
