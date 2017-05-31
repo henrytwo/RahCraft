@@ -1,35 +1,26 @@
 {
-  "400" : {
+  "400": {
     "name": "Stick",
-    "texture": "stick.png",
     "icon": "stick.png",
     "maxstack": 64
   },
-
-  "401" : {
+  "401": {
     "name": "Coal",
-    "texture": "coal.png",
     "icon": "coal.png",
     "maxstack": 64
   },
-
-  "402" : {
+  "402": {
     "name": "Iron Ingot",
-    "texture": "iron_ingot.png",
     "icon": "iron_ingot.png",
     "maxstack": 64
   },
-
-  "403" : {
+  "403": {
     "name": "Gold Ingot",
-    "texture": "gold_ingot.png",
     "icon": "gold_ingot.png",
     "maxstack": 64
   },
-
-    "404" : {
+  "404": {
     "name": "Diamond",
-    "texture": "diamond.png",
     "icon": "diamond.png",
     "maxstack": 64
   }
