@@ -12,8 +12,8 @@ with open('servers.json','w') as block_json:
 
     for block in block_list:
         block_json.write('''
-    	%s:{
-    	    "name":"%s"
+    	"%s":{
+    	    "name":"%s",
         	"host":"%s",
         	"port":%s
         '''%(block[0], block[1],block[2], block[3]))

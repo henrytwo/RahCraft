@@ -466,9 +466,10 @@ def server_picker():
     with open('data/servers.json', 'r') as servers:
         server_dict = json.load(servers)
 
+    server_list = []
+
     for server in server_dict:
-        server[0] = int(server[0])
-        server[3] = int(server[3])
+        server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port']])
 
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1] - 80)
 
