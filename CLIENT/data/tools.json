@@ -1,0 +1,37 @@
+{
+  "200": {
+    "name": "Wooden Pickaxe",
+    "icon": "wood_pickaxe.png",
+    "type": "pickaxe",
+    "type speed": 2,
+    "ntype speed": 1,
+    "maxstack": 1
+  },
+
+  "201": {
+    "name": "Wooden Shovel",
+    "icon": "wood_shovel.png",
+    "type": "shovel",
+    "type speed": 2,
+    "ntype speed": 1,
+    "maxstack": 1
+  },
+
+  "202": {
+    "name": "Wooden Axe",
+    "icon": "wood_axe.png",
+    "type": "axe",
+    "type speed": 2,
+    "ntype speed": 1,
+    "maxstack": 1
+  },
+
+  "203": {
+    "name": "Stone Pickaxe",
+    "icon": "stone_pickaxe.png",
+    "type": "pickaxe",
+    "type speed": 3,
+    "ntype speed": 1,
+    "maxstack": 1
+  }
+}
