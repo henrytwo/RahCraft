@@ -43,9 +43,9 @@ def load_blocks(block_file, block_size):
     block_data = json.load(open("data/" + block_file))
 
     for block in block_data:
-        blocks[int(block)] = block_data[block]
+        blocks[block] = block_data[block]
 
-        blocks[int(block)] = {'name':block_data[block]['name'],
+        blocks[block] = {'name':block_data[block]['name'],
                               'texture':transform.scale(image.load("textures/blocks/" + block_data[block]['texture']).convert_alpha(), (block_size, block_size)),
                               'hardness':block_data[block]['hardness'],
                               'sound':block_data[block]['sound'],

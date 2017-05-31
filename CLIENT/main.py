@@ -8,13 +8,14 @@ import components.rahma as rah
 import components.menu as menu
 import Game as Game
 import webbrowser
+import json
 
 
 def login():
 
 
     display.set_caption("RahCraft Authentication Service")
-    
+
     global username, password, host, port, token, screen
 
     def hash_creds(target):
@@ -27,14 +28,22 @@ def login():
     title_text = rah.text('Welcome to RahCraft! Login to continue', 20)
     screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 30))
 
-    with open('data/session.rah', 'r') as session_file:
-        session = session_file.read().strip().split()
+    try:
 
-        if session:
-            token = session[0]
-            username = session[1]
+        with open('data/session.json', 'r') as session_file:
 
-            return 'auth'
+            session = json.load(session_file)
+
+            if session['name'] and session['token']:
+                token = session['token']
+                username = session['name']
+
+                return 'auth'
+
+    except ValueError:
+
+        with open('data/session.json', 'w') as session_file:
+            json.dump({"token":"","name":""}, session_file, indent = 4, sort_keys = True)
 
     test = menu.Switch(20, 20, 100, 40, False, 'Test')
     test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
@@ -162,8 +171,8 @@ def authenticate():
                 else:
                     token = str(first_message[1])
 
-                with open('data/session.rah', 'w') as session_file:
-                    session_file.write('%s\n%s' % (token, username))
+                with open('data/session.json', 'w') as session_file:
+                    json.dump({"token":"%s"%token,"name":"%s"%username}, session_file, indent=4, sort_keys=True)
 
                 online = True
                 server.close()
@@ -175,15 +184,15 @@ def authenticate():
                 username = ''
                 token = ''
 
-                with open('data/session.rah', 'w') as session_file:
-                    session_file.write('')
+                with open('data/session.json', 'w') as session_file:
+                    json.dump({"token":"","name":""}, session_file, indent=4, sort_keys=True)
 
                 return 'reject'
     except:
         server.close()
 
-        with open('data/session.rah', 'w') as session_file:
-            session_file.write('')
+        with open('data/session.json', 'w') as session_file:
+            json.dump({"token":"","name":""}, session_file, indent = 4, sort_keys = True)
 
         return "crash", 'Unable to connect to authentication servers\nTry again later\n', "login"
 
@@ -454,10 +463,10 @@ def options():
 def server_picker():
     global host, port, screen
 
-    with open('data/servers.rah', 'r') as servers:
-        server_list = [server.split(' // ') for server in servers.read().split('\n')]
+    with open('data/servers.json', 'r') as servers:
+        server_dict = json.load(servers)
 
-    for server in server_list:
+    for server in server_dict:
         server[0] = int(server[0])
         server[3] = int(server[3])
 
@@ -632,7 +641,7 @@ def server_adder():
                 if e.key == K_RETURN and host and port:
                     name, host, port = fields['name'][1], fields['host'][1], int(fields['port'][1])
 
-                    with open('data/servers.rah', 'w') as servers:
+                    with open('data/servers.json', 'w') as servers:
                         line_count = len(servers.read().split('\n'))
 
                         rah.rahprint(line_count)
@@ -659,7 +668,7 @@ def server_adder():
 
                 name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
 
-                with open('data/servers.rah', 'r+') as servers:
+                with open('data/servers.json', 'r+') as servers:
 
                     line_count = len(servers.read().split('\n'))
 
@@ -683,7 +692,7 @@ def server_adder():
 
 def menu_screen():
     display.set_caption("RahCraft")
-    
+
     global username, online, token, screen
 
     clock = time.Clock()
@@ -745,7 +754,7 @@ def menu_screen():
                 username = ''
                 token = ''
 
-                with open('data/session.rah', 'w') as session_file:
+                with open('data/session.json', 'w') as session_file:
                     session_file.write('')
 
                 return 'login'

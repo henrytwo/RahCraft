@@ -12,7 +12,7 @@ with open('block.json','w') as block_json:
 
     for block in block_list:
         block_json.write('''
-    	"%s":{
+    	%s:{
 		    "name":"%s",
 	    	"texture":"%s",
         	"icon":"%s",

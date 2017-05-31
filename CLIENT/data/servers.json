@@ -1,11 +1,27 @@
 {
-    "Localhost"{
-        "host":"127.0.0.1"
-        "port":"5376"
-    }
 
-    "Rahmish Imperial"{
-        "host":"rahmish.com"
-        "port":"5276"
-    }
+    	0:{
+    	    "name":"Localhost"
+        	"host":"127.0.0.1",
+        	"port":5276
+        },
+
+    	1:{
+    	    "name":"Rahmish Imperial"
+        	"host":"rahmish.com",
+        	"port":5276
+        },
+
+    	2:{
+    	    "name":"123"
+        	"host":"123",
+        	"port":123
+        },
+
+    	3:{
+    	    "name":"test"
+        	"host":"rahmish.com",
+        	"port":1111
+        }
+
 }

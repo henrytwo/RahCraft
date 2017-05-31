@@ -1,0 +1,123 @@
+{
+
+    	0:{
+		    "name":"Wooden Pickaxe",
+	    	"texture":"wood_pickaxe.png",
+        	"bonus":2,
+        	"speed":1,
+        	"type":"pickaxe",
+        },
+
+    	1:{
+		    "name":"Wooden Shovel",
+	    	"texture":"wood_shovel.png",
+        	"bonus":2,
+        	"speed":1,
+        	"type":"shovel",
+        },
+
+    	2:{
+		    "name":"Wooden Axe",
+	    	"texture":"wood_axe.png",
+        	"bonus":2,
+        	"speed":1,
+        	"type":"axe",
+        },
+
+    	3:{
+		    "name":"Stone Pickaxe",
+	    	"texture":"stone_pickaxe.png",
+        	"bonus":3,
+        	"speed":1,
+        	"type":"pickaxe",
+        },
+
+    	4:{
+		    "name":"Stone Shovel",
+	    	"texture":"stone_pickaxe.png",
+        	"bonus":3,
+        	"speed":1,
+        	"type":"shovel",
+        },
+
+    	5:{
+		    "name":"Stone Axe",
+	    	"texture":"stone_pickaxe.png",
+        	"bonus":3,
+        	"speed":1,
+        	"type":"axe",
+        },
+
+    	6:{
+		    "name":"Iron Pickaxe",
+	    	"texture":"iron_pickaxe.png",
+        	"bonus":5,
+        	"speed":1,
+        	"type":"pickaxe",
+        },
+
+    	7:{
+		    "name":"Iron Shovel",
+	    	"texture":"iron_pickaxe.png",
+        	"bonus":5,
+        	"speed":1,
+        	"type":"shovel",
+        },
+
+    	8:{
+		    "name":"Iron Axe",
+	    	"texture":"iron_pickaxe.png",
+        	"bonus":5,
+        	"speed":1,
+        	"type":"axe",
+        },
+
+    	9:{
+		    "name":"Gold Pickaxe",
+	    	"texture":"gold_pickaxe.png",
+        	"bonus":10,
+        	"speed":1,
+        	"type":"pickaxe",
+        },
+
+    	10:{
+		    "name":"Gold Shovel",
+	    	"texture":"gold_shovel.png",
+        	"bonus":10,
+        	"speed":1,
+        	"type":"shovel",
+        },
+
+    	11:{
+		    "name":"Gold Axe",
+	    	"texture":"gold_axe.png",
+        	"bonus":10,
+        	"speed":1,
+        	"type":"axe",
+        },
+
+    	12:{
+		    "name":"Diamond Pickaxe",
+	    	"texture":"diamond_pickaxe.png",
+        	"bonus":8,
+        	"speed":1,
+        	"type":"pickaxe",
+        },
+
+    	13:{
+		    "name":"Diamond Shovel",
+	    	"texture":"diamond_pickaxe.png",
+        	"bonus":8,
+        	"speed":1,
+        	"type":"shovel",
+        },
+
+    	14:{
+		    "name":"Diamond Axe",
+	    	"texture":"diamond_pickaxe.png",
+        	"bonus":8,
+        	"speed":1,
+        	"type":"axe",
+        }
+
+}
