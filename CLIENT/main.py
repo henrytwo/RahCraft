@@ -127,7 +127,7 @@ def authenticate():
     global username, password, online, token
 
     rah.wallpaper(screen, size)
-    connecting_text = rah.text("Waiting for AUTH server...", 30)
+    connecting_text = rah.text("Authenticating...", 30)
     screen.blit(connecting_text,
                 rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
