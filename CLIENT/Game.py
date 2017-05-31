@@ -60,14 +60,12 @@ def load_blocks(block_file, block_size):
 def load_tools(tool_file):
     tools = {}
 
-    tool_number = 0
+    tool_data = json.load(open("data/" + tool_file))
 
     for tool in open("data/" + tool_file):
         tool_name, tool_image, type_bonus, breaking_speed, breaking_type = tool.strip("\n").split(" // ")
         tools[tool_number + 100] = [tool_name, image.load("textures/items/" + tool_image), int(type_bonus),
                                     int(breaking_speed), breaking_type, 1]  # 9
-
-        tool_number += 1
 
     return tools
 
@@ -82,9 +80,7 @@ def load_items(item_file):
         pass
 
 
-
 def create_item_dictionary(*libraries):
-
     item_lib = {}
 
     for di in libraries:
@@ -119,7 +115,8 @@ def game(surf, username, token, host, port, size, music_enable):
                 block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
 
                 if len(block_properties) > block > 0:
-                    surf.blit(block_properties[block]['texture'], (x - x_offset % block_size, y - y_offset % block_size))
+                    surf.blit(block_properties[block]['texture'],
+                              (x - x_offset % block_size, y - y_offset % block_size))
 
                     if breaking_block and current_breaking[1] == (x + x_offset) // block_size and current_breaking[
                         2] == (y + y_offset) // block_size:
@@ -194,9 +191,11 @@ def game(surf, username, token, host, port, size, music_enable):
     block_properties = load_blocks("block.json", block_size)
     tool_properties = load_tools("tools.rah")
 
-    item_lib = create_item_dictionary(block_properties)#, [tool_properties, 1, -1])
+    item_lib = create_item_dictionary(block_properties)  # , [tool_properties, 1, -1])
     print(item_lib)
-    breaking_animation = [transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i in range(10)]
+    breaking_animation = [
+        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
+        in range(10)]
 
     tint = Surface(size)
     tint.fill((0, 0, 0))
@@ -226,7 +225,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5, (K_a, K_d, K_w, K_s, K_SPACE))
+    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
+                                 (K_a, K_d, K_w, K_s, K_SPACE))
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -241,12 +241,14 @@ def game(surf, username, token, host, port, size, music_enable):
         if world_msg[0] == 2:
             break
 
-    world[world_msg[1] - 5:world_msg[1] + size[0]//block_size + 5, world_msg[2] - 5:world_msg[2] + size[1]//block_size + 5] = np.array(world_msg[3], copy=True)
+    world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
+    world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
 
     # Init Existing Remote Players
     # =====================================================================
     for Rp in r_players:
-        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5, 2 * block_size - 5)
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
+                                                 2 * block_size - 5)
 
     # Initing Pygame Components
     # =====================================================================
@@ -463,7 +465,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
-            block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
+            block_clip = (
+            local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
             if inventory_updated:
@@ -471,7 +474,8 @@ def game(surf, username, token, host, port, size, music_enable):
             if on_tick:
                 send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
 
-            displaying_world = world[offset_clip.x:offset_clip.x + size[0]//block_size + 5, offset_clip.y:offset_clip.y + size[1]//block_size + 5]
+            displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
+                               offset_clip.y:offset_clip.y + size[1] // block_size + 5]
             update_cost = displaying_world.flatten()
             update_cost = np.count_nonzero(update_cost == -1)
 
@@ -494,11 +498,14 @@ def game(surf, username, token, host, port, size, music_enable):
                             current_x = int(current_x) * 20
                             current_y = int(current_y) * 20
 
-                        remote_players[remote_username] = player.RemotePlayer(remote_username, current_x, current_y, block_size - 5, 2 * block_size - 5)
+                        remote_players[remote_username] = player.RemotePlayer(remote_username, current_x, current_y,
+                                                                              block_size - 5, 2 * block_size - 5)
 
                 elif command == 2:
                     chunk_position_x, chunk_position_y, world_chunk = message
-                    world[chunk_position_x - 5:chunk_position_x + size[0]//block_size + 5, chunk_position_y - 5:chunk_position_y + size[1]//block_size + 5] = np.array(world_chunk, copy=True)
+                    world[chunk_position_x - 5:chunk_position_x + size[0] // block_size + 5,
+                    chunk_position_y - 5:chunk_position_y + size[1] // block_size + 5] = np.array(world_chunk,
+                                                                                                  copy=True)
 
                     if (chunk_position_x, chunk_position_y) in render_request:
                         render_request.remove((chunk_position_x, chunk_position_y))
@@ -569,7 +576,8 @@ def game(surf, username, token, host, port, size, music_enable):
             # =======================================================
             render_world()
 
-            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties)
+            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
+                                block_properties)
 
             under_block = (offset_clip.x, y_offset // block_size + 1)
 
@@ -591,7 +599,9 @@ def game(surf, username, token, host, port, size, music_enable):
                     breaking_block = False
 
                 elif mb[0] == 1:
-                    if not breaking_block and world[hover_x, hover_y] > 0 and (hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
+                    if not breaking_block and world[hover_x, hover_y] > 0 and (
+                    hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
+                                                                     hover_y - block_clip_cord[1]) <= reach:
                         breaking_block = True
                         current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
                         if current_breaking[3] >= block_properties[current_breaking[0]]['hardness']:
@@ -603,7 +613,8 @@ def game(surf, username, token, host, port, size, music_enable):
                             if hotbar_items[hotbar_slot][0] in tool_properties:
                                 current_tool = hotbar_items[hotbar_slot][0]
 
-                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]]['tool']:
+                                if tool_properties[current_tool][4] == block_properties[world[hover_x, hover_y]][
+                                    'tool']:
                                     current_breaking[3] += tool_properties[current_tool][2]
                                 else:
                                     current_breaking[3] += tool_properties[current_tool][3]
@@ -633,7 +644,8 @@ def game(surf, username, token, host, port, size, music_enable):
                         crafting = not crafting
                         current_gui = 'C'
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
-                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties:
+                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and \
+                                    hotbar_items[hotbar_slot][0] in block_properties:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
@@ -715,18 +727,18 @@ def game(surf, username, token, host, port, size, music_enable):
 
             if chat_enable:
                 chat_content = chat.update(pass_event)
-                chat.draw(surf,'')
+                chat.draw(surf, '')
 
             if debug:
 
-                debug_list = ["%s"%build,
-                              "FPS: %i"%round(clock.get_fps(), 2),
-                              "X:%i Y:%i"%(offset_clip.x, y_offset // block_size),
-                              "Block Size: %i"%block_size,
-                              "Hotbar Slot: %i"%hotbar_slot,
-                              "Block Selected: %s"%str(item_lib[hotbar_items[hotbar_slot][0]][0]),
-                              "Mouse Pos: %i, %i"%((mx + x_offset) // block_size, (my + y_offset) // block_size),
-                              "Update Cost: %i"%update_cost]
+                debug_list = ["%s" % build,
+                              "FPS: %i" % round(clock.get_fps(), 2),
+                              "X:%i Y:%i" % (offset_clip.x, y_offset // block_size),
+                              "Block Size: %i" % block_size,
+                              "Hotbar Slot: %i" % hotbar_slot,
+                              "Block Selected: %s" % str(item_lib[hotbar_items[hotbar_slot][0]][0]),
+                              "Mouse Pos: %i, %i" % ((mx + x_offset) // block_size, (my + y_offset) // block_size),
+                              "Update Cost: %i" % update_cost]
 
                 for y in range(0, len(debug_list)):
                     about_text = rah.text(debug_list[y], 15)
