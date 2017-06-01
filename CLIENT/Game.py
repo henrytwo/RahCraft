@@ -48,7 +48,7 @@ def load_blocks(block_file, block_size):
                               'hardness':block_data[block]['hardness'],
                               'sound':block_data[block]['sound'],
                               'collision':block_data[block]['collision'],
-                              'icon':transform.scale(image.load("textures/blocks/" + block_data[block]['icon']).convert_alpha(), (32, 32)),
+                              'icon': transform.scale(image.load("textures/icons/" + block_data[block]['icon']).convert_alpha(), (32, 32)),
                               'tool':block_data[block]['tool'],
                               'maxstack':block_data[block]['maxstack']}
 
