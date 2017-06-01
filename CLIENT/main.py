@@ -514,10 +514,14 @@ def server_picker():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
-        if y_offset < -65 * (len(server_list) + 1 - size[1]//65):
-            y_offset = -65 * (len(server_list) + 1 - size[1]//65)
-        elif y_offset > 50:
+        if (65 * len(server_list)) > size[1]:
+            if y_offset < -65 * (len(server_list) + 1 - size[1]//65):
+                y_offset = -65 * (len(server_list) + 1 - size[1]//65)
+            elif y_offset > 50:
+                y_offset = 50
+        else:
             y_offset = 50
+
 
         scroll_pos = int((y_offset/(-65 * len(server_list))) * size[1])
         percent_visible = size[1]/(len(server_list) * 65)
@@ -530,7 +534,7 @@ def server_picker():
         if bar_rect.collidepoint(mx, my) and m_press[0] == 1:
             y_offset = int((my - (percent_visible * size[1])//2)/size[1] * -65 * len(server_list))
 
-        nav_update = server_menu.update(screen, release, mx, my, m_press, y_offset)
+        nav_update = server_menu.update(screen, release, mx, my, m_press, y_offset, size)
 
         if nav_update:
             host, port = nav_update[1], nav_update[2]

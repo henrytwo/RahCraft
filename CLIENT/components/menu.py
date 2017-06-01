@@ -326,12 +326,12 @@ class ServerButton:
     def idle(self, surf):
         self.draw_button(surf, (20, 20, 20), (250, 250, 250))
 
-    def update(self, surf, mx, my, m_press, release):
+    def update(self, surf, mx, my, m_press, release, size):
         if self.rect.collidepoint(mx, my):
             if m_press[0]:
                 self.mouse_down(surf)
 
-            elif release:
+            elif release and my < size[1] - 80:
                 mouse.set_cursor(*cursors.tri_left)
 
                 rah.load_sound(['sound/random/click.ogg'])
@@ -389,13 +389,13 @@ class ScrollingMenu:
 
             self.button_list.append(ServerButton(button_x, button_y, BUTTON_W, BUTTON_H, title, host, port))
 
-    def update(self, surf, release, mx, my, m_press, y_offset):
+    def update(self, surf, release, mx, my, m_press, y_offset, size):
         click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
         hover_over_button = False
 
         for button in self.button_list:
-            nav_update = button.update(surf, mx, my, m_press, release)
+            nav_update = button.update(surf, mx, my, m_press, release, size)
 
             button.rect.y = y_offset + self.button_list.index(button) * 65
 
