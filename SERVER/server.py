@@ -190,7 +190,7 @@ def heart_beats(message_queue, tick):
     while True:
         time.sleep(.06)
         tick += 1
-        if tick % 100 == 0:
+        if tick % 1000 == 0:
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
             if tick >= 24000:
                 tick = 1

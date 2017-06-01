@@ -428,6 +428,40 @@ class Inventory:
         self.item_slots = []
         self.holding = [0, 0]
 
+        self.recipe = json.load(open("data/tucrafting.json"))
+
+        self.crafting_grid = [[0, 0], [0, 0]]
+        self.result = [0, 0]
+
+    def recipe_check(self):
+        current_recipe = [self.crafting_grid[x][y][0] for x in range(2) for y in range(2)]
+        current_recipe = " ".join(list(map(str, current_recipe)))
+        if current_recipe in self.recipes:
+            self.resulting_item = [self.recipes[current_recipe]['result'], self.recipes[current_recipe]['quantity']]
+        else:
+            self.resulting_item = [0, 0]
+
+    def craft(self, item_lib):
+        if self.resulting_item != [0, 0]:
+            if self.holding == [0, 0]:
+                self.holding = self.resulting_item
+                for x in range(len(self.crafting_grid)):
+                    for y in range(2):
+                        if self.crafting_grid[x][y][0] != 0:
+                            if self.crafting_grid[x][y][1] == 1:
+                                self.crafting_grid[x][y] = [0, 0]
+                            else:
+                                self.crafting_grid[x][y][1] -= 1
+            elif self.holding[0] == self.resulting_item[0] and self.holding[1] + self.resulting_item[1] < item_lib[self.holding[0]][-1]:
+                self.holding[1] += self.resulting_item[1]
+                for x in range(len(self.crafting_grid)):
+                    for y in range(2):
+                        if self.crafting_grid[x][y][0] != 0:
+                            if self.crafting_grid[x][y][1] == 1:
+                                self.crafting_grid[x][y] = [0, 0]
+                            else:
+                                self.crafting_grid[x][y][1] -= 1
+
     def check_stacking(self, item, item_lib):
         if self.holding[0] != item[0] or item[1] == item_lib[item[0]][-1]:
             previous_holding = self.holding[:]
@@ -486,6 +520,10 @@ class Inventory:
                 elif r_click:
                     hotbar[item] = self.single_add(hotbar[item][:], item_lib)
 
+        for row in range(len(self.crafting_grid)):
+            for item in range(len(self.crafting_grid[row])):
+                draw.rect(surf, (0, 0, 0), (419 + 36*item, 120 + 36*row, 32, 32))
+
         if self.holding[0] > 0:
             surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
             surf.blit(rah.text(str(self.holding[1]), 10), (mx - 10, my - 10))
@@ -508,7 +546,6 @@ class Crafting:
 
         self.current_recipe = []
         self.resulting_item = [0, 0]
-        self.MAX_STACK = 60
 
     def recipe_check(self):
         current_recipe = [self.crafting_grid[x][y][0] for x in range(3) for y in range(3)]

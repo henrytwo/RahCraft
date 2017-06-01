@@ -286,13 +286,8 @@ From the streets of Södermalm!
 Technologic!
 Funk soul brother!
 Pumpa kungen!
-日本ハロー！
-한국 안녕하세요!
 Helo Cymru!
 Cześć Polsko!
-你好中国！
-Привет Россия!
-Γεια σου Ελλάδα!
 My life for Aiur!
 Lennart lennart = new Lennart();
 I see your vocabulary has improved!

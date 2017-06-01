@@ -355,7 +355,7 @@ def game(surf, username, token, host, port, size, music_enable):
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
 
-    rah.rahprint("ini done")
+    print("ini done")
 
     try:
         while True:
@@ -599,6 +599,7 @@ def game(surf, username, token, host, port, size, music_enable):
             # ==========================Mouse Interaction=================================
             mb = mouse.get_pressed()
             mx, my = mouse.get_pos()
+            print(mx, my)
 
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)

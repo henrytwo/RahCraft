@@ -738,7 +738,7 @@ def menu_screen():
     rah.wallpaper(screen, size)
 
     with open('data/splashes.txt') as splashes:
-        motd = choice(splashes.read().strip().split('\n'))
+        motd = choice(splashes.read().split('\n'))
 
     logo = transform.scale(image.load("textures/menu/logo.png"), (size[0]//3, int(size[0]//3 * 51/301)))
     screen.blit(logo, (size[0] // 2 - logo.get_width() // 2, size[1]//2 - 120 - logo.get_height()))
