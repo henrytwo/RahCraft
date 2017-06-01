@@ -356,7 +356,7 @@ class ServerButton:
 
 
 class ScrollingMenu:
-    def __init__(self, button_param, x, y, w, h):
+    def __init__(self, button_param, x, y, w):
         # button_list <row>, <func>, <title>, <host>, <port>
 
         V_SPACE = 5
@@ -370,7 +370,7 @@ class ScrollingMenu:
         SET_W = BUTTON_W
 
         X_OFFSET = x + w // 2 - SET_W // 2
-        Y_OFFSET = y + h // 2 - SET_H // 2
+        Y_OFFSET = 50
 
         ROW = 0
         TITLE = 1
@@ -389,13 +389,15 @@ class ScrollingMenu:
 
             self.button_list.append(ServerButton(button_x, button_y, BUTTON_W, BUTTON_H, title, host, port))
 
-    def update(self, surf, release, mx, my, m_press):
+    def update(self, surf, release, mx, my, m_press, y_offset):
         click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
         hover_over_button = False
 
         for button in self.button_list:
             nav_update = button.update(surf, mx, my, m_press, release)
+
+            button.rect.y = y_offset + self.button_list.index(button) * 65
 
             if nav_update is not None:
                 return nav_update

@@ -9,6 +9,7 @@ import components.menu as menu
 import Game as Game
 import webbrowser
 import json
+from random import *
 
 
 def login():
@@ -317,14 +318,13 @@ def crash(error, previous):
 
     global screen
 
-    # wallpaper = transform.scale(image.load("textures/menu/wallpaper.png"), (wpw, wph))
-    # screen.blit(wallpaper, (0, 0))
+    rah.wallpaper(screen, size)
 
-    tint = Surface(size)
-    tint.fill((0, 0, 255))
-    tint.set_alpha(99)
+    #tint = Surface(size)
+    #tint.fill((0, 0, 255))
+    #tint.set_alpha(99)
 
-    screen.blit(tint, (0,0))
+    #screen.blit(tint, (0,0))
 
     back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
 
@@ -338,6 +338,8 @@ def crash(error, previous):
                                            'Note: If clicking the button below doesnt',
                                            'do anything, the game is beyond broken',
                                            'and needs to be restarted',
+                                           '',
+                                           '',
                                            '',
                                            'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
                                            'ICS3U 2017',
@@ -471,12 +473,15 @@ def server_picker():
     for server in server_dict:
         server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port']])
 
-    server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0], size[1] - 80)
+    server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0])
 
     button_list = [
-        menu.Button((size[0] * 7) // 9 - 100, size[1] - 60, size[0] // 4, 40, 'custom_server_picker', 'Direct Connect'),
-        menu.Button(size[0] // 2 - 100, size[1] - 60, size[0] // 4, 40, 'add_server', 'Add Server'),
-        menu.Button((size[0] * 2) // 9 - 100, size[1] - 60, size[0] // 4, 40, 'menu', 'Back')]
+        menu.Button((size[0] * 7) // 9 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'custom_server_picker', 'Direct Connect'),
+        menu.Button(size[0] // 2 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'add_server', 'Add Server'),
+        menu.Button((size[0] * 2) // 9 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'menu', 'Back')]
+
+    y_offset = 50
+    percent_visible = 0
 
     while True:
 
@@ -496,32 +501,52 @@ def server_picker():
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
                 return 'server_picker'
 
+            if e.type == MOUSEBUTTONDOWN:
+
+                if e.button == 4:
+
+                    y_offset += 40
+
+                elif e.button == 5:
+
+                    y_offset -= 40
+
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
-        nav_update = server_menu.update(screen, release, mx, my, m_press)
+        if y_offset < -65 * (len(server_list) + 1 - size[1]//65):
+            y_offset = -65 * (len(server_list) + 1 - size[1]//65)
+        elif y_offset > 50:
+            y_offset = 50
+
+        scroll_pos = int((y_offset/(-65 * len(server_list))) * size[1])
+        percent_visible = size[1]/(len(server_list) * 65)
+
+        bar_rect = Rect(size[0] - 20, 0, 20, size[1])
+
+        draw.rect(screen, (100,100,100), bar_rect)
+        draw.rect(screen,(230, 230, 230), (size[0] - 18, scroll_pos, 14, (percent_visible * size[1])))
+
+        if bar_rect.collidepoint(mx, my) and m_press[0] == 1:
+            y_offset = int((my - (percent_visible * size[1])//2)/size[1] * -65 * len(server_list))
+
+        nav_update = server_menu.update(screen, release, mx, my, m_press, y_offset)
 
         if nav_update:
             host, port = nav_update[1], nav_update[2]
             return nav_update[0]
 
+
         server_bar = Surface((size[0], 80))
-
         server_bar.fill((200, 200, 200))
-
         server_bar.set_alpha(90)
-
         screen.blit(server_bar, (0, size[1] - 80))
 
         for button in button_list:
             nav_update = button.update(screen, mx, my, m_press, 15, release)
 
             if nav_update:
-                if nav_update == 'add_server' and len(server_list) > 4:
-                    rah.rahprint("Too many")
-
-                else:
-                    return nav_update
+                return nav_update
 
         display.update()
 
@@ -640,14 +665,13 @@ def server_adder():
 
             if e.type == KEYDOWN:
                 if e.key == K_RETURN and host and port:
-                    name, host, port = fields['name'][1], fields['host'][1], int(fields['port'][1])
+                    name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
+
+                    server_update = json.load(open('servers.json'))
+                    server_update.update({str(len(server_update)): {"name": name, "host": host, "port": port}})
 
                     with open('data/servers.json', 'w') as servers:
-                        line_count = len(servers.read().split('\n'))
-
-                        rah.rahprint(line_count)
-
-                        servers.write('%i // %s // %s // %i' % (line_count, name, host, port))
+                        json.dump(server_update, servers, indent = 4, sort_keys = True)
 
                 if e.key == K_TAB:
                     field_list.insert(0, field_list[-1])
@@ -669,11 +693,11 @@ def server_adder():
 
                 name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
 
-                with open('data/servers.json', 'r+') as servers:
+                server_update = json.load(open('data/servers.json'))
+                server_update.update({str(len(server_update)):{"name":name, "host":host, "port":port}})
 
-                    line_count = len(servers.read().split('\n'))
-
-                    servers.write('\n%i // %s // %s // %i' % (line_count, name, host, port))
+                with open('data/servers.json', 'w') as servers:
+                    json.dump(server_update, servers, indent = 4, sort_keys = True)
 
                 return 'server_picker'
 
@@ -709,8 +733,28 @@ def menu_screen():
 
     rah.wallpaper(screen, size)
 
-    logo = transform.scale(image.load("textures/menu/logo.png"), (301, 51))
-    screen.blit(logo, (size[0] // 2 - logo.get_width() // 2, 100))
+    with open('data/splashes.txt') as splashes:
+        motd = choice(splashes.read().strip().split('\n'))
+
+    logo = transform.scale(image.load("textures/menu/logo.png"), (size[0]//3, int(size[0]//3 * 51/301)))
+    screen.blit(logo, (size[0] // 2 - logo.get_width() // 2, size[1]//2 - 120 - logo.get_height()))
+
+    minecraft_font = font.Font("fonts/minecraft.ttf", 20)
+    text_surface = minecraft_font.render(motd, True, (255, 255, 0))
+    text_shadow = minecraft_font.render(motd, True, (0, 0, 0))
+
+    shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
+    shadow_surface.blit(text_shadow, (0, 0))
+    shadow_surface.set_alpha(100)
+
+    text_surface_final = Surface((text_surface.get_width() + 4, text_surface.get_height() + 4), SRCALPHA)
+
+    text_surface_final.blit(text_shadow, (2, 2))
+    text_surface_final.blit(text_surface, (0, 0))
+
+    text_surface_final = transform.rotate(text_surface_final, 10)
+
+    screen.blit(text_surface_final, (size[0]//2 - text_surface_final.get_width()//2 + 100, size[1]//2 - 170))
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
@@ -837,7 +881,6 @@ if __name__ == "__main__":
     while navigation != 'exit':
         size = (screen.get_width(), screen.get_height())
         try:
-
             if navigation == 'game':
                 game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
@@ -850,6 +893,7 @@ if __name__ == "__main__":
                 navigation = UI[navigation]()
 
         except:
+            navigation = 'menu'
             crash(traceback.format_exc(), 'menu')
 
     display.quit()

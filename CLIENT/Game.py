@@ -153,6 +153,8 @@ def game(surf, username, token, host, port, size, music_enable):
     # =====================================================================
     display.set_caption("RahCraft")
 
+    rah.wallpaper(surf, size)
+
     connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
     surf.blit(connecting_text,
               rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
@@ -371,6 +373,11 @@ def game(surf, username, token, host, port, size, music_enable):
                 if e.type == QUIT:
                     quit_game()
                     return 'menu'
+
+                    # elif e.type == ACTIVEEVENT:
+                    #     if e.state == 1:
+                    #         paused = True
+                    #
 
                 elif e.type == MOUSEBUTTONDOWN and not paused:
                     if e.button == 1:
