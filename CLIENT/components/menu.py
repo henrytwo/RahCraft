@@ -436,14 +436,15 @@ class Inventory:
         self.item_slots = []
         self.holding = [0, 0]
 
-        self.recipe = json.load(open("data/tucrafting.json"))
+        self.recipes = json.load(open("data/tucrafting.json"))
 
-        self.crafting_grid = [[0, 0], [0, 0]]
+        self.crafting_grid = [[[0, 0], [0, 0]], [[0, 0], [0, 0]]]
         self.result = [0, 0]
 
     def recipe_check(self):
         current_recipe = [self.crafting_grid[x][y][0] for x in range(2) for y in range(2)]
         current_recipe = " ".join(list(map(str, current_recipe)))
+
         if current_recipe in self.recipes:
             self.resulting_item = [self.recipes[current_recipe]['result'], self.recipes[current_recipe]['quantity']]
         else:
@@ -493,6 +494,12 @@ class Inventory:
                 self.holding[1] -= 1
                 inv[1] += 1
 
+        elif self.holding[0] == 0:
+            half = inv[1] // 2
+
+            self.holding = [inv[0], half]
+            inv[1] -= half
+
         if self.holding[1] == 0:
             self.holding = [0, 0]
 
@@ -530,7 +537,25 @@ class Inventory:
 
         for row in range(len(self.crafting_grid)):
             for item in range(len(self.crafting_grid[row])):
-                draw.rect(surf, (0, 0, 0), (419 + 36*item, 120 + 36*row, 32, 32))
+                if self.crafting_grid[row][item][1] != 0:
+                    surf.blit(item_lib[self.crafting_grid[row][item][0]][1], (419 + 36 * item, 120 + 36 * row, 32, 32))
+                    surf.blit(rah.text(str(self.crafting_grid[row][item][1]), 10), (419 + 36 * item, 120 + 36 * row, 32, 32))
+
+                if Rect((419 + 36 * item, 120 + 36 * row, 32, 32)).collidepoint(mx, my):
+                    surf.blit(self.highlight, (419 + 36 * item, 120 + 36 * row, 32, 32))
+                    if l_click:
+                        self.crafting_grid[row][item] = self.check_stacking(self.crafting_grid[row][item][:], item_lib)
+                    elif r_click:
+                        self.crafting_grid[row][item] = self.single_add(self.crafting_grid[row][item][:], item_lib)
+
+        self.recipe_check()
+
+        if self.resulting_item[0] != 0:
+            surf.blit(item_lib[self.resulting_item[0]][1], (531, 140, 32, 32))
+            surf.blit(rah.text(str(self.resulting_item[1]), 10), (531, 140, 32, 32))
+
+            if Rect((531, 140, 32, 32)).collidepoint(mx, my) and l_click:
+                self.craft(item_lib)
 
         if self.holding[0] > 0:
             surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
@@ -609,6 +634,12 @@ class Crafting:
                 inv[0] = self.holding[0]
                 self.holding[1] -= 1
                 inv[1] += 1
+
+        elif self.holding[0] == 0:
+            half = inv[1] // 2
+
+            self.holding = [inv[0], half]
+            inv[1] -= half
 
         if self.holding[1] == 0:
             self.holding = [0, 0]
