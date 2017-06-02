@@ -318,13 +318,13 @@ def crash(error, previous):
 
     global screen
 
-    rah.wallpaper(screen, size)
+    #rah.wallpaper(screen, size)
 
-    #tint = Surface(size)
-    #tint.fill((0, 0, 255))
-    #tint.set_alpha(99)
+    tint = Surface(size)
+    tint.fill((0, 0, 255))
+    tint.set_alpha(99)
 
-    #screen.blit(tint, (0,0))
+    screen.blit(tint, (0,0))
 
     back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
 
@@ -373,6 +373,51 @@ def crash(error, previous):
 
         display.update()
 
+
+
+def information(message, previous):
+
+    global screen
+
+    rah.wallpaper(screen, size)
+
+    #tint = Surface(size)
+    #tint.fill((0, 0, 255))
+    #tint.set_alpha(99)
+
+    #screen.blit(tint, (0,0))
+
+    back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
+
+    message_list = list(map(str, message.split('\n')))
+
+    while True:
+        release = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'information', message, previous
+
+        mx, my = mouse.get_pos()
+        m_press = mouse.get_pressed()
+
+        for y in range(0, len(message_list)):
+            about_text = rah.text(message_list[y], 15)
+            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 10 + y * 20))
+
+        nav_update = back_button.update(screen, mx, my, m_press, 15, release)
+
+        if nav_update is not None:
+            return nav_update
+
+        display.update()
 
 def assistance():
     global screen
@@ -488,14 +533,18 @@ def server_picker():
         rah.wallpaper(screen, size)
 
         release = False
+        right_release = False
 
         for e in event.get():
 
             if e.type == QUIT:
                 return 'exit'
 
-            if e.type == MOUSEBUTTONUP and e.button == 1:
-                release = True
+            if e.type == MOUSEBUTTONUP:
+                if e.button == 1:
+                    release = True
+                elif e.button == 3:
+                    right_release = True
 
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
@@ -514,32 +563,57 @@ def server_picker():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
-        if (65 * len(server_list)) > size[1]:
-            if y_offset < -65 * (len(server_list) + 1 - size[1]//65):
-                y_offset = -65 * (len(server_list) + 1 - size[1]//65)
+        #Scrolling menu----------------------------------------------------
+
+        page_h = size[1] - 80
+
+        if (65 * len(server_list)) > page_h:
+            if y_offset < -65 * (len(server_list) + 1 - page_h//65):
+                y_offset = -65 * (len(server_list) + 1 - page_h//65)
             elif y_offset > 50:
                 y_offset = 50
         else:
             y_offset = 50
 
 
-        scroll_pos = int((y_offset/(-65 * len(server_list))) * size[1])
-        percent_visible = size[1]/(len(server_list) * 65)
+        scroll_pos = int((y_offset/(-65 * len(server_list))) * page_h)
+        percent_visible = page_h/(len(server_list) * 65)
 
-        bar_rect = Rect(size[0] - 20, 0, 20, size[1])
+        bar_rect = Rect(size[0] - 20, 0, 20, page_h)
 
         draw.rect(screen, (100,100,100), bar_rect)
-        draw.rect(screen,(230, 230, 230), (size[0] - 18, scroll_pos, 14, (percent_visible * size[1])))
+        draw.rect(screen,(230, 230, 230), (size[0] - 18, scroll_pos, 14, (percent_visible * page_h)))
 
         if bar_rect.collidepoint(mx, my) and m_press[0] == 1:
-            y_offset = int((my - (percent_visible * size[1])//2)/size[1] * -65 * len(server_list))
+            y_offset = int((my - (percent_visible * page_h)//2)/page_h * -65 * len(server_list))
 
-        nav_update = server_menu.update(screen, release, mx, my, m_press, y_offset, size)
+        #---------------------------------------------------------------------
+
+        nav_update = server_menu.update(screen, release, right_release, mx, my, m_press, y_offset, size)
 
         if nav_update:
-            host, port = nav_update[1], nav_update[2]
-            return nav_update[0]
+            if nav_update[0] == 'remove':
 
+                server_update = json.load(open('data/servers.json'))
+
+                for server in server_update:
+                    if server_update[server]['name'] == nav_update[1] and server_update[server]['host'] == nav_update[2] and server_update[server]['port'] == nav_update[3]:
+                        destroy_index = server
+                        break
+
+                del server_update[destroy_index]
+
+                with open('data/servers.json', 'w') as servers:
+                    json.dump(server_update, servers, indent=4, sort_keys=True)
+
+                return 'server_picker'
+
+            elif nav_update[0] == 'remove fail':
+                return 'information', "\n\n\n\n\nCouldn't delete server shortcut\nPermission denied", 'server_picker'
+
+            else:
+                host, port = nav_update[1], nav_update[2]
+                return nav_update[0]
 
         server_bar = Surface((size[0], 80))
         server_bar.fill((200, 200, 200))
@@ -668,14 +742,25 @@ def server_adder():
                 release = True
 
             if e.type == KEYDOWN:
-                if e.key == K_RETURN and host and port:
+                if e.key == K_RETURN and fields['Name'][1] and fields['Host'][1] and fields['Port'][1]:
+
+                    if not fields['Port'][1].isdigit():
+                        return 'information', "\n\n\n\n\nCouldn't add server\nInvalid entry for port", 'add_server'
+
+                    server_update = json.load(open('data/servers.json'))
+
+                    for server in server_update:
+                        if server_update[server]['name'] == fields['Name'][1]:
+                            return 'information', "\n\n\n\n\nCouldn't add server\nName conflicts with previous entry", 'add_server'
+
                     name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
 
-                    server_update = json.load(open('servers.json'))
                     server_update.update({str(len(server_update)): {"name": name, "host": host, "port": port}})
 
                     with open('data/servers.json', 'w') as servers:
-                        json.dump(server_update, servers, indent = 4, sort_keys = True)
+                        json.dump(server_update, servers, indent=4, sort_keys=True)
+
+                    return 'server_picker'
 
                 if e.key == K_TAB:
                     field_list.insert(0, field_list[-1])
@@ -695,9 +780,17 @@ def server_adder():
 
             if nav_update == 'server_picker' and fields['Name'][1] and fields['Host'][1] and fields['Port'][1]:
 
-                name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
+                if not fields['Port'][1].is_digit():
+                    return 'information', "\n\n\n\n\nCouldn't add server\nInvalid entry for port", 'add_server'
 
                 server_update = json.load(open('data/servers.json'))
+
+                for server in server_update:
+                    if server_update[server]['name'] == fields['Name'][1]:
+                        return 'information', "\n\n\n\n\nCouldn't add server\nName conflicts with previous entry", 'add_server'
+
+                name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
+
                 server_update.update({str(len(server_update)):{"name":name, "host":host, "port":port}})
 
                 with open('data/servers.json', 'w') as servers:
@@ -882,6 +975,7 @@ if __name__ == "__main__":
           'server_picker': server_picker,
           'custom_server_picker': custom_server_picker,
           'add_server': server_adder,
+          'information': information,
           'auth': authenticate,
           'reject':reject
           }
@@ -896,6 +990,9 @@ if __name__ == "__main__":
 
             elif navigation[0] == 'crash':
                 navigation = crash(navigation[1], navigation[2])
+
+            elif navigation[0] == 'information':
+                navigation = information(navigation[1], navigation[2])
 
             else:
                 navigation = UI[navigation]()
