@@ -494,6 +494,12 @@ class Inventory:
                 self.holding[1] -= 1
                 inv[1] += 1
 
+        elif self.holding[0] == 0:
+            half = inv[1] // 2
+
+            self.holding = [inv[0], half]
+            inv[1] -= half
+
         if self.holding[1] == 0:
             self.holding = [0, 0]
 
@@ -628,6 +634,12 @@ class Crafting:
                 inv[0] = self.holding[0]
                 self.holding[1] -= 1
                 inv[1] += 1
+
+        elif self.holding[0] == 0:
+            half = inv[1] // 2
+
+            self.holding = [inv[0], half]
+            inv[1] -= half
 
         if self.holding[1] == 0:
             self.holding = [0, 0]
