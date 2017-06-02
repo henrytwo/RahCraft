@@ -266,7 +266,7 @@ def game(surf, username, token, host, port, size, music_enable):
     tick_timer = time.set_timer(TICKEVENT, 50)
     current_tick = 0
 
-    sky = transform.scale(image.load("textures/sky/sky.png"), (5600, 800))
+    #sky = transform.scale(image.load("textures/sky/sky.png"), (5600, 800))
     sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
     moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
     sky_tick = 1
@@ -407,11 +407,8 @@ def game(surf, username, token, host, port, size, music_enable):
                     if e.key == K_F3:
                         debug = not debug
 
-                    if e.key == K_SLASH:
-                        if current_gui == 'CH':
-                            current_gui = ''
-
-                        chat_enable = not chat_enable
+                    if e.key == K_SLASH and not current_gui:
+                        chat_enable = True
                         current_gui = 'CH'
 
                     if chat_enable and e.key == K_RETURN:
@@ -430,6 +427,7 @@ def game(surf, username, token, host, port, size, music_enable):
                             inventory_visible = False
                             current_gui = ''
                         elif current_gui == 'CH':
+                            chat.content = ''
                             chat_enable = False
                             current_gui = ''
                         elif current_gui == '' or current_gui == 'P':
@@ -556,7 +554,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     sky_tick = tick_offset + tick
 
-                    send_queue.put(([(101, username), SERVERADDRESS]))
+                    for repeat in range(5):
+                        send_queue.put(([(101, username), SERVERADDRESS]))
 
             except:
                 pass
@@ -574,8 +573,10 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     rah.rahprint("Reset")
 
-            surf.fill((255, 0, 0))
-            surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
+            print(sky_tick)
+
+            surf.fill(int(sky_tick))
+            #surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
             surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
 
@@ -748,7 +749,9 @@ def game(surf, username, token, host, port, size, music_enable):
                               "Hotbar Slot: %i" % hotbar_slot,
                               "Block Selected: %s" % str(item_lib[hotbar_items[hotbar_slot][0]][0]),
                               "Mouse Pos: %i, %i" % ((mx + x_offset) // block_size, (my + y_offset) // block_size),
-                              "Update Cost: %i" % update_cost]
+                              "Update Cost: %i" % update_cost,
+                              "Time: %s" % sky_tick,
+                              "Token: %s" % token[0:10]]
 
                 for y in range(0, len(debug_list)):
                     about_text = rah.text(debug_list[y], 15)

@@ -445,6 +445,9 @@ if __name__ == '__main__':
                 except:
                     send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
 
+            elif message[1].lower()[:5] == '/sync':
+                messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
+                send_message = "Server synchronized"
 
             else:
                 if address in players:
@@ -468,12 +471,11 @@ if __name__ == '__main__':
             kill_list = []
 
             for p in players:
-
                 if p in active_players:
-                    sendQueue.put((message, p))
+                    for repeat in range(5):
+                        sendQueue.put((message, p))
 
                 else:
-
                     kill_list.append(p)
 
             for p in kill_list:
@@ -501,5 +503,6 @@ if __name__ == '__main__':
             active_players = []
 
         elif command == 101:
-            active_players.append(address)
+            if address not in active_players:
+                active_players.append(address)
             print('[Server] %s has responded to heartbeat'%message[1])
