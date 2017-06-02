@@ -8,30 +8,5 @@
         "host": "rahmish.com",
         "name": "Rahmish Imperial",
         "port": 5276
-    },
-    "2": {
-        "host": "223",
-        "name": "sadsad",
-        "port": 2323
-    },
-    "3": {
-        "host": "3223",
-        "name": "sdsadd",
-        "port": 2323
-    },
-    "4": {
-        "host": "2323",
-        "name": "asdsadsd",
-        "port": 3232
-    },
-    "5": {
-        "host": "2323",
-        "name": "asdsaddsa",
-        "port": 32323
-    },
-    "6": {
-        "host": "2323",
-        "name": "sads",
-        "port": 33
     }
 }

@@ -313,6 +313,8 @@ class ServerButton:
         self.host = host
         self.port = port
 
+        self.do_not_destroy = ['Rahmish Imperial', 'Localhost']
+
     def draw_button(self, surf, inner, outer):
         draw.rect(surf, outer, self.rect)
         draw.rect(surf, inner, (self.rect.x + 2, self.rect.y + 2, self.rect.w - 4, self.rect.h - 4))
@@ -326,7 +328,7 @@ class ServerButton:
     def idle(self, surf):
         self.draw_button(surf, (20, 20, 20), (250, 250, 250))
 
-    def update(self, surf, mx, my, m_press, release, size):
+    def update(self, surf, mx, my, m_press, release, right_release, size):
         if self.rect.collidepoint(mx, my):
             if m_press[0]:
                 self.mouse_down(surf)
@@ -337,6 +339,12 @@ class ServerButton:
                 rah.load_sound(['sound/random/click.ogg'])
 
                 return ['game', self.host, self.port]
+
+            elif right_release and my < size[1] - 80:
+                if self.title not in self.do_not_destroy:
+                    return ['remove', self.title, self.host, self.port]
+                else:
+                    return ['remove fail']
 
             else:
                 self.highlight(surf)
@@ -389,13 +397,13 @@ class ScrollingMenu:
 
             self.button_list.append(ServerButton(button_x, button_y, BUTTON_W, BUTTON_H, title, host, port))
 
-    def update(self, surf, release, mx, my, m_press, y_offset, size):
+    def update(self, surf, release, right_release, mx, my, m_press, y_offset, size):
         click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
         hover_over_button = False
 
         for button in self.button_list:
-            nav_update = button.update(surf, mx, my, m_press, release, size)
+            nav_update = button.update(surf, mx, my, m_press, release, right_release, size)
 
             button.rect.y = y_offset + self.button_list.index(button) * 65
 
