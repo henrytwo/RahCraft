@@ -128,9 +128,9 @@ def game(surf, username, token, host, port, size, music_enable):
                         surf.blit(breaking_animation[int(percent_broken)],
                                   (x - x_offset % block_size, y - y_offset % block_size))
 
-                elif block < 0:
-                    draw.rect(surf, (100, 100, 100),
-                              (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
+                # elif block < 0:
+                #     draw.rect(surf, (100, 100, 100),
+                #               (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
     def render_hotbar(hotbar_slot):
         surf.blit(hotbar, hotbarRect)
@@ -285,7 +285,7 @@ def game(surf, username, token, host, port, size, music_enable):
     fly = False
     inventory_visible = False
     chat_enable = False
-    debug = False
+    debug = True
 
     pause_list = [[0, 'unpause', "Back to game"],
                   [1, 'options', "Options"],
@@ -475,19 +475,18 @@ def game(surf, username, token, host, port, size, music_enable):
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
-            block_clip = (
-            local_player.rect.x // block_size, local_player.rect.y // block_size)
+            block_clip = (local_player.rect.x, local_player.rect.y)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
-            if x_offset <= 0:
-                x_offset = 1
-            elif x_offset >= world_size_x:
-                x_offset = world_size_x - 1
-
-            if y_offset >= world_size_y:
-                y_offset = world_size_y - 1
-            elif y_offset <= 0:
-                y_offset = 1
+            # if x_offset <= 0:
+            #     x_offset = 1
+            # elif x_offset >= world_size_x:
+            #     x_offset = world_size_x - 1
+            #
+            # if y_offset >= world_size_y:
+            #     y_offset = world_size_y - 1
+            # elif y_offset <= 0:
+            #     y_offset = 1
 
             if inventory_updated:
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
@@ -596,13 +595,13 @@ def game(surf, username, token, host, port, size, music_enable):
             surf.fill(int(sky_tick))
 
 
-            for y in range(size[1]):
-
-                r = 0
-                g = 0
-                b = int(((y_offset // block_size)/world_size_y) * 255)
-
-                draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
+            # for y in range(size[1]):
+            #
+            #     r = 0
+            #     g = 0
+            #     b = int(((y_offset // block_size)/world_size_y) * 255)
+            #
+            #     draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
 
             #surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))

@@ -56,6 +56,7 @@ class Player(object):
         try:
             return PlayerData[self.username]
         except KeyError:
+
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)],
                                          [[8, 64] for _ in range(9)],
