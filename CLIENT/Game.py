@@ -233,6 +233,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
                                  (K_a, K_d, K_w, K_s, K_SPACE))
+
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
@@ -359,6 +360,9 @@ def game(surf, username, token, host, port, size, music_enable):
 
     try:
         while True:
+
+            print(x_offset, y_offset)
+
             release = False
             on_tick = False
             block_broken = False
