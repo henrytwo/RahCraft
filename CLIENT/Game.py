@@ -128,9 +128,9 @@ def game(surf, username, token, host, port, size, music_enable):
                         surf.blit(breaking_animation[int(percent_broken)],
                                   (x - x_offset % block_size, y - y_offset % block_size))
 
-                elif block < 0:
-                    draw.rect(surf, (0, 0, 0),
-                              (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
+                # elif block < 0:
+                #     draw.rect(surf, (100, 100, 100),
+                #               (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
     def render_hotbar(hotbar_slot):
         surf.blit(hotbar, hotbarRect)
@@ -183,7 +183,7 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
-    block_size = 20
+    block_size = 25
     build = 'RahCraft v0.1.1 EVALUATION'
 
     # Chat
@@ -199,7 +199,7 @@ def game(surf, username, token, host, port, size, music_enable):
     item_properties = load_items("items.json")
 
     item_lib = create_item_dictionary(block_properties, tool_properties, item_properties)
-    rah.rahprint(item_lib)
+    print(item_lib)
     breaking_animation = [
         transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
         in range(10)]
@@ -216,7 +216,7 @@ def game(surf, username, token, host, port, size, music_enable):
             sender.terminate()
             receiver.terminate()
             commandline.terminate()
-            return "crash", first_message[1], 'login'
+            return 'information', first_message[1], 'server_picker'
         elif first_message[0] == 0:
             break
 
@@ -226,8 +226,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     reach = 5
 
-    player_x = int(float(player_x_) * 20 - size[0] // 2)
-    player_y = int(float(player_y_) * 20 - size[1] // 2)
+    player_x = int(float(player_x_)/block_size * 20 - size[0] // 2)
+    player_y = int(float(player_y_)/block_size * 20 - size[1] // 2)
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
@@ -285,7 +285,7 @@ def game(surf, username, token, host, port, size, music_enable):
     fly = False
     inventory_visible = False
     chat_enable = False
-    debug = False
+    debug = True
 
     pause_list = [[0, 'unpause', "Back to game"],
                   [1, 'options', "Options"],
@@ -355,7 +355,7 @@ def game(surf, username, token, host, port, size, music_enable):
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
 
-    rah.rahprint("ini done")
+    print("ini done")
 
     try:
         while True:
@@ -387,12 +387,16 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     if e.button == 4:
 
+                        block_size -= 1
+
                         hotbar_slot = max(-1, hotbar_slot - 1)
 
                         if hotbar_slot == -1:
                             hotbar_slot = 8
 
                     elif e.button == 5:
+
+                        block_size += 1
 
                         hotbar_slot = min(9, hotbar_slot + 1)
 
@@ -470,14 +474,24 @@ def game(surf, username, token, host, port, size, music_enable):
 
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
-            block_clip = (
-            local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
+
+            block_clip = (local_player.rect.x, local_player.rect.y)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
+
+            # if x_offset <= 0:
+            #     x_offset = 1
+            # elif x_offset >= world_size_x:
+            #     x_offset = world_size_x - 1
+            #
+            # if y_offset >= world_size_y:
+            #     y_offset = world_size_y - 1
+            # elif y_offset <= 0:
+            #     y_offset = 1
 
             if inventory_updated:
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
             if on_tick:
-                send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
+                send_queue.put(([(1, local_player.rect.x/block_size, local_player.rect.y/block_size), SERVERADDRESS]))
 
             displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
                                offset_clip.y:offset_clip.y + size[1] // block_size + 5]
@@ -493,10 +507,11 @@ def game(surf, username, token, host, port, size, music_enable):
                 server_message = message_queue.get_nowait()
                 command, message = server_message[0], server_message[1:]
 
+
                 if command == 1:
                     remote_username, current_x, current_y = message
                     if remote_username in remote_players:
-                        remote_players[remote_username].calculate_velocity((current_x, current_y), tickPerFrame)
+                        remote_players[remote_username].calculate_velocity((current_x * block_size, current_y * block_size), tickPerFrame)
 
                     else:
                         if type(current_y) is str:
@@ -547,6 +562,10 @@ def game(surf, username, token, host, port, size, music_enable):
                 elif command == 10:
                     chat_list.append(message[0])
 
+                elif command == 11:
+                    quit_game()
+                    return 'information', message[0], 'menu'
+
                 elif command == 100:
                     send_time, tick = message
 
@@ -573,9 +592,17 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     rah.rahprint("Reset")
 
-            rah.rahprint(sky_tick)
-
             surf.fill(int(sky_tick))
+
+
+            # for y in range(size[1]):
+            #
+            #     r = 0
+            #     g = 0
+            #     b = int(((y_offset // block_size)/world_size_y) * 255)
+            #
+            #     draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
+
             #surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
             surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
@@ -600,7 +627,6 @@ def game(surf, username, token, host, port, size, music_enable):
             # ==========================Mouse Interaction=================================
             mb = mouse.get_pressed()
             mx, my = mouse.get_pos()
-            rah.rahprint((mx, my))
 
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
@@ -758,7 +784,6 @@ def game(surf, username, token, host, port, size, music_enable):
                     surf.blit(about_text, (size[0] - about_text.get_width() - 10, 10 + y * 20))
 
             display.update()
-            display.set_caption("RahCraft // FPS - {0}".format(clock.get_fps()))
             clock.tick(120)
 
     except:
