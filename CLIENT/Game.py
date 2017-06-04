@@ -183,7 +183,7 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
-    block_size = 25
+    block_size = 20
     build = 'RahCraft v0.1.1 EVALUATION'
 
     # Chat
@@ -199,7 +199,7 @@ def game(surf, username, token, host, port, size, music_enable):
     item_properties = load_items("items.json")
 
     item_lib = create_item_dictionary(block_properties, tool_properties, item_properties)
-    print(item_lib)
+    rah.rahprint(item_lib)
     breaking_animation = [
         transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
         in range(10)]
@@ -355,7 +355,7 @@ def game(surf, username, token, host, port, size, music_enable):
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
 
-    print("ini done")
+    rah.rahprint("ini done")
 
     try:
         while True:
@@ -573,7 +573,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     rah.rahprint("Reset")
 
-            print(sky_tick)
+            rah.rahprint(sky_tick)
 
             surf.fill(int(sky_tick))
             #surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
@@ -600,7 +600,7 @@ def game(surf, username, token, host, port, size, music_enable):
             # ==========================Mouse Interaction=================================
             mb = mouse.get_pressed()
             mx, my = mouse.get_pos()
-            print(mx, my)
+            rah.rahprint((mx, my))
 
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
@@ -758,6 +758,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     surf.blit(about_text, (size[0] - about_text.get_width() - 10, 10 + y * 20))
 
             display.update()
+            display.set_caption("RahCraft // FPS - {0}".format(clock.get_fps()))
             clock.tick(120)
 
     except:

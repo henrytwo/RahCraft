@@ -20,7 +20,7 @@ class Player:
         self.vx_inc = 0.15
         self.vy_inc = 0.5
 
-        self.base_vy = -(cap // 10 + 3)
+        self.base_vy = -(cap // 10 + 4)
 
         self.max_walk_vx = cap // 10
         self.max_dash_vx = cap // 5
