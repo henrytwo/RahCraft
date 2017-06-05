@@ -109,7 +109,7 @@ class Player(object):
         # self.saturation = 10
 
     def save(self, block_size):
-        return [(self.cord[0], self.cord[1]), self.spawnCord, self.inventory, self.hotbar,
+        return [(self.cord[0] // block_size, self.cord[1] // block_size), self.spawnCord, self.inventory, self.hotbar,
                 self.health, self.hunger]
 
 

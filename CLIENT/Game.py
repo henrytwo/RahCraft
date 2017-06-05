@@ -226,8 +226,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     reach = 5
 
-    player_x = int(float(player_x_)/block_size * 20 - size[0] // 2)
-    player_y = int(float(player_y_)/block_size * 20 - size[1] // 2)
+    player_x = int(float(player_x_) * 20 - size[0] // 2)
+    player_y = int(float(player_y_) * 20 - size[1] // 2)
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
@@ -479,7 +479,7 @@ def game(surf, username, token, host, port, size, music_enable):
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
-            block_clip = (local_player.rect.x, local_player.rect.y)
+            block_clip = (local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
             # if x_offset <= 0:
@@ -495,7 +495,7 @@ def game(surf, username, token, host, port, size, music_enable):
             if inventory_updated:
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
             if on_tick:
-                send_queue.put(([(1, local_player.rect.x/block_size, local_player.rect.y/block_size), SERVERADDRESS]))
+                send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
 
             displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
                                offset_clip.y:offset_clip.y + size[1] // block_size + 5]
