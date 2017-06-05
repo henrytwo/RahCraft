@@ -59,7 +59,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)],
-                                         [[8, 64] for _ in range(9)],
+                                         [[201, 64] for _ in range(9)],
                                          10, 10]
 
             # print(PlayerData[self.username])
@@ -440,17 +440,23 @@ if __name__ == '__main__':
                 elif message[1].lower()[:4] == '/say':
                     send_message =  message[1][4:]
 
-                elif message[1].lower()[:5] == '/give':
+                elif message[1].lower()[:6] == '/clear':
+                    players[address].inventory =[[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)]
+                    players[address].hotbar = [[8, 64] for _ in range(9)]
 
-                    print(message[1])
+                elif message[1].lower()[:5] == '/give':
 
                     executor = players[address].username
                     receiver = message[1][6:message[1][-1].find(' ') - 3]
-                    item = message[1][message[1][-1].find(' '):]
+                    item, quantity = message[1][message[1].rfind(' ') + 1:].split(',')
 
-                    print(executor, receiver, item)
+                    print(item, 'split',quantity)
 
-                    send_message = '%s gave %s %s'%(executor, receiver, item)
+                    players[address].hotbar[0] = [int(item), int(quantity)]
+
+                    players[address].change_inventory_all(players[address].inventory, players[address].hotbar)
+
+                    send_message = '%s gave %s %s of %s'%(executor, receiver, quantity, item)
 
                 elif message[1].lower()[:5] == '/kick':
 
@@ -492,7 +498,7 @@ if __name__ == '__main__':
 
                     send_message = '[%s] %s' % (user_sending, message[1])
 
-                if send_message[0] != '[':
+                if send_message and send_message[0] != '[':
                     send_message = '[Server] ' + send_message
 
                 for i in players:
@@ -543,4 +549,6 @@ if __name__ == '__main__':
                 print('[Server] %s has responded to heartbeat'%message[1])
 
         except:
-            sendQueue.put(((11, '\n\n\nDisconnected from server'), address))
+            sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAn error has occured'), address))
+
+            print(traceback.format_exc())

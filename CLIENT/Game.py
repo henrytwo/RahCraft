@@ -370,6 +370,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Crafting
     # =====================================================================
+
     crafting_object = menu.Crafting(size[0], size[1])
 
     crafting = False
@@ -420,16 +421,12 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     if e.button == 4:
 
-                        block_size -= 1
-
                         hotbar_slot = max(-1, hotbar_slot - 1)
 
                         if hotbar_slot == -1:
                             hotbar_slot = 8
 
                     elif e.button == 5:
-
-                        block_size += 1
 
                         hotbar_slot = min(9, hotbar_slot + 1)
 
@@ -495,6 +492,19 @@ def game(surf, username, token, host, port, size, music_enable):
                             else:
                                 current_gui = ''
 
+                elif e.type == VIDEORESIZE:
+                    surf = display.set_mode((e.w, e.h), RESIZABLE)
+                    size = ((e.w, e.h))
+
+                    chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
+                    pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
+                    inventory_object = menu.Inventory(0, 0, size[0], size[1])
+                    hotbarRect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
+                    crafting_object = menu.Crafting(size[0], size[1])
+
+                    tint = Surface(size)
+                    tint.fill((0, 0, 0))
+                    tint.set_alpha(99)
 
                 elif e.type == TICKEVENT:
                     event.clear(TICKEVENT)
@@ -702,6 +712,7 @@ def game(surf, username, token, host, port, size, music_enable):
                             current_breaking = []
 
                     if block_broken:
+
                         rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]]['sound']])
 
                         if block_properties[world[hover_x, hover_y]]['tool-required']:
