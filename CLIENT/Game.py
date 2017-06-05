@@ -50,6 +50,8 @@ def load_blocks(block_file, block_size):
                               'collision':block_data[block]['collision'],
                               'icon': transform.scale(image.load("textures/icons/" + block_data[block]['icon']).convert_alpha(), (32, 32)),
                               'tool':block_data[block]['tool'],
+                              'drop':block_data[block]['drop'],
+                              'tool-required': True if block_data[block]['tool-required'] == 1 else False,
                               'maxstack':block_data[block]['maxstack']}
 
     return blocks
@@ -101,6 +103,34 @@ def commandline_in(commandline_queue, fn, address, chat_queue):
     while True:
         commandline_queue.put(((10, chat_queue.get()), address))
 
+def pickup_item(inventory, hotbar, item, item_lib):
+    item_location = ''
+    inventory_type = ''
+    print(inventory, hotbar, item_lib)
+
+    for item in range(len(hotbar)):
+        if hotbar[item][0] == item and hotbar[item][1] < item_lib[hotbar[item][0]][2]:
+            hotbar[item][1] += 1
+            return inventory, hotbar
+        elif hotbar[item][0] == 0 and inventory_type == '':
+            item_location = item
+            inventory_type = 'hotbar'
+
+    for row in range(len(inventory)):
+        for item in range(len(inventory[row])):
+            if inventory[row][item][0] == item and inventory[row][item][1] < item_lib[inventory[row][item][0]][2]:
+                inventory[row][item][1] += 1
+                return inventory, hotbar
+            elif inventory[row][item][0] == 0 and inventory_type == '':
+                item_location = [row, item]
+                inventory = 'inventory'
+
+    if item_location == 'hotbar':
+        hotbar[item_location] = [item, 1]
+    elif inventory_type == 'inventory':
+        inventory[item_location[0]][item_location[1]] = [item, 1]
+
+    return inventory, hotbar
 
 def game(surf, username, token, host, port, size, music_enable):
     def quit_game():
@@ -355,7 +385,7 @@ def game(surf, username, token, host, port, size, music_enable):
     highlight_bad = Surface((block_size, block_size))
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
-
+    inventory_updated = False
     print("ini done")
 
     try:
@@ -370,7 +400,6 @@ def game(surf, username, token, host, port, size, music_enable):
             r_click = False
             l_click = False
             pass_event = None
-            inventory_updated = False
 
             for e in event.get():
                 pass_event = e
@@ -494,6 +523,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             if inventory_updated:
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
+                inventory_updated = False
             if on_tick:
                 send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
 
@@ -673,6 +703,14 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     if block_broken:
                         rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]]['sound']])
+
+                        if block_properties[world[hover_x, hover_y]]['tool-required']:
+                            if tool_properties[current_tool]['type'] == block_properties[world[hover_x, hover_y]]['tool']:
+                                inventory_items, hotbar_items = pickup_item(inventory_items, hotbar_items, block_properties[world[hover_x, hover_y]]['drop'], item_lib)
+                        else:
+                            inventory_items, hotbar_items = pickup_item(inventory_items, hotbar_items, block_properties[world[hover_x, hover_y]]['drop'], item_lib)
+
+                        inventory_updated = True
 
                         block_request.add((hover_x, hover_y))
                         send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
