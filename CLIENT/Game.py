@@ -103,32 +103,37 @@ def commandline_in(commandline_queue, fn, address, chat_queue):
     while True:
         commandline_queue.put(((10, chat_queue.get()), address))
 
-def pickup_item(inventory, hotbar, item, item_lib):
+
+def pickup_item(inventory, hotbar, Nitem, item_lib):
     item_location = ''
     inventory_type = ''
-    print(inventory, hotbar, item_lib)
-
+    print(Nitem)
     for item in range(len(hotbar)):
-        if hotbar[item][0] == item and hotbar[item][1] < item_lib[hotbar[item][0]][2]:
+        print(item, 'hotbar')
+        if hotbar[item][0] == Nitem and hotbar[item][1] < item_lib[hotbar[item][0]][2]:
             hotbar[item][1] += 1
             return inventory, hotbar
         elif hotbar[item][0] == 0 and inventory_type == '':
             item_location = item
             inventory_type = 'hotbar'
 
+    print('noh')
     for row in range(len(inventory)):
         for item in range(len(inventory[row])):
-            if inventory[row][item][0] == item and inventory[row][item][1] < item_lib[inventory[row][item][0]][2]:
+            if inventory[row][item][0] == Nitem and inventory[row][item][1] < item_lib[inventory[row][item][0]][2]:
                 inventory[row][item][1] += 1
                 return inventory, hotbar
             elif inventory[row][item][0] == 0 and inventory_type == '':
                 item_location = [row, item]
-                inventory = 'inventory'
+                inventory_type = 'inventory'
+    print('noi')
 
-    if item_location == 'hotbar':
-        hotbar[item_location] = [item, 1]
+    print(item_location, inventory_type)
+
+    if inventory_type == 'hotbar':
+        hotbar[item_location] = [Nitem, 1]
     elif inventory_type == 'inventory':
-        inventory[item_location[0]][item_location[1]] = [item, 1]
+        inventory[item_location[0]][item_location[1]] = [Nitem, 1]
 
     return inventory, hotbar
 
@@ -391,9 +396,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
     try:
         while True:
-
-            print(x_offset, y_offset)
-
             release = False
             on_tick = False
             block_broken = False
@@ -716,8 +718,10 @@ def game(surf, username, token, host, port, size, music_enable):
                         rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]]['sound']])
 
                         if block_properties[world[hover_x, hover_y]]['tool-required']:
-                            if tool_properties[current_tool]['type'] == block_properties[world[hover_x, hover_y]]['tool']:
-                                inventory_items, hotbar_items = pickup_item(inventory_items, hotbar_items, block_properties[world[hover_x, hover_y]]['drop'], item_lib)
+                            if hotbar_items[hotbar_slot][0] in tool_properties:
+                                current_tool = hotbar_items[hotbar_slot][0]
+                                if tool_properties[current_tool]['type'] == block_properties[world[hover_x, hover_y]]['tool']:
+                                    inventory_items, hotbar_items = pickup_item(inventory_items, hotbar_items, block_properties[world[hover_x, hover_y]]['drop'], item_lib)
                         else:
                             inventory_items, hotbar_items = pickup_item(inventory_items, hotbar_items, block_properties[world[hover_x, hover_y]]['drop'], item_lib)
 
