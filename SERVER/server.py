@@ -440,6 +440,18 @@ if __name__ == '__main__':
                 elif message[1].lower()[:4] == '/say':
                     send_message =  message[1][4:]
 
+                elif message[1].lower()[:5] == '/give':
+
+                    print(message[1])
+
+                    executor = players[address].username
+                    receiver = message[1][6:message[1][-1].find(' ') - 3]
+                    item = message[1][message[1][-1].find(' '):]
+
+                    print(executor, receiver, item)
+
+                    send_message = '%s gave %s %s'%(executor, receiver, item)
+
                 elif message[1].lower()[:5] == '/kick':
 
                     kick_name = message[1][6:]
