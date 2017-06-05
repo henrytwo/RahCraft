@@ -29,14 +29,14 @@
 	},
 	"104": {
 		"name": "Stone Shovel",
-		"icon": "stone_pickaxe.png",
+		"icon": "stone_shovel.png",
 		"bonus": 3,
 		"speed": 1,
 		"type": "shovel"
 	},
 	"105": {
 		"name": "Stone Axe",
-		"icon": "stone_pickaxe.png",
+		"icon": "stone_axe.png",
 		"bonus": 3,
 		"speed": 1,
 		"type": "axe"
@@ -50,14 +50,14 @@
 	},
 	"107": {
 		"name": "Iron Shovel",
-		"icon": "iron_pickaxe.png",
+		"icon": "iron_shovel.png",
 		"bonus": 5,
 		"speed": 1,
 		"type": "shovel"
 	},
 	"108": {
 		"name": "Iron Axe",
-		"icon": "iron_pickaxe.png",
+		"icon": "iron_axe.png",
 		"bonus": 5,
 		"speed": 1,
 		"type": "axe"
@@ -92,14 +92,14 @@
 	},
 	"113": {
 		"name": "Diamond Shovel",
-		"icon": "diamond_pickaxe.png",
+		"icon": "diamond_shovel.png",
 		"bonus": 8,
 		"speed": 1,
 		"type": "shovel"
 	},
 	"114": {
 		"name": "Diamond Axe",
-		"icon": "diamond_pickaxe.png",
+		"icon": "diamond_axe.png",
 		"bonus": 8,
 		"speed": 1,
 		"type": "axe"

@@ -10,5 +10,21 @@
   "8 8 8 8": {
     "result": 10,
     "quantity": 1
+  },
+  "5 0 0 0": {
+    "result": 8,
+    "quantity": 4
+  },
+  "0 5 0 0": {
+    "result": 8,
+    "quantity": 4
+  },
+  "0 0 5 0": {
+    "result": 8,
+    "quantity": 4
+  },
+  "0 0 0 5": {
+    "result": 8,
+    "quantity": 4
   }
 }
