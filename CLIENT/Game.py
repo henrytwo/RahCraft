@@ -128,7 +128,9 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):
                 inventory_type = 'inventory'
     print('noi')
 
-    if item_location == 'hotbar':
+    print(item_location, inventory_type)
+
+    if inventory_type == 'hotbar':
         hotbar[item_location] = [Nitem, 1]
     elif inventory_type == 'inventory':
         inventory[item_location[0]][item_location[1]] = [Nitem, 1]
