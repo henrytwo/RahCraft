@@ -1,6 +1,7 @@
 from pygame import *
 import numpy
-import components.rahma as rah
+
+import CLIENT.components.rahma as rah
 
 font.init()
 
@@ -89,7 +90,7 @@ class Player:
 
         for block in blocks:
             if self.rect.colliderect(block):
-                if self.vy > 0:
+                if self.vy >= 0:
                     self.rect.bottom = block.top
                     self.standing = True
                 elif self.vy < 0:

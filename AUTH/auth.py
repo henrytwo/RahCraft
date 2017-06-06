@@ -1,27 +1,28 @@
 import socket
 from multiprocessing import *
 from threading import *
-import pickle
 import uuid
 import MySQLdb
+import pickle
 import time
 
 with open("data/config.rah", "r") as config_file:
     config = config_file.read().strip().split('\n')
-    
+
     channel = config[0]
     slack_enable = config[1]
 
 with open("data/mysql.rah") as sql:
-    sqlpasswd = sql.read().strip()
+    sql_password = sql.read().strip()
+
 
 def import_users(que):
-    global sqlpasswd
-    
+    global sql_password
+
     while True:
         user = {}
 
-        db = MySQLdb.connect(host='localhost', user='root', passwd=sqlpasswd, db='Rahmish')
+        db = MySQLdb.connect(host='localhost', user='root', passwd=sql_password, db='Rahmish')
 
         cur = db.cursor()
 
@@ -35,7 +36,7 @@ def import_users(que):
         print("[Update]", user)
 
         if slack_enable:
-            broadcast(channel, "[Update] %s"%user)
+            broadcast(channel, "[Update] %s" % user)
 
         que.put(user)
 
@@ -46,7 +47,6 @@ tokens = {}
 
 
 def gen_token(credentials):
-
     global tokens
 
     username = credentials[0]
@@ -59,30 +59,32 @@ def credential_login(credentials, user):
     print("[Login]", user, credentials)
 
     if slack_enable:
-        broadcast(channel, "[Login] %s"%credentials)
+        broadcast(channel, "[Login] %s" % credentials)
 
     if credentials[0] in user and user[credentials[0]] == credentials[1]:
         return 1, gen_token(credentials)
     else:
         return 400,
 
+
 def token_login(token, user, tokens):
     print("[Login]", token)
 
     if slack_enable:
-        broadcast(channel, "[Login] %s"%token)
+        broadcast(channel, "[Login] %s" % token)
 
     if token[0] in user and token[0] in tokens and tokens[token[0]] == token[1]:
         return 1, token
     else:
         return 400,
 
-def auth(token, user, tokens):
 
+def auth(token, user, tokens):
     if token[0] in user and token[0] in tokens and tokens[token[0]] == token[1]:
         return 1,
     else:
         return 400,
+
 
 def receive_info(conn, addr):
     global active_user
@@ -127,7 +129,8 @@ if __name__ == '__main__':
     print("Auth Server binded to %s:%i" % (host, port))
 
     if slack_enable:
-        from components.slack import *
+        from AUTH.components.slack import *
+
         config_slack()
 
     thing = None

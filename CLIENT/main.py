@@ -4,17 +4,15 @@ import socket
 import hashlib
 import traceback
 
-import components.rahma as rah
-import components.menu as menu
-import Game as Game
+import CLIENT.components.rahma as rah
+import CLIENT.components.menu as menu
+import CLIENT.Game as Game
 import webbrowser
 import json
 from random import *
 
 
 def login():
-
-
     display.set_caption("RahCraft Authentication Service")
 
     global username, password, host, port, token, screen
@@ -44,12 +42,11 @@ def login():
     except ValueError:
 
         with open('data/session.json', 'w') as session_file:
-            json.dump({"token":"","name":""}, session_file, indent = 4, sort_keys = True)
+            json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
     test = menu.Switch(20, 20, 100, 40, False, 'Test')
     test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
     test2 = menu.Slider(20, 110, 400, 40, False, 'Test')
-
 
     username, password = '', ''
 
@@ -175,7 +172,7 @@ def authenticate():
                     token = str(first_message[1])
 
                 with open('data/session.json', 'w') as session_file:
-                    json.dump({"token":"%s"%token,"name":"%s"%username}, session_file, indent=4, sort_keys=True)
+                    json.dump({"token": "%s" % token, "name": "%s" % username}, session_file, indent=4, sort_keys=True)
 
                 online = True
                 server.close()
@@ -188,20 +185,19 @@ def authenticate():
                 token = ''
 
                 with open('data/session.json', 'w') as session_file:
-                    json.dump({"token":"","name":""}, session_file, indent=4, sort_keys=True)
+                    json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
                 return 'reject'
     except:
         server.close()
 
         with open('data/session.json', 'w') as session_file:
-            json.dump({"token":"","name":""}, session_file, indent = 4, sort_keys = True)
+            json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
         return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n', "login"
 
 
 def about():
-
     global screen
 
     rah.wallpaper(screen, size)
@@ -257,9 +253,7 @@ def about():
         display.update()
 
 
-
 def reject():
-
     global screen
 
     rah.wallpaper(screen, size)
@@ -317,16 +311,15 @@ def reject():
 
 
 def crash(error, previous):
-
     global screen
 
-    #rah.wallpaper(screen, size)
+    # rah.wallpaper(screen, size)
 
     tint = Surface(size)
     tint.fill((0, 0, 255))
     tint.set_alpha(99)
 
-    screen.blit(tint, (0,0))
+    screen.blit(tint, (0, 0))
 
     back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
 
@@ -376,18 +369,16 @@ def crash(error, previous):
         display.update()
 
 
-
 def information(message, previous):
-
     global screen
 
     rah.wallpaper(screen, size)
 
-    #tint = Surface(size)
-    #tint.fill((0, 0, 255))
-    #tint.set_alpha(99)
+    # tint = Surface(size)
+    # tint.fill((0, 0, 255))
+    # tint.set_alpha(99)
 
-    #screen.blit(tint, (0,0))
+    # screen.blit(tint, (0,0))
 
     back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
 
@@ -420,6 +411,7 @@ def information(message, previous):
             return nav_update
 
         display.update()
+
 
 def assistance():
     global screen
@@ -518,12 +510,14 @@ def server_picker():
     server_list = []
 
     for server in server_dict:
-        server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port']])
+        server_list.append(
+            [int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port']])
 
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0])
 
     button_list = [
-        menu.Button((size[0] * 7) // 9 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'custom_server_picker', 'Direct Connect'),
+        menu.Button((size[0] * 7) // 9 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'custom_server_picker',
+                    'Direct Connect'),
         menu.Button(size[0] // 2 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'add_server', 'Add Server'),
         menu.Button((size[0] * 2) // 9 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'menu', 'Back')]
 
@@ -565,31 +559,30 @@ def server_picker():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
-        #Scrolling menu----------------------------------------------------
+        # Scrolling menu----------------------------------------------------
 
         page_h = size[1] - 80
 
         if (65 * len(server_list)) > page_h:
-            if y_offset < -65 * (len(server_list) + 1 - page_h//65):
-                y_offset = -65 * (len(server_list) + 1 - page_h//65)
+            if y_offset < -65 * (len(server_list) + 1 - page_h // 65):
+                y_offset = -65 * (len(server_list) + 1 - page_h // 65)
             elif y_offset > 50:
                 y_offset = 50
         else:
             y_offset = 50
 
-
-        scroll_pos = int((y_offset/(-65 * len(server_list))) * page_h)
-        percent_visible = page_h/(len(server_list) * 65)
+        scroll_pos = int((y_offset / (-65 * len(server_list))) * page_h)
+        percent_visible = page_h / (len(server_list) * 65)
 
         bar_rect = Rect(size[0] - 20, 0, 20, page_h)
 
-        draw.rect(screen, (100,100,100), bar_rect)
-        draw.rect(screen,(230, 230, 230), (size[0] - 18, scroll_pos, 14, (percent_visible * page_h)))
+        draw.rect(screen, (100, 100, 100), bar_rect)
+        draw.rect(screen, (230, 230, 230), (size[0] - 18, scroll_pos, 14, (percent_visible * page_h)))
 
         if bar_rect.collidepoint(mx, my) and m_press[0] == 1:
-            y_offset = int((my - (percent_visible * page_h)//2)/page_h * -65 * len(server_list))
+            y_offset = int((my - (percent_visible * page_h) // 2) / page_h * -65 * len(server_list))
 
-        #---------------------------------------------------------------------
+        # ---------------------------------------------------------------------
 
         nav_update = server_menu.update(screen, release, right_release, mx, my, m_press, y_offset, size)
 
@@ -599,7 +592,8 @@ def server_picker():
                 server_update = json.load(open('data/servers.json'))
 
                 for server in server_update:
-                    if server_update[server]['name'] == nav_update[1] and server_update[server]['host'] == nav_update[2] and server_update[server]['port'] == nav_update[3]:
+                    if server_update[server]['name'] == nav_update[1] and server_update[server]['host'] == nav_update[
+                        2] and server_update[server]['port'] == nav_update[3]:
                         destroy_index = server
                         break
 
@@ -644,7 +638,6 @@ def custom_server_picker():
     field_selected = 'Host'
 
     field_list = ['Port', 'Host']
-
 
     fields = {'Host': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Host'), host],
               'Port': [menu.TextBox(size[0] // 4, size[1] // 4 + 80, size[0] // 2, 40, 'Port'), port]}
@@ -705,7 +698,6 @@ def custom_server_picker():
 
 
 def server_adder():
-
     global screen
 
     clock = time.Clock()
@@ -793,10 +785,10 @@ def server_adder():
 
                 name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
 
-                server_update.update({str(len(server_update)):{"name":name, "host":host, "port":port}})
+                server_update.update({str(len(server_update)): {"name": name, "host": host, "port": port}})
 
                 with open('data/servers.json', 'w') as servers:
-                    json.dump(server_update, servers, indent = 4, sort_keys = True)
+                    json.dump(server_update, servers, indent=4, sort_keys=True)
 
                 return 'server_picker'
 
@@ -815,7 +807,6 @@ def server_adder():
 
 
 def menu_screen():
-
     def draw_screen():
         rah.wallpaper(screen, size)
 
@@ -889,7 +880,7 @@ def menu_screen():
                 return 'login'
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h),RESIZABLE)
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
                 return 'menu'
 
         mx, my = mouse.get_pos()
@@ -918,7 +909,7 @@ if __name__ == "__main__":
     screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 
     display.set_caption("RahCraft")
-    display.set_icon(transform.scale(image.load('textures/gui/icon.png'),(32,32)))
+    display.set_icon(transform.scale(image.load('textures/gui/icon.png'), (32, 32)))
 
     rah.rah(screen)
 
@@ -979,7 +970,7 @@ if __name__ == "__main__":
           'add_server': server_adder,
           'information': information,
           'auth': authenticate,
-          'reject':reject
+          'reject': reject
           }
 
     while navigation != 'exit':

@@ -1,4 +1,6 @@
 import os.path
+import sys
+import traceback
 from collections import deque
 import socket
 import pickle as pkl
@@ -10,13 +12,12 @@ from shlex import split
 import platform
 import numpy as np
 
-from components.slack import *
-from components.world import *
 from math import *
 import time
 from random import *
-import sys
-import traceback
+
+from SERVER.components.slack import *
+from SERVER.components.world import *
 
 with open("data/config.rah", "r") as config:
     config = config.read().strip().split("\n")
@@ -198,6 +199,7 @@ def heart_beats(message_queue, tick):
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
             if tick >= 24000:
                 tick = 1
+
 
 def authenticate(message):
     global online
@@ -502,7 +504,7 @@ if __name__ == '__main__':
 
                 for p in kill_list:
 
-                    send_message = '[Server] %s was disconnected for not responding'%(players[p].username)
+                    send_message = '[Server] %s was disconnected for not responding' % (players[p].username)
 
                     for i in players:
                         sendQueue.put(((10, send_message), i))
@@ -520,7 +522,7 @@ if __name__ == '__main__':
                     for i in players:
                         sendQueue.put(((9, offPlayer), i))
 
-                broadcast(channel, '[Tick] %s'%message[2])
+                broadcast(channel, '[Tick] %s' % message[2])
 
                 active_players = []
 
@@ -565,6 +567,4 @@ if __name__ == '__main__':
 
 
         except:
-            sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAn error has occured'), address))
-
-            print(traceback.format_exc())
+            sendQueue.put(((11, '\n\n\nDisconnected from server'), address))

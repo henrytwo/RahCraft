@@ -1,6 +1,7 @@
-import components.rahma as rah
 from pygame import *
 import json
+
+import CLIENT.components.rahma as rah
 
 button_hover = image.load("textures/menu/button_hover.png")
 button_pressed = image.load("textures/menu/button_pressed.png")

@@ -6,7 +6,7 @@ import platform
 try:
     import numpy as np
 
-except ImportError:
+except ModuleNotFoundError:
     print("Module Numpy wasn't found")
     try:
         if platform.system() == "Windows":
