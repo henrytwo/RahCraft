@@ -48,6 +48,7 @@ def login():
 
     test = menu.Switch(20, 20, 100, 40, False, 'Test')
     test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
+    test2 = menu.Slider(20, 110, 400, 40, False, 'Test')
 
 
     username, password = '', ''
@@ -128,6 +129,7 @@ def login():
 
         test.update(screen, mx, my, m_press, 15, release)
         test1.update(screen, mx, my, m_press, 15, release)
+        test2.update(screen, mx, my, m_press, 15, release)
 
         clock.tick(120)
         display.update()
@@ -195,7 +197,7 @@ def authenticate():
         with open('data/session.json', 'w') as session_file:
             json.dump({"token":"","name":""}, session_file, indent = 4, sort_keys = True)
 
-        return "crash", 'Unable to connect to authentication servers\nTry again later\n', "login"
+        return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n', "login"
 
 
 def about():

@@ -325,9 +325,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     pause_list = [[0, 'unpause', "Back to game"],
                   [1, 'options', "Options"],
-                  [2, 'assistance', "Help"],
-                  [2, 'about', "About"],
-                  [3, 'menu', "Exit"]]
+                  [2, 'menu', "Exit"]]
 
     pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
 

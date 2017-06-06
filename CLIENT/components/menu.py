@@ -44,6 +44,34 @@ class Button:
         text_surf = rah.text(self.text, size)
         surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
 
+class Slider:
+    def __init__(self, x, y, w, h, position, text):
+        self.rect = Rect(x, y, w, h)
+        self.text = text
+        self.pos = position
+
+        self.texture = {'hover':transform.scale(button_hover, (20, h - 3)),
+                        'idle':transform.scale(button_idle, (20, h - 3))}
+
+    def update(self, surf, mx, my, m_press, size, release):
+        draw.rect(surf, (0, 0, 0), self.rect)
+        draw.rect(surf, (200, 200, 200), self.rect, 1)
+
+        if self.rect.collidepoint(mx, my):
+            mouse_state =  'hover'
+            if m_press[0]:
+                self.pos = (mx - self.rect.x)/self.rect.w
+
+            if release:
+                rah.load_sound(['sound/random/click.ogg'])
+
+        else:
+            mouse_state = 'idle'
+
+        surf.blit(self.texture[mouse_state], (self.rect.x + min(max(self.pos, ((self.texture[mouse_state].get_width() + 2)//2)/self.rect.w), 1 - ((self.texture[mouse_state].get_width() + 3)//2)/self.rect.w) * self.rect.w - self.texture[mouse_state].get_width()//2, self.rect.y + 1))
+
+        text_surf = rah.text(self.text, size)
+        surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
 
 class Toggle:
     def __init__(self, x, y, w, h, state, text):
@@ -51,8 +79,7 @@ class Toggle:
         self.text = text
         self.state = state
 
-        self.texture = {'hover':transform.scale(button_hover, (w, h)),
-                        'idle':transform.scale(button_idle, (w, h)),
+        self.texture = {'idle':transform.scale(button_idle, (w, h)),
                         'press':transform.scale(button_pressed, (w, h))}
 
     def draw_button(self, surf, type, size):
@@ -66,24 +93,17 @@ class Toggle:
     def update(self, surf, mx, my, m_press, size, release):
 
         if self.rect.collidepoint(mx, my):
-            if m_press[0]:
-                self.draw_button(surf, 'press', size)
-
-            elif release:
+            if release:
                 mouse.set_cursor(*cursors.tri_left)
 
                 rah.load_sound(['sound/random/click.ogg'])
 
                 self.state = not self.state
 
-            else:
-                 self.draw_button(surf, 'hover', size)
-
+        if self.state:
+            self.draw_button(surf, 'press', size)
         else:
-            if self.state:
-                self.draw_button(surf, 'press', size)
-            else:
-                self.draw_button(surf, 'idle', size)
+            self.draw_button(surf, 'idle', size)
 
 
 
