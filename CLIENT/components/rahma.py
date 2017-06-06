@@ -1,3 +1,7 @@
+from platform import *
+from subprocess import *
+from shlex import split
+
 import time as t
 from pygame import *
 from random import *
@@ -29,6 +33,7 @@ def load_sound(sound_list):
 
 def rahprint(text):
     printing = False
+    # printing = True
 
     if printing:
         print(text)
@@ -39,9 +44,19 @@ def center(x, y, canvas_w, canvas_h, object_w, object_h):
 
 
 def rah(screen):
-    screen.fill((255, 255, 255))
-    splash = image.load('textures/menu/splash.png')
-    screen.blit(splash, center(0, 0, 800, 500, splash.get_width(), splash.get_height()))
+    if mouse.get_pos()[0] in range(1, 799) and mouse.get_pos()[1] in range(1, 499):
+        screen.fill((255, 255, 255))
+        splash = image.load('textures/menu/splash.png')
+        screen.blit(splash, center(0, 0, 800, 500, splash.get_width(), splash.get_height()))
+
+    else:
+        screen.fill((212, 0, 0))
+        logo = transform.scale(image.load('textures/menu/rahcraftdev.png'), (200, 200))
+        logo_font = font.Font("fonts/Lato-Black.ttf", 60)
+        logo_text = logo_font.render("RAHCRAFT DEV", True, (255, 204, 0))
+        screen.blit(logo, center(-10, -50, 800, 500, logo.get_width(), logo.get_height()))
+        screen.blit(logo_text, center(0, 100, 800, 500, logo_text.get_width(), logo_text.get_height()))
+
     display.flip()
 
     t.sleep(0.1)

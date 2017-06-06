@@ -199,6 +199,7 @@ def heart_beats(message_queue, tick):
             if tick >= 24000:
                 tick = 1
 
+
 def authenticate(message):
     global online
 
@@ -303,7 +304,7 @@ if __name__ == '__main__':
                     active_players.append(address)
 
                     messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1',)))
-                    #print('Player %s has connected from %s' % (message[1], address))
+                    # print('Player %s has connected from %s' % (message[1], address))
                     username.add(message[1])
 
                     for i in players:
@@ -313,10 +314,10 @@ if __name__ == '__main__':
 
                 else:
                     sendQueue.put(((400, (
-                    "\n\n\n\n\n\n\n\n\nConnection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)\n\n")), address))
+                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)\n\n")),
+                                   address))
 
             elif command == 1:
-
 
                 # Player movement
                 # Data: [1, <cordx>, <cordy>]
@@ -329,7 +330,8 @@ if __name__ == '__main__':
             elif command == 2:
                 # Render world
                 # Data: [2, <cordx>, <cordy>, <size>]
-                sendQueue.put(((2, message[1], message[2], world.get_world(message[1], message[2], message[3], message[4])), address))
+                sendQueue.put(((2, message[1], message[2],
+                                world.get_world(message[1], message[2], message[3], message[4])), address))
 
             elif command == 3:
                 # Break block
@@ -376,8 +378,9 @@ if __name__ == '__main__':
 
             elif command == 9:
 
-                messageQueue.put(((10, "%s has disconnected from the game"%players[address].username), ('127.0.0.1',)))
-                #print('Player %s has disconnected from the game. %s' % (players[address].username, address))
+                messageQueue.put(
+                    ((10, "%s has disconnected from the game" % players[address].username), ('127.0.0.1',)))
+                # print('Player %s has disconnected from the game. %s' % (players[address].username, address))
 
                 playerNDisconnect.append(players[address].number)
                 PlayerData[players[address].username] = players[address].save(message[1])
@@ -438,10 +441,11 @@ if __name__ == '__main__':
                                 sendQueue.put(((10, send_message), i))
 
                 elif message[1].lower()[:4] == '/say':
-                    send_message =  message[1][4:]
+                    send_message = message[1][4:]
 
                 elif message[1].lower()[:6] == '/clear':
-                    players[address].inventory =[[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)]
+                    players[address].inventory = [[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in
+                                                  range(3)]
                     players[address].hotbar = [[8, 64] for _ in range(9)]
 
                 elif message[1].lower()[:5] == '/give':
@@ -450,13 +454,13 @@ if __name__ == '__main__':
                     receiver = message[1][6:message[1][-1].find(' ') - 3]
                     item, quantity = message[1][message[1].rfind(' ') + 1:].split(',')
 
-                    print(item, 'split',quantity)
+                    print(item, 'split', quantity)
 
                     players[address].hotbar[0] = [int(item), int(quantity)]
 
                     players[address].change_inventory_all(players[address].inventory, players[address].hotbar)
 
-                    send_message = '%s gave %s %s of %s'%(executor, receiver, quantity, item)
+                    send_message = '%s gave %s %s of %s' % (executor, receiver, quantity, item)
 
                 elif message[1].lower()[:5] == '/kick':
 
@@ -464,11 +468,13 @@ if __name__ == '__main__':
 
                     for player in players:
                         if players[player].username == kick_name:
-                            sendQueue.put(((11, '\n\n\nDisconnected from server by %s'%players[address].username), player))
-                            send_message = '%s was disconnected from the server by %s'%(kick_name, players[address].username)
+                            sendQueue.put(
+                                ((11, '\n\n\nDisconnected from server by %s' % players[address].username), player))
+                            send_message = '%s was disconnected from the server by %s' % (
+                            kick_name, players[address].username)
 
                     if not send_message:
-                        send_message = 'Player %s not found'%kick_name
+                        send_message = 'Player %s not found' % kick_name
 
                 elif message[1].lower()[:5] == '/exec':
 
@@ -476,7 +482,8 @@ if __name__ == '__main__':
                         exec(message[1][6:])
                         send_message = "Command '%s' executed by %s" % (message[1][6:], players[address].username)
                     except:
-                        send_message = "Command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+                        send_message = "Command '%s' failed to execute: %s" % (
+                        message[1][6:], traceback.format_exc().replace('\n', ''))
 
                 elif message[1].lower()[:5] == '/bash':
 
@@ -484,7 +491,8 @@ if __name__ == '__main__':
                         print(Popen(split(message[1][6:]), stdout=PIPE))
                         send_message = "Bash command '%s' executed by %s" % (message[1][6:], players[address].username)
                     except:
-                        send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+                        send_message = "Bash command '%s' failed to execute: %s" % (
+                        message[1][6:], traceback.format_exc().replace('\n', ''))
 
                 elif message[1].lower()[:5] == '/sync':
                     messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
@@ -521,7 +529,7 @@ if __name__ == '__main__':
 
                 for p in kill_list:
 
-                    send_message = '[Server] %s was disconnected for not responding'%(players[p].username)
+                    send_message = '[Server] %s was disconnected for not responding' % (players[p].username)
 
                     for i in players:
                         sendQueue.put(((10, send_message), i))
@@ -539,14 +547,14 @@ if __name__ == '__main__':
                     for i in players:
                         sendQueue.put(((9, offPlayer), i))
 
-                broadcast(channel, '[Tick] %s'%message[2])
+                broadcast(channel, '[Tick] %s' % message[2])
 
                 active_players = []
 
             elif command == 101:
                 if address not in active_players:
                     active_players.append(address)
-                print('[Server] %s has responded to heartbeat'%message[1])
+                print('[Server] %s has responded to heartbeat' % message[1])
 
         except:
             sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAn error has occured'), address))

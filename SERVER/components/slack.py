@@ -1,5 +1,6 @@
 from slacker import Slacker
 
+
 def config_slack():
     try:
         global slack
@@ -8,6 +9,7 @@ def config_slack():
             slack = Slacker(token.read().strip())
     except:
         pass
+
 
 def broadcast(channel, message):
     print(message)

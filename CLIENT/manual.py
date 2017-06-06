@@ -1,10 +1,11 @@
 import pickle
-from multiprocessing import *
 import socket
 import traceback
+from multiprocessing import *
 
 host = input('Host: ')
 port = int(input('Port: '))
+
 
 def player_sender(send_queue, server):
     print('Sender running...')
@@ -21,13 +22,14 @@ def receive_message(message_queue, server):
         msg = server.recvfrom(163840)
         message_queue.put(pickle.loads(msg[0]))
 
+
 server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 SERVERADDRESS = (host, port)
 
 send_queue = Queue()
 message_queue = Queue()
 
-#server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
+# server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
 
 sender = Process(target=player_sender, args=(send_queue, server))
 sender.start()
