@@ -461,6 +461,7 @@ class Inventory:
                                 self.crafting_grid[x][y] = [0, 0]
                             else:
                                 self.crafting_grid[x][y][1] -= 1
+
             elif self.holding[0] == self.resulting_item[0] and self.holding[1] + self.resulting_item[1] < item_lib[self.holding[0]][-1]:
                 self.holding[1] += self.resulting_item[1]
                 for x in range(len(self.crafting_grid)):
@@ -476,6 +477,7 @@ class Inventory:
             previous_holding = self.holding[:]
             self.holding = item[:]
             return previous_holding
+
         else:
             calculate_stack = item_lib[item[0]][-1] - self.holding[1] - item[1]
             amount_holding = self.holding[1]
@@ -538,11 +540,11 @@ class Inventory:
         for row in range(len(self.crafting_grid)):
             for item in range(len(self.crafting_grid[row])):
                 if self.crafting_grid[row][item][1] != 0:
-                    surf.blit(item_lib[self.crafting_grid[row][item][0]][1], (419 + 36 * item, 120 + 36 * row, 32, 32))
-                    surf.blit(rah.text(str(self.crafting_grid[row][item][1]), 10), (419 + 36 * item, 120 + 36 * row, 32, 32))
+                    surf.blit(item_lib[self.crafting_grid[row][item][0]][1], (self.w//2 + 19 + 36 * item, self.h//2 - 130 + 36 * row, 32, 32))
+                    surf.blit(rah.text(str(self.crafting_grid[row][item][1]), 10), (self.w//2 + 19 + 36 * item, self.h//2 - 130 + 36 * row, 32, 32))
 
-                if Rect((419 + 36 * item, 120 + 36 * row, 32, 32)).collidepoint(mx, my):
-                    surf.blit(self.highlight, (419 + 36 * item, 120 + 36 * row, 32, 32))
+                if Rect((self.w//2 + 19 + 36 * item, self.h//2 - 130 + 36 * row, 32, 32)).collidepoint(mx, my):
+                    surf.blit(self.highlight, (self.w//2 + 19 + 36 * item, self.h//2 - 130 + 36 * row, 32, 32))
                     if l_click:
                         self.crafting_grid[row][item] = self.check_stacking(self.crafting_grid[row][item][:], item_lib)
                     elif r_click:
@@ -551,10 +553,10 @@ class Inventory:
         self.recipe_check()
 
         if self.resulting_item[0] != 0:
-            surf.blit(item_lib[self.resulting_item[0]][1], (531, 140, 32, 32))
-            surf.blit(rah.text(str(self.resulting_item[1]), 10), (531, 140, 32, 32))
+            surf.blit(item_lib[self.resulting_item[0]][1], (self.w//2 + 131, self.h//2 - 110, 32, 32))
+            surf.blit(rah.text(str(self.resulting_item[1]), 10), (self.w//2 + 131, self.h//2 - 110, 32, 32))
 
-            if Rect((531, 140, 32, 32)).collidepoint(mx, my) and l_click:
+            if Rect((self.w//2 + 131, self.h//2 - 110, 32, 32)).collidepoint(mx, my) and l_click:
                 self.craft(item_lib)
 
         if self.holding[0] > 0:
@@ -698,8 +700,8 @@ class Crafting:
         self.recipe_check()
 
         if self.resulting_item[0] != 0:
-            surf.blit(transform.scale(item_lib[self.resulting_item[0]][1], (48, 48)), (463, 146, 48, 48))
-            surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
+            surf.blit(transform.scale(item_lib[self.resulting_item[0]][1], (48, 48)), (self.w//2 + 63, self.h//2 - 104, 48, 48))
+            surf.blit(rah.text(str(self.resulting_item[1]), 10), (self.w//2 + 63, self.h//2 - 104, 48, 48))
 
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
