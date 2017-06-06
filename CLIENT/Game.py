@@ -207,8 +207,9 @@ def game(surf, username, token, host, port, size, music_enable):
 
         surf.blit(selected, (hotbar_rect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))
 
-        block_name = rah.text(str(item_lib[hotbar_items[hotbar_slot][0]][0]), 13)
-        surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 60))
+        if hotbar_items[hotbar_slot][0] != 0:
+            block_name = rah.text(str(item_lib[hotbar_items[hotbar_slot][0]][0]), 13)
+            surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 60))
 
     # Loading Screen
     # =====================================================================
@@ -419,6 +420,8 @@ def game(surf, username, token, host, port, size, music_enable):
     highlight_bad.set_alpha(90)
     inventory_updated = False
     print("ini done")
+
+    sky_diming = False
 
     try:
         while True:
@@ -656,18 +659,24 @@ def game(surf, username, token, host, port, size, music_enable):
 
             # Adding Sky
             # =======================================================
-            if sky_tick % SKYTICKDEFAULT != 0:  # Change SKYTICKDEFAULT to a lower number to test
-                if on_tick:
-                    sky_tick += 1
-            else:
+            print(sky_tick)
+            if on_tick:
+                if not sky_diming:
+                    sky_tick += 100
+                else:
+                    sky_tick -= 100
+            print(sky_tick, sky_diming)
 
-                sky_tick += 1
-                if sky_tick >= 24000:
-                    sky_tick = 0
+            if sky_tick > 12000:
+                sky_diming = True
+                sky_tick = sky_tick - (sky_tick-12000)
+            elif sky_tick < 0:
+                sky_diming = False
+                sky_tick = sky_tick + abs(sky_tick)
 
-                    rah.rahprint("Reset")
+                rah.rahprint("Reset")
 
-            surf.fill(int(sky_tick))
+            surf.fill(int(sky_tick/47))
 
             # for y in range(size[1]):
             #
@@ -872,7 +881,7 @@ def game(surf, username, token, host, port, size, music_enable):
                               "Token: %s" % token[0:10]]
 
                 for y in range(len(debug_list)):
-                    about_text = rah.text(debug_list[y], 15).convert_alpha()
+                    about_text = rah.text(debug_list[y], 15)
                     surf.blit(about_text, (size[0] - about_text.get_width() - 10, 10 + y * 20))
 
             clock.tick(120)
