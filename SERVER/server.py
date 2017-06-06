@@ -1,4 +1,6 @@
 import os.path
+import sys
+import traceback
 from collections import deque
 import socket
 import pickle as pkl
@@ -10,13 +12,12 @@ from shlex import split
 import platform
 import numpy as np
 
-from components.slack import *
-from components.world import *
 from math import *
 import time
 from random import *
-import sys
-import traceback
+
+from SERVER.components.slack import *
+from SERVER.components.world import *
 
 with open("data/config.rah", "r") as config:
     config = config.read().strip().split("\n")
@@ -443,24 +444,17 @@ if __name__ == '__main__':
                 elif message[1].lower()[:4] == '/say':
                     send_message = message[1][4:]
 
-                elif message[1].lower()[:6] == '/clear':
-                    players[address].inventory = [[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in
-                                                  range(3)]
-                    players[address].hotbar = [[8, 64] for _ in range(9)]
-
                 elif message[1].lower()[:5] == '/give':
+
+                    print(message[1])
 
                     executor = players[address].username
                     receiver = message[1][6:message[1][-1].find(' ') - 3]
-                    item, quantity = message[1][message[1].rfind(' ') + 1:].split(',')
+                    item = message[1][message[1][-1].find(' '):]
 
-                    print(item, 'split', quantity)
+                    print(executor, receiver, item)
 
-                    players[address].hotbar[0] = [int(item), int(quantity)]
-
-                    players[address].change_inventory_all(players[address].inventory, players[address].hotbar)
-
-                    send_message = '%s gave %s %s of %s' % (executor, receiver, quantity, item)
+                    send_message = '%s gave %s %s' % (executor, receiver, item)
 
                 elif message[1].lower()[:5] == '/kick':
 
@@ -506,7 +500,7 @@ if __name__ == '__main__':
 
                     send_message = '[%s] %s' % (user_sending, message[1])
 
-                if send_message and send_message[0] != '[':
+                if send_message[0] != '[':
                     send_message = '[Server] ' + send_message
 
                 for i in players:
@@ -557,6 +551,4 @@ if __name__ == '__main__':
                 print('[Server] %s has responded to heartbeat' % message[1])
 
         except:
-            sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAn error has occured'), address))
-
-            print(traceback.format_exc())
+            sendQueue.put(((11, '\n\n\nDisconnected from server'), address))
