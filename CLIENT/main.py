@@ -10,7 +10,7 @@ import CLIENT.Game as Game
 import webbrowser
 import json
 from random import *
-
+from multiprocessing import *
 
 def login():
     display.set_caption("RahCraft Authentication Service")
@@ -504,18 +504,69 @@ def options():
 def server_picker():
     global host, port, screen
 
-    #def update_server(server_list):
-    #    for server in server_list:
+    def menu_sender(send_queue, server):
+        rah.rahprint('Sender running...')
 
+        while True:
+            tobesent = send_queue.get()
+            server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
 
-    with open('data/servers.json', 'r') as servers:
-        server_dict = json.load(servers)
+    def receive_message(message_queue, server):
+        rah.rahprint('Ready to receive command...')
 
-    server_list = []
+        while True:
+            msg = server.recvfrom(163840)
+            message_queue.put(pickle.loads(msg[0]))
 
-    for server in server_dict:
-        server_list.append(
-            [int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port']])
+    def update_server():
+        with open('data/servers.json', 'r') as servers:
+            server_dict = json.load(servers)
+
+        server_list = []
+
+        for server in server_dict:
+            server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], ''])
+
+        server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
+        send_queue = Queue()
+        message_queue = Queue()
+
+        sender = Process(target=menu_sender, args=(send_queue, server))
+        sender.start()
+
+        receiver = Process(target=receive_message, args=(message_queue, server))
+        receiver.start()
+
+        for server_info in server_list:
+
+            try:
+                SERVERADDRESS = (server_info[2], int(server_info[3]))
+                server.sendto(pickle.dumps([102,]), SERVERADDRESS)
+
+            except:
+                pass
+
+        check_cycle = 0
+
+        while check_cycle < 10000:
+            try:
+                message = message_queue.get_nowait()
+
+                if message[0] == 102:
+                    for server_info in server_list:
+                        if server_info[2:4] == list(message[2:4]):
+                            server_info[4] = message[1]
+
+            except:
+                pass
+                #print(server_list)
+
+            check_cycle += 1
+
+        return server_list
+
+    server_list = update_server()
 
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0])
 
@@ -567,16 +618,18 @@ def server_picker():
 
         page_h = size[1] - 80
 
-        if (65 * len(server_list)) > page_h:
-            if y_offset < -65 * (len(server_list) + 1 - page_h // 65):
-                y_offset = -65 * (len(server_list) + 1 - page_h // 65)
+        button_h = 75
+
+        if (button_h * len(server_list)) > page_h:
+            if y_offset < -button_h * (len(server_list) + 1 - page_h // button_h):
+                y_offset = -button_h * (len(server_list) + 1 - page_h // button_h)
             elif y_offset > 50:
                 y_offset = 50
         else:
             y_offset = 50
 
-        scroll_pos = int((y_offset / (-65 * len(server_list))) * page_h)
-        percent_visible = page_h / (len(server_list) * 65)
+        scroll_pos = int((y_offset / (-button_h * len(server_list))) * page_h)
+        percent_visible = page_h / (len(server_list) * button_h)
 
         bar_rect = Rect(size[0] - 20, 0, 20, page_h)
 
@@ -584,11 +637,11 @@ def server_picker():
         draw.rect(screen, (230, 230, 230), (size[0] - 18, scroll_pos, 14, (percent_visible * page_h)))
 
         if bar_rect.collidepoint(mx, my) and m_press[0] == 1:
-            y_offset = int((my - (percent_visible * page_h) // 2) / page_h * -65 * len(server_list))
+            y_offset = int((my - (percent_visible * page_h) // 2) / page_h * -button_h * len(server_list))
 
         # ---------------------------------------------------------------------
 
-        nav_update = server_menu.update(screen, release, right_release, mx, my, m_press, y_offset, size)
+        nav_update = server_menu.update(screen, release, right_release, mx, my, m_press, y_offset, size, server_list)
 
         if nav_update:
             if nav_update[0] == 'remove':

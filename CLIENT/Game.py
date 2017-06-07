@@ -268,14 +268,18 @@ def game(surf, username, token, host, port, size, music_enable):
     server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
 
     while True:
-        first_message = message_queue.get()
-        if first_message[0] == 400:
-            sender.terminate()
-            receiver.terminate()
-            commandline.terminate()
-            return 'information', first_message[1], 'server_picker'
-        elif first_message[0] == 0:
-            break
+        try:
+            first_message = message_queue.get_nowait()
+            if first_message[0] == 400:
+                sender.terminate()
+                receiver.terminate()
+                commandline.terminate()
+                return 'information', first_message[1], 'server_picker'
+            elif first_message[0] == 0:
+                break
+
+        except:
+            print('nope')
 
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players = first_message[1:]
 

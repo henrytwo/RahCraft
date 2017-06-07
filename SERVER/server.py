@@ -285,6 +285,8 @@ if __name__ == '__main__':
         message, address = pickled_message
         command = message[0]
 
+        print(pickled_message)
+
         try:
 
             #PRIVATE COMMANDS, CAN ONLY EXECUTE IF PLAYER IS LOGGED IN
@@ -366,120 +368,128 @@ if __name__ == '__main__':
 
                     send_message = ''
 
-                    if message[1].lower() == "/quit":
-                        receiver.terminate()
-                        sender.terminate()
-                        commandline.terminate()
-                        heart_beat.terminate()
-                        server.close()
-                        world.save()
-                        break
+                    if message[1].lower()[0] == '/':
 
-                    if message[1].lower() == "/del world":
-                        send_message = "<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: "
-
-                        sys.stdout.flush()
-                        in_put = messageQueue.get()
-                        while in_put[0][0] != 10:
-                            # print(in_put)
-                            in_put = messageQueue.get()
-
-                        if in_put[0][1] == 'y':
-                            os.remove("saves/world.pkl")
-                            send_message = "World deleted successfully\nServer will shutdown"
+                        if message[1].lower() == "/quit":
                             receiver.terminate()
                             sender.terminate()
                             commandline.terminate()
+                            heart_beat.terminate()
                             server.close()
-
-                            exit()
-
+                            world.save()
                             break
 
+                        elif message[1].lower() == "/del world":
+                            send_message = "<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: "
+
+                            sys.stdout.flush()
+                            in_put = messageQueue.get()
+                            while in_put[0][0] != 10:
+                                # print(in_put)
+                                in_put = messageQueue.get()
+
+                            if in_put[0][1] == 'y':
+                                os.remove("saves/world.pkl")
+                                send_message = "World deleted successfully\nServer will shutdown"
+                                receiver.terminate()
+                                sender.terminate()
+                                commandline.terminate()
+                                server.close()
+
+                                exit()
+
+                                break
+
+                            else:
+                                send_message = "Command aborted"
+
+                        elif message[1].lower() == '/ping':
+                            send_message = 'pong!'
+
+                        elif message[1].lower() == '/lenin':
+                            with open('data/communist.rah') as communist:
+                                for line in communist.read().split('\n'):
+                                    send_message = '[Comrade Lenin] ' + line
+
+                                    for i in players:
+                                        sendQueue.put(((10, send_message), i))
+
+                        elif message[1].lower()[:4] == '/say':
+                            send_message =  message[1][4:]
+
+                        elif message[1].lower()[:6] == '/clear':
+                            players[address].inventory =[[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)]
+                            players[address].hotbar = [[8, 64] for _ in range(9)]
+
+                        elif message[1].lower()[:5] == '/give':
+
+                            message_list = message[1].split(' ')
+
+                            executor = players[address].username
+                            receiver = message_list[1]
+                            item, quantity = message_list[2:4]
+
+                            for player in players:
+                                if players[player].username == receiver:
+                                    players[player].hotbar[0] = [int(item), int(quantity)]
+                                    players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
+
+                            send_message = '%s gave %s %s of %s'%(executor, receiver, quantity, item)
+
+                        elif message[1].lower()[:5] == '/kick':
+
+                            kick_name = message[1][6:]
+
+                            for player in players:
+                                if players[player].username == kick_name:
+                                    sendQueue.put(((11, '\n\n\nDisconnected from server by %s'%players[address].username), player))
+                                    send_message = '%s was disconnected from the server by %s'%(kick_name, players[address].username)
+
+                            if not send_message:
+                                send_message = 'Player %s not found'%kick_name
+
+
+                        elif message[1].lower()[:3] == '/tp':
+
+                            message_list = message[1].split(' ')
+                            executor = players[address].username
+                            receiver = message_list[1]
+
+                            for player in players:
+                                if players[player].username == receiver:
+
+                                    x, y = players[player].change_location((message_list[2:4]))
+
+                                    for i in players:
+                                        sendQueue.put(((1, players[player].username, x, y), i))
+
+                            send_message = '%s teleported %s to %s %s' % (executor, receiver, x, y)
+
+                        elif message[1].lower()[:5] == '/exec':
+
+                            try:
+                                exec(message[1][6:])
+                                send_message = "Command '%s' executed by %s" % (message[1][6:], players[address].username)
+                            except:
+                                send_message = "Command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+
+                        elif message[1].lower()[:5] == '/bash':
+
+                            try:
+                                print(Popen(split(message[1][6:]), stdout=PIPE))
+                                send_message = "Bash command '%s' executed by %s" % (message[1][6:], players[address].username)
+                            except:
+                                send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+
+                        elif message[1].lower()[:5] == '/sync':
+                            messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
+                            send_message = "Server synchronized"
+
+                        elif message[1].lower()[:5] == '/list':
+                            send_message = str(players)
+
                         else:
-                            send_message = "Command aborted"
-
-                    elif message[1].lower() == '/ping':
-                        send_message = 'pong!'
-
-                    elif message[1].lower() == '/lenin':
-                        with open('data/communist.rah') as communist:
-                            for line in communist.read().split('\n'):
-                                send_message = '[Comrade Lenin] ' + line
-
-                                for i in players:
-                                    sendQueue.put(((10, send_message), i))
-
-                    elif message[1].lower()[:4] == '/say':
-                        send_message =  message[1][4:]
-
-                    elif message[1].lower()[:6] == '/clear':
-                        players[address].inventory =[[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)]
-                        players[address].hotbar = [[8, 64] for _ in range(9)]
-
-                    elif message[1].lower()[:5] == '/give':
-
-                        message_list = message[1].split(' ')
-
-                        executor = players[address].username
-                        receiver = message_list[1]
-                        item, quantity = message_list[2:4]
-
-                        for player in players:
-                            if players[player].username == receiver:
-                                players[player].hotbar[0] = [int(item), int(quantity)]
-                                players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
-
-                        send_message = '%s gave %s %s of %s'%(executor, receiver, quantity, item)
-
-                    elif message[1].lower()[:5] == '/kick':
-
-                        kick_name = message[1][6:]
-
-                        for player in players:
-                            if players[player].username == kick_name:
-                                sendQueue.put(((11, '\n\n\nDisconnected from server by %s'%players[address].username), player))
-                                send_message = '%s was disconnected from the server by %s'%(kick_name, players[address].username)
-
-                        if not send_message:
-                            send_message = 'Player %s not found'%kick_name
-
-
-                    elif message[1].lower()[:3] == '/tp':
-
-                        message_list = message[1].split(' ')
-                        executor = players[address].username
-                        receiver = message_list[1]
-
-                        for player in players:
-                            if players[player].username == receiver:
-
-                                x, y = players[player].change_location((message_list[2:4]))
-
-                                for i in players:
-                                    sendQueue.put(((1, players[player].username, x, y), i))
-
-                        send_message = '%s teleported %s to %s %s' % (executor, receiver, x, y)
-
-                    elif message[1].lower()[:5] == '/exec':
-
-                        try:
-                            exec(message[1][6:])
-                            send_message = "Command '%s' executed by %s" % (message[1][6:], players[address].username)
-                        except:
-                            send_message = "Command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
-
-                    elif message[1].lower()[:5] == '/bash':
-
-                        try:
-                            print(Popen(split(message[1][6:]), stdout=PIPE))
-                            send_message = "Bash command '%s' executed by %s" % (message[1][6:], players[address].username)
-                        except:
-                            send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
-
-                    elif message[1].lower()[:5] == '/sync':
-                        messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
-                        send_message = "Server synchronized"
+                            send_message = "Command not found"
 
                     else:
                         if address in players:
@@ -580,7 +590,7 @@ if __name__ == '__main__':
 
             #External heartbeat
             if command == 102:
-                sendQueue.put(((102, motd),address))
+                sendQueue.put(((102, motd, host, port),address))
 
 
         except:

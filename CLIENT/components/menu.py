@@ -328,11 +328,12 @@ class TextBox:
 
 
 class ServerButton:
-    def __init__(self, x, y, w, h, title, host, port):
+    def __init__(self, x, y, w, h, title, host, port, motd):
         self.rect = Rect(x, y, w, h)
         self.title = title
         self.host = host
         self.port = port
+        self.motd = motd
 
         self.do_not_destroy = ['Rahmish Imperial', 'Localhost']
 
@@ -376,49 +377,79 @@ class ServerButton:
         surf.blit(title_text_surf, (self.rect.x + 10, self.rect.y + 10))
 
         connection_text_surf = rah.text("%s:%i" % (self.host, self.port), 15)
-        surf.blit(connection_text_surf, (self.rect.x + 10, self.rect.y + 32))
+        surf.blit(connection_text_surf, (self.rect.x + 10, self.rect.y + 50))
+
+        motd_text_surf = rah.text("%s" % (self.motd), 12)
+        surf.blit(motd_text_surf, (self.rect.x + 10, self.rect.y + 34))
 
         if self.host == 'rahmish.com':
             special_text_surf = rah.text("Verified Rahmish Server", 12)
             surf.blit(special_text_surf,
-                      (self.rect.x + self.rect.w - special_text_surf.get_width() - 10, self.rect.y + 34))
+                      (self.rect.x + self.rect.w - special_text_surf.get_width() - 10, self.rect.y + 50))
 
+        if self.motd:
+            draw.circle(surf, (0, 255, 0), (self.rect.x + self.rect.w - 15, self.rect.y + 15),10)
+            #rah.text('')
+        else:
+            draw.circle(surf, (255, 0, 0), (self.rect.x + self.rect.w - 15, self.rect.y + 15), 10)
 
 class ScrollingMenu:
     def __init__(self, button_param, x, y, w):
         # button_list <row>, <func>, <title>, <host>, <port>
 
-        V_SPACE = 5
+        self.V_SPACE = 5
 
-        BUTTON_W = 400
-        BUTTON_H = 60
+        self.BUTTON_W = 400
+        self.BUTTON_H = 75
 
         ROWS = max([button[0] for button in button_param])
 
-        SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
-        SET_W = BUTTON_W
+        SET_H = ROWS * (self.BUTTON_H + self.V_SPACE) - self.V_SPACE
+        SET_W = self.BUTTON_W
 
-        X_OFFSET = x + w // 2 - SET_W // 2
-        Y_OFFSET = 50
+        self.X_OFFSET = x + w // 2 - SET_W // 2
+        self.Y_OFFSET = 50
 
         ROW = 0
         TITLE = 1
         HOST = 2
         PORT = 3
+        MOTD = 4
 
         self.button_list = []
 
         for button_index in range(len(button_param)):
-            button_x = X_OFFSET
-            button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
+            button_x = self.X_OFFSET
+            button_y = self.Y_OFFSET + button_param[button_index][ROW] * (self.BUTTON_H + self.V_SPACE)
 
             title = button_param[button_index][TITLE]
             host = button_param[button_index][HOST]
             port = int(button_param[button_index][PORT])
+            motd = button_param[button_index][MOTD]
 
-            self.button_list.append(ServerButton(button_x, button_y, BUTTON_W, BUTTON_H, title, host, port))
+            self.button_list.append(ServerButton(button_x, button_y, self.BUTTON_W, self.BUTTON_H, title, host, port, motd))
 
-    def update(self, surf, release, right_release, mx, my, m_press, y_offset, size):
+    def update(self, surf, release, right_release, mx, my, m_press, y_offset, size, button_param):
+
+        self.button_list = []
+
+        ROW = 0
+        TITLE = 1
+        HOST = 2
+        PORT = 3
+        MOTD = 4
+
+        for button_index in range(len(button_param)):
+            button_x = self.X_OFFSET
+            button_y = self.Y_OFFSET + button_param[button_index][ROW] * (self.BUTTON_H + self.V_SPACE)
+
+            title = button_param[button_index][TITLE]
+            host = button_param[button_index][HOST]
+            port = int(button_param[button_index][PORT])
+            motd = button_param[button_index][MOTD]
+
+            self.button_list.append(ServerButton(button_x, button_y, self.BUTTON_W, self.BUTTON_H, title, host, port, motd))
+
         click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
         hover_over_button = False
@@ -426,7 +457,7 @@ class ScrollingMenu:
         for button in self.button_list:
             nav_update = button.update(surf, mx, my, m_press, release, right_release, size)
 
-            button.rect.y = y_offset + self.button_list.index(button) * 65
+            button.rect.y = y_offset + self.button_list.index(button) * (button.rect.h + 5)
 
             if nav_update is not None:
                 return nav_update

@@ -1,5 +1,4 @@
 from multiprocessing import *
-
 import socket
 import pickle
 import components.rahma as rah
@@ -10,7 +9,6 @@ def player_sender(send_queue, server):
     while True:
         tobesent = send_queue.get()
         server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
-
 
 def receive_message(message_queue, server):
     rah.rahprint('Ready to receive command...')
