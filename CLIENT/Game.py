@@ -232,8 +232,6 @@ def game(surf, username, token, host, port, size, music_enable):
     message_queue = Queue()
     chat_queue = Queue()
 
-    server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
-
     sender = Process(target=player_sender, args=(send_queue, server))
     sender.start()
 
@@ -272,6 +270,9 @@ def game(surf, username, token, host, port, size, music_enable):
 
     # Receiving First Messages, Initing World, and Player
     # =====================================================================
+
+    server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
+
     while True:
         first_message = message_queue.get()
         if first_message[0] == 400:
@@ -584,7 +585,10 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 if command == 1:
                     remote_username, current_x, current_y = message
-                    if remote_username in remote_players:
+                    if remote_username == username:
+                        local_player.rect.x, local_player.rect.y = current_x, current_y
+
+                    elif remote_username in remote_players:
                         remote_players[remote_username].calculate_velocity((current_x, current_y), tick_per_frame)
                         remote_players[remote_username].calculate_velocity(
                             (current_x * block_size, current_y * block_size), tickPerFrame)

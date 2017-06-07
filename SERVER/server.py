@@ -297,8 +297,7 @@ if __name__ == '__main__':
                     x, y = players[address].change_location((message[1], message[2]))
 
                     for i in players:
-                        if players[i].username != players[address].username:
-                            sendQueue.put(((1, players[address].username, x, y), i))
+                        sendQueue.put(((1, players[address].username, x, y), i))
 
                 elif command == 2:
                     # Render world
@@ -420,15 +419,16 @@ if __name__ == '__main__':
 
                     elif message[1].lower()[:5] == '/give':
 
+                        message_list = message[1].split(' ')
+
                         executor = players[address].username
-                        receiver = message[1][6:message[1][-1].find(' ') - 3]
-                        item, quantity = message[1][message[1].rfind(' ') + 1:].split(',')
+                        receiver = message_list[1]
+                        item, quantity = message_list[2:4]
 
-                        print(item, 'split',quantity)
-
-                        players[address].hotbar[0] = [int(item), int(quantity)]
-
-                        players[address].change_inventory_all(players[address].inventory, players[address].hotbar)
+                        for player in players:
+                            if players[player].username == receiver:
+                                players[player].hotbar[0] = [int(item), int(quantity)]
+                                players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
 
                         send_message = '%s gave %s %s of %s'%(executor, receiver, quantity, item)
 
@@ -443,6 +443,23 @@ if __name__ == '__main__':
 
                         if not send_message:
                             send_message = 'Player %s not found'%kick_name
+
+
+                    elif message[1].lower()[:3] == '/tp':
+
+                        message_list = message[1].split(' ')
+                        executor = players[address].username
+                        receiver = message_list[1]
+
+                        for player in players:
+                            if players[player].username == receiver:
+
+                                x, y = players[player].change_location((message_list[2:4]))
+
+                                for i in players:
+                                    sendQueue.put(((1, players[player].username, x, y), i))
+
+                        send_message = '%s teleported %s to %s %s' % (executor, receiver, x, y)
 
                     elif message[1].lower()[:5] == '/exec':
 
@@ -568,3 +585,5 @@ if __name__ == '__main__':
 
         except:
             sendQueue.put(((11, '\n\n\nDisconnected from server'), address))
+
+            print(traceback.format_exc())

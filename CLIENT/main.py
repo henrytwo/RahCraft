@@ -194,7 +194,7 @@ def authenticate():
         with open('data/session.json', 'w') as session_file:
             json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
-        return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n', "login"
+        return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n\n\nVisit rahmish.com/status for help', "login"
 
 
 def about():
@@ -503,6 +503,10 @@ def options():
 
 def server_picker():
     global host, port, screen
+
+    #def update_server(server_list):
+    #    for server in server_list:
+
 
     with open('data/servers.json', 'r') as servers:
         server_dict = json.load(servers)
