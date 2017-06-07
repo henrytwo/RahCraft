@@ -1,107 +1,122 @@
 {
-	"100": {
-		"name": "Wooden Pickaxe",
-		"icon": "wood_pickaxe.png",
-		"bonus": 2,
-		"speed": 1,
-		"type": "pickaxe"
-	},
-	"101": {
-		"name": "Wooden Shovel",
-		"icon": "wood_shovel.png",
-		"bonus": 2,
-		"speed": 1,
-		"type": "shovel"
-	},
-	"102": {
-		"name": "Wooden Axe",
-		"icon": "wood_axe.png",
-		"bonus": 2,
-		"speed": 1,
-		"type": "axe"
-	},
-	"103": {
-		"name": "Stone Pickaxe",
-		"icon": "stone_pickaxe.png",
-		"bonus": 3,
-		"speed": 1,
-		"type": "pickaxe"
-	},
-	"104": {
-		"name": "Stone Shovel",
-		"icon": "stone_shovel.png",
-		"bonus": 3,
-		"speed": 1,
-		"type": "shovel"
-	},
-	"105": {
-		"name": "Stone Axe",
-		"icon": "stone_axe.png",
-		"bonus": 3,
-		"speed": 1,
-		"type": "axe"
-	},
-	"106": {
-		"name": "Iron Pickaxe",
-		"icon": "iron_pickaxe.png",
-		"bonus": 5,
-		"speed": 1,
-		"type": "pickaxe"
-	},
-	"107": {
-		"name": "Iron Shovel",
-		"icon": "iron_shovel.png",
-		"bonus": 5,
-		"speed": 1,
-		"type": "shovel"
-	},
-	"108": {
-		"name": "Iron Axe",
-		"icon": "iron_axe.png",
-		"bonus": 5,
-		"speed": 1,
-		"type": "axe"
-	},
-	"109": {
-		"name": "Gold Pickaxe",
-		"icon": "gold_pickaxe.png",
-		"bonus": 10,
-		"speed": 1,
-		"type": "pickaxe"
-	},
-	"110": {
-		"name": "Gold Shovel",
-		"icon": "gold_shovel.png",
-		"bonus": 10,
-		"speed": 1,
-		"type": "shovel"
-	},
-	"111": {
-		"name": "Gold Axe",
-		"icon": "gold_axe.png",
-		"bonus": 10,
-		"speed": 1,
-		"type": "axe"
-	},
-	"112": {
-		"name": "Diamond Pickaxe",
-		"icon": "diamond_pickaxe.png",
-		"bonus": 8,
-		"speed": 1,
-		"type": "pickaxe"
-	},
-	"113": {
-		"name": "Diamond Shovel",
-		"icon": "diamond_shovel.png",
-		"bonus": 8,
-		"speed": 1,
-		"type": "shovel"
-	},
-	"114": {
-		"name": "Diamond Axe",
-		"icon": "diamond_axe.png",
-		"bonus": 8,
-		"speed": 1,
-		"type": "axe"
-	}
+  "100": {
+    "name": "Wooden Pickaxe",
+    "icon": "wood_pickaxe.png",
+    "bonus": 2,
+    "speed": 1,
+    "durability": 60,
+    "type": "pickaxe"
+  },
+  "101": {
+    "name": "Wooden Shovel",
+    "icon": "wood_shovel.png",
+    "bonus": 2,
+    "speed": 1,
+    "durability": 60,
+    "type": "shovel"
+  },
+  "102": {
+    "name": "Wooden Axe",
+    "icon": "wood_axe.png",
+    "bonus": 2,
+    "speed": 1,
+    "durability": 60,
+    "type": "axe"
+  },
+  "103": {
+    "name": "Stone Pickaxe",
+    "icon": "stone_pickaxe.png",
+    "bonus": 3,
+    "speed": 1,
+    "durability": 132,
+    "type": "pickaxe"
+  },
+  "104": {
+    "name": "Stone Shovel",
+    "icon": "stone_shovel.png",
+    "bonus": 3,
+    "speed": 1,
+    "durability": 132,
+    "type": "shovel"
+  },
+  "105": {
+    "name": "Stone Axe",
+    "icon": "stone_axe.png",
+    "bonus": 3,
+    "speed": 1,
+    "durability": 132,
+    "type": "axe"
+  },
+  "106": {
+    "name": "Iron Pickaxe",
+    "icon": "iron_pickaxe.png",
+    "bonus": 5,
+    "speed": 1,
+    "durability": 251,
+    "type": "pickaxe"
+  },
+  "107": {
+    "name": "Iron Shovel",
+    "icon": "iron_shovel.png",
+    "bonus": 5,
+    "speed": 1,
+    "durability": 251,
+    "type": "shovel"
+  },
+  "108": {
+    "name": "Iron Axe",
+    "icon": "iron_axe.png",
+    "bonus": 5,
+    "speed": 1,
+    "durability": 251,
+    "type": "axe"
+  },
+  "109": {
+    "name": "Gold Pickaxe",
+    "icon": "gold_pickaxe.png",
+    "bonus": 10,
+    "speed": 1,
+    "durability": 33,
+    "type": "pickaxe"
+  },
+  "110": {
+    "name": "Gold Shovel",
+    "icon": "gold_shovel.png",
+    "bonus": 10,
+    "speed": 1,
+    "durability": 33,
+    "type": "shovel"
+  },
+  "111": {
+    "name": "Gold Axe",
+    "icon": "gold_axe.png",
+    "bonus": 10,
+    "speed": 1,
+    "durability": 33,
+    "type": "axe"
+  },
+  "112": {
+    "name": "Diamond Pickaxe",
+    "icon": "diamond_pickaxe.png",
+    "bonus": 8,
+    "speed": 1,
+    "durability": 1562,
+    "type": "pickaxe"
+  },
+  "113": {
+    "name": "Diamond Shovel",
+    "icon": "diamond_shovel.png",
+    "bonus": 8,
+    "speed": 1,
+    "durability": 1562,
+    "type": "shovel"
+  },
+  "114": {
+    "name": "Diamond Axe",
+    "icon": "diamond_axe.png",
+    "bonus": 8,
+    "speed": 1,
+    "durability": 1562,
+    "type": "axe"
+  }
 }

@@ -132,9 +132,7 @@ def commandline_in(commandline_queue, fn, address, chat_queue):
 def pickup_item(inventory, hotbar, Nitem, item_lib):
     item_location = ''
     inventory_type = ''
-    print(Nitem)
     for item in range(len(hotbar)):
-        print(item, 'hotbar')
         if hotbar[item][0] == Nitem and hotbar[item][1] < item_lib[hotbar[item][0]][2]:
             hotbar[item][1] += 1
             return inventory, hotbar
@@ -142,7 +140,6 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):
             item_location = item
             inventory_type = 'hotbar'
 
-    print('noh')
     for row in range(len(inventory)):
         for item in range(len(inventory[row])):
             if inventory[row][item][0] == Nitem and inventory[row][item][1] < item_lib[inventory[row][item][0]][2]:
@@ -151,9 +148,6 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):
             elif inventory[row][item][0] == 0 and inventory_type == '':
                 item_location = [row, item]
                 inventory_type = 'inventory'
-    print('noi')
-
-    print(item_location, inventory_type)
 
     if inventory_type == 'hotbar':
         hotbar[item_location] = [Nitem, 1]
@@ -564,6 +558,7 @@ def game(surf, username, token, host, port, size, music_enable):
             #     y_offset = 1
 
             if inventory_updated:
+
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
             if on_tick:
@@ -661,13 +656,11 @@ def game(surf, username, token, host, port, size, music_enable):
 
             # Adding Sky
             # =======================================================
-            print(sky_tick)
             if on_tick:
                 if not sky_diming:
                     sky_tick += 100
                 else:
                     sky_tick -= 100
-            print(sky_tick, sky_diming)
 
             if sky_tick > 12000:
                 sky_diming = True
