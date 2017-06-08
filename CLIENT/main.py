@@ -504,9 +504,10 @@ def options():
 def menu_sender(send_queue, server):
     rah.rahprint('Sender running...')
 
-    while True:
-        tobesent = send_queue.get()
-        server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
+
+    #Server status stuff
+    def menu_sender(send_queue, server):
+        rah.rahprint('Sender running...')
 
 
 def receive_message(message_queue, server):
@@ -517,70 +518,65 @@ def receive_message(message_queue, server):
         message_queue.put(pickle.loads(msg[0]))
 
 
-def server_picker():
-    global host, port, screen
+    rah.wallpaper(screen, size)
 
-    def update_server():
-        rah.wallpaper(screen, size)
+    connecting_text = rah.text("Updating servers...", 30)
+    screen.blit(connecting_text,
+              rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
-        connecting_text = rah.text("Updating servers...", 30)
-        screen.blit(connecting_text,
-                  rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+    with open('data/servers.json', 'r') as servers:
+        server_dict = json.load(servers)
 
-        with open('data/servers.json', 'r') as servers:
-            server_dict = json.load(servers)
+    server_list = []
 
-        server_list = []
+    for server in server_dict:
+        server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], '', 501])
 
-        for server in server_dict:
-            server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], '', 501])
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-        server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    send_queue = Queue()
+    message_queue = Queue()
 
-        send_queue = Queue()
-        message_queue = Queue()
+    sender = Process(target=menu_sender, args=(send_queue, server))
+    sender.start()
 
-        sender = Process(target=menu_sender, args=(send_queue, server))
-        sender.start()
+    receiver = Process(target=receive_message, args=(message_queue, server))
+    receiver.start()
 
-        receiver = Process(target=receive_message, args=(message_queue, server))
-        receiver.start()
+    for server_info in server_list:
 
-        for server_info in server_list:
+        try:
+            SERVERADDRESS = (server_info[2], int(server_info[3]))
+            server.sendto(pickle.dumps([102,]), SERVERADDRESS)
 
-            try:
-                SERVERADDRESS = (server_info[2], int(server_info[3]))
-                server.sendto(pickle.dumps([102,]), SERVERADDRESS)
+        except:
+            pass
 
-            except:
-                pass
+    clock = time.Clock()
 
-        clock = time.Clock()
+    draw.rect(screen, (0, 0, 0), (size[0] // 4, size[1] // 2 + 50, size[0] // 2, 10))
 
-        draw.rect(screen, (0, 0, 0), (size[0] // 4, size[1] // 2 + 50, size[0] // 2, 10))
+    for check_cycle in range(500):
 
-        for check_cycle in range(500):
+        draw.rect(screen, (0, 255, 0), (size[0]//4, size[1]//2 + 50, (size[0]//2) * (check_cycle/500), 10))
+        display.flip()
 
-            draw.rect(screen, (0, 255, 0), (size[0]//4, size[1]//2 + 50, (size[0]//2) * (check_cycle/500), 10))
-            display.flip()
+        try:
+            message = message_queue.get_nowait()
 
-            try:
-                message = message_queue.get_nowait()
+            if message[0] == 102:
+                for server_info in server_list:
+                    if server_info[2:4] == list(message[2:4]):
+                        server_info[4] = message[1]
+                        server_info[5] = check_cycle
 
-                if message[0] == 102:
-                    for server_info in server_list:
-                        if server_info[2:4] == list(message[2:4]):
-                            server_info[4] = message[1]
-                            server_info[5] = check_cycle
+        except:
+            pass
 
-            except:
-                pass
+        clock.tick(500)
 
-            clock.tick(500)
-
-        return server_list
-
-    server_list = update_server()
+    sender.terminate()
+    receiver.terminate()
 
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0])
 

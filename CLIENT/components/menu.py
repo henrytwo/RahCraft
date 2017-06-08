@@ -390,8 +390,6 @@ class ServerButton:
 
         signal_strength = self.strength//100
 
-        print(self.title, signal_strength, self.strength)
-
         for bar in range(5):
             if bar == 4 and signal_strength >= 5:
                 colour = (255, 0, 0)
