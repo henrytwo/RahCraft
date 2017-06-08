@@ -519,13 +519,19 @@ def server_picker():
             message_queue.put(pickle.loads(msg[0]))
 
     def update_server():
+        rah.wallpaper(screen, size)
+
+        connecting_text = rah.text("Updating servers...", 30)
+        screen.blit(connecting_text,
+                  rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+
         with open('data/servers.json', 'r') as servers:
             server_dict = json.load(servers)
 
         server_list = []
 
         for server in server_dict:
-            server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], ''])
+            server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], '', 501])
 
         server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -547,9 +553,15 @@ def server_picker():
             except:
                 pass
 
-        check_cycle = 0
+        clock = time.Clock()
 
-        while check_cycle < 10000:
+        draw.rect(screen, (0, 0, 0), (size[0] // 4, size[1] // 2 + 50, size[0] // 2, 10))
+
+        for check_cycle in range(500):
+
+            draw.rect(screen, (0, 255, 0), (size[0]//4, size[1]//2 + 50, (size[0]//2) * (check_cycle/500), 10))
+            display.flip()
+
             try:
                 message = message_queue.get_nowait()
 
@@ -557,12 +569,12 @@ def server_picker():
                     for server_info in server_list:
                         if server_info[2:4] == list(message[2:4]):
                             server_info[4] = message[1]
+                            server_info[5] = check_cycle
 
             except:
                 pass
-                #print(server_list)
 
-            check_cycle += 1
+            clock.tick(500)
 
         return server_list
 
@@ -611,6 +623,11 @@ def server_picker():
 
                     y_offset -= 40
 
+            if e.type == KEYDOWN:
+                if e.key == K_r:
+                    return 'server_picker'
+
+
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
@@ -641,7 +658,7 @@ def server_picker():
 
         # ---------------------------------------------------------------------
 
-        nav_update = server_menu.update(screen, release, right_release, mx, my, m_press, y_offset, size, server_list)
+        nav_update = server_menu.update(screen, release, right_release, mx, my, m_press, y_offset, size)
 
         if nav_update:
             if nav_update[0] == 'remove':
