@@ -500,16 +500,15 @@ def options():
 
         display.update()
 
+def receive_message(message_queue, server):
+    rah.rahprint('Ready to receive command...')
+
+    while True:
+        msg = server.recvfrom(163840)
+        message_queue.put(pickle.loads(msg[0]))
+
 def server_picker():
     global screen, host, port
-
-    def receive_message(message_queue, server):
-        rah.rahprint('Ready to receive command...')
-
-        while True:
-            msg = server.recvfrom(163840)
-            message_queue.put(pickle.loads(msg[0]))
-
 
     rah.wallpaper(screen, size)
 

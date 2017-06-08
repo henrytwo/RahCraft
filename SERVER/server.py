@@ -235,7 +235,6 @@ def authenticate(message):
         server.close()
         return False
 
-
 if __name__ == '__main__':
     players = {}
     player_number = 1
@@ -257,6 +256,8 @@ if __name__ == '__main__':
         config_slack()
 
     world = World(world_name)
+
+    chests = {}
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
@@ -342,7 +343,9 @@ if __name__ == '__main__':
                         players[address].hotbar[message[4]] = [0, 0]
 
                     sendQueue.put(((6, message[4], players[address].hotbar[message[4]]), address))
-
+                    '''
+                    if message[3] ==
+                    '''
                     for i in players:
                         sendQueue.put(((4, message[1], message[2], message[3]), i))
 

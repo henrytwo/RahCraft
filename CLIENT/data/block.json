@@ -200,7 +200,32 @@
     "hardness": 300,
     "tool": "pickaxe",
     "drop": 16,
-    "tool-required": 16,
+    "tool-required": 1,
+    "maxstack": 64
+  },
+  "17": {
+    "name": "Chest",
+    "texture": "chest.jpg",
+    "icon": "chest_icon32.png",
+    "collision": "collide",
+    "sound": "wood",
+    "hardness": 75,
+    "tool": "axe",
+    "drop": 17,
+    "tool-required": 0,
+    "maxstack": 64
+  },
+
+  "18": {
+    "name": "Furnace",
+    "texture": "furnace_front_on.png",
+    "icon": "furnace_icon32.png",
+    "collision": "collide",
+    "sound": "stone",
+    "hardness": 300,
+    "tool": "pickaxe",
+    "drop": 18,
+    "tool-required": 1,
     "maxstack": 64
   }
 }

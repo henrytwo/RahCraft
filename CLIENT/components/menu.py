@@ -507,7 +507,7 @@ class Inventory:
                             else:
                                 self.crafting_grid[x][y][1] -= 1
 
-            elif self.holding[0] == self.resulting_item[0] and self.holding[1] + self.resulting_item[1] < item_lib[self.holding[0]][-1]:
+            elif self.holding[0] == self.resulting_item[0] and self.holding[1] + self.resulting_item[1] <= item_lib[self.holding[0]][-1]:
                 self.holding[1] += self.resulting_item[1]
                 for x in range(len(self.crafting_grid)):
                     for y in range(2):
@@ -647,7 +647,7 @@ class Crafting:
                                 self.crafting_grid[x][y] = [0, 0]
                             else:
                                 self.crafting_grid[x][y][1] -= 1
-            elif self.holding[0] == self.resulting_item[0] and self.holding[1] + self.resulting_item[1] < item_lib[self.holding[0]][-1]:
+            elif self.holding[0] == self.resulting_item[0] and self.holding[1] + self.resulting_item[1] <= item_lib[self.holding[0]][-1]:
                 self.holding[1] += self.resulting_item[1]
                 for x in range(len(self.crafting_grid)):
                     for y in range(3):
