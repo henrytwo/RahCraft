@@ -93,6 +93,7 @@ def load_tools(tool_file):
                             'bonus': tool_data[tool]['bonus'],
                             'speed': tool_data[tool]['speed'],
                             'type': tool_data[tool]['type'],
+                            'durability': tool_data[tool]['durability'],
                             'maxstack': 1}
 
     return tools
@@ -199,6 +200,10 @@ def game(surf, username, token, host, port, size, music_enable):
                     surf.blit(rah.text(str(hotbar_items[item][1]), 10),
                               (hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
+            if len(hotbar_items[item]) == 3:
+                draw.rect(surf, (0, 0, 0), (hotbar_rect[0] + (32 + 8) * item + 10, size[1] - 10, 24, 2))
+                draw.rect(surf, (255, 255, 0), (hotbar_rect[0] + (32 + 8) * item + 10, size[1] - 10, int(24 * hotbar_items[item][2] // tool_properties[hotbar_items[item][0]]['durability']), 2))
+
         surf.blit(selected, (hotbar_rect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))
 
         if hotbar_items[hotbar_slot][0] != 0:
@@ -279,7 +284,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 break
 
         except:
-            print('nope')
+            pass
 
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players = first_message[1:]
 
@@ -416,7 +421,6 @@ def game(surf, username, token, host, port, size, music_enable):
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
     inventory_updated = False
-    print("ini done")
 
     sky_diming = False
 
@@ -753,6 +757,16 @@ def game(surf, username, token, host, port, size, music_enable):
                     if block_broken:
 
                         rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]]['sound']])
+
+                        if hotbar_items[hotbar_slot][0] in tool_properties:
+                            if len(hotbar_items[hotbar_slot]) == 2:
+                                hotbar_items[hotbar_slot].append(tool_properties[hotbar_items[hotbar_slot][0]]['durability'])
+                            else:
+                                hotbar_items[hotbar_slot][2] -= 1
+                                if hotbar_items[hotbar_slot][2] == 0:
+                                    hotbar_items[hotbar_slot] = [0, 0]
+
+                        print(hotbar_items)
 
                         if block_properties[world[hover_x, hover_y]]['tool-required']:
                             if hotbar_items[hotbar_slot][0] in tool_properties:

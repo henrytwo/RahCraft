@@ -499,7 +499,7 @@ class Inventory:
 
     def craft(self, item_lib):
         if self.resulting_item != [0, 0]:
-            if self.holding == [0, 0]:
+            if self.holding[0] == 0:
                 self.holding = self.resulting_item
                 for x in range(len(self.crafting_grid)):
                     for y in range(2):
@@ -640,7 +640,7 @@ class Crafting:
 
     def craft(self, item_lib):
         if self.resulting_item != [0, 0]:
-            if self.holding == [0, 0]:
+            if self.holding[0] == 0:
                 self.holding = self.resulting_item
                 for x in range(len(self.crafting_grid)):
                     for y in range(3):
