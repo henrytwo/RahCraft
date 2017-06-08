@@ -214,14 +214,6 @@ def game(surf, username, token, host, port, size, music_enable):
     # =====================================================================
     display.set_caption("RahCraft")
 
-    rah.wallpaper(surf, size)
-
-    connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 30)
-    surf.blit(connecting_text,
-              rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
-
-    display.update()
-
     # Setting Up Socket I/O and Multiprocessing
     # =====================================================================
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -270,9 +262,35 @@ def game(surf, username, token, host, port, size, music_enable):
     # Receiving First Messages, Initing World, and Player
     # =====================================================================
 
-    server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
+    clock = time.Clock()
+    dir = 5
+    slider_x = 0
 
-    while True:
+    for cycle in range(1001):
+        server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
+
+        if cycle == 1000:
+            return 'information', '\n\n\n\n\nUnable to connect to server\nTimed out', 'server_picker'
+
+        rah.wallpaper(surf, size)
+
+        connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 15)
+
+        surf.blit(connecting_text,
+                  rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+
+        tile_w = size[0]//8
+
+        slider_x += dir
+
+        if slider_x <= 0 or slider_x >= size[0]//2 - tile_w:
+            dir *= -1
+
+        draw.rect(surf, (0,0,0), (size[0]//4, size[1]//2 + 40, size[0]//2, 10))
+        draw.rect(surf, (0, 255, 0), (size[0]//4 + slider_x, size[1]//2 + 40, tile_w,10))
+
+        display.update()
+
         try:
             first_message = message_queue.get_nowait()
             if first_message[0] == 400:
@@ -285,6 +303,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
         except:
             pass
+
+        clock.tick(500)
 
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players = first_message[1:]
 
@@ -586,12 +606,20 @@ def game(surf, username, token, host, port, size, music_enable):
                 server_message = message_queue.get_nowait()
                 command, message = server_message[0], server_message[1:]
 
-                if command == 1:
-                    remote_username, current_x, current_y = message
-                    if remote_username == username:
-                        local_player.rect.x, local_player.rect.y = current_x, current_y
+                print(message)
 
-                    elif remote_username in remote_players:
+                if command == 1:
+                    remote_username, current_x, current_y, tp = message
+
+                    # if remote_username == username and tp:
+                    #
+                    #     x_offset, y_offset = current_x, current_y
+                    #     local_player.rect.x, local_player.rect.y = x_offset + size[0] // 2 + block_size // 2, y_offset + size[1] // 2 + block_size // 2
+                    #
+                    #     local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
+                    #                         block_properties)
+
+                    if remote_username in remote_players:
                         remote_players[remote_username].calculate_velocity((current_x, current_y), tick_per_frame)
                         remote_players[remote_username].calculate_velocity(
                             (current_x * block_size, current_y * block_size), tickPerFrame)

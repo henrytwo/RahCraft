@@ -458,10 +458,10 @@ if __name__ == '__main__':
                             for player in players:
                                 if players[player].username == receiver:
 
-                                    x, y = players[player].change_location((message_list[2:4]))
+                                    x, y = players[player].change_location((list(map(int, message_list[2:4]))))
 
                                     for i in players:
-                                        sendQueue.put(((1, players[player].username, x, y), i))
+                                        sendQueue.put(((1, players[player].username, x, y, True), i))
 
                             send_message = '%s teleported %s to %s %s' % (executor, receiver, x, y)
 
@@ -582,7 +582,7 @@ if __name__ == '__main__':
                     for i in players:
                         if players[i].username != players[address].username:
                             sendQueue.put(((1, players[address].username, str(players[address].cord[0]),
-                                            str(players[address].cord[1])), i))
+                                            str(players[address].cord[1]), False), i))
 
                 else:
                     sendQueue.put(((400, (
