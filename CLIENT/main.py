@@ -501,16 +501,7 @@ def options():
         display.update()
 
 def server_picker():
-    global screen
-
-    def menu_sender(send_queue, server):
-        rah.rahprint('Sender running...')
-
-
-        #Server status stuff
-        def menu_sender(send_queue, server):
-            rah.rahprint('Sender running...')
-
+    global screen, host, port
 
     def receive_message(message_queue, server):
         rah.rahprint('Ready to receive command...')
@@ -536,11 +527,7 @@ def server_picker():
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
-    send_queue = Queue()
     message_queue = Queue()
-
-    sender = Process(target=menu_sender, args=(send_queue, server))
-    sender.start()
 
     receiver = Process(target=receive_message, args=(message_queue, server))
     receiver.start()
@@ -576,7 +563,6 @@ def server_picker():
 
         clock.tick(500)
 
-    sender.terminate()
     receiver.terminate()
 
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0])
