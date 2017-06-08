@@ -500,22 +500,24 @@ def options():
 
         display.update()
 
+def server_picker():
+    global screen
 
-def menu_sender(send_queue, server):
-    rah.rahprint('Sender running...')
-
-
-    #Server status stuff
     def menu_sender(send_queue, server):
         rah.rahprint('Sender running...')
 
 
-def receive_message(message_queue, server):
-    rah.rahprint('Ready to receive command...')
+        #Server status stuff
+        def menu_sender(send_queue, server):
+            rah.rahprint('Sender running...')
 
-    while True:
-        msg = server.recvfrom(163840)
-        message_queue.put(pickle.loads(msg[0]))
+
+    def receive_message(message_queue, server):
+        rah.rahprint('Ready to receive command...')
+
+        while True:
+            msg = server.recvfrom(163840)
+            message_queue.put(pickle.loads(msg[0]))
 
 
     rah.wallpaper(screen, size)
@@ -544,7 +546,6 @@ def receive_message(message_queue, server):
     receiver.start()
 
     for server_info in server_list:
-
         try:
             SERVERADDRESS = (server_info[2], int(server_info[3]))
             server.sendto(pickle.dumps([102,]), SERVERADDRESS)
