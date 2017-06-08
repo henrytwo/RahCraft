@@ -390,12 +390,16 @@ class ServerButton:
 
         signal_strength = self.strength//100
 
-        for bar in range(5):
+        print(self.title, signal_strength, self.strength)
 
-            if bar == 4 and signal_strength > 0:
+        for bar in range(5):
+            if bar == 4 and signal_strength >= 5:
                 colour = (255, 0, 0)
-            elif bar > signal_strength:
-                colour = (0, 255, 0)
+            elif bar >= signal_strength:
+                if signal_strength > 2:
+                    colour = (200, 255, 0)
+                else:
+                    colour = (0, 255, 0)
             else:
                 colour = (0, 0, 0)
 
