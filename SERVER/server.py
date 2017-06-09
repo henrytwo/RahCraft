@@ -246,7 +246,7 @@ def authenticate(message):
 
 if __name__ == '__main__':
     players = {}
-    username_dict = {('127.0.0.1', 0):'Server'}
+    username_dict = {('127.0.0.1', 0):'Rahbot'}
     player_number = 1
 
     active_players = []
@@ -311,35 +311,41 @@ if __name__ == '__main__':
                 # Player login and authentication
                 # Data: [0,<username>, <token>]
 
-                if message[1] not in username and authenticate(message[1:3]):
+                if message[1] not in username:
 
-                    if not playerNDisconnect:
-                        PN = player_number
-                        player_number += 1
-                    else:
-                        PN = playerNDisconnect.popleft()
+                    if authenticate(message[1:3]):
 
-                    playerLocations = {players[x].username: players[x].cord for x in players}
+                        if not playerNDisconnect:
+                            PN = player_number
+                            player_number += 1
+                        else:
+                            PN = playerNDisconnect.popleft()
 
-                    players[address] = Player(PN, message[1])
-                    username_dict[address] = message[1]
-                    sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
-                                    players[address].hotbar, players[address].inventory, playerLocations), address))
+                        playerLocations = {players[x].username: players[x].cord for x in players}
 
-                    active_players.append(address)
+                        players[address] = Player(PN, message[1])
+                        username_dict[address] = message[1]
+                        sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
+                                        players[address].hotbar, players[address].inventory, playerLocations), address))
 
-                    messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1', 0000)))
-                    # rahprint('Player %s has connected from %s' % (message[1], address))
-                    username.add(message[1])
+                        active_players.append(address)
 
-                    for i in players:
-                        if players[i].username != username_dict[address]:
-                            sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
-                                            str(players[address].cord[1]), False), i))
+                        messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1', 0000)))
+                        # rahprint('Player %s has connected from %s' % (message[1], address))
+                        username.add(message[1])
+
+                        for i in players:
+                            if players[i].username != username_dict[address]:
+                                sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
+                                                str(players[address].cord[1]), False), i))
+
+                    sendQueue.put(((400, (
+                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nCredentials were rejected by\nRahCraft Authentication Service\n(Try logging in again)\n\n")),
+                                   address))
 
                 else:
                     sendQueue.put(((400, (
-                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)\n\n")),
+                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nUsername currently in use\nIf you recently disconnected, wait\n 30 seconds for server to sync")),
                                    address))
 
             # External heartbeat
@@ -529,7 +535,7 @@ if __name__ == '__main__':
 
                                 message_list = message[1].split(' ')
 
-                                if len(message_list) == 2:
+                                if len(message_list) == 3:
 
                                     executor = username_dict[address]
                                     receiver = message_list[2]

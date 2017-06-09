@@ -293,7 +293,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
         try:
             first_message = message_queue.get_nowait()
-            if first_message[0] == 400:
+            if first_message[0] == 400 or not first_message[1:]:
                 sender.terminate()
                 receiver.terminate()
                 commandline.terminate()
@@ -705,19 +705,17 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 rah.rahprint("Reset")
 
-            surf.fill(int(sky_tick/47))
+            for y in range(size[1]):
 
-            # for y in range(size[1]):
-            #
-            #     r = 0
-            #     g = 0
-            #     b = int(((y_offset // block_size)/world_size_y) * 255)
-            #
-            #     draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
+                 r =  min(max(int(((y_offset // block_size)/world_size_y) * 20 - int(255 * sky_tick/24000)), 0),255)
+                 g = min(max(int(((y_offset // block_size)/world_size_y) * 60 - int(255 * sky_tick/24000)), 0),255)
+                 b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(500 * sky_tick/24000)), 0),255)
+
+                 draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
 
             # surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
-            surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
-            surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 16 - 50, -200)))
+            surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
+            surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
 
             # Render World
             # =======================================================
