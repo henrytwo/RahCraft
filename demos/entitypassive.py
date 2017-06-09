@@ -30,7 +30,7 @@ class Block:
         self.around = False
 
 
-class Player:
+class Entity:
     def __init__(self, x, y, w, h, cap):
         self.rect = Rect(x, y, w, h)
 
@@ -61,7 +61,7 @@ class Player:
 
     def sim_input(self):
         if not self.analog_move:
-            self.command = randrange(500)
+            self.command = randrange(10)
             if self.command in [1, 2, 4, 5]:
                 self.analog_move = True
                 self.analog_limit = randint(60, 180)
@@ -156,9 +156,6 @@ class Player:
         # self.vx = self.max_vx if 0
         self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
 
-    def respawn(self, pos):
-        self.actual_x, self.actual_y = pos
-
     def update(self):
         draw.rect(screen, (255, 0, 0), self.rect)
 
@@ -194,9 +191,11 @@ columns = 16 * complexity
 b_width = screenSize[0] // columns
 b_height = screenSize[1] // rows
 
-gameWorld = make_world(rows, columns, 3)
+gameWorld = make_world(rows, columns, 2)
 
-player = Player(screenSize[0] // 2, screenSize[1] // 2, b_width, b_height, b_height)
+entityList = [Entity((b_width + b_width * (i * 2)) % screenSize[0], (b_height + b_height * (i * 2)) % screenSize[1],
+              b_width, b_height, b_height)
+              for i in range(4)]
 
 surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
                       (-1, 0), (0, 0), (1, 0),
@@ -215,13 +214,11 @@ while True:
             for c in range(columns):
                 gameWorld[r, c].update()
 
-        player.sim_input()
-        player.control()
-        player.detect()
-        player.update()
-
-        if keys[K_e]:
-            player.respawn(mouse_pos)
+        for entity in entityList:
+            entity.sim_input()
+            entity.control()
+            entity.detect()
+            entity.update()
 
         clock.tick(60)
 
