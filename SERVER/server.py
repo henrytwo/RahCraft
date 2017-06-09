@@ -17,8 +17,8 @@ from math import *
 import time
 from random import *
 
-from SERVER.components.slack import *
-from SERVER.components.world import *
+from components.slack import *
+from components.world import *
 
 with open("data/config.rah", "r") as config:
     config = config.read().strip().split("\n")

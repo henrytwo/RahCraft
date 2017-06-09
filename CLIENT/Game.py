@@ -42,9 +42,9 @@ import time as ti
 from pygame import *
 from random import *
 
-import CLIENT.components.rahma as rah
-import CLIENT.components.player as player
-import CLIENT.components.menu as menu
+import components.rahma as rah
+import components.player as player
+import components.menu as menu
 
 def player_sender(send_queue, server):
     rah.rahprint('Sender running...')

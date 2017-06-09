@@ -1,7 +1,7 @@
 from pygame import *
 import numpy
 
-import CLIENT.components.rahma as rah
+import components.rahma as rah
 
 font.init()
 
