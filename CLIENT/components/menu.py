@@ -810,13 +810,30 @@ class Chest:
 
         return inv
 
-    def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, item_lib):
+    def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, chest_inv, item_lib):
         surf.blit(self.graphic, (self.x, self.y))
+
+        for row in range(len(chest_inv)):
+            for item in range(len(chest_inv[row])):
+                if chest_inv[row][item][1] != 0:
+                surf.blit(item_lib[chest_inv[row][item][0]][1],
+                          (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                surf.blit(rah.text(str(chest_inv[row][item][1]), 10),
+                          (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+            if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                if l_click:
+                    chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
+                elif r_click:
+                    chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
                 if inventory[row][item][1] != 0:
-                    surf.blit(block_properties[inventory[row][item][0]][7],
+                    surf.blit(item_lib[inventory[row][item][0]][1],
                               (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     surf.blit(rah.text(str(inventory[row][item][1]), 10),
@@ -832,7 +849,7 @@ class Chest:
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
-                surf.blit(block_properties[hotbar[item][0]][7], (self.x + 16 + item * 36, self.y + 283, 32, 32))
+                surf.blit(item_lib[hotbar[item][0]][1], (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 surf.blit(rah.text(str(hotbar[item][1]), 10), (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
@@ -843,4 +860,4 @@ class Chest:
                     hotbar[item] = self.check_stacking(hotbar[item], item_lib)
 
         if self.holding[0] > 0:
-            surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
+            surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
