@@ -198,13 +198,17 @@ def authenticate():
 def about():
     global screen
 
-    rah.wallpaper(screen, size)
+    sound_object = mixer.Sound('sound/music/about.wav')
+    sound_object.play(0)
 
-    back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
+    rah.wallpaper(screen, size)
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    about_list = ['The Zen of Python, by Tim Peters',
+    about_list = ['RahCraft',
+                  '',
+                  '',
+                  'The Zen of Python, by Tim Peters',
                   'Beautiful is better than ugly.',
                   'Explicit is better than implicit.',
                   'Simple is better than complex.',
@@ -213,16 +217,55 @@ def about():
                   'Sparse is better than dense.',
                   'Readability counts.',
                   'Special cases aren\'t special enough to break the rules.',
-                  '...',
+                  'Although practicality beats purity.',
+                  'Errors should never pass silently.',
+                  'Unless explicitly silenced.',
+                  'In the face of ambiguity, refuse the temptation to guess.',
+                  'There should be one-- and preferably only one --obvious way to do it.',
+                  "Although that way may not be obvious at first unless you're Dutch.",
+                  'Now is better than never.',
+                  'Although never is often better than *right* now.',
                   'If the implementation is hard to explain, it\'s a bad idea.',
                   'If the implementation is easy to explain, it may be a good idea.',
                   'Namespaces are one honking great idea -- let\'s do more of those!',
                   '',
+                  'rahmish.com',
+                  '',
+                  'RahCraft (C) Rahmish Empire, All Rahs Reserved',
+                  '',
                   'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
                   'ICS3U 2017',
-                  '']
+                  'Vincent Massey Secondary School',
+                  '',
+                  '',
+                  '                 !#########       #                 ',
+                  '               !########!          ##!              ',
+                  '            !########!               ###            ',
+                  '         !##########                  ####          ',
+                  '       ######### #####                ######        ',
+                  '        !###!      !####!              ######       ',
+                  '          !           #####            ######!      ',
+                  '                        !####!         #######      ',
+                  '                           #####       #######      ',
+                  '                             !####!   #######!      ',
+                  '                                ####!########       ',
+                  '             ##                   ##########        ',
+                  '           ,######!          !#############         ',
+                  '         ,#### ########################!####!       ',
+                  "       ,####'     ##################!'    #####     ",
+                  "     ,####'            #######              !####!  ",
+                  "    ####'                                      #####",
+                  '    ~##                                          ##~']
+    scroll_y = size[1]
+
+    clock = time.Clock()
 
     while True:
+
+        if scroll_y < -20 * len(about_list):
+            sound_object.stop()
+            return 'menu'
+
         release = False
 
         for e in event.get():
@@ -234,21 +277,27 @@ def about():
 
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
+                sound_object.stop()
                 return 'about'
+
+            if e.type == KEYDOWN:
+                if e.key == K_ESCAPE:
+                    sound_object.stop()
+                    return 'menu'
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        rah.wallpaper(screen, size)
+
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
+            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20 + scroll_y))
 
-        nav_update = back_button.update(screen, mx, my, m_press, 15, release)
-
-        if nav_update is not None:
-            return nav_update
+        scroll_y -= 1
 
         display.update()
+        clock.tick(30)
 
 
 def reject():
