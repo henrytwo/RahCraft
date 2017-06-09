@@ -205,7 +205,7 @@ def heart_beats(message_queue, tick):
     while True:
         time.sleep(.06)
         tick += 1
-        if tick % 1000 == 0:
+        if tick % 100 == 0:
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
             if tick >= 24000:
                 tick = 1
@@ -355,7 +355,7 @@ if __name__ == '__main__':
                                        address))
                 else:
                     sendQueue.put(((400, (
-                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nThis server is white listed\nContect the administrator for assistance")),
+                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nThis server is white listed\nIf you believe this is an error,\nContact the administrator for assistance")),
                                    address))
 
             # External heartbeat
@@ -610,8 +610,8 @@ if __name__ == '__main__':
                                     receiver = message_list[2]
 
                                     if message_list[1] == 'add':
-                                        op.append(receiver)
-                                        send_message = '%s gave %s op'%(executor, receiver)
+                                        whitelist.append(receiver)
+                                        send_message = '%s added %s to the whitelist'%(executor, receiver)
 
                                         with open('data/whitelist.rah', 'w') as whitelist_file:
                                             for user in whitelist:

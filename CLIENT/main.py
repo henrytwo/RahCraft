@@ -1051,8 +1051,6 @@ if __name__ == "__main__":
     while navigation != 'exit':
         size = (screen.get_width(), screen.get_height())
 
-        print(navigation)
-
         try:
             if navigation == 'game':
                 game_nav = Game.game(screen, username, token, host, port, size, music_enable)
