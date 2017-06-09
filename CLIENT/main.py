@@ -25,10 +25,9 @@ def login():
     rah.wallpaper(screen, size)
 
     title_text = rah.text('Welcome to RahCraft! Login to continue', 20)
-    screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 30))
+    screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 50))
 
     try:
-
         with open('data/session.json', 'r') as session_file:
 
             session = json.load(session_file)
@@ -44,9 +43,9 @@ def login():
         with open('data/session.json', 'w') as session_file:
             json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
-    test = menu.Switch(20, 20, 100, 40, False, 'Test')
-    test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
-    test2 = menu.Slider(20, 110, 400, 40, False, 'Test')
+    #test = menu.Switch(20, 20, 100, 40, False, 'Test')
+    #test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
+    #test2 = menu.Slider(20, 110, 400, 40, False, 'Test')
 
     username, password = '', ''
 
@@ -58,8 +57,7 @@ def login():
     exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
 
     auth_button = menu.Button(size[0] // 4, size[1] // 2 + 50, size[0] // 2, 40, 'auth', 'Login')
-    signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup',
-                                'Need an account? Signup here')
+    signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup','Need an account? Signup here')
 
     while True:
 
@@ -124,9 +122,9 @@ def login():
         username, password = fields['Username'][1], hash_creds(
             hash_creds(fields['Password'][1]) + hash_creds(fields['Username'][1]))
 
-        test.update(screen, mx, my, m_press, 15, release)
-        test1.update(screen, mx, my, m_press, 15, release)
-        test2.update(screen, mx, my, m_press, 15, release)
+        #test.update(screen, mx, my, m_press, 15, release)
+        #test1.update(screen, mx, my, m_press, 15, release)
+        #test2.update(screen, mx, my, m_press, 15, release)
 
         clock.tick(120)
         display.update()
@@ -408,7 +406,10 @@ def information(message, previous):
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
         if nav_update is not None:
-            return nav_update
+            if nav_update == 'server_picker':
+                return ['server_picker', '']
+            else:
+                return nav_update
 
         display.update()
 
@@ -507,7 +508,8 @@ def receive_message(message_queue, server):
         msg = server.recvfrom(163840)
         message_queue.put(pickle.loads(msg[0]))
 
-def server_picker():
+def server_picker(direct_server):
+
     global screen, host, port
 
     rah.wallpaper(screen, size)
@@ -575,6 +577,16 @@ def server_picker():
     y_offset = 50
     percent_visible = 0
 
+    if direct_server:
+        for server_obj in server_list:
+            if server_obj[1] == direct_server and server_obj[4]:
+                game_nav = Game.game(screen, username, token, server_obj[2], server_obj[3], size, music_enable)
+
+                navigation = game_nav
+
+            else:
+                return 'information', '\n\n\n\nCould not detect response from server\n\nConnection aborted', 'server_picker'
+
     while True:
 
         rah.wallpaper(screen, size)
@@ -595,7 +607,7 @@ def server_picker():
 
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
-                return 'server_picker'
+                return ['server_picker', '']
 
             if e.type == MOUSEBUTTONDOWN:
 
@@ -609,7 +621,7 @@ def server_picker():
 
             if e.type == KEYDOWN:
                 if e.key == K_r:
-                    return 'server_picker'
+                    return ['server_picker', '']
 
 
         mx, my = mouse.get_pos()
@@ -660,7 +672,10 @@ def server_picker():
                 with open('data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
-                return 'server_picker'
+                return ['server_picker', '']
+
+            elif nav_update[0] == 'server_picker':
+                return ['server_picker', nav_update[1]]
 
             elif nav_update[0] == 'remove fail':
                 return 'information', "\n\n\n\n\nCouldn't delete server shortcut\nPermission denied", 'server_picker'
@@ -718,7 +733,7 @@ def custom_server_picker():
 
             if e.type == KEYDOWN:
                 if e.key == K_RETURN and host and port:
-                    host, port = fields['host'][1], int(fields['port'][1])
+                    host, port = fields['Host'][1], int(fields['Port'][1])
                     return 'game'
 
                 if e.key == K_TAB:
@@ -738,8 +753,11 @@ def custom_server_picker():
         if nav_update:
 
             if nav_update == 'game' and host and port:
-                host, port = fields['host'][1], int(fields['port'][1])
+                host, port = fields['Host'][1], int(fields['Port'][1])
                 return nav_update
+
+            elif nav_update == 'server_picker':
+                return ['server_picker', '']
 
             else:
                 return nav_update
@@ -812,7 +830,7 @@ def server_adder():
                     with open('data/servers.json', 'w') as servers:
                         json.dump(server_update, servers, indent=4, sort_keys=True)
 
-                    return 'server_picker'
+                    return ['server_picker', '']
 
                 if e.key == K_TAB:
                     field_list.insert(0, field_list[-1])
@@ -848,10 +866,8 @@ def server_adder():
                 with open('data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
-                return 'server_picker'
+            return ['server_picker', '']
 
-            else:
-                return nav_update
 
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
@@ -956,6 +972,9 @@ def menu_screen():
 
                 return 'login'
 
+            elif nav_update == 'server_picker':
+                return ['server_picker', '']
+
             else:
                 return nav_update
 
@@ -1038,6 +1057,9 @@ if __name__ == "__main__":
                 game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
                 navigation = game_nav
+
+            elif navigation[0] == 'server_picker':
+                navigation = server_picker(navigation[1])
 
             elif navigation[0] == 'crash':
                 navigation = crash(navigation[1], navigation[2])
