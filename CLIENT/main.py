@@ -681,6 +681,7 @@ def server_picker():
                 return 'information', "\n\n\n\n\nCouldn't delete server shortcut\nPermission denied", 'server_picker'
 
             else:
+                print(nav_update)
                 host, port = nav_update[1], nav_update[2]
                 return nav_update[0]
 

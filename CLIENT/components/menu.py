@@ -361,11 +361,8 @@ class ServerButton:
 
                 rah.load_sound(['sound/random/click.ogg'])
 
-                if self.motd:
-                    return ['game', self.host, self.port]
+                return ['game', self.host, self.port]
 
-                else:
-                    return ['server_picker', self.title]
 
             elif right_release and my < size[1] - 80:
                 if self.title not in self.do_not_destroy:
