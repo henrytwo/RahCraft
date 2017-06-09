@@ -406,10 +406,7 @@ def information(message, previous):
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
         if nav_update is not None:
-            if nav_update == 'server_picker':
-                return ['server_picker', '']
-            else:
-                return nav_update
+            return nav_update
 
         display.update()
 
@@ -508,15 +505,23 @@ def receive_message(message_queue, server):
         msg = server.recvfrom(163840)
         message_queue.put(pickle.loads(msg[0]))
 
-def server_picker(direct_server):
-
-    global screen, host, port
+def status_screen(status, size, screen):
 
     rah.wallpaper(screen, size)
 
     connecting_text = rah.text("Updating servers...", 30)
     screen.blit(connecting_text,
               rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+
+    status_text = rah.text(status, 15)
+    screen.blit(status_text, rah.center(0, 50, size[0], size[1], status_text.get_width(), status_text.get_height()))
+
+    display.flip()
+def server_picker():
+
+    global screen, host, port
+
+    status_screen('Indexing servers', size, screen)
 
     with open('data/servers.json', 'r') as servers:
         server_dict = json.load(servers)
@@ -533,6 +538,8 @@ def server_picker(direct_server):
     receiver = Process(target=receive_message, args=(message_queue, server))
     receiver.start()
 
+    status_screen('Pinging servers', size, screen)
+
     for server_info in server_list:
         try:
             SERVERADDRESS = (server_info[2], int(server_info[3]))
@@ -540,6 +547,12 @@ def server_picker(direct_server):
 
         except:
             pass
+
+    rah.wallpaper(screen, size)
+
+    connecting_text = rah.text("Updating servers...", 30)
+    screen.blit(connecting_text,
+              rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
     clock = time.Clock()
 
@@ -577,16 +590,6 @@ def server_picker(direct_server):
     y_offset = 50
     percent_visible = 0
 
-    if direct_server:
-        for server_obj in server_list:
-            if server_obj[1] == direct_server and server_obj[4]:
-                game_nav = Game.game(screen, username, token, server_obj[2], server_obj[3], size, music_enable)
-
-                navigation = game_nav
-
-            else:
-                return 'information', '\n\n\n\nCould not detect response from server\n\nConnection aborted', 'server_picker'
-
     while True:
 
         rah.wallpaper(screen, size)
@@ -607,7 +610,7 @@ def server_picker(direct_server):
 
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
-                return ['server_picker', '']
+                return 'server_picker'
 
             if e.type == MOUSEBUTTONDOWN:
 
@@ -621,7 +624,7 @@ def server_picker(direct_server):
 
             if e.type == KEYDOWN:
                 if e.key == K_r:
-                    return ['server_picker', '']
+                    return 'server_picker'
 
 
         mx, my = mouse.get_pos()
@@ -672,10 +675,7 @@ def server_picker(direct_server):
                 with open('data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
-                return ['server_picker', '']
-
-            elif nav_update[0] == 'server_picker':
-                return ['server_picker', nav_update[1]]
+                return 'server_picker'
 
             elif nav_update[0] == 'remove fail':
                 return 'information', "\n\n\n\n\nCouldn't delete server shortcut\nPermission denied", 'server_picker'
@@ -756,9 +756,6 @@ def custom_server_picker():
                 host, port = fields['Host'][1], int(fields['Port'][1])
                 return nav_update
 
-            elif nav_update == 'server_picker':
-                return ['server_picker', '']
-
             else:
                 return nav_update
 
@@ -830,7 +827,7 @@ def server_adder():
                     with open('data/servers.json', 'w') as servers:
                         json.dump(server_update, servers, indent=4, sort_keys=True)
 
-                    return ['server_picker', '']
+                    return 'server_picker'
 
                 if e.key == K_TAB:
                     field_list.insert(0, field_list[-1])
@@ -866,8 +863,10 @@ def server_adder():
                 with open('data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
-            return ['server_picker', '']
+                return 'server_picker'
 
+            else:
+                return nav_update
 
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
@@ -972,8 +971,6 @@ def menu_screen():
 
                 return 'login'
 
-            elif nav_update == 'server_picker':
-                return ['server_picker', '']
 
             else:
                 return nav_update
@@ -1052,14 +1049,14 @@ if __name__ == "__main__":
 
     while navigation != 'exit':
         size = (screen.get_width(), screen.get_height())
+
+        print(navigation)
+
         try:
             if navigation == 'game':
                 game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
                 navigation = game_nav
-
-            elif navigation[0] == 'server_picker':
-                navigation = server_picker(navigation[1])
 
             elif navigation[0] == 'crash':
                 navigation = crash(navigation[1], navigation[2])

@@ -28,6 +28,7 @@ with open("data/config.rah", "r") as config:
     slack_enable = int(config[3])
     channel = config[4]
     online = int(config[5])
+    whitelist_enable = int(config[6])
 
 # If world doesn't exist
 if not os.path.isfile('saves/%s.pkl' % world_name):
@@ -291,6 +292,9 @@ if __name__ == '__main__':
     with open('data/motd.rah') as motd:
         motd = choice(motd.read().strip().split('\n'))
 
+    with open('data/whitelist.rah') as whitelist:
+        whitelist = whitelist.read().strip().split('\n')
+
     with open('data/op.rah') as op:
         op = op.read().strip().split('\n')
 
@@ -311,41 +315,47 @@ if __name__ == '__main__':
                 # Player login and authentication
                 # Data: [0,<username>, <token>]
 
-                if message[1] not in username:
+                if whitelist_enable and message[1] in whitelist or not whitelist_enable:
 
-                    if authenticate(message[1:3]):
+                    if message[1] not in username:
 
-                        if not playerNDisconnect:
-                            PN = player_number
-                            player_number += 1
-                        else:
-                            PN = playerNDisconnect.popleft()
+                        if authenticate(message[1:3]):
 
-                        playerLocations = {players[x].username: players[x].cord for x in players}
+                            if not playerNDisconnect:
+                                PN = player_number
+                                player_number += 1
+                            else:
+                                PN = playerNDisconnect.popleft()
 
-                        players[address] = Player(PN, message[1])
-                        username_dict[address] = message[1]
-                        sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
-                                        players[address].hotbar, players[address].inventory, playerLocations), address))
+                            playerLocations = {players[x].username: players[x].cord for x in players}
 
-                        active_players.append(address)
+                            players[address] = Player(PN, message[1])
+                            username_dict[address] = message[1]
+                            sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
+                                            players[address].hotbar, players[address].inventory, playerLocations), address))
 
-                        messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1', 0000)))
-                        # rahprint('Player %s has connected from %s' % (message[1], address))
-                        username.add(message[1])
+                            active_players.append(address)
 
-                        for i in players:
-                            if players[i].username != username_dict[address]:
-                                sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
-                                                str(players[address].cord[1]), False), i))
+                            messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1', 0000)))
+                            # rahprint('Player %s has connected from %s' % (message[1], address))
+                            username.add(message[1])
 
-                    sendQueue.put(((400, (
-                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nCredentials were rejected by\nRahCraft Authentication Service\n(Try logging in again)\n\n")),
-                                   address))
+                            for i in players:
+                                if players[i].username != username_dict[address]:
+                                    sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
+                                                    str(players[address].cord[1]), False), i))
 
+                        sendQueue.put(((400, (
+                            "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nCredentials were rejected by\nRahCraft Authentication Service\n(Try logging in again)\n\n")),
+                                       address))
+
+                    else:
+                        sendQueue.put(((400, (
+                            "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nUsername currently in use\nIf you recently disconnected, wait\n 30 seconds for server to sync")),
+                                       address))
                 else:
                     sendQueue.put(((400, (
-                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nUsername currently in use\nIf you recently disconnected, wait\n 30 seconds for server to sync")),
+                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nThis server is white listed\nContect the administrator for assistance")),
                                    address))
 
             # External heartbeat
@@ -559,6 +569,65 @@ if __name__ == '__main__':
                                             send_message = 'User %s was removed from the op list' % receiver
                                         else:
                                             send_message = 'User %s was not found in the op list'%receiver
+
+                                    else:
+                                        send_message = 'Unknown subcommand %s'%message_list[1]
+
+                                else:
+                                    send_message = 'No parameters given'
+
+                            elif message[1].lower()[:10] == '/whitelist':
+
+                                message_list = message[1].split(' ')
+
+                                if len(message_list) == 2:
+                                    if message_list[1] == 'toggle':
+                                        whitelist_enable = not whitelist_enable
+
+                                        if whitelist_enable:
+                                            send_message = 'Whitelist enabled by %s'%username_dict[address]
+                                        else:
+                                            send_message = 'Whitelist disabled by %s' % username_dict[address]
+
+                                        with open("data/config.rah", "w") as config_file:
+
+                                            config = config.read().strip().split("\n")
+                                            config_list = [host,
+                                                           port,
+                                                           world_name,
+                                                           slack_enable,
+                                                           channel,
+                                                           online,
+                                                           whitelist_enable]
+
+                                            for line in config_list:
+                                                config_file.write(line + '\n')
+
+
+                                elif len(message_list) == 3:
+
+                                    executor = username_dict[address]
+                                    receiver = message_list[2]
+
+                                    if message_list[1] == 'add':
+                                        op.append(receiver)
+                                        send_message = '%s gave %s op'%(executor, receiver)
+
+                                        with open('data/whitelist.rah', 'w') as whitelist_file:
+                                            for user in whitelist:
+                                                whitelist_file.write('%s\n'%user)
+
+                                    elif message_list[1] == 'remove':
+                                        if receiver in whitelist:
+                                            del whitelist[whitelist.index(receiver)]
+
+                                            with open('data/whitelist.rah', 'w') as whitelist_file:
+                                                for user in whitelist:
+                                                    whitelist_file.write('%s\n' % user)
+
+                                            send_message = 'User %s was removed from the whitelist' % receiver
+                                        else:
+                                            send_message = 'User %s was not found in the whitelist'%receiver
 
                                     else:
                                         send_message = 'Unknown subcommand %s'%message_list[1]
