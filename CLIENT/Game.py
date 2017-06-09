@@ -456,7 +456,6 @@ def game(surf, username, token, host, port, size, music_enable):
             r_click = False
             l_click = False
             pass_event = None
-            inventory_updated = False
 
             for e in event.get():
                 pass_event = e
@@ -592,6 +591,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
+
             if on_tick:
                 send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
 
@@ -658,6 +658,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 elif command == 6:
                     slot, meta_data = message
+
+                    print(message)
 
                     hotbar_items[slot] = meta_data[:]
 
@@ -822,11 +824,12 @@ def game(surf, username, token, host, port, size, music_enable):
                         crafting = not crafting
                         current_gui = 'C'
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
-                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and \
-                                    hotbar_items[hotbar_slot][0] in block_properties:
+                            hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties and hotbar_items[hotbar_slot][1] > 0:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
+
+                        print(4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot)
 
                         hover_sound = block_properties[hotbar_items[hotbar_slot][0]]
 

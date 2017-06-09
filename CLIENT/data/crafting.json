@@ -35,6 +35,14 @@
     "result": 8,
     "quantity": 4
   },
+  "8 8 8 8 0 8 8 8 8": {
+    "result": 17,
+    "quantity": 1
+  },
+  "9 9 9 9 0 9 9 9 9": {
+    "result": 18,
+    "quantity": 1
+  },
   "8 0 0 8 0 0 0 0 0": {
     "result": 200,
     "quantity": 4

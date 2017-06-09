@@ -724,7 +724,9 @@ class Crafting:
                 surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 if l_click:
-                    hotbar[item] = self.check_stacking(hotbar[item], item_lib)
+                    hotbar[item] = self.check_stacking(hotbar[item][:], item_lib)
+                elif r_click:
+                    hotbar[item] = self.single_add(hotbar[item][:], item_lib)
 
         for row in range(len(self.crafting_grid)):
             for item in range(3):
@@ -761,13 +763,9 @@ class Crafting:
 
 
 class Chest:
-    def __init__(self, x, y, w, h, size):
+    def __init__(self, x, y, w, h):
 
-        if size == 1:
-            self.graphic = image.load('textures/gui/small_chest.png')
-
-        else:
-            self.graphic = image.load('textures/gui/large_chest.png')
+        self.graphic = image.load('textures/gui/small_chest.png')
 
         self.x, self.y = w // 2 - self.graphic.get_width() // 2, h // 2 - self.graphic.get_height() // 2
         self.w, self.h = w, h
@@ -778,15 +776,13 @@ class Chest:
         self.item_slots = []
         self.holding = [0, 0]
 
-        self.MAX_STACK = 64
-
-    def check_stacking(self, item):
-        if self.holding[0] != item[0] or item[1] == self.MAX_STACK:
+    def check_stacking(self, item, item_lib):
+        if self.holding[0] != item[0] or item[1] == item_lib[item[0]][-1]:
             previous_holding = self.holding[:]
             self.holding = item[:]
             return previous_holding
         else:
-            calculate_stack = self.MAX_STACK - self.holding[1] - item[1]
+            calculate_stack = item_lib[item[0]][-1] - self.holding[1] - item[1]
             amount_holding = self.holding[1]
 
             if calculate_stack >= 0:
@@ -794,15 +790,50 @@ class Chest:
                 return [item[0], item[1] + amount_holding]
             else:
                 self.holding = [item[0], abs(calculate_stack)]
-                return [item[0], self.MAX_STACK]
+                return [item[0], item_lib[item[0]][-1]]
 
-    def update(self, surf, mx, my, m_press, l_click, inventory, hotbar, block_properties):
+    def single_add(self, inv, item_lib):
+        if self.holding[0] != 0 and inv[1] < item_lib[self.holding[0]][-1]:
+            if self.holding[0] == inv[0] or inv[0] == 0:
+                inv[0] = self.holding[0]
+                self.holding[1] -= 1
+                inv[1] += 1
+
+        elif self.holding[0] == 0:
+            half = inv[1] // 2
+
+            self.holding = [inv[0], half]
+            inv[1] -= half
+
+        if self.holding[1] == 0:
+            self.holding = [0, 0]
+
+        return inv
+
+    def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, chest_inv, item_lib):
         surf.blit(self.graphic, (self.x, self.y))
+
+        for row in range(len(chest_inv)):
+            for item in range(len(chest_inv[row])):
+                if chest_inv[row][item][1] != 0:
+                surf.blit(item_lib[chest_inv[row][item][0]][1],
+                          (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                surf.blit(rah.text(str(chest_inv[row][item][1]), 10),
+                          (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+            if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                if l_click:
+                    chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
+                elif r_click:
+                    chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
                 if inventory[row][item][1] != 0:
-                    surf.blit(block_properties[inventory[row][item][0]][7],
+                    surf.blit(item_lib[inventory[row][item][0]][1],
                               (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     surf.blit(rah.text(str(inventory[row][item][1]), 10),
@@ -812,13 +843,13 @@ class Chest:
                     surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
 
                     if l_click:
-                        tempstorage = self.holding[:]
-                        self.holding = inventory[row][item][:]
-                        inventory[row][item] = tempstorage[:]
+                        inventory[row][item] = self.check_stacking(inventory[row][item][:], item_lib)
+                    elif r_click:
+                        inventory[row][item] = self.single_add(inventory[row][item][:], item_lib)
 
         for item in range(len(hotbar)):
             if hotbar[item][1] != 0:
-                surf.blit(block_properties[hotbar[item][0]][7], (self.x + 16 + item * 36, self.y + 283, 32, 32))
+                surf.blit(item_lib[hotbar[item][0]][1], (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 surf.blit(rah.text(str(hotbar[item][1]), 10), (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
@@ -826,9 +857,7 @@ class Chest:
                 surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                 if l_click:
-                    tempstorage = self.holding[:]
-                    self.holding = hotbar[item][:]
-                    hotbar[item] = tempstorage[:]
+                    hotbar[item] = self.check_stacking(hotbar[item], item_lib)
 
         if self.holding[0] > 0:
-            surf.blit(block_properties[self.holding[0]][3], (mx - 10, my - 10))
+            surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
