@@ -13,5 +13,10 @@
         "host": "9808098",
         "name": "posakdposakd",
         "port": 9809
+    },
+    "3": {
+        "host": "127.0.0.1",
+        "name": "Localhost",
+        "port": 5276
     }
 }
