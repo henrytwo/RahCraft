@@ -50,7 +50,7 @@ class Player:
 
         self.friction = 0.95
 
-        self.standing = True
+        self.standing = False
 
         self.surrounding_blocks = []
 
@@ -101,7 +101,7 @@ class Player:
                 self.surrounding_blocks.append(gameWorld[self.rect.centery // self.rect.h + shift[1],
                                                          self.rect.centerx // self.rect.w + shift[0]])
             except IndexError:
-                pass
+                self.surrounding_blocks.append(None)
 
         for block in self.surrounding_blocks:
             block.around = True
@@ -123,6 +123,12 @@ class Player:
                 self.actual_y = self.rect.y
                 self.vy = 0
 
+        if type(blocks[7]) is Air:
+            if self.command == 1:
+                self.command = 4
+            elif self.command == 2:
+                self.command = 5
+
         if 0 > round(self.vx) > -1:
             self.actual_x += self.vx - 1
         else:
@@ -133,12 +139,16 @@ class Player:
             if type(block) is Block and self.rect.colliderect(block.rect):
                 if self.vx > 0:
                     self.rect.right = block.rect.left
-                    print('hey', end=" ")
-                    self.command = 4
+                    if type(blocks[2]) is not Block:
+                        self.command = 4
+                    else:
+                        self.command = choice([0, 2])
                 elif self.vx < 0:
                     self.rect.left = block.rect.right
-                    print('woah', end=" ")
-                    self.command = 5
+                    if type(blocks[0]) is not Block:
+                        self.command = 5
+                    else:
+                        self.command = choice([0, 1])
 
                 self.actual_x = self.rect.x
                 self.vx = 0
@@ -193,7 +203,6 @@ surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
                       (-1, 1), (0, 1), (1, 1)]
 
 while True:
-
     for e in event.get():
         if e.type == QUIT:
             break
