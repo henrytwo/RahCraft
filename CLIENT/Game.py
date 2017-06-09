@@ -267,7 +267,10 @@ def game(surf, username, token, host, port, size, music_enable):
     slider_x = 0
 
     for cycle in range(1001):
-        server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
+        try:
+            server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
+        except:
+            return 'information', '\n\n\n\n\nUnable to connect to server\nHost or Port invalid', 'server_picker'
 
         if cycle == 1000:
             return 'information', '\n\n\n\n\nUnable to connect to server\nTimed out', 'server_picker'
