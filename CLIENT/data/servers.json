@@ -8,5 +8,10 @@
         "host": "rahmish.com",
         "name": "Rahmish Imperial",
         "port": 5276
+    },
+    "2": {
+        "host": "10.88.223.49",
+        "name": "Meh",
+        "port": 5276
     }
 }

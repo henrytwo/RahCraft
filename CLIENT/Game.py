@@ -606,8 +606,6 @@ def game(surf, username, token, host, port, size, music_enable):
                 server_message = message_queue.get_nowait()
                 command, message = server_message[0], server_message[1:]
 
-                print(message)
-
                 if command == 1:
                     remote_username, current_x, current_y, tp = message
 

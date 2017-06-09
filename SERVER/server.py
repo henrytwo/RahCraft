@@ -7,6 +7,7 @@ import pickle as pkl
 from multiprocessing import *
 from copy import deepcopy
 
+
 from subprocess import Popen, PIPE
 from shlex import split
 import platform
@@ -63,7 +64,7 @@ class Player(object):
                                          [[0, 0] for _ in range(9)],
                                          10, 10]
 
-            # print(PlayerData[self.username])
+            # rahprint(PlayerData[self.username])
             return PlayerData[self.username]
 
     def change_spawn(self, spawn_position):
@@ -72,7 +73,7 @@ class Player(object):
     def change_location(self, cord_change):
         self.cord = cord_change[:]
 
-        print(self.cord)
+        rahprint(self.cord)
 
         return self.cord[0], self.cord[1]
 
@@ -162,17 +163,25 @@ class World:
     def save(self):
         pkl.dump(self.overworld, open('saves/world.pkl', 'wb'))
 
+def rahprint(text):
+    print_enable = False
+
+    if print_enable:
+        print(text)
 
 def player_sender(send_queue, server):
-    print('Sender running...')
+    rahprint('Sender running...')
 
     while True:
         tobesent = send_queue.get()
-        server.sendto(pkl.dumps(tobesent[0], protocol=4), tobesent[1])
+        try:
+            server.sendto(pkl.dumps(tobesent[0], protocol=4), tobesent[1])
+        except:
+            print(tobesent[0])
 
 
 def receive_message(message_queue, server):
-    print('Server is ready for connection!')
+    rahprint('Server is ready for connection!')
 
     while True:
         try:
@@ -183,12 +192,12 @@ def receive_message(message_queue, server):
 
 
 def commandline_in(commandline_queue, fn):
-    print('Ready for input.')
+    rahprint('Ready for input.')
     sys.stdin = os.fdopen(fn)
 
     while True:
         command = input('[Server]>')
-        commandline_queue.put(((10, command), ('127.0.0.1',)))
+        commandline_queue.put(((10, command), ('127.0.0.1', 0000)))
 
 
 def heart_beats(message_queue, tick):
@@ -237,6 +246,7 @@ def authenticate(message):
 
 if __name__ == '__main__':
     players = {}
+    username_dict = {('127.0.0.1', 0):'Server'}
     player_number = 1
 
     active_players = []
@@ -262,7 +272,7 @@ if __name__ == '__main__':
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
 
-    print("Server binded to %s:%i" % (host, port))
+    rahprint("Server binded to %s:%i" % (host, port))
 
     heart_beat = Process(target=heart_beats, args=(messageQueue, 0))  # Change the tick stuff later
     heart_beat.start()
@@ -279,19 +289,64 @@ if __name__ == '__main__':
     cmdIn = ""
 
     with open('data/motd.rah') as motd:
-        motd = motd.read().strip()
+        motd = choice(motd.read().strip().split('\n'))
+
+    with open('data/op.rah') as op:
+        op = op.read().strip().split('\n')
+
+    with open('data/op_config.rah') as op_commands:
+        op_commands = op_commands.read().strip().split('\n')
 
     while True:
         pickled_message = messageQueue.get()
         message, address = pickled_message
         command = message[0]
 
-        print(pickled_message)
+        rahprint(pickled_message)
 
         try:
 
-            #PRIVATE COMMANDS, CAN ONLY EXECUTE IF PLAYER IS LOGGED IN
-            if True:#address in players:
+            # External commands
+            if command == 0:
+                # Player login and authentication
+                # Data: [0,<username>, <token>]
+
+                if message[1] not in username and authenticate(message[1:3]):
+
+                    if not playerNDisconnect:
+                        PN = player_number
+                        player_number += 1
+                    else:
+                        PN = playerNDisconnect.popleft()
+
+                    playerLocations = {players[x].username: players[x].cord for x in players}
+
+                    players[address] = Player(PN, message[1])
+                    username_dict[address] = message[1]
+                    sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
+                                    players[address].hotbar, players[address].inventory, playerLocations), address))
+
+                    active_players.append(address)
+
+                    messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1', 0000)))
+                    # rahprint('Player %s has connected from %s' % (message[1], address))
+                    username.add(message[1])
+
+                    for i in players:
+                        if players[i].username != username_dict[address]:
+                            sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
+                                            str(players[address].cord[1]), False), i))
+
+                else:
+                    sendQueue.put(((400, (
+                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)\n\n")),
+                                   address))
+
+            # External heartbeat
+            elif command == 102:
+                sendQueue.put(((102, motd, host, port), address))
+
+            elif address in players or address == ('127.0.0.1', 0000):
                 if command == 1:
 
 
@@ -300,7 +355,7 @@ if __name__ == '__main__':
                     x, y = players[address].change_location((message[1], message[2]))
 
                     for i in players:
-                        sendQueue.put(((1, players[address].username, x, y), i))
+                        sendQueue.put(((1, username_dict[address], x, y), i))
 
                 elif command == 2:
                     # Render world
@@ -354,15 +409,16 @@ if __name__ == '__main__':
 
                 elif command == 9:
 
-                    messageQueue.put(((10, "%s has disconnected from the game"%players[address].username), ('127.0.0.1',)))
-                    #print('Player %s has disconnected from the game. %s' % (players[address].username, address))
+                    messageQueue.put(((10, "%s has disconnected from the game"%username_dict[address]), ('127.0.0.1', 0000)))
+                    #rahprint('Player %s has disconnected from the game. %s' % (username_dict[address], address))
 
                     playerNDisconnect.append(players[address].number)
-                    PlayerData[players[address].username] = players[address].save(message[1])
-                    offPlayer = players[address].username
+                    PlayerData[username_dict[address]] = players[address].save(message[1])
+                    offPlayer = username_dict[address]
                     username.remove(offPlayer)
 
                     del players[address]
+                    del username_dict[address]
 
                     for i in players:
                         sendQueue.put(((9, offPlayer), i))
@@ -372,228 +428,224 @@ if __name__ == '__main__':
                     send_message = ''
 
                     if message[1].lower()[0] == '/':
+                        if (message[1].lower().split(' ')[0][1:] in op_commands and address in players and username_dict[address] in op) or message[1].lower().split(' ')[0][1:] not in op_commands or address == ('127.0.0.1', 0):
 
-                        if message[1].lower() == "/quit":
-                            receiver.terminate()
-                            sender.terminate()
-                            commandline.terminate()
-                            heart_beat.terminate()
-                            server.close()
-                            world.save()
-                            break
-
-                        elif message[1].lower() == "/del world":
-                            send_message = "<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: "
-
-                            sys.stdout.flush()
-                            in_put = messageQueue.get()
-                            while in_put[0][0] != 10:
-                                # print(in_put)
-                                in_put = messageQueue.get()
-
-                            if in_put[0][1] == 'y':
-                                os.remove("saves/world.pkl")
-                                send_message = "World deleted successfully\nServer will shutdown"
+                            if message[1].lower() == "/quit":
                                 receiver.terminate()
                                 sender.terminate()
                                 commandline.terminate()
+                                heart_beat.terminate()
                                 server.close()
-
-                                exit()
-
+                                world.save()
                                 break
 
+                            elif message[1].lower() == "/delworld":
+                                send_message = "<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: "
+
+                                sys.stdout.flush()
+                                in_put = messageQueue.get()
+                                while in_put[0][0] != 10:
+                                    # rahprint(in_put)
+                                    in_put = messageQueue.get()
+
+                                if in_put[0][1] == 'y':
+                                    os.remove("saves/world.pkl")
+                                    send_message = "World deleted successfully\nServer will shutdown"
+                                    receiver.terminate()
+                                    sender.terminate()
+                                    commandline.terminate()
+                                    server.close()
+
+                                    exit()
+
+                                    break
+
+                                else:
+                                    send_message = "Command aborted"
+
+                            elif message[1].lower() == '/ping':
+                                send_message = 'pong!'
+
+                            elif message[1].lower() == '/lenin':
+                                with open('data/communist.rah') as communist:
+                                    for line in communist.read().split('\n'):
+                                        send_message = '[Comrade Lenin] ' + line
+
+                                        for i in players:
+                                            sendQueue.put(((10, send_message), i))
+
+                            elif message[1].lower()[:4] == '/say':
+                                send_message =  message[1][4:]
+
+                            elif message[1].lower()[:6] == '/clear':
+                                players[address].inventory =[[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)]
+                                players[address].hotbar = [[8, 64] for _ in range(9)]
+
+                            elif message[1].lower()[:5] == '/give':
+
+                                message_list = message[1].split(' ')
+
+                                executor = username_dict[address]
+                                receiver = message_list[1]
+                                item, quantity = message_list[2:4]
+
+                                for player in players:
+                                    if players[player].username == receiver:
+                                        players[player].hotbar[0] = [int(item), int(quantity)]
+                                        players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
+
+                                send_message = '%s gave %s %s of %s'%(executor, receiver, quantity, item)
+
+                            elif message[1].lower()[:5] == '/kick':
+
+                                kick_name = message[1][6:]
+
+                                for player in players:
+                                    if players[player].username == kick_name:
+                                        sendQueue.put(((11, '\n\n\nDisconnected from server by %s'%username_dict[address]), player))
+                                        send_message = '%s was disconnected from the server by %s'%(kick_name, username_dict[address])
+
+                                if not send_message:
+                                    send_message = 'Player %s not found'%kick_name
+
+
+                            elif message[1].lower()[:3] == '/tp':
+
+                                message_list = message[1].split(' ')
+                                executor = username_dict[address]
+                                receiver = message_list[1]
+
+                                for player in players:
+                                    if players[player].username == receiver:
+
+                                        x, y = players[player].change_location((list(map(int, message_list[2:4]))))
+
+                                        for i in players:
+                                            sendQueue.put(((1, players[player].username, x, y, True), i))
+
+                                send_message = '%s teleported %s to %s %s' % (executor, receiver, x, y)
+
+                            elif message[1].lower()[:3] == '/op':
+
+                                message_list = message[1].split(' ')
+
+                                if len(message_list) == 2:
+
+                                    executor = username_dict[address]
+                                    receiver = message_list[2]
+
+                                    if message_list[1] == 'add':
+                                        op.append(receiver)
+                                        send_message = '%s gave %s op'%(executor, receiver)
+
+                                        with open('data/op.rah', 'w') as op_file:
+                                            for user in op:
+                                                op_file.write('%s\n'%user)
+
+                                    elif message_list[1] == 'remove':
+                                        if receiver in op:
+                                            del op[op.index(receiver)]
+
+                                            with open('data/op.rah', 'w') as op_file:
+                                                for user in op:
+                                                    op_file.write('%s\n' % user)
+
+                                            send_message = 'User %s was removed from the op list' % receiver
+                                        else:
+                                            send_message = 'User %s was not found in the op list'%receiver
+
+                                    else:
+                                        send_message = 'Unknown subcommand %s'%message_list[1]
+
+                                else:
+                                    send_message = 'No parameters given'
+
+                            elif message[1].lower()[:5] == '/exec':
+                                try:
+                                    exec(message[1][6:])
+                                    send_message = "Command '%s' executed by %s" % (message[1][6:], username_dict[address])
+                                except:
+                                    send_message = "Command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+
+                            elif message[1].lower()[:5] == '/bash':
+
+                                try:
+                                    rahprint(Popen(split(message[1][6:]), stdout=PIPE))
+                                    send_message = "Bash command '%s' executed by %s" % (message[1][6:], username_dict[address])
+                                except:
+                                    send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
+
+                            elif message[1].lower()[:5] == '/sync':
+                                messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
+                                send_message = "Server synchronized"
+
+                            elif message[1].lower()[:5] == '/list':
+                                send_message = str(players)
+
                             else:
-                                send_message = "Command aborted"
-
-                        elif message[1].lower() == '/ping':
-                            send_message = 'pong!'
-
-                        elif message[1].lower() == '/lenin':
-                            with open('data/communist.rah') as communist:
-                                for line in communist.read().split('\n'):
-                                    send_message = '[Comrade Lenin] ' + line
-
-                                    for i in players:
-                                        sendQueue.put(((10, send_message), i))
-
-                        elif message[1].lower()[:4] == '/say':
-                            send_message =  message[1][4:]
-
-                        elif message[1].lower()[:6] == '/clear':
-                            players[address].inventory =[[[randint(1, 15), randint(1, 64)] for _ in range(9)] for __ in range(3)]
-                            players[address].hotbar = [[8, 64] for _ in range(9)]
-
-                        elif message[1].lower()[:5] == '/give':
-
-                            message_list = message[1].split(' ')
-
-                            executor = players[address].username
-                            receiver = message_list[1]
-                            item, quantity = message_list[2:4]
-
-                            for player in players:
-                                if players[player].username == receiver:
-                                    players[player].hotbar[0] = [int(item), int(quantity)]
-                                    players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
-
-                            send_message = '%s gave %s %s of %s'%(executor, receiver, quantity, item)
-
-                        elif message[1].lower()[:5] == '/kick':
-
-                            kick_name = message[1][6:]
-
-                            for player in players:
-                                if players[player].username == kick_name:
-                                    sendQueue.put(((11, '\n\n\nDisconnected from server by %s'%players[address].username), player))
-                                    send_message = '%s was disconnected from the server by %s'%(kick_name, players[address].username)
-
-                            if not send_message:
-                                send_message = 'Player %s not found'%kick_name
-
-
-                        elif message[1].lower()[:3] == '/tp':
-
-                            message_list = message[1].split(' ')
-                            executor = players[address].username
-                            receiver = message_list[1]
-
-                            for player in players:
-                                if players[player].username == receiver:
-
-                                    x, y = players[player].change_location((list(map(int, message_list[2:4]))))
-
-                                    for i in players:
-                                        sendQueue.put(((1, players[player].username, x, y, True), i))
-
-                            send_message = '%s teleported %s to %s %s' % (executor, receiver, x, y)
-
-                        elif message[1].lower()[:5] == '/exec':
-
-                            try:
-                                exec(message[1][6:])
-                                send_message = "Command '%s' executed by %s" % (message[1][6:], players[address].username)
-                            except:
-                                send_message = "Command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
-
-                        elif message[1].lower()[:5] == '/bash':
-
-                            try:
-                                print(Popen(split(message[1][6:]), stdout=PIPE))
-                                send_message = "Bash command '%s' executed by %s" % (message[1][6:], players[address].username)
-                            except:
-                                send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
-
-                        elif message[1].lower()[:5] == '/sync':
-                            messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
-                            send_message = "Server synchronized"
-
-                        elif message[1].lower()[:5] == '/list':
-                            send_message = str(players)
+                                send_message = "Command not found"
 
                         else:
-                            send_message = "Command not found"
+                            send_message = "Access denied"
 
                     else:
-                        if address in players:
-                            user_sending = players[address].username
-                        else:
-                            user_sending = 'Server'
+                        user_sending = username_dict[address]
 
                         send_message = '[%s] %s' % (user_sending, message[1])
 
-                    if send_message and send_message[0] != '[':
-                        send_message = '[Server] ' + send_message
+                    if send_message[0] != '[':
+                        send_message = '[%s] '%username_dict[('127.0.0.1', 0)] + send_message
 
                     for i in players:
                         sendQueue.put(((10, send_message), i))
 
                     if slack_enable:
                         broadcast(channel, send_message)
+
+                elif command == 100:
+
+                    kill_list = []
+
+                    for p in players:
+                        if p in active_players:
+                            for repeat in range(5):
+                                sendQueue.put((message, p))
+
+                        else:
+                            kill_list.append(p)
+
+                    for p in kill_list:
+
+                        send_message = '[Server] %s was disconnected for not responding' % (players[p].username)
+
+                        for i in players:
+                            sendQueue.put(((10, send_message), i))
+
+                        if slack_enable:
+                            broadcast(channel, send_message)
+
+                        playerNDisconnect.append(players[p].number)
+                        PlayerData[players[p].username] = players[p].save(message[1])
+                        offPlayer = players[p].username
+                        username.remove(offPlayer)
+
+                        del players[p]
+                        del username_dict[p]
+
+                        for i in players:
+                            sendQueue.put(((9, offPlayer), i))
+
+                    broadcast(channel, '[Tick] %s' % message[2])
+
+                    active_players = []
 
                 elif command == 101:
                     if address not in active_players:
                         active_players.append(address)
-                    print('[Server] %s has responded to heartbeat' % message[1])
-
+                    rahprint('[Server] %s has responded to heartbeat' % message[1])
 
             else:
                 sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAccess denied'), address))
-
-            if command == 100:
-
-                kill_list = []
-
-                for p in players:
-                    if p in active_players:
-                        for repeat in range(5):
-                            sendQueue.put((message, p))
-
-                    else:
-                        kill_list.append(p)
-
-                for p in kill_list:
-
-                    send_message = '[Server] %s was disconnected for not responding' % (players[p].username)
-
-                    for i in players:
-                        sendQueue.put(((10, send_message), i))
-
-                    if slack_enable:
-                        broadcast(channel, send_message)
-
-                    playerNDisconnect.append(players[p].number)
-                    PlayerData[players[p].username] = players[p].save(message[1])
-                    offPlayer = players[p].username
-                    username.remove(offPlayer)
-
-                    del players[p]
-
-                    for i in players:
-                        sendQueue.put(((9, offPlayer), i))
-
-                broadcast(channel, '[Tick] %s' % message[2])
-
-                active_players = []
-
-
-            #External commands
-            if command == 0:
-                # Player login and authentication
-                # Data: [0,<username>, <token>]
-
-                if message[1] not in username and authenticate(message[1:3]):
-
-                    if not playerNDisconnect:
-                        PN = player_number
-                        player_number += 1
-                    else:
-                        PN = playerNDisconnect.popleft()
-
-                    playerLocations = {players[x].username: players[x].cord for x in players}
-
-                    players[address] = Player(PN, message[1])
-                    sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
-                                    players[address].hotbar, players[address].inventory, playerLocations), address))
-
-                    active_players.append(address)
-
-                    messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1',)))
-                    #print('Player %s has connected from %s' % (message[1], address))
-                    username.add(message[1])
-
-                    for i in players:
-                        if players[i].username != players[address].username:
-                            sendQueue.put(((1, players[address].username, str(players[address].cord[0]),
-                                            str(players[address].cord[1]), False), i))
-
-                else:
-                    sendQueue.put(((400, (
-                    "\n\n\n\n\n\n\n\n\nConnection closed by remote host\nUsername in use or session\nis invalid (Try restarting the game)\n\n")), address))
-
-            #External heartbeat
-            if command == 102:
-                sendQueue.put(((102, motd, host, port),address))
 
 
         except:
