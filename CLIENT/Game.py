@@ -697,9 +697,9 @@ def game(surf, username, token, host, port, size, music_enable):
             # =======================================================
             if on_tick:
                 if not sky_diming:
-                    sky_tick += 100
+                    sky_tick += 1
                 else:
-                    sky_tick -= 100
+                    sky_tick -= 1
 
             if sky_tick > 12000:
                 sky_diming = True

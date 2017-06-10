@@ -34,7 +34,7 @@ with open("data/config.rah", "r") as config:
 if not os.path.isfile('saves/%s.pkl' % world_name):
     # Generate a new world with the function
     # world_seed,maxHeight,minX,maxX,w,h
-    world = generate_world(input("Seed:\n"), 1, 3, 10, 10000, 100)
+    world = generate_world(input("Seed:\n"), 10, 3, 10, 10000, 100)
 
     # Dumps world to file
     with open('saves/%s.pkl' % world_name, 'wb') as file:

@@ -184,7 +184,7 @@ display.set_caption("New Physics Idea!")
 screenSize = 960, 540
 screen = display.set_mode(screenSize)
 
-complexity = 2 # abs(int(input('Complexity level of world? (Use a positive integer)\n')))
+complexity = 10 # abs(int(input('Complexity level of world? (Use a positive integer)\n')))
 rows = 9 * complexity
 columns = 16 * complexity
 
