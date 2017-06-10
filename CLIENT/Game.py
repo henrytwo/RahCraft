@@ -435,6 +435,8 @@ def game(surf, username, token, host, port, size, music_enable):
     using_chest = False
 
     current_gui = ''
+    current_chest = []
+    chest_location = []
 
     # Block highlight
     # =====================================================================
@@ -454,7 +456,7 @@ def game(surf, username, token, host, port, size, music_enable):
             release = False
             on_tick = False
             block_broken = False
-            tick_per_frame = max(clock.get_fps() / 20, 1)
+            tick_per_frame = max(clock.get_fps() / 10, 1)
             r_click = False
             l_click = False
             pass_event = None
@@ -522,8 +524,10 @@ def game(surf, username, token, host, port, size, music_enable):
                             chat_enable = False
                             current_gui = ''
                         elif current_gui == 'Ch':
+                            send_queue.put(((7, 'chest', chest_location[0], chest_location[1], 0), SERVERADDRESS))
                             using_chest = False
                             current_gui = ''
+                            inventory_updated = True
                         elif current_gui == '' or current_gui == 'P':
                             paused = not paused
                             if paused:
@@ -591,9 +595,10 @@ def game(surf, username, token, host, port, size, music_enable):
             #     y_offset = world_size_y - 1
             # elif y_offset <= 0:
             #     y_offset = 1
+            if using_chest and current_tick == 10 and current_chest != []:
+                send_queue.put(([8, 'chest', chest_location[0], chest_location[1], current_chest], SERVERADDRESS))
 
             if inventory_updated:
-
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
 
@@ -664,14 +669,16 @@ def game(surf, username, token, host, port, size, music_enable):
                 elif command == 6:
                     slot, meta_data = message
 
-                    print(message)
-
                     hotbar_items[slot] = meta_data[:]
 
                 elif command == 7:
                     slot, meta_data = message
 
                     inventory_items[slot] = meta_data[:]
+
+                elif command == 8:
+                    current_chest = message[0]
+
 
                 elif command == 9:
                     remote_username = message[0]
@@ -829,6 +836,8 @@ def game(surf, username, token, host, port, size, music_enable):
                     elif world[hover_x, hover_y] == 17 and current_gui == '':
                         using_chest = True
                         current_gui = 'Ch'
+                        chest_location = [hover_x, hover_y]
+                        send_queue.put(((7, 'chest', hover_x, hover_y, 1), SERVERADDRESS))
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties and hotbar_items[hotbar_slot][1] > 0:
                         block_request.add((hover_x, hover_y))
@@ -877,7 +886,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             elif using_chest:
                 surf.blit(tint, (0, 0))
-                chest_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, [[[0, 0] for _ in range(9)] for __ in range(3)],item_lib)
+                chest_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_chest, item_lib)
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))

@@ -60,7 +60,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[0, 0] for _ in range(9)],
+                                         [[17, 1] for _ in range(9)],
                                          10, 10]
 
             # rahprint(PlayerData[self.username])
@@ -413,7 +413,7 @@ if __name__ == '__main__':
 
                     sendQueue.put(((6, message[4], players[address].hotbar[message[4]]), address))
                     if message[3] == 17:
-                        chests[(cordx, cordy)] = [[[0, 0] for _ in range(9)] for __ in range(3)]
+                        chests[(message[1], message[2])] = [[[[0, 0] for _ in range(9)] for __ in range(3)], []]
 
                     for i in players:
                         sendQueue.put(((4, message[1], message[2], message[3]), i))
@@ -422,16 +422,35 @@ if __name__ == '__main__':
                     players[address].change_inventory_all(message[1], message[2])
 
                 elif command == 7:
+                    print(message)
+                    print(chests[(message[2], message[3])])
                     if message[1] == 'chest':
-                        try:
-                            sendQueue.put(([7, chest[message[2], message[3]][0]], address))
-                        except:
-                            sendQueue.put(([7, "err"], address))
+                        if message[-1] == 1:
+                            try:
+                                chests[(message[2], message[3])][1].append(address)
+                                sendQueue.put(([8, chests[message[2], message[3]][0]], address))
+                                print('sent')
+                            except:
+                                sendQueue.put(([8, "err"], address))
+                        else:
+                            try:
+                                chests[(message[2], message[3])][1].remove(address)
+                            except:
+                                sendQueue.put(([8, "err"], address))
+
                     elif message[1] == 'furnace':
                         try:
-                            sendQueue.put(([7, furnace[message[2], message[3]]], address))
+                            sendQueue.put(([8, furnace[message[2], message[3]]], address))
                         except:
-                            sendQueue.put(([], address))
+                            sendQueue.put(([8, "err"], address))
+
+                elif command == 8:
+                    if message[1] == 'chest':
+                        if chests[(message[2], message[3])][0] != message[4]:
+                            chests[(message[2], message[3])][0] = deepcopy(message[4])
+                            for i in chests[(message[2], message[3])][0]:
+                                sendQueue.put(((8, message[4]), address))
+
 
                 elif command == 9:
 
@@ -440,6 +459,7 @@ if __name__ == '__main__':
 
                     playerNDisconnect.append(players[address].number)
                     PlayerData[username_dict[address]] = players[address].save(message[1])
+                    print(PlayerData[username_dict[address]])
                     offPlayer = username_dict[address]
                     username.remove(offPlayer)
 

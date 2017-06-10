@@ -820,13 +820,13 @@ class Chest:
 
                     surf.blit(rah.text(str(chest_inv[row][item][1]), 10), (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
-            if Rect((self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32)).collidepoint(mx, my):
-                surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
+                if Rect((self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32)).collidepoint(mx, my):
+                    surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
-                if l_click:
-                    chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
-                elif r_click:
-                    chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
+                    if l_click:
+                        chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
+                    elif r_click:
+                        chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
