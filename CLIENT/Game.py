@@ -583,7 +583,7 @@ def game(surf, username, token, host, port, size, music_enable):
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
             block_clip = (
-                local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
+                local_player.rect.centerx // block_size * block_size, local_player.rect.centery // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
             # if x_offset <= 0:

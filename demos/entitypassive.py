@@ -61,7 +61,7 @@ class Entity:
 
     def sim_input(self):
         if not self.analog_move:
-            self.command = randrange(10)
+            self.command = randrange(2000)
             if self.command in [1, 2, 4, 5]:
                 self.analog_move = True
                 self.analog_limit = randint(60, 180)
