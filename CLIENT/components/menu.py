@@ -763,7 +763,7 @@ class Crafting:
 
 
 class Chest:
-    def __init__(self, x, y, w, h):
+    def __init__(self, w, h):
 
         self.graphic = image.load('textures/gui/small_chest.png')
 
@@ -816,14 +816,12 @@ class Chest:
         for row in range(len(chest_inv)):
             for item in range(len(chest_inv[row])):
                 if chest_inv[row][item][1] != 0:
-                    surf.blit(item_lib[chest_inv[row][item][0]][1],
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+                    surf.blit(item_lib[chest_inv[row][item][0]][1], (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
-                    surf.blit(rah.text(str(chest_inv[row][item][1]), 10),
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+                    surf.blit(rah.text(str(chest_inv[row][item][1]), 10), (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
-            if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
-                surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+            if Rect((self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
                 if l_click:
                     chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)

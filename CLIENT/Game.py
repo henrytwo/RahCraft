@@ -425,12 +425,14 @@ def game(surf, username, token, host, port, size, music_enable):
 
     block_step = None
 
-    # Crafting
+    # Crafting/other gui stuffz
     # =====================================================================
 
     crafting_object = menu.Crafting(size[0], size[1])
+    chest_object = menu.Chest(size[0], size[1])
 
     crafting = False
+    using_chest = False
 
     current_gui = ''
 
@@ -518,6 +520,9 @@ def game(surf, username, token, host, port, size, music_enable):
                         elif current_gui == 'CH':
                             chat.content = ''
                             chat_enable = False
+                            current_gui = ''
+                        elif current_gui == 'Ch':
+                            using_chest = False
                             current_gui = ''
                         elif current_gui == '' or current_gui == 'P':
                             paused = not paused
@@ -795,8 +800,6 @@ def game(surf, username, token, host, port, size, music_enable):
                                 if hotbar_items[hotbar_slot][2] == 0:
                                     hotbar_items[hotbar_slot] = [0, 0]
 
-                        print(hotbar_items)
-
                         if block_properties[world[hover_x, hover_y]]['tool-required']:
                             if hotbar_items[hotbar_slot][0] in tool_properties:
                                 current_tool = hotbar_items[hotbar_slot][0]
@@ -821,15 +824,16 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     if world[hover_x, hover_y] == 10 and current_gui == '':
-                        crafting = not crafting
+                        crafting = True
                         current_gui = 'C'
+                    elif world[hover_x, hover_y] == 17 and current_gui == '':
+                        using_chest = True
+                        current_gui = 'Ch'
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties and hotbar_items[hotbar_slot][1] > 0:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
-
-                        print(4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot)
 
                         hover_sound = block_properties[hotbar_items[hotbar_slot][0]]
 
@@ -871,13 +875,16 @@ def game(surf, username, token, host, port, size, music_enable):
                     else:
                         return nav_update
 
+            elif using_chest:
+                surf.blit(tint, (0, 0))
+                chest_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, [[[0, 0] for _ in range(9)] for __ in range(3)],item_lib)
+
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
                 inventory_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
             elif crafting:
                 surf.blit(tint, (0, 0))
-
                 crafting_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
             if not paused:

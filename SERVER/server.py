@@ -53,8 +53,6 @@ class Player(object):
 
         self.cord, self.spawnCord, self.inventory, self.hotbar, self.health, self.hunger = self.get_player_info()
 
-        # self.saturation, self.foodLib
-
     def get_player_info(self):
         try:
             return PlayerData[self.username]
@@ -398,7 +396,6 @@ if __name__ == '__main__':
                 elif command == 4:
                     # Place block
                     # Data: [4, <cordx>, <cordy>, <block type>]
-                    print(message[4], players[address].hotbar[message[4]])
                     if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 5:
                         spawnpoint_check = world.get_spawnpoint()
 
@@ -414,17 +411,27 @@ if __name__ == '__main__':
                     if players[address].hotbar[message[4]][1] <= 0 or players[address].hotbar[message[4]][0] == 0:
                         players[address].hotbar[message[4]] = [0, 0]
 
-
-                    print(message[4], players[address].hotbar[message[4]])
                     sendQueue.put(((6, message[4], players[address].hotbar[message[4]]), address))
-                    '''
-                    if message[3] ==
-                    '''
+                    if message[3] == 17:
+                        chests[(cordx, cordy)] = [[[0, 0] for _ in range(9)] for __ in range(3)]
+
                     for i in players:
                         sendQueue.put(((4, message[1], message[2], message[3]), i))
 
                 elif command == 5:
                     players[address].change_inventory_all(message[1], message[2])
+
+                elif command == 7:
+                    if message[1] == 'chest':
+                        try:
+                            sendQueue.put(([7, chest[message[2], message[3]][0]], address))
+                        except:
+                            sendQueue.put(([7, "err"], address))
+                    elif message[1] == 'furnace':
+                        try:
+                            sendQueue.put(([7, furnace[message[2], message[3]]], address))
+                        except:
+                            sendQueue.put(([], address))
 
                 elif command == 9:
 
