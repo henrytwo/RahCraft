@@ -639,7 +639,7 @@ if __name__ == '__main__':
                                     if len(message_list) >= 3:
                                         ban_message = ' '.join(message_list[2:])
                                     else:
-                                        ban_message = 'The ban hammer has spoken!'
+                                        ban_message = 'Queen Rahma has spoken!'
 
                                     ban[receiver] = {"message":ban_message}
 
