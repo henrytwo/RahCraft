@@ -422,14 +422,12 @@ if __name__ == '__main__':
                     players[address].change_inventory_all(message[1], message[2])
 
                 elif command == 7:
-                    print(message)
-                    print(chests[(message[2], message[3])])
+
                     if message[1] == 'chest':
                         if message[-1] == 1:
                             try:
                                 chests[(message[2], message[3])][1].append(address)
                                 sendQueue.put(([8, chests[message[2], message[3]][0]], address))
-                                print('sent')
                             except:
                                 sendQueue.put(([8, "err"], address))
                         else:
@@ -445,11 +443,12 @@ if __name__ == '__main__':
                             sendQueue.put(([8, "err"], address))
 
                 elif command == 8:
+                    print(message)
                     if message[1] == 'chest':
-                        if chests[(message[2], message[3])][0] != message[4]:
-                            chests[(message[2], message[3])][0] = deepcopy(message[4])
-                            for i in chests[(message[2], message[3])][1]:
-                                sendQueue.put(((8, message[4]), address))
+                        if chests[(message[5], message[6])][0][message[2]][message[3]] != message[4]:
+                            chests[(message[5], message[6])][0][message[2]][message[3]] = message[4]
+                            for i in chests[(message[5], message[6])][1]:
+                                sendQueue.put(((8, chests[(message[5], message[6])][0]), i))
 
 
                 elif command == 9:
@@ -708,7 +707,7 @@ if __name__ == '__main__':
                         broadcast(channel, send_message)
 
                 elif command == 100:
-
+                    '''
                     kill_list = []
 
                     for p in players:
@@ -739,10 +738,10 @@ if __name__ == '__main__':
 
                         for i in players:
                             sendQueue.put(((9, offPlayer), i))
-
+                    '''
                     broadcast(channel, '[Tick] %s' % message[2])
 
-                    active_players = []
+                    #active_players = []
 
                 elif command == 101:
                     if address not in active_players:

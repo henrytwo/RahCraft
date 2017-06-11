@@ -526,6 +526,7 @@ def game(surf, username, token, host, port, size, music_enable):
                         elif current_gui == 'Ch':
                             send_queue.put(((7, 'chest', chest_location[0], chest_location[1], 0), SERVERADDRESS))
                             using_chest = False
+                            current_chest = []
                             current_gui = ''
                             inventory_updated = True
                         elif current_gui == '' or current_gui == 'P':
@@ -720,10 +721,10 @@ def game(surf, username, token, host, port, size, music_enable):
 
             for y in range(size[1]):
                 r = min(max(int(((y_offset // block_size) / world_size_y) * 20 - int(255 * sky_tick / 24000)), 0), 255)
-                 g = min(max(int(((y_offset // block_size)/world_size_y) * 60 - int(255 * sky_tick/24000)), 0),255)
-                 b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(500 * sky_tick/24000)), 0),255)
+                g = min(max(int(((y_offset // block_size)/world_size_y) * 60 - int(255 * sky_tick/24000)), 0),255)
+                b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(500 * sky_tick/24000)), 0),255)
 
-                 draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
+                draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
 
             # surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
@@ -883,7 +884,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 changed = chest_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_chest, item_lib)
 
                 if changed != [0, 0]:
-                    send_queue.put((changed, SERVERADDRESS))
+                    send_queue.put((changed+[chest_location[0], chest_location[1]], SERVERADDRESS))
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
