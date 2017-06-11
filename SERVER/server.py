@@ -357,7 +357,6 @@ if __name__ == '__main__':
                     sendQueue.put(((400, (
                         "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nThis server is white listed\nIf you believe this is an error,\nContact the administrator for assistance")),
                                    address))
-                print(players)
 
             # External heartbeat
             elif command == 102:
@@ -389,6 +388,9 @@ if __name__ == '__main__':
 
                             for i in players:
                                 players[i].change_spawn(world.spawnpoint)
+
+                    if world.overworld[message[1], message[2]] == 17 and [message[1], message[2]] in chests:
+                        del chests[[message[1], message[2]]]
 
                     world.break_block(message[1], message[2])
 
@@ -445,7 +447,6 @@ if __name__ == '__main__':
                             sendQueue.put(([8, "err"], address))
 
                 elif command == 8:
-                    print(message)
                     if message[1] == 'chest':
                         if chests[(message[5], message[6])][0][message[2]][message[3]] != message[4]:
                             chests[(message[5], message[6])][0][message[2]][message[3]] = message[4]
@@ -457,10 +458,8 @@ if __name__ == '__main__':
 
                     messageQueue.put(((10, "%s has disconnected from the game"%username_dict[address]), ('127.0.0.1', 0000)))
                     #rahprint('Player %s has disconnected from the game. %s' % (username_dict[address], address))
-                    print(players[address].cord, message[1])
                     playerNDisconnect.append(players[address].number)
                     PlayerData[username_dict[address]] = players[address].save(message[1])
-                    print(PlayerData[username_dict[address]])
                     offPlayer = username_dict[address]
                     username.remove(offPlayer)
 
