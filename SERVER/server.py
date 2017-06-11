@@ -382,7 +382,8 @@ if __name__ == '__main__':
                     x, y = players[address].change_location((message[1], message[2]))
 
                     for i in players:
-                        sendQueue.put(((1, username_dict[address], x, y, False), i))
+                        if i != address:
+                            sendQueue.put(((1, username_dict[address], x, y, False), i))
 
                 elif command == 2:
                     # Render world
