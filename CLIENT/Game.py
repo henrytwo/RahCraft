@@ -315,8 +315,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     reach = 5
 
-    player_x = int(player_x_) * block_size
-    player_y = int(player_y_) * block_size
+    player_x = float(player_x_) * block_size
+    player_y = float(player_y_) * block_size
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
