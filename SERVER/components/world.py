@@ -2,6 +2,7 @@ from random import *
 from subprocess import Popen, PIPE
 from shlex import split
 import platform
+import json
 
 try:
     import numpy as np
@@ -20,16 +21,13 @@ except ModuleNotFoundError:
         print("Failed to install numpy")
         quit()
 
-# Code to trigger Syed
-with open('data/block.rah', 'r') as block_lookup:
-    block_list = [block.split(' // ') for block in block_lookup.read().strip().split('\n')]
 
-# block_list = block_lookup.read().strip().split('\n')
-#
-# block_list = [block.split(' // ') for block in block_list]
+block_data = json.load(open("data/block.json"))
+block_lookup = {}
+for block in block_data:
+    block_lookup[block_data[block]['name']] = int(block)
 
-block_lookup = {block_list[i][0]: i for i in range(len(block_list))}
-
+biome_data = json.load(open("data/biome.json"))
 
 def generate_tree(bx, by, world):
     height = randint(4, 6)
@@ -45,9 +43,15 @@ def generate_tree(bx, by, world):
     return world
 
 
+
+
 # ----- Game World Construction Function
-def generate_world(world_seed, max_height, min_x, max_x, w, h):
+def generate_world(world_seed, biome_min, biome_max, w, h):
     """ Creates a world object randomly generated using a user-inputted seed. """
+
+    max_height = 1
+    min_x = 3
+    max_x = 10
 
     # Set the initial seed for the random module (random.seed())
     seed(world_seed)
@@ -56,6 +60,18 @@ def generate_world(world_seed, max_height, min_x, max_x, w, h):
     world = [[0 for y in range(h)] for x in range(w)]
     # Generates the random values for the terrain construction
     terrain = [randrange(10) + 40 for _ in range(w)]
+
+    biomes = []
+    for __ in range(w//biome_min):
+        biome_select = choice(list(biome_data))
+
+        for _ in range(randint(biome_min, biome_max)):
+            biomes.append(biome_select)
+
+        if len(biomes) >= w:
+            biomes = biomes[:w] #Truncate selection
+            break
+
 
     # ----- Construct the Terrain
     # Counter that changes dynamically to check through all blocks in the terrain list
@@ -67,8 +83,7 @@ def generate_world(world_seed, max_height, min_x, max_x, w, h):
 
         # Check to see if terrain gap is too large
 
-        if abs(terrain[cur_pos] - terrain[
-                    cur_pos - 1]) > max_height:  # if terrain gap is larger than threshhold (too big)
+        if abs(terrain[cur_pos] - terrain[cur_pos - 1]) > max_height:  # if terrain gap is larger than threshhold (too big)
 
             for n in range(randint(min_x, max_x)):
                 # Insert a new value into the terrain list between the values that are too far apart
@@ -87,16 +102,16 @@ def generate_world(world_seed, max_height, min_x, max_x, w, h):
             # Generates structures
             if y > terrain[x]:
                 if y - terrain[x] == 1:
-                    world[x][y] = block_lookup["Grass"]
+                    world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["top"]]
 
                     if randint(0, 10) == 0 and x + 10 < w:
                         world = generate_tree(x, y - 1, world)
 
                 elif y - terrain[x] < randint(3, 8):
-                    world[x][y] = block_lookup["Dirt"]
+                    world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["middle"]]
 
                 else:
-                    world[x][y] = block_lookup["Stone"]
+                    world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["lower"]]
 
                 # Coal
                 if 10 + terrain[x] > y > 5 + terrain[x] and randint(0, 200) == 0:

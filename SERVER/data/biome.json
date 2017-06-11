@@ -1,19 +1,28 @@
 {
-    'plains':{
-        
-
-
+    "0":{
+        "name":"plains",
+        "minv":1,
+        "maxv":1,
+        "minh":1,
+        "maxh":5,
+        "layer":{
+                 "top":"Grass",
+                 "middle":"Dirt",
+                 "lower":"Stone"
+                },
+        "structure":["tree"]
     },
-
-    'desert':{
-
-
-    },
-
-    'hell':{
-
-
-
+    "1":{
+        "name":"desert",
+        "minv":1,
+        "maxv":1,
+        "minh":1,
+        "maxh":5,
+        "layer":{
+                 "top":"Sand",
+                 "middle":"Sandstone",
+                 "lower":"Stone"
+                },
+        "structure":["cactus"]
     }
-
 }

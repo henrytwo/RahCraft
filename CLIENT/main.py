@@ -192,7 +192,7 @@ def authenticate():
         with open('data/session.json', 'w') as session_file:
             json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
-        return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n\n\nVisit rahmish.com/status for help', "login"
+        return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n\n\nVisit rahmish.com/status.php for help', "login"
 
 
 def about():

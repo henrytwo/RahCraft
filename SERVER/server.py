@@ -34,7 +34,7 @@ with open("data/config.rah", "r") as config:
 if not os.path.isfile('saves/%s.pkl' % world_name):
     # Generate a new world with the function
     # world_seed,maxHeight,minX,maxX,w,h
-    world = generate_world(input("Seed:\n"), 10, 3, 10, 10000, 100)
+    world = generate_world(input("Seed:\n"), 30, 100, 10000, 100)
 
     # Dumps world to file
     with open('saves/%s.pkl' % world_name, 'wb') as file:
@@ -62,8 +62,9 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[0, 0] for _ in range(9)],
+                                         [[21, 64] for _ in range(9)],
                                          10, 10]
+
 
             # rahprint(PlayerData[self.username])
             return PlayerData[self.username]
@@ -300,6 +301,7 @@ if __name__ == '__main__':
 
     with open('data/op_config.rah') as op_commands:
         op_commands = op_commands.read().strip().split('\n')
+
 
     while True:
         pickled_message = messageQueue.get()
@@ -713,7 +715,7 @@ if __name__ == '__main__':
                         for i in players:
                             sendQueue.put(((9, offPlayer), i))
 
-                    broadcast(channel, '[Tick] %s' % message[2])
+                    #broadcast(channel, '[Tick] %s' % message[2])
 
                     active_players = []
 

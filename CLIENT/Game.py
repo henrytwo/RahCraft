@@ -234,7 +234,7 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
-    block_size = 25
+    block_size = 20
     build = 'RahCraft v0.1.1 EVALUATION'
 
     # Chat
