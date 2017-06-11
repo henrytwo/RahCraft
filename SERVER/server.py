@@ -782,7 +782,7 @@ if __name__ == '__main__':
                         broadcast(channel, send_message)
 
                 elif command == 100:
-                    '''
+
                     kill_list = []
 
                     for p in players:
@@ -813,7 +813,7 @@ if __name__ == '__main__':
 
                         for i in players:
                             sendQueue.put(((9, offPlayer), i))
-                    '''
+
                     broadcast(channel, '[Tick] %s' % message[2])
 
                     #active_players = []
