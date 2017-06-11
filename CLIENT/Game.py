@@ -160,7 +160,7 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):
 
 def game(surf, username, token, host, port, size, music_enable):
     def quit_game():
-        send_queue.put(((9, block_size), SERVERADDRESS))
+        send_queue.put(((9,), SERVERADDRESS))
         time.wait(50)
         sender.terminate()
         receiver.terminate()
@@ -315,8 +315,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     reach = 5
 
-    player_x = float(player_x_) * block_size
-    player_y = float(player_y_) * block_size
+    player_x = int(float(player_x_) * block_size)
+    player_y = int(float(player_y_) * block_size)
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
@@ -621,29 +621,23 @@ def game(surf, username, token, host, port, size, music_enable):
                 if command == 1:
                     remote_username, current_x, current_y, tp = message
 
-                    if remote_username == username and tp:
+                    if remote_username == username:
+                        if tp:
+                            x_offset, y_offset = int(current_x * block_size), int(current_y * block_size)
+                            local_player.rect.x, local_player.rect.y = x_offset + size[0] // 2 + block_size // 2, y_offset + size[1] // 2 + block_size // 2
 
-                        x_offset, y_offset = current_x, current_y
-                        local_player.rect.x, local_player.rect.y = x_offset + size[0] // 2 + block_size // 2, y_offset + size[1] // 2 + block_size // 2
+                            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties)
 
-                        local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
-                                            block_properties)
                     elif remote_username in remote_players:
-                        remote_players[remote_username].calculate_velocity((current_x, current_y), tick_per_frame)
+                        remote_players[remote_username].calculate_velocity((int(current_x * block_size), int(current_y * block_size)), tick_per_frame)
 
                     else:
-                        if type(current_y) is str:
-                            current_x = int(current_x) * 20
-                            current_y = int(current_y) * 20
-
-                        remote_players[remote_username] = player.RemotePlayer(remote_username, current_x, current_y,
-                                                                              block_size - 5, 2 * block_size - 5)
+                        remote_players[remote_username] = player.RemotePlayer(remote_username, int(current_x * block_size), int(current_y * block_size), block_size - 5, 2 * block_size - 5)
 
                 elif command == 2:
                     chunk_position_x, chunk_position_y, world_chunk = message
                     world[chunk_position_x - 5:chunk_position_x + size[0] // block_size + 5,
-                    chunk_position_y - 5:chunk_position_y + size[1] // block_size + 5] = np.array(world_chunk,
-                                                                                                  copy=True)
+                    chunk_position_y - 5:chunk_position_y + size[1] // block_size + 5] = np.array(world_chunk, copy=True)
 
                     if (chunk_position_x, chunk_position_y) in render_request:
                         render_request.remove((chunk_position_x, chunk_position_y))

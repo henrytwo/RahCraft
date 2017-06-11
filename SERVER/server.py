@@ -112,7 +112,7 @@ class Player(object):
         # self.saturation = 10
 
     def save(self, block_size):
-        return [(self.cord[0] // block_size, self.cord[1] // block_size), self.spawnCord, self.inventory, self.hotbar,
+        return [(self.cord[0], self.cord[1]), self.spawnCord, self.inventory, self.hotbar,
                 self.health, self.hunger]
 
 
@@ -337,8 +337,7 @@ if __name__ == '__main__':
 
                                 players[address] = Player(PN, message[1])
                                 username_dict[address] = message[1]
-                                sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
-                                                players[address].hotbar, players[address].inventory, playerLocations), address))
+                                sendQueue.put(((0, 10000, 100, players[address].cord[0], players[address].cord[1], players[address].hotbar, players[address].inventory, playerLocations), address))
 
                                 active_players.append(address)
 
@@ -348,8 +347,7 @@ if __name__ == '__main__':
 
                                 for i in players:
                                     if players[i].username != username_dict[address]:
-                                        sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
-                                                        str(players[address].cord[1]), False), i))
+                                        sendQueue.put(((1, username_dict[address], players[address].cord[0], players[address].cord[1], False), i))
 
                             else:
                                 sendQueue.put(((400, (
@@ -382,8 +380,7 @@ if __name__ == '__main__':
                     x, y = players[address].change_location((message[1], message[2]))
 
                     for i in players:
-                        if i != address:
-                            sendQueue.put(((1, username_dict[address], x, y, False), i))
+                        sendQueue.put(((1, username_dict[address], x, y, False), i))
 
                 elif command == 2:
                     # Render world
@@ -393,7 +390,7 @@ if __name__ == '__main__':
                 elif command == 3:
                     # Break block
                     # Data: [3, <cordx>, <cordy>]
-                    if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 5:
+                    if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 2:
                         spawnpoint_check = world.get_spawnpoint()
 
                         if spawnpoint_check != world.spawnpoint:
@@ -413,7 +410,7 @@ if __name__ == '__main__':
                 elif command == 4:
                     # Place block
                     # Data: [4, <cordx>, <cordy>, <block type>]
-                    if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 5:
+                    if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 2:
                         spawnpoint_check = world.get_spawnpoint()
 
                         if spawnpoint_check != world.spawnpoint:
@@ -472,7 +469,7 @@ if __name__ == '__main__':
                     messageQueue.put(((10, "%s has disconnected from the game"%username_dict[address]), ('127.0.0.1', 0000)))
                     #rahprint('Player %s has disconnected from the game. %s' % (username_dict[address], address))
                     playerNDisconnect.append(players[address].number)
-                    PlayerData[username_dict[address]] = players[address].save(message[1])
+                    PlayerData[username_dict[address]] = players[address].save()
                     offPlayer = username_dict[address]
                     username.remove(offPlayer)
 
