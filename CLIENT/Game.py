@@ -456,7 +456,7 @@ def game(surf, username, token, host, port, size, music_enable):
             release = False
             on_tick = False
             block_broken = False
-            tick_per_frame = max(clock.get_fps() / 10, 1)
+            tick_per_frame = max(clock.get_fps() / 20, 1)
             r_click = False
             l_click = False
             pass_event = None
@@ -601,7 +601,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
 
-            if on_tick:
+            if current_tick % 2 == 0:
                 send_queue.put(((1, local_player.rect.x, local_player.rect.y), SERVERADDRESS))
 
             displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
@@ -673,9 +673,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     inventory_items[slot] = meta_data[:]
 
                 elif command == 8:
-                    print(message)
                     current_chest = message[0]
-
 
                 elif command == 9:
                     remote_username = message[0]
