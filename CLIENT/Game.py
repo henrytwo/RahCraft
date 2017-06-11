@@ -500,7 +500,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     if e.key == K_F3:
                         debug = not debug
 
-                    if e.key == K_SLASH and not current_gui:
+                    if (e.key == K_SLASH or e.key == K_t) and not current_gui:
                         chat_enable = True
                         current_gui = 'CH'
 

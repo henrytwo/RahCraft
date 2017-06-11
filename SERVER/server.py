@@ -6,6 +6,7 @@ import socket
 import pickle as pkl
 from multiprocessing import *
 from copy import deepcopy
+import json
 
 
 from subprocess import Popen, PIPE
@@ -300,6 +301,9 @@ if __name__ == '__main__':
     with open('data/op_config.rah') as op_commands:
         op_commands = op_commands.read().strip().split('\n')
 
+    with open('data/ban.json') as ban_file:
+        ban = json.load(ban_file)
+
 
     while True:
         pickled_message = messageQueue.get()
@@ -315,47 +319,55 @@ if __name__ == '__main__':
                 # Player login and authentication
                 # Data: [0,<username>, <token>]
 
-                if whitelist_enable and message[1] in whitelist or not whitelist_enable:
+                if message[1] not in ban:
 
-                    if message[1] not in username:
+                    if whitelist_enable and message[1] in whitelist or not whitelist_enable:
 
-                        if authenticate(message[1:3]):
+                        if message[1] not in username:
 
-                            if not playerNDisconnect:
-                                PN = player_number
-                                player_number += 1
+                            if authenticate(message[1:3]):
+
+                                if not playerNDisconnect:
+                                    PN = player_number
+                                    player_number += 1
+                                else:
+                                    PN = playerNDisconnect.popleft()
+
+                                playerLocations = {players[x].username: players[x].cord for x in players}
+
+                                players[address] = Player(PN, message[1])
+                                username_dict[address] = message[1]
+                                sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
+                                                players[address].hotbar, players[address].inventory, playerLocations), address))
+
+                                active_players.append(address)
+
+                                messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1', 0000)))
+                                # rahprint('Player %s has connected from %s' % (message[1], address))
+                                username.add(message[1])
+
+                                for i in players:
+                                    if players[i].username != username_dict[address]:
+                                        sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
+                                                        str(players[address].cord[1]), False), i))
+
                             else:
-                                PN = playerNDisconnect.popleft()
+                                sendQueue.put(((400, (
+                                    "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nCredentials were rejected by\nRahCraft Authentication Service\n(Try logging in again)\n\n")),
+                                               address))
 
-                            playerLocations = {players[x].username: players[x].cord for x in players}
-
-                            players[address] = Player(PN, message[1])
-                            username_dict[address] = message[1]
-                            sendQueue.put(((0, 10000, 100, str(players[address].cord[0]), str(players[address].cord[1]),
-                                            players[address].hotbar, players[address].inventory, playerLocations), address))
-
-                            active_players.append(address)
-
-                            messageQueue.put(((10, "%s has connected to the game" % message[1]), ('127.0.0.1', 0000)))
-                            # rahprint('Player %s has connected from %s' % (message[1], address))
-                            username.add(message[1])
-
-                            for i in players:
-                                if players[i].username != username_dict[address]:
-                                    sendQueue.put(((1, username_dict[address], str(players[address].cord[0]),
-                                                    str(players[address].cord[1]), False), i))
-
-                        sendQueue.put(((400, (
-                            "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nCredentials were rejected by\nRahCraft Authentication Service\n(Try logging in again)\n\n")),
-                                       address))
+                        else:
+                            sendQueue.put(((400, (
+                                "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nUsername currently in use\nIf you recently disconnected, wait\n 30 seconds for server to sync")),
+                                           address))
 
                     else:
                         sendQueue.put(((400, (
-                            "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nUsername currently in use\nIf you recently disconnected, wait\n 30 seconds for server to sync")),
+                            "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nThis server is white listed\nIf you believe this is an error,\nContact the administrator for assistance")),
                                        address))
                 else:
                     sendQueue.put(((400, (
-                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nThis server is white listed\nIf you believe this is an error,\nContact the administrator for assistance")),
+                        "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\n%s" % ban[message[1]]['message'])),
                                    address))
                 print(players)
 
@@ -545,16 +557,26 @@ if __name__ == '__main__':
 
                             elif message[1].lower()[:5] == '/kick':
 
-                                kick_name = message[1][6:]
+                                message_list = message[1].split(' ')
 
-                                for player in players:
-                                    if players[player].username == kick_name:
-                                        sendQueue.put(((11, '\n\n\nDisconnected from server by %s'%username_dict[address]), player))
-                                        send_message = '%s was disconnected from the server by %s'%(kick_name, username_dict[address])
+                                if len(message_list) > 1:
 
-                                if not send_message:
-                                    send_message = 'Player %s not found'%kick_name
+                                    kick_name = message_list[1]
+                                    if len(message_list) > 2:
+                                        kick_message = ' '.join(message_list[2:])
+                                    else:
+                                        kick_message = ''
 
+                                    for player in players:
+                                        if players[player].username == kick_name:
+                                            sendQueue.put(((11, '\n\n\nDisconnected from server by %s\n\n%s'%(username_dict[address], kick_message)), player))
+                                            send_message = '%s was disconnected from the server by %s'%(kick_name, username_dict[address])
+
+                                    if not send_message:
+                                        send_message = 'Player %s not found'%kick_name
+
+                                else:
+                                    send_message = 'No parameters given'
 
                             elif message[1].lower()[:3] == '/tp':
 
@@ -606,6 +628,58 @@ if __name__ == '__main__':
 
                                 else:
                                     send_message = 'No parameters given'
+
+                            elif message[1].lower()[:4] == '/ban':
+
+                                message_list = message[1].split(' ')
+
+                                if len(message_list) > 1:
+                                    executor = username_dict[address]
+                                    receiver = message_list[1]
+
+                                    if len(message_list) >= 3:
+                                        ban_message = ' '.join(message_list[2:])
+                                    else:
+                                        ban_message = 'The ban hammer has spoken!'
+
+                                    ban[receiver] = {"message":ban_message}
+
+                                    with open('data/ban.json', 'w') as ban_data:
+                                        json.dump(ban, ban_data, indent=4, sort_keys=True)
+
+                                    send_message = "%s banned %s for %s"%(executor, receiver, ban_message)
+
+                                    for player in players:
+                                        if players[player].username == receiver:
+                                            sendQueue.put(((11, '\n\n\nDisconnected from server\n\n%s'%ban_message), player))
+
+
+                                else:
+                                    send_message = "Invalid parameters"
+
+
+                            elif message[1].lower()[:7] == '/pardon':
+
+                                message_list = message[1].split(' ')
+
+                                if len(message_list) == 2:
+                                    executor = username_dict[address]
+                                    receiver = message_list[1]
+
+                                    if receiver in ban:
+
+                                        del ban[receiver]
+
+                                        with open('data/ban.json', 'w') as ban_data:
+                                            json.dump(ban, ban_data, indent=4, sort_keys=True)
+
+                                        send_message = "%s pardoned %s"%(executor, receiver)
+
+                                    else:
+                                        send_message = "%s was not found in the ban list"%(receiver)
+
+                                else:
+                                    send_message = "Invalid parameters"
 
                             elif message[1].lower()[:10] == '/whitelist':
 
