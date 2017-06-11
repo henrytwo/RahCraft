@@ -258,7 +258,7 @@
   "21": {
     "name": "Cactus",
     "texture": "cactus_side.png",
-    "icon": "woodenplank_icon32.png",
+    "icon": "cactus_icon32.png",
     "collision": "pass",
     "sound": "grass",
     "hardness": 7,

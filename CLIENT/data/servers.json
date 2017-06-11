@@ -9,14 +9,9 @@
         "name": "Rahmish Imperial",
         "port": 5276
     },
-    "2": {
-        "host": "9808098",
-        "name": "posakdposakd",
-        "port": 9809
-    },
     "3": {
-        "host": "127.0.0.1",
-        "name": "Localhost",
+        "host": "139.59.115.40",
+        "name": "Rahmish Singapore Server",
         "port": 5276
     }
 }
