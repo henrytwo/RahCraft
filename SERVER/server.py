@@ -544,7 +544,7 @@ if __name__ == '__main__':
                                 message_list = message[1].split(' ')
 
                                 executor = username_dict[address]
-                                receiver = message_list[1]
+                                command_receiver = message_list[1]
                                 item, quantity = message_list[2:4]
 
                                 for player in players:
@@ -581,17 +581,17 @@ if __name__ == '__main__':
 
                                 message_list = message[1].split(' ')
                                 executor = username_dict[address]
-                                receiver = message_list[1]
+                                command_receiver = message_list[1]
 
                                 for player in players:
-                                    if players[player].username == receiver:
+                                    if players[player].username == command_receiver:
 
                                         x, y = players[player].change_location((list(map(int, message_list[2:4]))))
 
                                         for i in players:
                                             sendQueue.put(((1, players[player].username, x, y, True), i))
 
-                                send_message = '%s teleported %s to %s %s' % (executor, receiver, x, y)
+                                send_message = '%s teleported %s to %s %s' % (executor, command_receiver, x, y)
 
                             elif message[1].lower()[:3] == '/op':
 
@@ -600,27 +600,27 @@ if __name__ == '__main__':
                                 if len(message_list) == 3:
 
                                     executor = username_dict[address]
-                                    receiver = message_list[2]
+                                    command_receiver = message_list[2]
 
                                     if message_list[1] == 'add':
-                                        op.append(receiver)
-                                        send_message = '%s gave %s op'%(executor, receiver)
+                                        op.append(command_receiver)
+                                        send_message = '%s gave %s op'%(executor, command_receiver)
 
                                         with open('data/op.rah', 'w') as op_file:
                                             for user in op:
                                                 op_file.write('%s\n'%user)
 
                                     elif message_list[1] == 'remove':
-                                        if receiver in op:
-                                            del op[op.index(receiver)]
+                                        if command_receiver in op:
+                                            del op[op.index(command_receiver)]
 
                                             with open('data/op.rah', 'w') as op_file:
                                                 for user in op:
                                                     op_file.write('%s\n' % user)
 
-                                            send_message = 'User %s was removed from the op list' % receiver
+                                            send_message = 'User %s was removed from the op list' % command_receiver
                                         else:
-                                            send_message = 'User %s was not found in the op list'%receiver
+                                            send_message = 'User %s was not found in the op list'%command_receiver
 
                                     else:
                                         send_message = 'Unknown subcommand %s'%message_list[1]
@@ -634,22 +634,22 @@ if __name__ == '__main__':
 
                                 if len(message_list) > 1:
                                     executor = username_dict[address]
-                                    receiver = message_list[1]
+                                    command_receiver = message_list[1]
 
                                     if len(message_list) >= 3:
                                         ban_message = ' '.join(message_list[2:])
                                     else:
                                         ban_message = 'Queen Rahma has spoken!'
 
-                                    ban[receiver] = {"message":ban_message}
+                                    ban[command_receiver] = {"message":ban_message}
 
                                     with open('data/ban.json', 'w') as ban_data:
                                         json.dump(ban, ban_data, indent=4, sort_keys=True)
 
-                                    send_message = "%s banned %s for %s"%(executor, receiver, ban_message)
+                                    send_message = "%s banned %s for %s"%(executor, command_receiver, ban_message)
 
                                     for player in players:
-                                        if players[player].username == receiver:
+                                        if players[player].username == command_receiver:
                                             sendQueue.put(((11, '\n\n\nDisconnected from server\n\n%s'%ban_message), player))
 
 
@@ -663,19 +663,19 @@ if __name__ == '__main__':
 
                                 if len(message_list) == 2:
                                     executor = username_dict[address]
-                                    receiver = message_list[1]
+                                    command_receiver = message_list[1]
 
-                                    if receiver in ban:
+                                    if command_receiver in ban:
 
-                                        del ban[receiver]
+                                        del ban[command_receiver]
 
                                         with open('data/ban.json', 'w') as ban_data:
                                             json.dump(ban, ban_data, indent=4, sort_keys=True)
 
-                                        send_message = "%s pardoned %s"%(executor, receiver)
+                                        send_message = "%s pardoned %s"%(executor, command_receiver)
 
                                     else:
-                                        send_message = "%s was not found in the ban list"%(receiver)
+                                        send_message = "%s was not found in the ban list"%(command_receiver)
 
                                 else:
                                     send_message = "Invalid parameters"
@@ -711,27 +711,27 @@ if __name__ == '__main__':
                                 elif len(message_list) == 3:
 
                                     executor = username_dict[address]
-                                    receiver = message_list[2]
+                                    command_receiver = message_list[2]
 
                                     if message_list[1] == 'add':
-                                        whitelist.append(receiver)
-                                        send_message = '%s added %s to the whitelist'%(executor, receiver)
+                                        whitelist.append(command_receiver)
+                                        send_message = '%s added %s to the whitelist'%(executor, command_receiver)
 
                                         with open('data/whitelist.rah', 'w') as whitelist_file:
                                             for user in whitelist:
                                                 whitelist_file.write('%s\n'%user)
 
                                     elif message_list[1] == 'remove':
-                                        if receiver in whitelist:
-                                            del whitelist[whitelist.index(receiver)]
+                                        if command_receiver in whitelist:
+                                            del whitelist[whitelist.index(command_receiver)]
 
                                             with open('data/whitelist.rah', 'w') as whitelist_file:
                                                 for user in whitelist:
                                                     whitelist_file.write('%s\n' % user)
 
-                                            send_message = 'User %s was removed from the whitelist' % receiver
+                                            send_message = 'User %s was removed from the whitelist' % command_receiver
                                         else:
-                                            send_message = 'User %s was not found in the whitelist'%receiver
+                                            send_message = 'User %s was not found in the whitelist'%command_receiver
 
                                     else:
                                         send_message = 'Unknown subcommand %s'%message_list[1]
