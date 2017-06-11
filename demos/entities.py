@@ -180,7 +180,7 @@ class EntityAggressive:
 
         self.base_vy = -(cap // 10 + 2.25)
 
-        self.max_vx = cap // 10
+        self.max_vx = cap // 15
         self.max_vy = cap
 
         self.friction = 0.95
@@ -227,9 +227,9 @@ class EntityAggressive:
         else:
             self.targeting = False
             print('die')
-            if self.rect.x < target_loc[0]:
+            if self.rect.x < target_loc[0] and self.command not in [1, 4]:
                 self.command = 1
-            elif self.rect.x > target_loc[0]:
+            elif self.rect.x > target_loc[0] and self.command not in [2, 5]:
                 self.command = 2
             elif self.rect.y > target_loc[1]:
                 self.command = 3
@@ -300,14 +300,12 @@ class EntityAggressive:
                     self.rect.right = block.rect.left
                     if type(blocks[2]) is not Block:
                         self.command = 4
-                        print('to the left')
                     else:
                         self.command = choice([0, 2])
                 elif self.vx < 0:
                     self.rect.left = block.rect.right
                     if type(blocks[0]) is not Block:
                         self.command = 5
-                        print('to the right')
                     else:
                         self.command = choice([0, 1])
 
