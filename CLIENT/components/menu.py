@@ -812,6 +812,7 @@ class Chest:
 
     def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, chest_inv, item_lib):
         surf.blit(self.graphic, (self.x, self.y))
+        changed = [0, 0]
 
         for row in range(len(chest_inv)):
             for item in range(len(chest_inv[row])):
@@ -825,8 +826,10 @@ class Chest:
 
                     if l_click:
                         chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
+                        changed = [8, 'chest', row, item, chest_inv[row][item]]
                     elif r_click:
                         chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
+                        changed = [8, 'chest', row, item, chest_inv[row][item]]
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
@@ -859,3 +862,5 @@ class Chest:
 
         if self.holding[0] > 0:
             surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
+
+        return changed
