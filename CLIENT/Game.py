@@ -315,8 +315,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     reach = 5
 
-    player_x = int(float(player_x_) * 20 - size[0] // 2)
-    player_y = int(float(player_y_) * 20 - size[1] // 2)
+    player_x = int(player_x_) * block_size
+    player_y = int(player_y_) * block_size
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
@@ -425,14 +425,18 @@ def game(surf, username, token, host, port, size, music_enable):
 
     block_step = None
 
-    # Crafting
+    # Crafting/other gui stuffz
     # =====================================================================
 
     crafting_object = menu.Crafting(size[0], size[1])
+    chest_object = menu.Chest(size[0], size[1])
 
     crafting = False
+    using_chest = False
 
     current_gui = ''
+    current_chest = []
+    chest_location = []
 
     # Block highlight
     # =====================================================================
@@ -452,7 +456,7 @@ def game(surf, username, token, host, port, size, music_enable):
             release = False
             on_tick = False
             block_broken = False
-            tick_per_frame = max(clock.get_fps() / 20, 1)
+            tick_per_frame = max(clock.get_fps() / 10, 1)
             r_click = False
             l_click = False
             pass_event = None
@@ -519,6 +523,12 @@ def game(surf, username, token, host, port, size, music_enable):
                             chat.content = ''
                             chat_enable = False
                             current_gui = ''
+                        elif current_gui == 'Ch':
+                            send_queue.put(((7, 'chest', chest_location[0], chest_location[1], 0), SERVERADDRESS))
+                            using_chest = False
+                            current_chest = []
+                            current_gui = ''
+                            inventory_updated = True
                         elif current_gui == '' or current_gui == 'P':
                             paused = not paused
                             if paused:
@@ -574,7 +584,7 @@ def game(surf, username, token, host, port, size, music_enable):
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
             block_clip = (
-                local_player.rect.x // block_size * block_size, local_player.rect.y // block_size * block_size)
+                local_player.rect.centerx // block_size * block_size, local_player.rect.centery // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
             # if x_offset <= 0:
@@ -588,12 +598,11 @@ def game(surf, username, token, host, port, size, music_enable):
             #     y_offset = 1
 
             if inventory_updated:
-
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
 
             if on_tick:
-                send_queue.put(([(1, local_player.rect.x, local_player.rect.y), SERVERADDRESS]))
+                send_queue.put(((1, local_player.rect.x, local_player.rect.y), SERVERADDRESS))
 
             displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
                                offset_clip.y:offset_clip.y + size[1] // block_size + 5]
@@ -619,11 +628,8 @@ def game(surf, username, token, host, port, size, music_enable):
                     #
                     #     local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
                     #                         block_properties)
-
                     if remote_username in remote_players:
                         remote_players[remote_username].calculate_velocity((current_x, current_y), tick_per_frame)
-                        remote_players[remote_username].calculate_velocity(
-                            (current_x * block_size, current_y * block_size), tickPerFrame)
 
                     else:
                         if type(current_y) is str:
@@ -659,14 +665,17 @@ def game(surf, username, token, host, port, size, music_enable):
                 elif command == 6:
                     slot, meta_data = message
 
-                    print(message)
-
                     hotbar_items[slot] = meta_data[:]
 
                 elif command == 7:
                     slot, meta_data = message
 
                     inventory_items[slot] = meta_data[:]
+
+                elif command == 8:
+                    print(message)
+                    current_chest = message[0]
+
 
                 elif command == 9:
                     remote_username = message[0]
@@ -711,12 +720,11 @@ def game(surf, username, token, host, port, size, music_enable):
                 rah.rahprint("Reset")
 
             for y in range(size[1]):
+                r = min(max(int(((y_offset // block_size) / world_size_y) * 20 - int(255 * sky_tick / 24000)), 0), 255)
+                g = min(max(int(((y_offset // block_size)/world_size_y) * 60 - int(255 * sky_tick/24000)), 0),255)
+                b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(500 * sky_tick/24000)), 0),255)
 
-                 r =  min(max(int(((y_offset // block_size)/world_size_y) * 20 - int(255 * sky_tick/24000)), 0),255)
-                 g = min(max(int(((y_offset // block_size)/world_size_y) * 60 - int(255 * sky_tick/24000)), 0),255)
-                 b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(500 * sky_tick/24000)), 0),255)
-
-                 draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
+                draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
 
             # surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
@@ -729,8 +737,7 @@ def game(surf, username, token, host, port, size, music_enable):
             except:
                 pass
 
-            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
-                                block_properties)
+            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties)
 
             under_block = (offset_clip.x, y_offset // block_size + 1)
 
@@ -795,8 +802,6 @@ def game(surf, username, token, host, port, size, music_enable):
                                 if hotbar_items[hotbar_slot][2] == 0:
                                     hotbar_items[hotbar_slot] = [0, 0]
 
-                        print(hotbar_items)
-
                         if block_properties[world[hover_x, hover_y]]['tool-required']:
                             if hotbar_items[hotbar_slot][0] in tool_properties:
                                 current_tool = hotbar_items[hotbar_slot][0]
@@ -821,15 +826,18 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     if world[hover_x, hover_y] == 10 and current_gui == '':
-                        crafting = not crafting
+                        crafting = True
                         current_gui = 'C'
+                    elif world[hover_x, hover_y] == 17 and current_gui == '':
+                        using_chest = True
+                        current_gui = 'Ch'
+                        chest_location = [hover_x, hover_y]
+                        send_queue.put(((7, 'chest', hover_x, hover_y, 1), SERVERADDRESS))
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties and hotbar_items[hotbar_slot][1] > 0:
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
-
-                        print(4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot)
 
                         hover_sound = block_properties[hotbar_items[hotbar_slot][0]]
 
@@ -871,13 +879,19 @@ def game(surf, username, token, host, port, size, music_enable):
                     else:
                         return nav_update
 
+            elif using_chest:
+                surf.blit(tint, (0, 0))
+                changed = chest_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_chest, item_lib)
+
+                if changed != [0, 0]:
+                    send_queue.put((changed+[chest_location[0], chest_location[1]], SERVERADDRESS))
+
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
                 inventory_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
             elif crafting:
                 surf.blit(tint, (0, 0))
-
                 crafting_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
             if not paused:

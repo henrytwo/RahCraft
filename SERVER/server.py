@@ -53,8 +53,6 @@ class Player(object):
 
         self.cord, self.spawnCord, self.inventory, self.hotbar, self.health, self.hunger = self.get_player_info()
 
-        # self.saturation, self.foodLib
-
     def get_player_info(self):
         try:
             return PlayerData[self.username]
@@ -62,7 +60,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[21, 64] for _ in range(9)],
+                                         [[17, 1] for _ in range(9)],
                                          10, 10]
 
 
@@ -359,6 +357,7 @@ if __name__ == '__main__':
                     sendQueue.put(((400, (
                         "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nThis server is white listed\nIf you believe this is an error,\nContact the administrator for assistance")),
                                    address))
+                print(players)
 
             # External heartbeat
             elif command == 102:
@@ -367,13 +366,12 @@ if __name__ == '__main__':
             elif address in players or address == ('127.0.0.1', 0000):
                 if command == 1:
 
-
                     # Player movement
                     # Data: [1, <cordx>, <cordy>]
                     x, y = players[address].change_location((message[1], message[2]))
 
                     for i in players:
-                        sendQueue.put(((1, username_dict[address], x, y), i))
+                        sendQueue.put(((1, username_dict[address], x, y, False), i))
 
                 elif command == 2:
                     # Render world
@@ -400,7 +398,6 @@ if __name__ == '__main__':
                 elif command == 4:
                     # Place block
                     # Data: [4, <cordx>, <cordy>, <block type>]
-                    print(message[4], players[address].hotbar[message[4]])
                     if hypot(world.spawnpoint[0] - message[1], world.spawnpoint[1] - message[2]) < 5:
                         spawnpoint_check = world.get_spawnpoint()
 
@@ -416,25 +413,54 @@ if __name__ == '__main__':
                     if players[address].hotbar[message[4]][1] <= 0 or players[address].hotbar[message[4]][0] == 0:
                         players[address].hotbar[message[4]] = [0, 0]
 
-
-                    print(message[4], players[address].hotbar[message[4]])
                     sendQueue.put(((6, message[4], players[address].hotbar[message[4]]), address))
-                    '''
-                    if message[3] ==
-                    '''
+                    if message[3] == 17:
+                        chests[(message[1], message[2])] = [[[[0, 0] for _ in range(9)] for __ in range(3)], [address[:]]]
+
                     for i in players:
                         sendQueue.put(((4, message[1], message[2], message[3]), i))
 
                 elif command == 5:
                     players[address].change_inventory_all(message[1], message[2])
 
+                elif command == 7:
+
+                    if message[1] == 'chest':
+                        if message[-1] == 1:
+                            try:
+                                chests[(message[2], message[3])][1].append(address)
+                                sendQueue.put(([8, chests[message[2], message[3]][0]], address))
+                            except:
+                                sendQueue.put(([8, "err"], address))
+                        else:
+                            try:
+                                chests[(message[2], message[3])][1].remove(address)
+                            except:
+                                sendQueue.put(([8, "err"], address))
+
+                    elif message[1] == 'furnace':
+                        try:
+                            sendQueue.put(([8, furnace[message[2], message[3]]], address))
+                        except:
+                            sendQueue.put(([8, "err"], address))
+
+                elif command == 8:
+                    print(message)
+                    if message[1] == 'chest':
+                        if chests[(message[5], message[6])][0][message[2]][message[3]] != message[4]:
+                            chests[(message[5], message[6])][0][message[2]][message[3]] = message[4]
+                            for i in chests[(message[5], message[6])][1]:
+                                sendQueue.put(((8, chests[(message[5], message[6])][0]), i))
+
+
                 elif command == 9:
 
                     messageQueue.put(((10, "%s has disconnected from the game"%username_dict[address]), ('127.0.0.1', 0000)))
                     #rahprint('Player %s has disconnected from the game. %s' % (username_dict[address], address))
-
+                    print(players[address].cord, message[1])
                     playerNDisconnect.append(players[address].number)
                     PlayerData[username_dict[address]] = players[address].save(message[1])
+                    print(PlayerData[username_dict[address]])
                     offPlayer = username_dict[address]
                     username.remove(offPlayer)
 
@@ -683,7 +709,7 @@ if __name__ == '__main__':
                         broadcast(channel, send_message)
 
                 elif command == 100:
-
+                    '''
                     kill_list = []
 
                     for p in players:
@@ -714,10 +740,10 @@ if __name__ == '__main__':
 
                         for i in players:
                             sendQueue.put(((9, offPlayer), i))
+                    '''
+                    broadcast(channel, '[Tick] %s' % message[2])
 
-                    #broadcast(channel, '[Tick] %s' % message[2])
-
-                    active_players = []
+                    #active_players = []
 
                 elif command == 101:
                     if address not in active_players:

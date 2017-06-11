@@ -6,6 +6,7 @@ import components.rahma as rah
 font.init()
 
 normal_font = font.Font("fonts/minecraft.ttf", 14)
+index_font = font.Font("fonts/minecraft.ttf", 10)
 
 
 class Player:
@@ -40,8 +41,9 @@ class Player:
 
         self.dir = 0
         self.standing = False
+        self.sneaking = False
 
-        self.surrounding_shifts = [(x, y) for x in range(-2, 3) for y in range(-2, 4)]
+        self.surrounding_shifts = [(sx, sy) for sy in range(-2, 3) for sx in range(-1, 2)]
 
     def control(self, keys, fly):
         if fly:
@@ -57,10 +59,12 @@ class Player:
 
         else:
             self.dir = 0
+            self.sneaking = False
 
             if keys[K_LSHIFT] != keys[K_LCTRL]:
                 if keys[K_LSHIFT]:
                     self.max_vx = self.max_sneak_vx
+                    self.sneaking = True
                 elif keys[K_LCTRL]:
                     self.max_vx = self.max_dash_vx
             else:
@@ -81,15 +85,41 @@ class Player:
 
             if (keys[self.controls[2]] or keys[self.controls[4]]) and self.standing:
                 self.vy = self.base_vy
-
-        self.standing = False
+                self.standing = False
 
     def collide(self, blocks, fly):
+        if self.sneaking and type(blocks[4]) is not Rect:
+            if (self.dir == -1 and blocks[3].__class__ == Rect and self.rect.right == blocks[3].left) \
+                    or (self.dir == 1 and blocks[5].__class__ == Rect and self.rect.left == blocks[5].right):
+                self.actual_x -= self.vx
+
+            else:
+                self.actual_x += self.vx
+
+        else:
+            self.actual_x += self.vx
+
+
+        self.rect.x = self.actual_x
+
+        for block in blocks:
+            if type(block) is Rect and self.rect.colliderect(block):
+                if self.vx > 0:
+                    self.rect.right = block.left
+                elif self.vx < 0:
+                    self.rect.left = block.right
+
+                self.actual_x = self.rect.x
+                self.vx = 0
+
+        if fly:
+            self.vx = 0
+
         self.actual_y += self.vy
         self.rect.y = self.actual_y
 
         for block in blocks:
-            if self.rect.colliderect(block):
+            if type(block) is Rect and self.rect.colliderect(block):
                 if self.vy >= 0:
                     self.rect.bottom = block.top
                     self.standing = True
@@ -104,25 +134,6 @@ class Player:
         else:
             self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
 
-        if 0 > round(self.vx) > -1:
-            self.actual_x += self.vx - 1
-        else:
-            self.actual_x += self.vx
-        self.rect.x = self.actual_x
-
-        for block in blocks:
-            if self.rect.colliderect(block):
-                if self.vx > 0:
-                    self.rect.right = block.left
-                elif self.vx < 0:
-                    self.rect.left = block.right
-
-                self.actual_x = self.rect.x
-                self.vx = 0
-
-        if fly:
-            self.vx = 0
-
     def detect(self, world, block_size, block_clip, block_properties):
         surrounding_blocks = []
 
@@ -134,6 +145,9 @@ class Player:
                 surrounding_blocks.append(
                     Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size,
                          block_size))
+            else:
+                surrounding_blocks.append((block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size,
+                                           block_size, block_size))
 
         return surrounding_blocks
 
@@ -144,6 +158,14 @@ class Player:
             self.control(key.get_pressed(), fly)
 
         self.collide(collision_blocks, fly)
+
+        # for block in collision_blocks:
+        #     if type(block) is Rect:
+        #         draw.rect(surf, (200, 200, 200), (block.x - x_offset, block.y - y_offset, *block.size))
+        #     if (self.dir == -1 and collision_blocks.index(block) == 3) or (self.dir == 1 and collision_blocks.index(block) == 5):
+        #         draw.rect(surf, (255, 0, 0), (block[0] - x_offset, block[1] - y_offset, block[2], block[3]))
+        #     surf.blit(index_font.render("{0}".format(collision_blocks.index(block)), True, (0, 0, 0)),
+        #               (block[0] - x_offset, block[1] - y_offset))
 
         draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
 
@@ -164,8 +186,6 @@ class RemotePlayer:
         self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height() + 10), SRCALPHA)
         self.name_back.fill(Color(75, 75, 75, 150))
 
-        self.MAX_MOVE = 90
-
     def calculate_velocity(self, ncord, fpt):
         self.vy = (ncord[1] - self.y) // fpt
         self.vx = (ncord[0] - self.x) // fpt
@@ -185,7 +205,6 @@ class RemotePlayer:
                                              self.name_back.get_width(), self.name_back.get_height()))
         surf.blit(self.name_tag, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                             self.name_tag.get_width(), self.name_tag.get_height()))
-
 
 # Lighting
 # draw.circle(self.reach_surf, Color(255, 255, 255, (reach * 20 - a) * 2), (reach * 20, reach * 20), a)

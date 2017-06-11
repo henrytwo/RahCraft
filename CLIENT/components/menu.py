@@ -763,7 +763,7 @@ class Crafting:
 
 
 class Chest:
-    def __init__(self, x, y, w, h):
+    def __init__(self, w, h):
 
         self.graphic = image.load('textures/gui/small_chest.png')
 
@@ -812,23 +812,24 @@ class Chest:
 
     def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, chest_inv, item_lib):
         surf.blit(self.graphic, (self.x, self.y))
+        changed = [0, 0]
 
         for row in range(len(chest_inv)):
             for item in range(len(chest_inv[row])):
                 if chest_inv[row][item][1] != 0:
-                    surf.blit(item_lib[chest_inv[row][item][0]][1],
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+                    surf.blit(item_lib[chest_inv[row][item][0]][1], (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
-                    surf.blit(rah.text(str(chest_inv[row][item][1]), 10),
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+                    surf.blit(rah.text(str(chest_inv[row][item][1]), 10), (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
-            if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
-                surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+                if Rect((self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32)).collidepoint(mx, my):
+                    surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
 
-                if l_click:
-                    chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
-                elif r_click:
-                    chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
+                    if l_click:
+                        chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
+                        changed = [8, 'chest', row, item, chest_inv[row][item]]
+                    elif r_click:
+                        chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
+                        changed = [8, 'chest', row, item, chest_inv[row][item]]
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
@@ -861,3 +862,5 @@ class Chest:
 
         if self.holding[0] > 0:
             surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
+
+        return changed
