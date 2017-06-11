@@ -621,14 +621,14 @@ def game(surf, username, token, host, port, size, music_enable):
                 if command == 1:
                     remote_username, current_x, current_y, tp = message
 
-                    # if remote_username == username and tp:
-                    #
-                    #     x_offset, y_offset = current_x, current_y
-                    #     local_player.rect.x, local_player.rect.y = x_offset + size[0] // 2 + block_size // 2, y_offset + size[1] // 2 + block_size // 2
-                    #
-                    #     local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
-                    #                         block_properties)
-                    if remote_username in remote_players:
+                    if remote_username == username and tp:
+
+                        x_offset, y_offset = current_x, current_y
+                        local_player.rect.x, local_player.rect.y = x_offset + size[0] // 2 + block_size // 2, y_offset + size[1] // 2 + block_size // 2
+
+                        local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
+                                            block_properties)
+                    elif remote_username in remote_players:
                         remote_players[remote_username].calculate_velocity((current_x, current_y), tick_per_frame)
 
                     else:

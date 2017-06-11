@@ -60,7 +60,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[17, 1] for _ in range(9)],
+                                         [[21, 1] for _ in range(9)],
                                          10, 10]
 
 
