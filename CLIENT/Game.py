@@ -255,6 +255,10 @@ def game(surf, username, token, host, port, size, music_enable):
         transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
         in range(10)]
 
+    health_texture = {"none":image.load("textures/gui/icons/heart_none.png"),
+                      "half": image.load("textures/gui/icons/heart_half.png"),
+                      "full": image.load("textures/gui/icons/heart_full.png")}
+
     tint = Surface(size)
     tint.fill((0, 0, 0))
     tint.set_alpha(99)
@@ -309,7 +313,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
         clock.tick(500)
 
-    world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players = first_message[1:]
+    world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = first_message[1:]
 
     rah.rahprint("player done")
 
@@ -868,6 +872,55 @@ def game(surf, username, token, host, port, size, music_enable):
 
             # ====================Inventory/hotbar========================
 
+            HEART_SIZE = 15
+
+            health = hotbar_slot
+
+            for heart_index in range(0, 20, 2):
+
+                heart_x = heart_index//2 * (HEART_SIZE + 1)
+                surf.blit(transform.scale(health_texture['none'], (HEART_SIZE + 1, HEART_SIZE + 1)), (hotbar_rect[0] + heart_x - 1, hotbar_rect[1] - HEART_SIZE - 6))
+
+                if heart_index < health - 2:
+                    surf.blit(transform.scale(health_texture['full'], (HEART_SIZE, HEART_SIZE)),
+                              (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
+
+                elif heart_index <= health - 1:
+
+                    if (health - heart_index)%2 == 0:
+                        heart_texture = health_texture['full']
+                    else:
+                        heart_texture = health_texture['half']
+
+
+                    surf.blit(transform.scale(heart_texture, (HEART_SIZE, HEART_SIZE)),
+                              (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
+
+
+            # HUNGER_SIZE = 15
+            #
+            # health = hotbar_slot
+            #
+            # for heart_index in range(0, 20, 2):
+            #
+            #     heart_x = heart_index//2 * (HEART_SIZE + 1)
+            #     surf.blit(transform.scale(hunger_texture['none'], (HEART_SIZE + 1, HEART_SIZE + 1)), (hotbar_rect[0] + heart_x - 1, hotbar_rect[1] - HEART_SIZE - 6))
+            #
+            #     if heart_index < health - 2:
+            #         surf.blit(transform.scale(hunger_texture['full'], (HEART_SIZE, HEART_SIZE)),
+            #                   (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
+            #
+            #     elif heart_index <= health - 1:
+            #
+            #         if (health - heart_index)%2 == 0:
+            #             heart_texture = hunger_texture['full']
+            #         else:
+            #             heart_texture = hunger_texture['half']
+            #
+            #
+            #         surf.blit(transform.scale(heart_texture, (HEART_SIZE, HEART_SIZE)),
+            #                   (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
+
             render_hotbar(hotbar_slot)
 
             # ===================Pausing====================================
@@ -906,6 +959,7 @@ def game(surf, username, token, host, port, size, music_enable):
             elif crafting:
                 surf.blit(tint, (0, 0))
                 crafting_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
+
 
             if not paused:
                 if key.get_pressed()[K_TAB]:

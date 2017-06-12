@@ -61,8 +61,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[21, 1] for _ in range(9)],
-                                         10, 10]
+                                         [[21, 1] for _ in range(9)], 20, 20]
 
 
             # rahprint(PlayerData[self.username])
@@ -107,11 +106,11 @@ class Player(object):
 
         self.inventory = [[0, 0] for _ in range(36)]
         self.hotbar = [[0, 0] * 2 for _ in range(36)]
-        self.hunger = 10
-        self.health = 10
+        self.hunger = 20
+        self.health = 20
         # self.saturation = 10
 
-    def save(self, block_size):
+    def save(self):
         return [(self.cord[0], self.cord[1]), self.spawnCord, self.inventory, self.hotbar,
                 self.health, self.hunger]
 
@@ -337,7 +336,8 @@ if __name__ == '__main__':
 
                                 players[address] = Player(PN, message[1])
                                 username_dict[address] = message[1]
-                                sendQueue.put(((0, 10000, 100, players[address].cord[0], players[address].cord[1], players[address].hotbar, players[address].inventory, playerLocations), address))
+
+                                sendQueue.put(((0, 10000, 100, players[address].cord[0], players[address].cord[1], players[address].hotbar, players[address].inventory, playerLocations, players[address].health, players[address].hunger ), address))
 
                                 active_players.append(address)
 
@@ -830,7 +830,7 @@ if __name__ == '__main__':
 
                     broadcast(channel, '[Tick] %s' % message[2])
 
-                    #active_players = []
+                    active_players = []
 
                 elif command == 101:
                     if address not in active_players:
