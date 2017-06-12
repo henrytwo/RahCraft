@@ -10,7 +10,7 @@
         "port": 5276
     },
     "3": {
-        "host": "139.59.115.40",
+        "host": "127.0.0.1",
         "name": "Rahmish Singapore Server",
         "port": 5276
     }

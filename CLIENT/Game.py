@@ -602,7 +602,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 inventory_updated = False
 
             if current_tick % 2 == 0:
-                send_queue.put(((1, local_player.rect.x, local_player.rect.y), SERVERADDRESS))
+                send_queue.put(((1, local_player.rect.x / block_size, local_player.rect.y / block_size), SERVERADDRESS))
 
             displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
                                offset_clip.y:offset_clip.y + size[1] // block_size + 5]
@@ -621,6 +621,7 @@ def game(surf, username, token, host, port, size, music_enable):
                 if command == 1:
                     remote_username, current_x, current_y, tp = message
 
+                    print(message)
                     if remote_username == username:
                         if tp:
                             x_offset, y_offset = int(current_x * block_size), int(current_y * block_size)
