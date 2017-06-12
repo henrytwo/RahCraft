@@ -433,9 +433,13 @@ def game(surf, username, token, host, port, size, music_enable):
 
     crafting = False
     using_chest = False
+    using_furnace = False
 
     current_gui = ''
     current_chest = []
+    chest_location = []
+
+    current_furnace = []
     chest_location = []
 
     # Block highlight
@@ -527,6 +531,12 @@ def game(surf, username, token, host, port, size, music_enable):
                             send_queue.put(((7, 'chest', chest_location[0], chest_location[1], 0), SERVERADDRESS))
                             using_chest = False
                             current_chest = []
+                            current_gui = ''
+                            inventory_updated = True
+                        elif current_gui == 'F':
+                            send_queue.put(((7, 'furnace', furnace_location[0], furnace_location[1], 0), SERVERADDRESS))
+                            using_furnace = False
+                            current_furnace = []
                             current_gui = ''
                             inventory_updated = True
                         elif current_gui == '' or current_gui == 'P':
@@ -621,7 +631,6 @@ def game(surf, username, token, host, port, size, music_enable):
                 if command == 1:
                     remote_username, current_x, current_y, tp = message
 
-                    print(message)
                     if remote_username == username:
                         if tp:
                             x_offset, y_offset = int(current_x * block_size), int(current_y * block_size)
@@ -826,6 +835,11 @@ def game(surf, username, token, host, port, size, music_enable):
                         current_gui = 'Ch'
                         chest_location = [hover_x, hover_y]
                         send_queue.put(((7, 'chest', hover_x, hover_y, 1), SERVERADDRESS))
+                    elif world[hover_x, gover_y] == 18 and current_gui == '':
+                        using_furnace = True
+                        current_gui = 'F'
+                        furnace_location = [hover_x, hover_y]
+                        send_queue.put(((7, 'furnace', hover_x, hover_y, 1), SERVERADDRESS))
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][0] in block_properties and hotbar_items[hotbar_slot][1] > 0:
                         block_request.add((hover_x, hover_y))
@@ -878,6 +892,10 @@ def game(surf, username, token, host, port, size, music_enable):
 
                 if changed != [0, 0]:
                     send_queue.put((changed+[chest_location[0], chest_location[1]], SERVERADDRESS))
+
+            elif using_furnace:
+                surf.blit(tint, (0, 0))
+                changed = furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))

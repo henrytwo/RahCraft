@@ -765,7 +765,7 @@ class Crafting:
 class Chest:
     def __init__(self, w, h):
 
-        self.graphic = image.load('textures/gui/small_chest.png')
+        self.graphic = image.load('textures/gui/small_chest.png').convert_alpha()
 
         self.x, self.y = w // 2 - self.graphic.get_width() // 2, h // 2 - self.graphic.get_height() // 2
         self.w, self.h = w, h
@@ -869,7 +869,12 @@ class Chest:
 class Furnace:
     def __init__(self, w, h):
 
-        self.graphic = image.load('textures/gui/small_chest.png')
+        self.graphic = image.load('textures/gui/furnace.png').convert_alpha()
+        self.toggle_image = image.load('textures/gui/flame.png').convert_alpha()
+        self.progress = image.load('textures/gui/progress.png').convert_alpha()
+
+        self.fuel = json.load(open("data/smelting_time.json"))
+        self.recipes = json.load(open("data/smelting.json"))
 
         self.x, self.y = w // 2 - self.graphic.get_width() // 2, h // 2 - self.graphic.get_height() // 2
         self.w, self.h = w, h
@@ -879,6 +884,8 @@ class Furnace:
         self.highlight.set_alpha(150)
         self.item_slots = []
         self.holding = [0, 0]
+
+        self.SMELT_TIME = 10# Seconds
 
     def check_stacking(self, item, item_lib):
         if self.holding[0] != item[0] or item[1] == item_lib[item[0]][-1]:
@@ -914,26 +921,11 @@ class Furnace:
 
         return inv
 
-    def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, chest_inv, item_lib):
+    def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, smelted, item_lib):
         surf.blit(self.graphic, (self.x, self.y))
         changed = [0, 0]
 
-        for row in range(len(chest_inv)):
-            for item in range(len(chest_inv[row])):
-                if chest_inv[row][item][1] != 0:
-                    surf.blit(item_lib[chest_inv[row][item][0]][1], (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
-
-                    surf.blit(rah.text(str(chest_inv[row][item][1]), 10), (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
-
-                if Rect((self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32)).collidepoint(mx, my):
-                    surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 36 + row * 36, 32, 32))
-
-                    if l_click:
-                        chest_inv[row][item] = self.check_stacking(chest_inv[row][item][:], item_lib)
-                        changed = [8, 'chest', row, item, chest_inv[row][item]]
-                    elif r_click:
-                        chest_inv[row][item] = self.single_add(chest_inv[row][item][:], item_lib)
-                        changed = [8, 'chest', row, item, chest_inv[row][item]]
+        draw.rect(surf, (0, 0, 0), (mx, my, 32, 32))
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
