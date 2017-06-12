@@ -428,6 +428,8 @@ if __name__ == '__main__':
                     sendQueue.put(((6, message[4], players[address].hotbar[message[4]]), address))
                     if message[3] == 17:
                         chests[(message[1], message[2])] = [[[[0, 0] for _ in range(9)] for __ in range(3)], [address[:]]]
+                    elif message[3] == 18:
+                        furnaces[(message[1], message[2])] = [[[0, 0], [0, 0], [0, 0], -1], [address[:]]]
 
                     for i in players:
                         sendQueue.put(((4, message[1], message[2], message[3]), i))
@@ -436,12 +438,11 @@ if __name__ == '__main__':
                     players[address].change_inventory_all(message[1], message[2])
 
                 elif command == 7:
-
                     if message[1] == 'chest':
                         if message[-1] == 1:
                             try:
                                 chests[(message[2], message[3])][1].append(address)
-                                sendQueue.put(([8, chests[message[2], message[3]][0]], address))
+                                sendQueue.put(([8, 'chest', chests[message[2], message[3]][0]], address))
                             except:
                                 sendQueue.put(([8, "err"], address))
                         else:
@@ -452,7 +453,8 @@ if __name__ == '__main__':
 
                     elif message[1] == 'furnace':
                         try:
-                            sendQueue.put(([8, furnace[message[2], message[3]]], address))
+                            furnaces[(message[2], message[3])][1].append(address)
+                            sendQueue.put(([8, 'furnace', furnace[message[2], message[3]][0]], address))
                         except:
                             sendQueue.put(([8, "err"], address))
 
@@ -461,7 +463,13 @@ if __name__ == '__main__':
                         if chests[(message[5], message[6])][0][message[2]][message[3]] != message[4]:
                             chests[(message[5], message[6])][0][message[2]][message[3]] = message[4]
                             for i in chests[(message[5], message[6])][1]:
-                                sendQueue.put(((8, chests[(message[5], message[6])][0]), i))
+                                sendQueue.put(((8, 'chest', chests[(message[5], message[6])][0]), i))
+
+                    elif message[1] == 'furnace':
+                        if furnaces[(message[4], message[5])][0][message[2]] != message[3]:
+                            chests[(message[4], message[5])][message[2]] = message[3]
+                            for i in furnaces[(message[4], message[5])][1]:
+                                sendQueue.put(((8, 'furnace', furnaces[(message[4], message[5])][0]), i))
 
 
                 elif command == 9:
@@ -810,7 +818,7 @@ if __name__ == '__main__':
                             broadcast(channel, send_message)
 
                         playerNDisconnect.append(players[p].number)
-                        PlayerData[players[p].username] = players[p].save(message[1])
+                        PlayerData[players[p].username] = players[p].save()
                         offPlayer = players[p].username
                         username.remove(offPlayer)
 

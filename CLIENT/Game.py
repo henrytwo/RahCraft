@@ -677,7 +677,9 @@ def game(surf, username, token, host, port, size, music_enable):
                     inventory_items[slot] = meta_data[:]
 
                 elif command == 8:
-                    current_chest = message[0]
+                    #if message[0] !=
+                    #storage_type, storage,
+                    pass
 
                 elif command == 9:
                     remote_username = message[0]
@@ -835,7 +837,7 @@ def game(surf, username, token, host, port, size, music_enable):
                         current_gui = 'Ch'
                         chest_location = [hover_x, hover_y]
                         send_queue.put(((7, 'chest', hover_x, hover_y, 1), SERVERADDRESS))
-                    elif world[hover_x, gover_y] == 18 and current_gui == '':
+                    elif world[hover_x, hover_y] == 18 and current_gui == '':
                         using_furnace = True
                         current_gui = 'F'
                         furnace_location = [hover_x, hover_y]
