@@ -394,17 +394,20 @@ class ServerButton:
         signal_strength = self.strength//100
 
         for bar in range(5):
-            if bar == 4 and signal_strength >= 5:
-                colour = (255, 0, 0)
-            elif bar >= signal_strength:
+            if bar >= signal_strength:
                 if signal_strength > 2:
                     colour = (200, 255, 0)
                 else:
                     colour = (0, 255, 0)
             else:
-                colour = (0, 0, 0)
+                colour = (100, 100, 100)
 
             draw.rect(surf, colour, (self.rect.x + self.rect.w - 10 - bar * 5, self.rect.y + 25, 3, - 15 + bar * 2))
+
+            if signal_strength >= 5:
+                draw.line(surf, (255,0,0), (self.rect.x + self.rect.w - 30, self.rect.y + 10), (self.rect.x + self.rect.w - 15, self.rect.y + 25), 4)
+                draw.line(surf, (255, 0, 0), (self.rect.x + self.rect.w - 30, self.rect.y + 25), (self.rect.x + self.rect.w - 15, self.rect.y + 10), 4)
+
 
 class ScrollingMenu:
     def __init__(self, button_param, x, y, w):

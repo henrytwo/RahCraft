@@ -258,6 +258,11 @@ def about():
                   '    ~##                                          ##~']
     scroll_y = size[1]
 
+    keith_meme = transform.scale(image.load('textures/keith.png'), (size))
+    keith_surface = Surface(size)
+    keith_surface.blit(keith_meme, (0, 0))
+    keith_surface.set_alpha(1)
+
     clock = time.Clock()
 
     while True:
@@ -289,6 +294,12 @@ def about():
         m_press = mouse.get_pressed()
 
         rah.wallpaper(screen, size)
+
+        screen.blit(keith_surface, (0,0))
+
+        print(scroll_y/(-20 * len(about_list)))
+
+        keith_surface.set_alpha(100 * (scroll_y/(-20 * len(about_list))))
 
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))

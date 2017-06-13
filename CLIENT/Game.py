@@ -654,13 +654,12 @@ def game(surf, username, token, host, port, size, music_enable):
                         block_request.remove((pos_x, pos_y))
 
                 elif command == 6:
-
-                    hotbar_items = message[0][:]
-
+                    slot, meta_data = message
+                    hotbar_items[slot] = meta_data[:]
 
                 elif command == 7:
-
-                    inventory_items = message[0][:]
+                    slot, meta_data = message
+                    inventory_items[slot] = meta_data[:]
 
                 elif command == 8:
                     if message[0] != "err":
@@ -727,6 +726,15 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     for repeat in range(5):
                         send_queue.put(([(101, username), SERVERADDRESS]))
+
+                elif command == 15:
+
+                    print(hotbar, inventory)
+
+                    hotbar = message[0][0]
+                    inventory = message[0][1]
+
+                    print(hotbar, inventory)
 
                 elif command == 100:
                     send_time, tick = message

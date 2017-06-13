@@ -61,7 +61,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[5, 2] for _ in range(9)] for __ in range(3)],
-                                         [[18, 1] for _ in range(9)], 20, 20]
+                                         [[17, 1] for _ in range(9)], 20, 20]
 
 
             # rahprint(PlayerData[self.username])
@@ -195,7 +195,7 @@ def give_item(inventory, hotbar, Nitem, quantity):
     item_location = ''
     inventory_type = ''
     for item in range(len(hotbar)):
-        if hotbar[item][1] < 64:
+        if hotbar[item][0] == Nitem and hotbar[item][1] < 64:
             hotbar[item][1] += quantity
             return inventory, hotbar
         elif hotbar[item][0] == 0 and inventory_type == '':
@@ -595,8 +595,7 @@ if __name__ == '__main__':
                                         players[player].inventory, players[player].hotbar = give_item(
                                             players[player].inventory, players[player].hotbar, int(item), int(quantity))
 
-                                        sendQueue.put(((6, players[player].hotbar), player))
-                                        sendQueue.put(((7, players[player].inventory), player))
+                                        sendQueue.put(((15, [players[player].hotbar, players[player].inventory]), player))
 
                                         #players[player].hotbar[0] = [int(item), int(quantity)]
                                         #players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
@@ -825,7 +824,7 @@ if __name__ == '__main__':
 
                         send_message = '[%s] %s' % (user_sending, message[1])
 
-                    if send_message[0] != '[':
+                    if send_message and send_message[0] != '[':
                         send_message = '[%s] '%username_dict[('127.0.0.1', 0)] + send_message
 
                     for i in players:
@@ -852,7 +851,7 @@ if __name__ == '__main__':
 
 
                 elif command == 100:
-                    '''
+
                     kill_list = []
 
                     for p in players:
@@ -883,8 +882,8 @@ if __name__ == '__main__':
 
                         for i in players:
                             sendQueue.put(((9, offPlayer), i))
-                    '''
-                    broadcast(channel, '[Tick] %s' % message[2])
+
+                    #broadcast(channel, '[Tick] %s' % message[2])
 
                     active_players = []
 
