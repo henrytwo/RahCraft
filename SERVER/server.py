@@ -61,7 +61,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[21, 1] for _ in range(9)], 20, 20]
+                                         [[18, 1] for _ in range(9)], 20, 20]
 
 
             # rahprint(PlayerData[self.username])
@@ -268,6 +268,7 @@ if __name__ == '__main__':
     world = World(world_name)
 
     chests = {}
+    furnaces = {}
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
@@ -469,10 +470,7 @@ if __name__ == '__main__':
                                 sendQueue.put(((8, 'chest', chests[(message[5], message[6])][0]), i))
 
                     elif message[1] == 'furnace':
-                        if furnaces[(message[4], message[5])][0][message[2]] != message[3]:
-                            chests[(message[4], message[5])][message[2]] = message[3]
-                            for i in furnaces[(message[4], message[5])][1]:
-                                sendQueue.put(((8, 'furnace', furnaces[(message[4], message[5])][0]), i))
+                        pass
 
 
                 elif command == 9:
