@@ -676,14 +676,13 @@ def game(surf, username, token, host, port, size, music_enable):
                         block_request.remove((pos_x, pos_y))
 
                 elif command == 6:
-                    slot, meta_data = message
 
-                    hotbar_items[slot] = meta_data[:]
+                    hotbar_items = message[0][:]
+
 
                 elif command == 7:
-                    slot, meta_data = message
 
-                    inventory_items[slot] = meta_data[:]
+                    inventory_items = message[0][:]
 
                 elif command == 8:
                     if message[0] != "err":
@@ -715,8 +714,41 @@ def game(surf, username, token, host, port, size, music_enable):
                     hunger = message[0]
 
                 elif command == 14:
+
                     # Complete sync
-                    world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = message[1:]
+                    world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = message[0:]
+
+                    player_x = int(float(player_x_) * block_size)
+                    player_y = int(float(player_y_) * block_size)
+
+                    world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
+
+                    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
+                                                 (K_a, K_d, K_w, K_s, K_SPACE))
+
+                    x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
+                    y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
+
+                    remote_players = {}
+
+                    send_queue.put(
+                        [[2, x_offset // block_size, y_offset // block_size, size, block_size], SERVERADDRESS])
+
+                    while True:
+                        world_msg = message_queue.get()
+                        rah.rahprint(world_msg)
+                        if world_msg[0] == 2:
+                            break
+
+                    world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
+                    world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
+
+                    for Rp in r_players:
+                        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
+                                                                 2 * block_size - 5)
+
+                    for repeat in range(5):
+                        send_queue.put(([(101, username), SERVERADDRESS]))
 
                 elif command == 100:
                     send_time, tick = message

@@ -61,7 +61,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[18, 1] for _ in range(9)], 20, 20]
+                                         [[0, 0] for _ in range(9)], 20, 20]
 
 
             # rahprint(PlayerData[self.username])
@@ -191,12 +191,39 @@ def receive_message(message_queue, server):
         message_queue.put((pkl.loads(message[0]), message[1]))
 
 
+def give_item(inventory, hotbar, Nitem, quantity):
+    item_location = ''
+    inventory_type = ''
+    for item in range(len(hotbar)):
+        if hotbar[item][1] < 64:
+            hotbar[item][1] += quantity
+            return inventory, hotbar
+        elif hotbar[item][0] == 0 and inventory_type == '':
+            item_location = item
+            inventory_type = 'hotbar'
+
+    for row in range(len(inventory)):
+        for item in range(len(inventory[row])):
+            if inventory[row][item][1] < 64:
+                inventory[row][item][1] += quantity
+                return inventory, hotbar
+            elif inventory[row][item][0] == 0 and inventory_type == '':
+                item_location = [row, item]
+                inventory_type = 'inventory'
+
+    if inventory_type == 'hotbar':
+        hotbar[item_location] = [Nitem, quantity]
+    elif inventory_type == 'inventory':
+        inventory[item_location[0]][item_location[1]] = [Nitem, quantity]
+
+    return inventory, hotbar
+
 def commandline_in(commandline_queue, fn):
     rahprint('Ready for input.')
     sys.stdin = os.fdopen(fn)
 
     while True:
-        command = input('[Server]>')
+        command = input('> ')
         commandline_queue.put(((10, command), ('127.0.0.1', 0000)))
 
 
@@ -564,8 +591,15 @@ if __name__ == '__main__':
 
                                 for player in players:
                                     if players[player].username == command_receiver:
-                                        players[player].hotbar[0] = [int(item), int(quantity)]
-                                        players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
+
+                                        players[player].inventory, players[player].hotbar = give_item(
+                                            players[player].inventory, players[player].hotbar, int(item), int(quantity))
+
+                                        sendQueue.put(((6, players[player].hotbar), player))
+                                        sendQueue.put(((7, players[player].inventory), player))
+
+                                        #players[player].hotbar[0] = [int(item), int(quantity)]
+                                        #players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
 
                                 send_message = '%s gave %s %s of %s'%(executor, command_receiver, quantity, item)
 
@@ -770,6 +804,10 @@ if __name__ == '__main__':
                                     send_message = "Bash command '%s' failed to execute: %s" % (message[1][6:], traceback.format_exc().replace('\n',''))
 
                             elif message[1].lower()[:5] == '/sync':
+                                sendQueue.put(((14, 10000, 100, players[address].cord[0], players[address].cord[1],
+                                                players[address].hotbar, players[address].inventory, playerLocations,
+                                                players[address].health, players[address].hunger), address))
+
                                 messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
                                 send_message = "Server synchronized"
 
@@ -806,9 +844,9 @@ if __name__ == '__main__':
                     # Data: [13, <cordx>, <cordy>]
                     players[address].hunger = message[0]
 
-                elif  command == 14:
+                elif command == 14:
                     #Complete sync
-                    sendQueue.put(((0, 10000, 100, players[address].cord[0], players[address].cord[1],
+                    sendQueue.put(((14, 10000, 100, players[address].cord[0], players[address].cord[1],
                                     players[address].hotbar, players[address].inventory, playerLocations,
                                     players[address].health, players[address].hunger), address))
 
