@@ -1,4 +1,5 @@
 from pygame import *
+import time as t
 import json
 
 import components.rahma as rah
@@ -921,11 +922,54 @@ class Furnace:
 
         return inv
 
+    def calculate(self, smelted, item_lib):
+        current_time = t.time()
+
+        update = False
+        items_smelted = min((current_time - smelted[3]) // 10, smelted[0][1])
+        partial_smelted = ((current_time - smelted[3]) / 10) % 1
+        max_smelt = (self.fuel[smelted[1][0]]['duration'] * smelted[1][1]) // 10
+        partial_burn = ((self.fuel[smelted[1][0]]['duration'] * smelted[1][1]) / 10) % 1
+        possible_smelt = self.item_lib[smelted[0][0]] - smelted[0][1] - smelted[2][1]
+
+        if possible_smelt < 0:
+            items_smelted += possible_smelt
+            partial_smelted = 0
+
+        if items_smelted > max_smelt:
+            partial_smelted = 0
+            smelted[3][0] = self.recipes[smelted[0][0]]
+            smelted[3][1] += items_smelted
+            smelted[0][1] -= items_smelted
+            smelted[2] = [0, 0]
+            update = True
+
+        elif items_smelted < max_smelt:
+            smelted[2][0] = smelted[2][1] - ((10 * (items_smelted - 1) // self.fuel[smelted[1][0]]['duration']) + 1)
+            smelted[0][1] -= items_smelted
+            if smelted[0][1] == 0:
+                smelted[0] = [0, 0]
+                partial_smelted = 0
+                partial_burn = 0
+                update = True
+            else:
+                smelted[3][0] = self.recipes[smelted[0][0]]
+                smelted[3][1] += items_smelted
+                smelted[0][1] -= items_smelted
+
+        else:
+            smelted[2] = [0, 0]
+            smelted[3][0] = self.recipes[smelted[0][0]]
+            smelted[3][1] += items_smelted
+            smelted[0][1] -= items_smelted
+            update = True
+
     def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, smelted, item_lib):
+        # smelted = item, fuel, result, time
         surf.blit(self.graphic, (self.x, self.y))
-        changed = [0, 0]
 
         draw.rect(surf, (0, 0, 0), (mx, my, 32, 32))
+        print(mx, my, self.x, self.y)
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
@@ -958,5 +1002,3 @@ class Furnace:
 
         if self.holding[0] > 0:
             surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
-
-        return changed

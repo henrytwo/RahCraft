@@ -438,6 +438,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     crafting_object = menu.Crafting(size[0], size[1])
     chest_object = menu.Chest(size[0], size[1])
+    furnace_object = menu.Furnace(size[0], size[1])
 
     crafting = False
     using_chest = False
@@ -685,9 +686,13 @@ def game(surf, username, token, host, port, size, music_enable):
                     inventory_items[slot] = meta_data[:]
 
                 elif command == 8:
-                    #if message[0] !=
-                    #storage_type, storage,
-                    pass
+                    if message[0] != "err":
+                        storage_type, storage = message
+
+                        if storage_type == 'chest':
+                            current_chest = storage
+                        elif storage_type == 'furnace':
+                            current_furnace = storage
 
                 elif command == 9:
                     remote_username = message[0]
@@ -950,7 +955,11 @@ def game(surf, username, token, host, port, size, music_enable):
 
             elif using_furnace:
                 surf.blit(tint, (0, 0))
-                changed = furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
+                furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
+                '''
+                if current_tick % 5 == 0:
+                    send_queue.put(((0, current_furnace), SERVERADDRESS))
+                '''
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
