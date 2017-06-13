@@ -61,7 +61,7 @@ class Player(object):
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
                                          [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[0, 0] for _ in range(9)], 20, 20]
+                                         [[18, 1] for _ in range(9)], 20, 20]
 
 
             # rahprint(PlayerData[self.username])
@@ -852,7 +852,7 @@ if __name__ == '__main__':
 
 
                 elif command == 100:
-
+                    '''
                     kill_list = []
 
                     for p in players:
@@ -883,7 +883,7 @@ if __name__ == '__main__':
 
                         for i in players:
                             sendQueue.put(((9, offPlayer), i))
-
+                    '''
                     broadcast(channel, '[Tick] %s' % message[2])
 
                     active_players = []

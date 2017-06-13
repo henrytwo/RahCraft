@@ -968,8 +968,9 @@ class Furnace:
         # smelted = item, fuel, result, time
         surf.blit(self.graphic, (self.x, self.y))
 
-        draw.rect(surf, (0, 0, 0), (mx, my, 32, 32))
-        print(mx, my, self.x, self.y)
+        draw.rect(surf, (0, 0, 0), (self.x + 111, self.y + 106, 32, 32))
+        draw.rect(surf, (0, 0, 0), (self.x + 111, self.y + 33, 32, 32))
+        draw.rect(surf, (0, 0, 0), (self.x + 232, self.y + 69, 32, 32))
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
