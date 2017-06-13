@@ -208,7 +208,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
         if hotbar_items[hotbar_slot][0] != 0:
             block_name = rah.text(str(item_lib[hotbar_items[hotbar_slot][0]][0]), 13)
-            surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 60))
+            surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 80))
 
     # Loading Screen
     # =====================================================================
@@ -700,6 +700,18 @@ def game(surf, username, token, host, port, size, music_enable):
                 elif command == 11:
                     quit_game()
                     return 'information', message[0], 'menu'
+
+                elif command == 12:
+                    # Health
+                    health = message[0]
+
+                elif command == 13:
+                    # Hunger
+                    hunger = message[0]
+
+                elif command == 14:
+                    # Complete sync
+                    world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = message[1:]
 
                 elif command == 100:
                     send_time, tick = message

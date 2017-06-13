@@ -355,8 +355,11 @@ if __name__ == '__main__':
                                                address))
 
                         else:
+                            messageQueue.put(((100, round(time.time(), 3), 0), ("127.0.0.1", 0000)))
+                            send_message = "Server synchronized"
+
                             sendQueue.put(((400, (
-                                "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nUsername currently in use\nIf you recently disconnected, wait\n 30 seconds for server to sync")),
+                                "\n\n\n\n\n\n\n\n\nConnection closed by remote host\n\nUsername currently in use\nIf you recently disconnected,\ntry to login again")),
                                            address))
 
                     else:
@@ -794,6 +797,23 @@ if __name__ == '__main__':
 
                     if slack_enable:
                         broadcast(channel, send_message)
+
+                elif command == 12:
+                    #Health
+                    # Data: [12, <cordx>, <cordy>]
+                    players[address].health = message[0]
+
+                elif command == 13:
+                    #Hunger
+                    # Data: [13, <cordx>, <cordy>]
+                    players[address].hunger = message[0]
+
+                elif  command == 14:
+                    #Complete sync
+                    sendQueue.put(((0, 10000, 100, players[address].cord[0], players[address].cord[1],
+                                    players[address].hotbar, players[address].inventory, playerLocations,
+                                    players[address].health, players[address].hunger), address))
+
 
                 elif command == 100:
 

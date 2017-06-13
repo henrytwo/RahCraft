@@ -238,7 +238,7 @@
     "hardness": 19,
     "tool": "shovel",
     "drop": 19,
-    "tool-required": 1,
+    "tool-required": 0,
     "maxstack": 64
   },
 
@@ -264,7 +264,7 @@
     "hardness": 7,
     "tool": "axe",
     "drop": 21,
-    "tool-required": 1,
+    "tool-required": 0,
     "maxstack": 64
   }
 }
