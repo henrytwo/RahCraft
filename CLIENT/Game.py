@@ -259,6 +259,10 @@ def game(surf, username, token, host, port, size, music_enable):
                       "half": image.load("textures/gui/icons/heart_half.png"),
                       "full": image.load("textures/gui/icons/heart_full.png")}
 
+    hunger_texture = {"none":image.load("textures/gui/icons/hunger_none.png"),
+                      "half": image.load("textures/gui/icons/hunger_half.png"),
+                      "full": image.load("textures/gui/icons/hunger_full.png")}
+
     tint = Surface(size)
     tint.fill((0, 0, 0))
     tint.set_alpha(99)
@@ -874,8 +878,6 @@ def game(surf, username, token, host, port, size, music_enable):
 
             HEART_SIZE = 15
 
-            health = hotbar_slot
-
             for heart_index in range(0, 20, 2):
 
                 heart_x = heart_index//2 * (HEART_SIZE + 1)
@@ -897,29 +899,27 @@ def game(surf, username, token, host, port, size, music_enable):
                               (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
 
 
-            # HUNGER_SIZE = 15
-            #
-            # health = hotbar_slot
-            #
-            # for heart_index in range(0, 20, 2):
-            #
-            #     heart_x = heart_index//2 * (HEART_SIZE + 1)
-            #     surf.blit(transform.scale(hunger_texture['none'], (HEART_SIZE + 1, HEART_SIZE + 1)), (hotbar_rect[0] + heart_x - 1, hotbar_rect[1] - HEART_SIZE - 6))
-            #
-            #     if heart_index < health - 2:
-            #         surf.blit(transform.scale(hunger_texture['full'], (HEART_SIZE, HEART_SIZE)),
-            #                   (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
-            #
-            #     elif heart_index <= health - 1:
-            #
-            #         if (health - heart_index)%2 == 0:
-            #             heart_texture = hunger_texture['full']
-            #         else:
-            #             heart_texture = hunger_texture['half']
-            #
-            #
-            #         surf.blit(transform.scale(heart_texture, (HEART_SIZE, HEART_SIZE)),
-            #                   (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
+            HUNGER_SIZE = 15
+
+            for hunger_index in range(0, 20, 2):
+
+                hunger_x = hunger_index//2 * (HUNGER_SIZE + 1)
+                surf.blit(transform.scale(hunger_texture['none'], (HUNGER_SIZE + 1, HUNGER_SIZE + 1)), (hotbar_rect[0] + hotbar.get_width() - 10 * HUNGER_SIZE + hunger_x - 11, hotbar_rect[1] - HUNGER_SIZE - 6))
+
+                if hunger_index < hunger - 2:
+                    surf.blit(transform.scale(hunger_texture['full'], (HUNGER_SIZE, HUNGER_SIZE)),
+                              (hotbar_rect[0] + hotbar.get_width() - 10 * HUNGER_SIZE + hunger_x - 10, hotbar_rect[1] - HUNGER_SIZE - 5))
+
+                elif hunger_index <= hunger - 1:
+
+                    if (hunger - hunger_index)%2 == 0:
+                        food_texture = hunger_texture['full']
+                    else:
+                        food_texture = hunger_texture['half']
+
+
+                    surf.blit(transform.scale(food_texture, (HUNGER_SIZE, HUNGER_SIZE)),
+                              (hotbar_rect[0] + hotbar.get_width() - 10 * HUNGER_SIZE + hunger_x - 10, hotbar_rect[1] - HUNGER_SIZE - 5))
 
             render_hotbar(hotbar_slot)
 
