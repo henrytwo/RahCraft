@@ -1,25 +1,3 @@
-# from pygame import *
-# from multiprocessing import *
-#
-# from subprocess import Popen, PIPE
-# from shlex import split
-# import platform
-# import numpy as np
-#
-# import socket
-# import pickle
-# import CLIENT.components.rahma as rah
-# from math import *
-# import CLIENT.components.player as player
-# import CLIENT.components.menu as menu
-# import time as ti
-# import glob
-# import traceback
-# import sys
-# import os
-# import json
-# from random import *
-
 import os
 import sys
 
@@ -448,7 +426,7 @@ def game(surf, username, token, host, port, size, music_enable):
     current_chest = []
     chest_location = []
 
-    current_furnace = []
+    current_furnace = [[0, 0], [0, 0], [0, 0], -1]
     chest_location = []
 
     # Block highlight
@@ -999,6 +977,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
             elif using_furnace:
                 surf.blit(tint, (0, 0))
+
+                time
                 furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
                 '''
                 if current_tick % 5 == 0:

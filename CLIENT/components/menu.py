@@ -1,6 +1,7 @@
 from pygame import *
 import time as t
 import json
+import math
 
 import components.rahma as rah
 
@@ -928,49 +929,64 @@ class Furnace:
         update = False
         items_smelted = min((current_time - smelted[3]) // 10, smelted[0][1])
         partial_smelted = ((current_time - smelted[3]) / 10) % 1
-        max_smelt = (self.fuel[smelted[1][0]]['duration'] * smelted[1][1]) // 10
-        partial_burn = ((self.fuel[smelted[1][0]]['duration'] * smelted[1][1]) / 10) % 1
-        possible_smelt = self.item_lib[smelted[0][0]] - smelted[0][1] - smelted[2][1]
+        max_smelt = (self.fuel[str(smelted[1][0])]['duration'] * smelted[1][1]) // 10
+        fuel_burned = (current_time - smelted[3]) // self.fuel[str(smelted[1][0])]['duration']
+        partial_burn = ((current_time - smelted[3]) / self.fuel[str(smelted[1][0])]['duration']) % 1
+        possible_smelt = item_lib[smelted[0][0]][2] - smelted[0][1] - smelted[2][1]
 
-        if possible_smelt < 0:
-            items_smelted += possible_smelt
+        if items_smelted == smelted[0][1]:
             partial_smelted = 0
+            partial_burn = 1
+            fuel_burned = smelted[1][1] - (math.ceil(10 * (items_smelted - 1) / self.fuel[str(smelted[1][0])]['duration']) + 1)
 
-        if items_smelted > max_smelt:
-            partial_smelted = 0
-            smelted[3][0] = self.recipes[smelted[0][0]]
-            smelted[3][1] += items_smelted
-            smelted[0][1] -= items_smelted
-            smelted[2] = [0, 0]
-            update = True
-
-        elif items_smelted < max_smelt:
-            smelted[2][0] = smelted[2][1] - ((10 * (items_smelted - 1) // self.fuel[smelted[1][0]]['duration']) + 1)
-            smelted[0][1] -= items_smelted
-            if smelted[0][1] == 0:
-                smelted[0] = [0, 0]
-                partial_smelted = 0
-                partial_burn = 0
-                update = True
-            else:
-                smelted[3][0] = self.recipes[smelted[0][0]]
-                smelted[3][1] += items_smelted
-                smelted[0][1] -= items_smelted
-
-        else:
-            smelted[2] = [0, 0]
-            smelted[3][0] = self.recipes[smelted[0][0]]
-            smelted[3][1] += items_smelted
-            smelted[0][1] -= items_smelted
-            update = True
+        return items_smelted, partial_smelted, max_smelt, fuel_burned, partial_burn, possible_smelt
 
     def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, smelted, item_lib):
         # smelted = item, fuel, result, time
         surf.blit(self.graphic, (self.x, self.y))
+        items_smelted = 0
+        partial_smelted = 0
+        partial_burn = 1
+        fuel_burned = 0
 
-        draw.rect(surf, (0, 0, 0), (self.x + 111, self.y + 106, 32, 32))
-        draw.rect(surf, (0, 0, 0), (self.x + 111, self.y + 33, 32, 32))
-        draw.rect(surf, (0, 0, 0), (self.x + 232, self.y + 69, 32, 32))
+        if smelted[0][1] != 0 and smelted[1][1] != 0:
+            items_smelted, partial_smelted, max_smelt, fuel_burned, partial_burn, possible_smelt = self.calculate(smelted, item_lib)
+            print(items_smelted, partial_smelted, partial_burn)
+
+        surf.blit(self.progress, (self.x + 158, self.y + 69), area=(0, 0, int(self.progress.get_width() * partial_smelted), self.progress.get_height()))
+        surf.blit(self.toggle_image, (self.x + 113, self.y + 72 + self.toggle_image.get_height()*partial_burn), area=(0, self.toggle_image.get_height() * partial_burn, self.toggle_image.get_width(), self.toggle_image.get_height()))
+
+        if smelted[1][0] != 0 and smelted[1][1] - fuel_burned != 0:
+            surf.blit(item_lib[smelted[1][0]][1], (self.x + 112, self.y + 106, 32, 32))
+            surf.blit(rah.text(str(smelted[1][1] - fuel_burned), 10), (self.x + 112, self.y + 106, 32, 32))
+        if Rect((self.x + 112, self.y + 106, 32, 32)).collidepoint(mx, my):
+            surf.blit(self.highlight, (self.x + 112, self.y + 106, 32, 32))
+            if l_click:
+                smelted[1] = self.check_stacking([smelted[1][0], smelted[1][1]-fuel_burned], item_lib)
+                smelted[0][1] -= items_smelted
+                smelted[2][1] += items_smelted
+                smelted[3] = t.time() - partial_smelted * 10
+
+        if smelted[0][0] != 0 and smelted[0][1]-items_smelted != 0:
+            surf.blit(item_lib[smelted[0][0]][1], (self.x + 112, self.y + 34, 32, 32))
+            surf.blit(rah.text(str(int(smelted[0][1]-items_smelted)), 10), (self.x + 112, self.y + 34, 32, 32))
+        if Rect((self.x + 112, self.y + 34, 32, 32)).collidepoint(mx, my):
+            surf.blit(self.highlight, (self.x + 112, self.y + 34, 32, 32))
+            if l_click:
+                smelted[0] = self.check_stacking([smelted[0][0], smelted[0][1]-items_smelted], item_lib)
+                smelted[0][1] -= items_smelted
+                smelted[1][1] -= fuel_burned
+                smelted[3] = t.time() - partial_smelted * 10
+
+        if items_smelted > 0 and smelted[0][1] > 0:
+            surf.blit(item_lib[self.recipes[str(smelted[0][0])]['result']][1], (self.x + 232, self.y + 70, 32, 32))
+            surf.blit(rah.text(str(int(items_smelted)), 10), (self.x + 232, self.y + 70, 32, 32))
+        if Rect((self.x + 232, self.y + 70, 32, 32)).collidepoint(mx, my):
+            surf.blit(self.highlight, (self.x + 232, self.y + 70, 32, 32))
+            if l_click:
+                smelted[0][1] -= items_smelted
+                smelted[1][1] -= fuel_burned
+                smelted[3] = t.time() - partial_smelted * 10
 
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
