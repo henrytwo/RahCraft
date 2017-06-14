@@ -11,6 +11,183 @@ import webbrowser
 import json
 from random import *
 from multiprocessing import *
+import urllib.request
+import zipfile
+import os
+import glob
+from shutil import copyfile
+
+def software_update():
+    global screen, current_version, current_build, size
+
+    display.set_caption("RahCraft Update Service")
+
+    rah.wallpaper(screen, size)
+
+    title_text = rah.text("Welcome to RahCraft! Let's get you up to date", 20)
+    screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 50))
+
+    update = None
+
+    try:
+        req = urllib.request.Request('http://henrytu.me/rahcraft.txt', headers={'User-Agent': 'Mozilla/5.0'})
+
+        with urllib.request.urlopen(req) as response:
+            extracted_file = str(response.read())[2:][:-3].split('\\n')
+
+        latest_version = int(extracted_file[0])
+        latest_build = extracted_file[1]
+        update_location = extracted_file[2]
+
+        if current_version < latest_version:
+
+            update_text = rah.text("Good news! RahCraft v%s is now available!" % latest_build, 18)
+
+            draw.rect(screen, (0, 0, 0),
+                      (size[0] // 2 - max((update_text.get_width() + 20)//2, size[0]//4 + 20), size[1] // 2 - 90, max(update_text.get_width() + 20, size[0]//2 + 40), 200))
+
+            draw.rect(screen, (150, 150, 150),
+                      (size[0] // 2 - max((update_text.get_width() + 20)//2, size[0]//4 + 20), size[1] // 2 - 100, max(update_text.get_width() + 20, size[0]//2 + 40), 200))
+
+            screen.blit(update_text,
+                        (size[0] // 2 - update_text.get_width() // 2, size[1] // 2 - update_text.get_height() - 50))
+
+            exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
+
+            update_button = menu.Button(size[0] // 4, size[1] // 2 - 20, size[0] // 2, 40, 'do_update', 'Update now')
+            skip_button = menu.Button(size[0] // 4, size[1] // 2 + 30, size[0] // 2, 40, 'skip_update', 'Skip update')
+
+            while True:
+
+                release = False
+
+                for e in event.get():
+                    if e.type == QUIT:
+                        return 'exit'
+
+                    if e.type == MOUSEBUTTONUP and e.button == 1:
+                        release = True
+
+                    if e.type == VIDEORESIZE:
+                        screen = display.set_mode((e.w, e.h), RESIZABLE)
+                        return 'update'
+
+                mx, my = mouse.get_pos()
+                m_press = mouse.get_pressed()
+
+                if skip_button.update(screen, mx, my, m_press, 15, release):
+                    update = 'no'
+
+                if update_button.update(screen, mx, my, m_press, 15, release):
+                    update = 'yes'
+
+                if exit_button.update(screen, mx, my, m_press, 15, release):
+                    return 'exit'
+
+                if update:
+
+                    if update == 'yes':
+
+                        rah.wallpaper(screen, size)
+
+                        update_text = rah.text("Downloading updates", 18)
+                        subupdate_text = rah.text("This might take a while...", 18)
+
+                        draw.rect(screen, (0, 0, 0),
+                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                                   size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                        draw.rect(screen, (150, 150, 150),
+                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                                   size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                        screen.blit(update_text,
+                                    (size[0] // 2 - update_text.get_width() // 2,
+                                     size[1] // 2 - update_text.get_height()))
+
+                        screen.blit(subupdate_text,
+                                    (size[0] // 2 - subupdate_text.get_width() // 2,
+                                     size[1] // 2 - subupdate_text.get_height() + 30))
+
+                        display.flip()
+
+                        with urllib.request.urlopen(update_location) as update_file, open('update.zip', 'wb') as out_file:
+                            out_file.write(update_file.read())
+
+                        update_text = rah.text("Downloading updates", 18)
+                        subupdate_text = rah.text("Unzipping...", 18)
+
+                        draw.rect(screen, (0, 0, 0),
+                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                                   size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                        draw.rect(screen, (150, 150, 150),
+                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                                   size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                        screen.blit(update_text,
+                                    (size[0] // 2 - update_text.get_width() // 2,
+                                     size[1] // 2 - update_text.get_height()))
+
+                        screen.blit(subupdate_text,
+                                    (size[0] // 2 - subupdate_text.get_width() // 2,
+                                     size[1] // 2 - subupdate_text.get_height() + 30))
+
+                        display.flip()
+
+                        with zipfile.ZipFile('update.zip','r') as zip_file:
+                            zip_file.extractall('update')
+
+                        update_text = rah.text("Downloading updates", 18)
+                        subupdate_text = rah.text("Copying files...", 18)
+
+                        draw.rect(screen, (0, 0, 0),
+                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                                   size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                        draw.rect(screen, (150, 150, 150),
+                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                                   size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                        screen.blit(update_text,
+                                    (size[0] // 2 - update_text.get_width() // 2,
+                                     size[1] // 2 - update_text.get_height()))
+
+                        screen.blit(subupdate_text,
+                                    (size[0] // 2 - subupdate_text.get_width() // 2,
+                                     size[1] // 2 - subupdate_text.get_height() + 30))
+
+                        display.flip()
+
+                        os.remove("update.zip")
+
+                        dir_list = glob.glob('update/%s/*'%glob.glob('update/*'))
+
+                        for dir in dir_list:
+                            if dir.split('/')[-1] != 'user_data':
+                                copyfile(dir, dir.split('/')[-1])
+
+                        os.remove("update")
+
+                        current_build, current_version = latest_build, latest_version
+
+                        with open('data/ver.rah', 'w') as version_file:
+                            version_file.write('%s\n%s'%(current_version, current_build))
+
+                        return ['information','\n\n\nRahCraft has updated successfully\nPlease restart game to apply changes','exit']
+
+                    elif update == 'no':
+                        return 'login'
+
+                display.update()
+
+        else:
+            return 'login'
+
+    except:
+        print(traceback.format_exc())
+        return ['information', '\n\n\n\n\nUnable to perform update software','login']
+
 
 def login():
     display.set_caption("RahCraft Authentication Service")
@@ -28,7 +205,7 @@ def login():
     screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 50))
 
     try:
-        with open('data/session.json', 'r') as session_file:
+        with open('user_data/session.json', 'r') as session_file:
 
             session = json.load(session_file)
 
@@ -40,7 +217,7 @@ def login():
 
     except ValueError:
 
-        with open('data/session.json', 'w') as session_file:
+        with open('user_data/session.json', 'w') as session_file:
             json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
     #test = menu.Switch(20, 20, 100, 40, False, 'Test')
@@ -169,7 +346,7 @@ def authenticate():
                 else:
                     token = str(first_message[1])
 
-                with open('data/session.json', 'w') as session_file:
+                with open('user_data/session.json', 'w') as session_file:
                     json.dump({"token": "%s" % token, "name": "%s" % username}, session_file, indent=4, sort_keys=True)
 
                 online = True
@@ -182,14 +359,14 @@ def authenticate():
                 username = ''
                 token = ''
 
-                with open('data/session.json', 'w') as session_file:
+                with open('user_data/session.json', 'w') as session_file:
                     json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
                 return 'reject'
     except:
         server.close()
 
-        with open('data/session.json', 'w') as session_file:
+        with open('user_data/session.json', 'w') as session_file:
             json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
         return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n\n\nVisit rahmish.com/status.php for help', "login"
@@ -296,8 +473,6 @@ def about():
         rah.wallpaper(screen, size)
 
         screen.blit(keith_surface, (0,0))
-
-        print(scroll_y/(-20 * len(about_list)))
 
         keith_surface.set_alpha(100 * (scroll_y/(-20 * len(about_list))))
 
@@ -438,7 +613,7 @@ def information(message, previous):
 
     # screen.blit(tint, (0,0))
 
-    back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
+    back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Okay")
 
     message_list = list(map(str, message.split('\n')))
 
@@ -583,7 +758,7 @@ def server_picker():
 
     status_screen('Indexing servers', size, screen)
 
-    with open('data/servers.json', 'r') as servers:
+    with open('user_data/servers.json', 'r') as servers:
         server_dict = json.load(servers)
 
     server_list = []
@@ -722,7 +897,7 @@ def server_picker():
         if nav_update:
             if nav_update[0] == 'remove':
 
-                server_update = json.load(open('data/servers.json'))
+                server_update = json.load(open('user_data/servers.json'))
 
                 for server in server_update:
                     if server_update[server]['name'] == nav_update[1] and server_update[server]['host'] == nav_update[
@@ -732,7 +907,7 @@ def server_picker():
 
                 del server_update[destroy_index]
 
-                with open('data/servers.json', 'w') as servers:
+                with open('user_data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
                 return 'server_picker'
@@ -875,7 +1050,7 @@ def server_adder():
                     if not fields['Port'][1].isdigit():
                         return 'information', "\n\n\n\n\nCouldn't add server\nInvalid entry for port", 'add_server'
 
-                    server_update = json.load(open('data/servers.json'))
+                    server_update = json.load(open('user_data/servers.json'))
 
                     for server in server_update:
                         if server_update[server]['name'] == fields['Name'][1]:
@@ -885,7 +1060,7 @@ def server_adder():
 
                     server_update.update({str(len(server_update)): {"name": name, "host": host, "port": port}})
 
-                    with open('data/servers.json', 'w') as servers:
+                    with open('user_data/servers.json', 'w') as servers:
                         json.dump(server_update, servers, indent=4, sort_keys=True)
 
                     return 'server_picker'
@@ -911,7 +1086,7 @@ def server_adder():
                 if not fields['Port'][1].is_digit():
                     return 'information', "\n\n\n\n\nCouldn't add server\nInvalid entry for port", 'add_server'
 
-                server_update = json.load(open('data/servers.json'))
+                server_update = json.load(open('user_data/servers.json'))
 
                 for server in server_update:
                     if server_update[server]['name'] == fields['Name'][1]:
@@ -921,7 +1096,7 @@ def server_adder():
 
                 server_update.update({str(len(server_update)): {"name": name, "host": host, "port": port}})
 
-                with open('data/servers.json', 'w') as servers:
+                with open('user_data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
                 return 'server_picker'
@@ -941,6 +1116,8 @@ def server_adder():
 
 
 def menu_screen():
+    global current_version
+
     def draw_screen():
         rah.wallpaper(screen, size)
 
@@ -969,7 +1146,7 @@ def menu_screen():
 
         normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-        version_text = normal_font.render("RahCraft v0.1.1 EVALUATION", True, (255, 255, 255))
+        version_text = normal_font.render("RahCraft v%s"%current_build, True, (255, 255, 255))
         screen.blit(version_text, (10, size[1] - 20))
 
         about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
@@ -1027,7 +1204,7 @@ def menu_screen():
                 username = ''
                 token = ''
 
-                with open('data/session.json', 'w') as session_file:
+                with open('user_data/session.json', 'w') as session_file:
                     session_file.write('')
 
                 return 'login'
@@ -1048,6 +1225,11 @@ if __name__ == "__main__":
 
     rah.rah(screen)
 
+    with open('data/ver.rah') as version_file:
+        version_components = version_file.read().strip().split('\n')
+
+    current_version, current_build = int(version_components[0]), version_components[1]
+
     host = "127.0.0.1"
     port = 5276
 
@@ -1063,7 +1245,7 @@ if __name__ == "__main__":
     username = ''
     token = ''
 
-    navigation = 'login'
+    navigation = 'update'
 
     font.init()
 
@@ -1106,13 +1288,15 @@ if __name__ == "__main__":
           'add_server': server_adder,
           'information': information,
           'auth': authenticate,
-          'reject': reject
+          'reject': reject,
+          'update':software_update
           }
 
     while navigation != 'exit':
         size = (screen.get_width(), screen.get_height())
 
         try:
+
             if navigation == 'game':
                 game_nav = Game.game(screen, username, token, host, port, size, music_enable)
 
@@ -1130,6 +1314,8 @@ if __name__ == "__main__":
         except:
             navigation = 'menu'
             crash(traceback.format_exc(), 'menu')
+
+
 
     display.quit()
     raise SystemExit
