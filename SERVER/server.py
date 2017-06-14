@@ -586,7 +586,7 @@ if __name__ == '__main__':
 
                                 executor = username_dict[address]
                                 command_receiver = message_list[1]
-                                item, quantity = message_list[2:], message_list[3]
+                                item, quantity = message_list[2], message_list[3]
 
                                 for player in players:
                                     if players[player].username == command_receiver:
