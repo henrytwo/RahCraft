@@ -227,10 +227,11 @@ def commandline_in(commandline_queue, fn):
         commandline_queue.put(((10, command), ('127.0.0.1', 0000)))
 
 
-def heart_beats(message_queue, tick):
+def heart_beats(message_queue, global_tick, tick):
     while True:
         time.sleep(.06)
         tick += 1
+        global_tick.value += 1
         if tick % 100 == 0:
             message_queue.put(((100, round(time.time(), 3), tick), ("127.0.0.1", 0000)))
             if tick >= 24000:
@@ -287,6 +288,7 @@ if __name__ == '__main__':
     messageQueue = Queue()
     commandlineQueue = Queue()
     itemLib = {}
+    global_tick = Value('l', 0)
     username = set()
 
     if slack_enable:
@@ -302,7 +304,7 @@ if __name__ == '__main__':
 
     rahprint("Server binded to %s:%i" % (host, port))
 
-    heart_beat = Process(target=heart_beats, args=(messageQueue, 0))  # Change the tick stuff later
+    heart_beat = Process(target=heart_beats, args=(messageQueue, global_tick, 0))  # Change the tick stuff later
     heart_beat.start()
 
     receiver = Process(target=receive_message, args=(messageQueue, server))
