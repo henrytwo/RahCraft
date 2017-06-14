@@ -145,7 +145,7 @@ def software_update():
                                 else:
                                     copytree(dir, '../' + file_name)
 
-                        rmtree("update")
+                        rmtree("../update")
 
                         current_build, current_version = latest_build, latest_version
 
