@@ -15,7 +15,7 @@ import urllib.request
 import zipfile
 import os
 import glob
-from shutil import copyfile, copy2
+from shutil import copyfile, copy2, rmtree
 
 #https://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
 def copytree(src, dst, symlinks=False, ignore=None):
@@ -137,13 +137,15 @@ def software_update():
                         for dir in dir_list:
                             file_name = dir.split('/')[-1]
 
-                            if file_name != 'user_data':
+                            user_files_intact = os.path.isfile('user_data/servers.json') and os.path.isfile('user_data/session.json')
+
+                            if (user_files_intact and file_name != 'user_data') or not user_files_intact:
                                 if len(file_name.split('.')) == 2:
                                     copyfile(dir, file_name)
                                 else:
                                     copytree(dir, file_name)
 
-                        os.remove("update")
+                        rmtree("update")
 
                         current_build, current_version = latest_build, latest_version
 
