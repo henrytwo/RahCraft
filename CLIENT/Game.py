@@ -249,7 +249,7 @@ def game(surf, username, token, host, port, size, music_enable):
     # =====================================================================
 
     clock = time.Clock()
-    dir = 5
+    dir = 10
     slider_x = 0
 
     for cycle in range(1001):
@@ -282,6 +282,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
         try:
             first_message = message_queue.get_nowait()
+
             if first_message[0] == 400 or not first_message[1:]:
                 sender.terminate()
                 receiver.terminate()
@@ -315,16 +316,56 @@ def game(surf, username, token, host, port, size, music_enable):
     remote_players = {}
     x, y = 0, 0
 
-    send_queue.put([[2, x_offset // block_size, y_offset // block_size, size, block_size], SERVERADDRESS])
+    for cycle in range(1001):
+        if cycle == 1000:
+            return 'information', '\n\n\n\n\nServer took too long to respond\nTimed out', 'server_picker'
 
-    while True:
-        world_msg = message_queue.get()
-        rah.rahprint(world_msg)
-        if world_msg[0] == 2:
-            break
+        send_queue.put([[2, x_offset // block_size, y_offset // block_size, size, block_size], SERVERADDRESS])
 
-    world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
-    world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
+        rah.wallpaper(surf, size)
+
+        connecting_text = rah.text("Downloading world...", 15)
+
+        surf.blit(connecting_text,
+                  rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+
+        tile_w = size[0]//8
+
+        slider_x += dir
+
+        if slider_x <= 0 or slider_x >= size[0]//2 - tile_w:
+            dir *= -1
+
+        draw.rect(surf, (0,0,0), (size[0]//4, size[1]//2 + 40, size[0]//2, 10))
+        draw.rect(surf, (0, 255, 0), (size[0]//4 + slider_x, size[1]//2 + 40, tile_w,10))
+
+        display.update()
+
+        try:
+            world_msg = message_queue.get_nowait()
+
+            print(world_msg)
+
+            if world_msg[0] == 2:
+                world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
+                world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
+
+                break
+
+            elif world_msg[0] == 100:
+                send_time, tick = world_msg[1:]
+
+                tick_offset = (round(ti.time(), 3) - send_time) * 20
+
+                sky_tick = tick_offset + tick
+
+                for repeat in range(3):
+                    send_queue.put(([(101, username), SERVERADDRESS]))
+
+        except:
+            pass
+
+        clock.tick(30)
 
     # Init Existing Remote Players
     # =====================================================================

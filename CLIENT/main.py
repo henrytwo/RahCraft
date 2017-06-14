@@ -43,7 +43,7 @@ def software_update():
     update = None
 
     try:
-        req = urllib.request.Request('http://henrytu.me/rahcraft.txt', headers={'User-Agent': 'Mozilla/5.0'})
+        req = urllib.request.Request('https://rahcraft.github.io/rahcraft.txt', headers={'User-Agent': 'Mozilla/5.0'})
 
         with urllib.request.urlopen(req) as response:
             extracted_file = str(response.read())[2:][:-3].split('\\n')
