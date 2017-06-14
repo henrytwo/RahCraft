@@ -68,7 +68,7 @@ def software_update():
             exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
 
             update_button = menu.Button(size[0] // 4, size[1] // 2 - 20, size[0] // 2, 40, 'do_update', 'Update now')
-            skip_button = menu.Button(size[0] // 4, size[1] // 2 + 30, size[0] // 2, 40, 'skip_update', 'Skip update')
+            skip_button = menu.Button(size[0] // 4, size[1] // 2 + 30, size[0] // 2, 40, 'skip_update', 'Skip')
 
             while True:
 
