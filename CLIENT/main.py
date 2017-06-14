@@ -1195,7 +1195,7 @@ def menu_screen():
 
 
 if __name__ == "__main__":
-    size = (800, 500)
+    size = (960, 540)
     screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 
     display.set_caption("RahCraft")
