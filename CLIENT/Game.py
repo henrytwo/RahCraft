@@ -293,7 +293,7 @@ def game(surf, username, token, host, port, size, music_enable):
         except:
             pass
 
-        clock.tick(500)
+        clock.tick(30)
 
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = first_message[1:]
 
@@ -584,16 +584,6 @@ def game(surf, username, token, host, port, size, music_enable):
                 local_player.rect.centerx // block_size * block_size, local_player.rect.centery // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
-            # if x_offset <= 0:
-            #     x_offset = 1
-            # elif x_offset >= world_size_x:
-            #     x_offset = world_size_x - 1
-            #
-            # if y_offset >= world_size_y:
-            #     y_offset = world_size_y - 1
-            # elif y_offset <= 0:
-            #     y_offset = 1
-
             if inventory_updated:
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
@@ -743,7 +733,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
                     sky_tick = tick_offset + tick
 
-                    for repeat in range(5):
+                    for repeat in range(3):
                         send_queue.put(([(101, username), SERVERADDRESS]))
 
             except:
