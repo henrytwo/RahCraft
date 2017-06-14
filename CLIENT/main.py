@@ -15,7 +15,7 @@ import urllib.request
 import zipfile
 import os
 import glob
-from shutil import copyfile
+from shutil import copyfile, rmtree
 
 def software_update():
     global screen, current_version, current_build, size
@@ -167,7 +167,7 @@ def software_update():
                             if dir.split('/')[-1] != 'user_data':
                                 copyfile(dir, dir.split('/')[-1])
 
-                        os.remove("update")
+                        rmtree("update")
 
                         current_build, current_version = latest_build, latest_version
 
