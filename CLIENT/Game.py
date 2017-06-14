@@ -604,6 +604,7 @@ def game(surf, username, token, host, port, size, music_enable):
                     inventory_object = menu.Inventory(0, 0, size[0], size[1])
                     hotbar_rect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
                     crafting_object = menu.Crafting(size[0], size[1])
+                    furnace_object = menu.Crafting(size[0], size[1])
 
                     tint = Surface(size)
                     tint.fill((0, 0, 0))

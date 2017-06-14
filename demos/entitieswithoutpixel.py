@@ -32,9 +32,17 @@ class Block:
 
 class EntityPassive:
     def __init__(self, x, y, w, h, cap, activity, main_list):
+        self.x = x
+        self.y = y
 
-        self.actual_x = x
-        self.actual_y = y
+        self.top = y
+        self.bottom = y + h
+
+        self.left = x
+        self.right = y + w
+
+        self.w = w
+        self.h = h
 
         self.vx = 0
         self.vy = 0
@@ -51,7 +59,16 @@ class EntityPassive:
 
         self.standing = False
 
-        self.surrounding_blocks = []
+        self.surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
+                              (-1, 0), (0, 0), (1, 0),
+                              (-1, 1), (0, 1), (1, 1)]
+
+        self.surrounding_top = []
+        self.surrounding_bottom = []
+        self.surrounding_left = []
+        self.surrounding_right = []
+
+
 
         self.command = 0
         self.analog_move = False
@@ -77,10 +94,6 @@ class EntityPassive:
                 self.command = 0
 
     def control(self):
-        # if key.get_pressed()[self.controls[0]] and self.vx > self.max_vx:
-        #     self.vx -= self.vx_inc
-        # elif self.vx < 0:
-        #     self.vx += self.vx_inc
         if self.command in [1, 4] and (self.vx < self.max_vx or self.vx < 0):
             self.vx += self.vx_inc
         elif self.command in [2, 5] and (abs(self.vx) < self.max_vx or self.vx > 0):
@@ -98,34 +111,52 @@ class EntityPassive:
             self.command = 2
 
     def detect(self):
-        self.surrounding_blocks = []
+        self.surrounding_top = []
+        self.surrounding_bottom = []
+        self.surrounding_left = []
+        self.surrounding_right = []
 
-        for shift in surrounding_shifts:
-            try:
-                self.surrounding_blocks.append(gameWorld[self.rect.centery // self.rect.h + shift[1],
-                                                         self.rect.centerx // self.rect.w + shift[0]])
+        for shift in range(2):
+            try: # top
+                if not gameWorld[self.rect.centery // self.rect.h + self.surrounding_shifts[0][shift][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[0][shift][0]] != Air:
+                    self.surrounding_top.append([self.rect.centery // self.rect.h + self.surrounding_shifts[0][shift][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[0][shift][0]])
             except IndexError:
-                self.surrounding_blocks.append(None)
+                pass
 
-        for block in self.surrounding_blocks:
-            gameWorld[block[0], block[1]].around = True
+            try: # bottom
+                if not gameWorld[self.rect.centery // self.rect.h + self.surrounding_shifts[2][shift][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[2][shift][0]] is Air:
+                    self.surrounding_bottom.append([self.rect.centery // self.rect.h + self.surrounding_shifts[2][shift][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[2][shift][0]])
+            except IndexError:
+                pass
 
-        self.collide(self.surrounding_blocks)
+            try: # left
+                if not gameWorld[self.rect.centery // self.rect.h + self.surrounding_shifts[shift][0][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[shift][0][0]] is Air:
+                    self.surrounding_top.append([self.rect.centery // self.rect.h + self.surrounding_shifts[shift][0][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[shift][0][0]])
+            except IndexError:
+                pass
 
-    def collide(self, blocks):
-        self.actual_y += self.vy
-        self.rect.y = self.actual_y
+            try: # right
+                if not gameWorld[self.rect.centery // self.rect.h + self.surrounding_shifts[shift][0][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[shift][0][0]] != Air:
+                    self.surrounding_top.append([self.rect.centery // self.rect.h + self.surrounding_shifts[shift][0][1], self.rect.centerx // self.rect.w + self.surrounding_shifts[shift][0][0]])
+            except IndexError:
+                pass
 
-        for block in blocks:
-            if type(block) is Block and self.rect.colliderect(block.rect):
-                if self.vy > 0:
-                    self.rect.bottom = block.rect.top
-                    self.standing = True
-                elif self.vy < 0:
-                    self.rect.top = block.rect.bottom
+        self.collide(self.surrounding_top, self.surrounding_bottom, self.surrounding_top, self.surrounding_left, self.surrounding_right)
 
-                self.actual_y = self.rect.y
-                self.vy = 0
+    def collide(self, blocks_top, block_bottom, block_left, block_right):
+        self.y += self.vy
+        self.top = self.y
+        self.bottom = self.y + self.h
+
+        for block in blocks_top:
+            if self.vy > 0 and self.bottom <= block[0]:
+                self.y = block[0]
+                self.standing = True
+            elif self.vy < 0:
+                self.rect.top = block.rect.bottom
+
+            self.actual_y = self.rect.y
+            self.vy = 0
 
         if type(blocks[7]) is Air:
             if self.command == 1:
@@ -157,7 +188,6 @@ class EntityPassive:
                 self.actual_x = self.rect.x
                 self.vx = 0
 
-        # self.vx = self.max_vx if 0
         self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
 
     def update(self):
@@ -359,9 +389,6 @@ for i in range(1):
     EntityPassive((b_width + b_width * (i * 2)) % screenSize[0], (b_height + b_height * (i * 2)) % screenSize[1],
                   b_width, b_height, b_height, 500, passiveList)
 
-surrounding_shifts = [(-1, -1), (0, -1), (1, -1),
-                      (-1, 0), (0, 0), (1, 0),
-                      (-1, 1), (0, 1), (1, 1)]
 
 while True:
     for e in event.get():

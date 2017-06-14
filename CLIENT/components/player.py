@@ -99,7 +99,6 @@ class Player:
         else:
             self.actual_x += self.vx
 
-
         self.rect.x = self.actual_x
 
         for block in blocks:

@@ -277,10 +277,6 @@ def login():
         username, password = fields['Username'][1], hash_creds(
             hash_creds(fields['Password'][1]) + hash_creds(fields['Username'][1]))
 
-        #test.update(screen, mx, my, m_press, 15, release)
-        #test1.update(screen, mx, my, m_press, 15, release)
-        #test2.update(screen, mx, my, m_press, 15, release)
-
         clock.tick(120)
         display.update()
 
