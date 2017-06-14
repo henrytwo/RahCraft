@@ -752,9 +752,9 @@ class Crafting:
 
         self.recipe_check()
 
-        if self.resulting_item[0] != 0:
-            surf.blit(transform.scale(item_lib[self.resulting_item[0]][1], (48, 48)), (self.w//2 + 63, self.h//2 - 104, 48, 48))
-            surf.blit(rah.text(str(self.resulting_item[1]), 10), (self.w//2 + 63, self.h//2 - 104, 48, 48))
+        if self.resulting_item[0] != 0 and self.resulting_item[1] != 0:
+            surf.blit(item_lib[self.resulting_item[0]][1], (self.x + 247, self.y + 69))
+            surf.blit(rah.text(str(self.resulting_item[1]), 10), (self.x + 247, self.y + 69))
 
         if Rect((463, 146, 48, 48)).collidepoint(mx, my):
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
