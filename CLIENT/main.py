@@ -132,7 +132,7 @@ def software_update():
 
                         os.remove("update.zip")
 
-                        dir_list = glob.glob('update/%s/*'%glob.glob('update/*'))
+                        dir_list = glob.glob('update/*/*')
 
                         for dir in dir_list:
                             file_name = dir.split('/')[-1]
