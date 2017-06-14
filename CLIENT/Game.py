@@ -718,13 +718,8 @@ def game(surf, username, token, host, port, size, music_enable):
                         send_queue.put(([(101, username), SERVERADDRESS]))
 
                 elif command == 15:
-
-                    print(hotbar, inventory)
-
-                    hotbar = message[0][0]
-                    inventory = message[0][1]
-
-                    print(hotbar, inventory)
+                    hotbar_items = message[0]
+                    inventory_items = message[1]
 
                 elif command == 100:
                     send_time, tick = message
@@ -738,6 +733,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
             except:
                 pass
+                #print(traceback.format_exc())
 
             # Adding Sky
             # =======================================================

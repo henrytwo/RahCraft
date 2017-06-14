@@ -204,7 +204,7 @@ def give_item(inventory, hotbar, Nitem, quantity):
 
     for row in range(len(inventory)):
         for item in range(len(inventory[row])):
-            if inventory[row][item][1] < 64:
+            if inventory[row][item][0] == Nitem and inventory[row][item][1] < 64:
                 inventory[row][item][1] += quantity
                 return inventory, hotbar
             elif inventory[row][item][0] == 0 and inventory_type == '':
@@ -584,7 +584,7 @@ if __name__ == '__main__':
 
                                 executor = username_dict[address]
                                 command_receiver = message_list[1]
-                                item, quantity = message_list[2:4]
+                                item, quantity = message_list[2:], message_list[3]
 
                                 for player in players:
                                     if players[player].username == command_receiver:
@@ -592,8 +592,7 @@ if __name__ == '__main__':
                                         players[player].inventory, players[player].hotbar = give_item(
                                             players[player].inventory, players[player].hotbar, int(item), int(quantity))
 
-                                        sendQueue.put(((6, players[player].hotbar), player))
-                                        sendQueue.put(((7, players[player].inventory), player))
+                                        sendQueue.put(((15, players[player].hotbar, players[player].inventory), player))
 
                                         #players[player].hotbar[0] = [int(item), int(quantity)]
                                         #players[player].change_inventory_all(players[player].inventory, players[player].hotbar)
