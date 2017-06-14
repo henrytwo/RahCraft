@@ -15,7 +15,20 @@ import urllib.request
 import zipfile
 import os
 import glob
-from shutil import copyfile, rmtree
+from shutil import copyfile, copy2
+
+#https://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
+def copytree(src, dst, symlinks=False, ignore=None):
+    if not os.path.exists(dst):
+        os.makedirs(dst)
+    for item in os.listdir(src):
+        s = os.path.join(src, item)
+        d = os.path.join(dst, item)
+        if os.path.isdir(s):
+            copytree(s, d, symlinks, ignore)
+        else:
+            if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
+                copy2(s, d)
 
 def software_update():
     global screen, current_version, current_build, size
@@ -91,7 +104,7 @@ def software_update():
                         rah.wallpaper(screen, size)
 
                         update_text = rah.text("Downloading updates", 18)
-                        subupdate_text = rah.text("This might take a while...", 18)
+                        subupdate_text = rah.text("This shouldn't take long...", 18)
 
                         draw.rect(screen, (0, 0, 0),
                                   (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
@@ -114,60 +127,23 @@ def software_update():
                         with urllib.request.urlopen(update_location) as update_file, open('update.zip', 'wb') as out_file:
                             out_file.write(update_file.read())
 
-                        update_text = rah.text("Downloading updates", 18)
-                        subupdate_text = rah.text("Unzipping...", 18)
-
-                        draw.rect(screen, (0, 0, 0),
-                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
-                                   size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
-
-                        draw.rect(screen, (150, 150, 150),
-                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
-                                   size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
-
-                        screen.blit(update_text,
-                                    (size[0] // 2 - update_text.get_width() // 2,
-                                     size[1] // 2 - update_text.get_height()))
-
-                        screen.blit(subupdate_text,
-                                    (size[0] // 2 - subupdate_text.get_width() // 2,
-                                     size[1] // 2 - subupdate_text.get_height() + 30))
-
-                        display.flip()
-
                         with zipfile.ZipFile('update.zip','r') as zip_file:
                             zip_file.extractall('update')
-
-                        update_text = rah.text("Downloading updates", 18)
-                        subupdate_text = rah.text("Copying files...", 18)
-
-                        draw.rect(screen, (0, 0, 0),
-                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
-                                   size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
-
-                        draw.rect(screen, (150, 150, 150),
-                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
-                                   size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
-
-                        screen.blit(update_text,
-                                    (size[0] // 2 - update_text.get_width() // 2,
-                                     size[1] // 2 - update_text.get_height()))
-
-                        screen.blit(subupdate_text,
-                                    (size[0] // 2 - subupdate_text.get_width() // 2,
-                                     size[1] // 2 - subupdate_text.get_height() + 30))
-
-                        display.flip()
 
                         os.remove("update.zip")
 
                         dir_list = glob.glob('update/%s/*'%glob.glob('update/*'))
 
                         for dir in dir_list:
-                            if dir.split('/')[-1] != 'user_data':
-                                copyfile(dir, dir.split('/')[-1])
+                            file_name = dir.split('/')[-1]
 
-                        rmtree("update")
+                            if file_name != 'user_data':
+                                if len(file_name.split('.')) == 2:
+                                    copyfile(dir, file_name)
+                                else:
+                                    copytree(dir, file_name)
+
+                        os.remove("update")
 
                         current_build, current_version = latest_build, latest_version
 
