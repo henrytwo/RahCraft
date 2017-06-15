@@ -212,7 +212,7 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
-    block_size = 20
+    block_size = 50
     build = 'RahCraft v0.1.1 EVALUATION'
 
     # Chat
@@ -307,7 +307,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
+    local_player = player.Player(player_x, player_y, block_size - 1, 2 * block_size - 1, block_size, 5,
                                  (K_a, K_d, K_w, K_s, K_SPACE))
 
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
@@ -344,7 +344,7 @@ def game(surf, username, token, host, port, size, music_enable):
         try:
             world_msg = message_queue.get_nowait()
 
-            print(world_msg)
+            #print(world_msg)
 
             if world_msg[0] == 2:
                 world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
@@ -370,8 +370,8 @@ def game(surf, username, token, host, port, size, music_enable):
     # Init Existing Remote Players
     # =====================================================================
     for Rp in r_players:
-        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
-                                                 2 * block_size - 5)
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 1,
+                                                 2 * block_size - 1)
 
     # Initing Pygame Components
     # =====================================================================
