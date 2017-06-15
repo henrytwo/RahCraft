@@ -39,7 +39,7 @@ def progress(block_no, block_size, file_size):
 
     draw.rect(screen, (0, 0, 0), (size[0] // 4, size[1] // 2 + 50, size[0] // 2, 10))
 
-    draw.rect(screen, (0, 255, 0), (size[0] // 4, size[1] // 2 + 50, int(size[0] // 2 * update_progress/file_size), 10))
+    draw.rect(screen, (0, 255, 0), (size[0] // 4, size[1] // 2 + 50, int((size[0] // 2) * update_progress/file_size), 10))
 
     status_text = rah.text("%s%% (%iMB/%iMB)"%(int(update_progress/file_size * 100), round(update_progress/1000000, 2), round(file_size/1000000, 2)), 13)
 
