@@ -1113,46 +1113,8 @@ def server_adder():
 def menu_screen():
     global current_version
 
-    def draw_screen():
-        rah.wallpaper(screen, size)
-
-        with open('data/splashes.txt') as splashes:
-            motd = choice(splashes.read().strip().split('\n'))
-
-        logo = transform.scale(image.load("textures/menu/logo.png"), (size[0] // 3, int(size[0] // 3 * 51 / 301)))
-        screen.blit(logo, (size[0] // 2 - logo.get_width() // 2, size[1] // 2 - 120 - logo.get_height()))
-
-        minecraft_font = font.Font("fonts/minecraft.ttf", 20)
-        text_surface = minecraft_font.render(motd, True, (255, 255, 0))
-        text_shadow = minecraft_font.render(motd, True, (0, 0, 0))
-
-        shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
-        shadow_surface.blit(text_shadow, (0, 0))
-        shadow_surface.set_alpha(100)
-
-        text_surface_final = Surface((text_surface.get_width() + 4, text_surface.get_height() + 4), SRCALPHA)
-
-        text_surface_final.blit(text_shadow, (2, 2))
-        text_surface_final.blit(text_surface, (0, 0))
-
-        text_surface_final = transform.rotate(text_surface_final, 10)
-
-        screen.blit(text_surface_final, (size[0] // 2 - text_surface_final.get_width() // 2 + 100, size[1] // 2 - 170))
-
-        normal_font = font.Font("fonts/minecraft.ttf", 14)
-
-        version_text = normal_font.render("RahCraft v%s"%current_build, True, (255, 255, 255))
-        screen.blit(version_text, (10, size[1] - 20))
-
-        about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
-        screen.blit(about_text, (size[0] - about_text.get_width(), size[1] - 20))
-
-        user_text = normal_font.render("Logged in as: %s" % username, True, (255, 255, 255))
-        screen.blit(user_text, (20, 20))
-
-        if online:
-            user_text = normal_font.render("AUTH ID: %s" % token, True, (255, 255, 255))
-            screen.blit(user_text, (20, 50))
+    rotation = 10
+    rotation_v = 1
 
     display.set_caption("RahCraft")
 
@@ -1169,9 +1131,52 @@ def menu_screen():
 
     main_menu = menu.Menu(menu_list, 0, 0, size[0], size[1])
 
-    draw_screen()
+    with open('data/splashes.txt') as splashes:
+        motd = choice(splashes.read().strip().split('\n'))
+
+    logo = transform.scale(image.load("textures/menu/logo.png"), (size[0] // 3, int(size[0] // 3 * 51 / 301)))
+
+    minecraft_font = font.Font("fonts/minecraft.ttf", 20)
+    text_surface = minecraft_font.render(motd, True, (255, 255, 0))
+    text_shadow = minecraft_font.render(motd, True, (0, 0, 0))
+
+    shadow_surface = Surface((text_surface.get_width(), text_surface.get_height()))
+    shadow_surface.blit(text_shadow, (0, 0))
+    shadow_surface.set_alpha(100)
 
     while True:
+
+        rah.wallpaper(screen, size)
+
+        text_surface_final = Surface((text_surface.get_width() + 4, text_surface.get_height() + 4), SRCALPHA)
+
+        screen.blit(logo, (size[0] // 2 - logo.get_width() // 2, size[1] // 2 - 120 - logo.get_height()))
+        text_surface_final.blit(text_shadow, (2, 2))
+        text_surface_final.blit(text_surface, (0, 0))
+
+        rotation += rotation_v
+
+        if rotation < 0 or rotation > 10:
+            rotation_v *= -1
+
+        text_surface_final = transform.rotate(text_surface_final, rotation)
+
+        screen.blit(text_surface_final, (size[0] // 2 - text_surface_final.get_width() // 2 + 100, size[1] // 2 - 170))
+
+        normal_font = font.Font("fonts/minecraft.ttf", 14)
+
+        version_text = normal_font.render("RahCraft v%s" % current_build, True, (255, 255, 255))
+        screen.blit(version_text, (10, size[1] - 20))
+
+        about_text = normal_font.render("Copyright (C) Rahmish Empire. All Rahs Reserved!", True, (255, 255, 255))
+        screen.blit(about_text, (size[0] - about_text.get_width(), size[1] - 20))
+
+        user_text = normal_font.render("Logged in as: %s" % username, True, (255, 255, 255))
+        screen.blit(user_text, (20, 20))
+
+        if online:
+            user_text = normal_font.render("AUTH ID: %s" % token, True, (255, 255, 255))
+            screen.blit(user_text, (20, 50))
 
         release = False
 
