@@ -59,8 +59,8 @@ class Player(object):
         except KeyError:
 
             PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
-                                         [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[0, 0] for _ in range(9)], 20, 20]
+                                         [[[5, 2] for _ in range(9)] for __ in range(3)],
+                                         [[18, 1] for _ in range(9)], 20, 20]
 
 
             # rahprint(PlayerData[self.username])
@@ -338,8 +338,6 @@ if __name__ == '__main__':
         message, address = pickled_message
         command = message[0]
 
-        rahprint(pickled_message)
-
         try:
 
             # External commands
@@ -458,7 +456,7 @@ if __name__ == '__main__':
                     if message[3] == 17:
                         chests[(message[1], message[2])] = [[[[0, 0] for _ in range(9)] for __ in range(3)], [address[:]]]
                     elif message[3] == 18:
-                        furnaces[(message[1], message[2])] = [[[0, 0], [0, 0], [0, 0], -1], [address[:]]]
+                        furnaces[(message[1], message[2])] = [[[0, 0], [0, 0], [0, 0]], [address[:]]]
 
                     for i in players:
                         sendQueue.put(((4, message[1], message[2], message[3]), i))
@@ -482,12 +480,15 @@ if __name__ == '__main__':
 
                     elif message[1] == 'furnace':
                         try:
+                            print(pickled_message, furnaces)
                             furnaces[(message[2], message[3])][1].append(address)
                             sendQueue.put(([8, 'furnace', furnace[message[2], message[3]][0]], address))
+                            print('donw')
                         except:
                             sendQueue.put(([8, "err"], address))
 
                 elif command == 8:
+                    print(pickled_message)
                     if message[1] == 'chest':
                         if chests[(message[5], message[6])][0][message[2]][message[3]] != message[4]:
                             chests[(message[5], message[6])][0][message[2]][message[3]] = message[4]
@@ -495,7 +496,10 @@ if __name__ == '__main__':
                                 sendQueue.put(((8, 'chest', chests[(message[5], message[6])][0]), i))
 
                     elif message[1] == 'furnace':
-                        pass
+                        if furnaces[message[2], message[3]][0] != message[4]:
+                            furnaces[message[2], message[3]][0] = message[4]
+                            for i in furnaces[message[2], message[3]][1]:
+                                sendQueue.put(((8, 'furnace', furnaces[message[2], message[3]][0]), i))
 
 
                 elif command == 9:

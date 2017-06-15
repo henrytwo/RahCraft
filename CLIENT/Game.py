@@ -467,7 +467,7 @@ def game(surf, username, token, host, port, size, music_enable):
     current_chest = []
     chest_location = []
 
-    current_furnace = [[0, 0], [0, 0], [0, 0], -1]
+    current_furnace = []
     chest_location = []
 
     # Block highlight
@@ -1028,10 +1028,9 @@ def game(surf, username, token, host, port, size, music_enable):
                 surf.blit(tint, (0, 0))
 
                 furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
-                '''
+
                 if current_tick % 5 == 0:
-                    send_queue.put(((0, current_furnace), SERVERADDRESS))
-                '''
+                    send_queue.put(((8, 'furnace', furnace_location[0], furnace_location[1], current_furnace), SERVERADDRESS))
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))

@@ -701,6 +701,7 @@ class Crafting:
     def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, item_lib):
         surf.blit(self.graphic, (self.x, self.y))
 
+
         for row in range(len(inventory)):
             for item in range(len(inventory[row])):
                 if inventory[row][item][1] != 0:
@@ -755,9 +756,7 @@ class Crafting:
             surf.blit(item_lib[self.resulting_item[0]][1], (self.x + 247, self.y + 69))
             surf.blit(rah.text(str(self.resulting_item[1]), 10), (self.x + 247, self.y + 69))
 
-        if Rect((463, 146, 48, 48)).collidepoint(mx, my):
-            surf.blit(rah.text(str(self.resulting_item[1]), 10), (463, 146, 48, 48))
-
+        if Rect((self.x + 247, self.y + 69, 32, 32)).collidepoint(mx, my):
             if l_click:
                 self.craft(item_lib)
 
@@ -926,98 +925,100 @@ class Furnace:
         return inv
 
     def calculate(self, smelted, item_lib):
-        current_time = t.time()
-
-        update = False
-        items_smelted = min((current_time - smelted[3]) // 10, smelted[0][1])
-        partial_smelted = ((current_time - smelted[3]) / 10) % 1
-        max_smelt = (self.fuel[str(smelted[1][0])]['duration'] * smelted[1][1]) // 10
-        fuel_burned = (current_time - smelted[3]) // self.fuel[str(smelted[1][0])]['duration']
-        partial_burn = ((current_time - smelted[3]) / self.fuel[str(smelted[1][0])]['duration']) % 1
-        possible_smelt = item_lib[smelted[0][0]][2] - smelted[0][1] - smelted[2][1]
-
-        if items_smelted == smelted[0][1]:
-            partial_smelted = 0
-            partial_burn = 1
-            fuel_burned = smelted[1][1] - (math.ceil(10 * (items_smelted - 1) / self.fuel[str(smelted[1][0])]['duration']) + 1)
-
-        return items_smelted, partial_smelted, max_smelt, fuel_burned, partial_burn, possible_smelt
-
-    def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, smelted, item_lib):
-        # smelted = item, fuel, result, time
-        surf.blit(self.graphic, (self.x, self.y))
-        items_smelted = 0
-        partial_smelted = 0
-        partial_burn = 1
+        max_smelt = 0
         fuel_burned = 0
 
-        if smelted[0][1] != 0 and smelted[1][1] != 0:
-            items_smelted, partial_smelted, max_smelt, fuel_burned, partial_burn, possible_smelt = self.calculate(smelted, item_lib)
-            print(items_smelted, partial_smelted, partial_burn)
+        if str(smelted[0][0]) in self.recipes and str(smelted[1][0]) in self.fuel:
+            if smelted[2][0] == 0 or smelted[2][1] == self.recipes[str(smelted[0][0])]['result']:
+                max_smelt = min(smelted[1][1] * self.fuel[str(smelted[1][0])]['duration']//self.SMELT_TIME, smelted[0][1], abs(item_lib[smelted[0][0]][2] - smelted[2][1]))
+                fuel_burned = smelted[1][1] - ((10 * (smelted[0][1] - 1) // self.fuel[str(smelted[1][0])]['duration']) + 1)
 
-        surf.blit(self.progress, (self.x + 158, self.y + 69), area=(0, 0, int(self.progress.get_width() * partial_smelted), self.progress.get_height()))
-        surf.blit(self.toggle_image, (self.x + 113, self.y + 72 + self.toggle_image.get_height()*partial_burn), area=(0, self.toggle_image.get_height() * partial_burn, self.toggle_image.get_width(), self.toggle_image.get_height()))
+        return max_smelt, fuel_burned
 
-        if smelted[1][0] != 0 and smelted[1][1] - fuel_burned != 0:
-            surf.blit(item_lib[smelted[1][0]][1], (self.x + 112, self.y + 106, 32, 32))
-            surf.blit(rah.text(str(smelted[1][1] - fuel_burned), 10), (self.x + 112, self.y + 106, 32, 32))
-        if Rect((self.x + 112, self.y + 106, 32, 32)).collidepoint(mx, my):
-            surf.blit(self.highlight, (self.x + 112, self.y + 106, 32, 32))
-            if l_click:
-                smelted[1] = self.check_stacking([smelted[1][0], smelted[1][1]-fuel_burned], item_lib)
+    def update(self, surf, mx, my, m_press, l_click, r_click, inventory, hotbar, smelted, item_lib):
+        # smelted = item, fuel, result
+        if len(smelted) > 0:
+            surf.blit(self.graphic, (self.x, self.y))
+            print(smelted)
+            items_smelted, fuel_burned = self.calculate(smelted, item_lib)
+            if items_smelted > 0:
                 smelted[0][1] -= items_smelted
+                smelted[1][1] = fuel_burned
+                smelted[2][0] = self.recipes[str(smelted[0][0])]['result']
                 smelted[2][1] += items_smelted
-                smelted[3] = t.time() - partial_smelted * 10
 
-        if smelted[0][0] != 0 and smelted[0][1]-items_smelted != 0:
-            surf.blit(item_lib[smelted[0][0]][1], (self.x + 112, self.y + 34, 32, 32))
-            surf.blit(rah.text(str(int(smelted[0][1]-items_smelted)), 10), (self.x + 112, self.y + 34, 32, 32))
-        if Rect((self.x + 112, self.y + 34, 32, 32)).collidepoint(mx, my):
-            surf.blit(self.highlight, (self.x + 112, self.y + 34, 32, 32))
-            if l_click:
-                smelted[0] = self.check_stacking([smelted[0][0], smelted[0][1]-items_smelted], item_lib)
-                smelted[0][1] -= items_smelted
-                smelted[1][1] -= fuel_burned
-                smelted[3] = t.time() - partial_smelted * 10
+                for item in range(len(smelted)):
+                    if smelted[item][0] == 0 or smelted[item][1] == 0:
+                        smelted[item] = [0, 0]
 
-        if items_smelted > 0 and smelted[0][1] > 0:
-            surf.blit(item_lib[self.recipes[str(smelted[0][0])]['result']][1], (self.x + 232, self.y + 70, 32, 32))
-            surf.blit(rah.text(str(int(items_smelted)), 10), (self.x + 232, self.y + 70, 32, 32))
-        if Rect((self.x + 232, self.y + 70, 32, 32)).collidepoint(mx, my):
-            surf.blit(self.highlight, (self.x + 232, self.y + 70, 32, 32))
-            if l_click:
-                smelted[0][1] -= items_smelted
-                smelted[1][1] -= fuel_burned
-                smelted[3] = t.time() - partial_smelted * 10
+            if smelted[2][0] > 0:
+                surf.blit(self.progress, (self.x + 158, self.y + 69))
+                surf.blit(self.toggle_image, (self.x + 113, self.y + 72))
 
-        for row in range(len(inventory)):
-            for item in range(len(inventory[row])):
-                if inventory[row][item][1] != 0:
-                    surf.blit(item_lib[inventory[row][item][0]][1],
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+            if smelted[0][0] != 0 and smelted[0][1]-items_smelted != 0:
+                surf.blit(item_lib[smelted[0][0]][1], (self.x + 112, self.y + 34, 32, 32))
+                surf.blit(rah.text(str(int(smelted[0][1]-items_smelted)), 10), (self.x + 112, self.y + 34, 32, 32))
+            if Rect((self.x + 112, self.y + 34, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 112, self.y + 34, 32, 32))
+                if l_click:
+                    smelted[0] = self.check_stacking(smelted[0], item_lib)
+                elif r_click:
+                    smelted[0] = self.single_add(smelted[0], item_lib)
 
-                    surf.blit(rah.text(str(inventory[row][item][1]), 10),
-                              (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+            if smelted[1][0] != 0 and smelted[1][1] != 0:
+                surf.blit(item_lib[smelted[1][0]][1], (self.x + 112, self.y + 106, 32, 32))
+                surf.blit(rah.text(str(smelted[1][1] - fuel_burned), 10), (self.x + 112, self.y + 106, 32, 32))
+            if Rect((self.x + 112, self.y + 106, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 112, self.y + 106, 32, 32))
+                if l_click:
+                    smelted[1] = self.check_stacking(smelted[1], item_lib)
+                elif r_click:
+                    smelted[1] = self.single_add(smelted[1], item_lib)
 
-                if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
-                    surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+            if smelted[2][1] > 0:
+                surf.blit(item_lib[smelted[2][0]][1], (self.x + 232, self.y + 70, 32, 32))
+                surf.blit(rah.text(str(smelted[2][1]), 10), (self.x + 232, self.y + 70, 32, 32))
+            if Rect((self.x + 232, self.y + 70, 32, 32)).collidepoint(mx, my):
+                surf.blit(self.highlight, (self.x + 232, self.y + 70, 32, 32))
+                if l_click and (self.holding[0] == smelted[2][0] or self.holding[0] == 0):
+                    hold_stack = item_lib[smelted[2][0]][2] - self.holding[1]
+                    if smelted[2][1] <= hold_stack:
+                        self.holding[1] += smelted[2][1]
+                        self.holding[0] = smelted[2][0]
+                        smelted[2] = [0, 0]
+                    else:
+                        self.holding[1] += hold_stack
+                        self.holding[0] = smelted[2][0]
+                        smelted[2][1] -= hold_stack
+
+            for row in range(len(inventory)):
+                for item in range(len(inventory[row])):
+                    if inventory[row][item][1] != 0:
+                        surf.blit(item_lib[inventory[row][item][0]][1],
+                                  (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                        surf.blit(rah.text(str(inventory[row][item][1]), 10),
+                                  (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                    if Rect((self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32)).collidepoint(mx, my):
+                        surf.blit(self.highlight, (self.x + 15 + item * 36, self.y + 168 + row * 36, 32, 32))
+
+                        if l_click:
+                            inventory[row][item] = self.check_stacking(inventory[row][item][:], item_lib)
+                        elif r_click:
+                            inventory[row][item] = self.single_add(inventory[row][item][:], item_lib)
+
+            for item in range(len(hotbar)):
+                if hotbar[item][1] != 0:
+                    surf.blit(item_lib[hotbar[item][0]][1], (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+                    surf.blit(rah.text(str(hotbar[item][1]), 10), (self.x + 16 + item * 36, self.y + 283, 32, 32))
+
+                if Rect((self.x + 16 + item * 36, self.y + 283, 32, 32)).collidepoint(mx, my):
+                    surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
 
                     if l_click:
-                        inventory[row][item] = self.check_stacking(inventory[row][item][:], item_lib)
-                    elif r_click:
-                        inventory[row][item] = self.single_add(inventory[row][item][:], item_lib)
+                        hotbar[item] = self.check_stacking(hotbar[item], item_lib)
 
-        for item in range(len(hotbar)):
-            if hotbar[item][1] != 0:
-                surf.blit(item_lib[hotbar[item][0]][1], (self.x + 16 + item * 36, self.y + 283, 32, 32))
-
-                surf.blit(rah.text(str(hotbar[item][1]), 10), (self.x + 16 + item * 36, self.y + 283, 32, 32))
-
-            if Rect((self.x + 16 + item * 36, self.y + 283, 32, 32)).collidepoint(mx, my):
-                surf.blit(self.highlight, (self.x + 16 + item * 36, self.y + 283, 32, 32))
-
-                if l_click:
-                    hotbar[item] = self.check_stacking(hotbar[item], item_lib)
-
-        if self.holding[0] > 0:
-            surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
+            if self.holding[0] > 0:
+                surf.blit(item_lib[self.holding[0]][1], (mx - 10, my - 10))
