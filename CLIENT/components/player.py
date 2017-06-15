@@ -43,7 +43,17 @@ class Player:
         self.standing = False
         self.sneaking = False
 
+        self.frame = 0
+        self.frame_additive = 0.5
+
         self.surrounding_shifts = [(sx, sy) for sy in range(-2, 3) for sx in range(-1, 2)]
+
+        head = image.load('textures/player_head.png')
+        body = image.load('textures/player_body.png')
+
+        self.texture = {'head':transform.scale(head, (int(w * 0.5), int((w * 0.5)/head.get_width() * head.get_height()))),
+                        'body':transform.scale(body, (int(w * 0.9), int((w * 0.9)/body.get_width() * body.get_height())))}
+
 
     def control(self, keys, fly):
         if fly:
@@ -166,8 +176,15 @@ class Player:
         #     surf.blit(index_font.render("{0}".format(collision_blocks.index(block)), True, (0, 0, 0)),
         #               (block[0] - x_offset, block[1] - y_offset))
 
-        draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
+        #draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
 
+        self.frame += self.frame_additive
+
+        if self.frame <-5 or self.frame > 5:
+            self.frame_additive *= -1
+
+        surf.blit(self.texture['head'], (self.rect.x - x_offset + self.rect.w//2 - (self.texture['head'].get_width() * 1.1)//2, self.rect.y - y_offset - int(self.frame)))
+        surf.blit(self.texture['body'], (self.rect.x - x_offset + self.rect.w//2 - self.texture['body'].get_width()//2, self.rect.y - y_offset + self.rect.h - self.texture['body'].get_height()))
 
 class RemotePlayer:
     def __init__(self, username, x, y, w, h):

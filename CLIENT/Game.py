@@ -212,7 +212,7 @@ def game(surf, username, token, host, port, size, music_enable):
     commandline.start()
     cmd_in = ""
 
-    block_size = 20
+    block_size = 50
     build = 'RahCraft v0.1.1 EVALUATION'
 
     # Chat
@@ -230,7 +230,7 @@ def game(surf, username, token, host, port, size, music_enable):
     item_lib = create_item_dictionary(block_properties, tool_properties, item_properties)
     rah.rahprint(item_lib)
     breaking_animation = [
-        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
+        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (block_size, block_size)).convert_alpha() for i
         in range(10)]
 
     health_texture = {"none":image.load("textures/gui/icons/heart_none.png"),
@@ -307,7 +307,7 @@ def game(surf, username, token, host, port, size, music_enable):
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
+    local_player = player.Player(player_x, player_y, block_size - 1, 2 * block_size - 1, block_size, 5,
                                  (K_a, K_d, K_w, K_s, K_SPACE))
 
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
@@ -344,7 +344,7 @@ def game(surf, username, token, host, port, size, music_enable):
         try:
             world_msg = message_queue.get_nowait()
 
-            print(world_msg)
+            #print(world_msg)
 
             if world_msg[0] == 2:
                 world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
@@ -370,8 +370,8 @@ def game(surf, username, token, host, port, size, music_enable):
     # Init Existing Remote Players
     # =====================================================================
     for Rp in r_players:
-        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
-                                                 2 * block_size - 5)
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 1,
+                                                 2 * block_size - 1)
 
     # Initing Pygame Components
     # =====================================================================
@@ -482,6 +482,8 @@ def game(surf, username, token, host, port, size, music_enable):
     inventory_updated = False
 
     sky_diming = False
+
+    star_list = [[randint(0, size[0]), randint(0, size[1])] for star in range(size[0]//10)]
 
     try:
         while True:
@@ -605,6 +607,8 @@ def game(surf, username, token, host, port, size, music_enable):
                     hotbar_rect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
                     crafting_object = menu.Crafting(size[0], size[1])
                     furnace_object = menu.Crafting(size[0], size[1])
+
+                    star_list = [[randint(0, size[0]), randint(0, size[1])] for star in range(size[0] // 10)]
 
                     tint = Surface(size)
                     tint.fill((0, 0, 0))
@@ -796,10 +800,19 @@ def game(surf, username, token, host, port, size, music_enable):
 
             for y in range(size[1]):
                 r = min(max(int(((y_offset // block_size) / world_size_y) * 20 - int(255 * sky_tick / 24000)), 0), 255)
-                g = min(max(int(((y_offset // block_size)/world_size_y) * 60 - int(255 * sky_tick/24000)), 0),255)
-                b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(500 * sky_tick/24000)), 0),255)
+                g = min(max(int(((y_offset // block_size)/world_size_y) * 200 - int(255 * sky_tick/24000)), 0),255)
+                b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(255 * sky_tick/24000)), 0),255)
 
                 draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
+
+            if sky_tick < 18000 or sky_tick > 6000:
+                for star in star_list:
+                    draw.circle(surf, (255, 255, 255), (int(star[0]), star[1]), randint(1,2))
+
+                    star[0] += 0.05
+
+                    if star[0] > size[0]:
+                        star[0] = 0
 
             # surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
@@ -1014,7 +1027,6 @@ def game(surf, username, token, host, port, size, music_enable):
             elif using_furnace:
                 surf.blit(tint, (0, 0))
 
-                time
                 furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
                 '''
                 if current_tick % 5 == 0:

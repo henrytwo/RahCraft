@@ -11,7 +11,7 @@ import webbrowser
 import json
 from random import *
 from multiprocessing import *
-import urllib.request
+from urllib.request import urlretrieve, Request, urlopen
 import zipfile
 import os
 import glob
@@ -30,8 +30,27 @@ def copytree(src, dst, symlinks=False, ignore=None):
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 copy2(s, d)
 
+#http://www.dreamincode.net/forums/topic/258621-console-progress-for-download-over-http/
+def progress(block_no, block_size, file_size):
+
+    global update_progress
+
+    update_progress += block_size
+
+    draw.rect(screen, (0, 0, 0), (size[0] // 4, size[1] // 2 + 50, size[0] // 2, 10))
+
+    draw.rect(screen, (0, 255, 0), (size[0] // 4, size[1] // 2 + 50, int((size[0] // 2) * update_progress/file_size), 10))
+
+    status_text = rah.text("%s%% (%iMB/%iMB)"%(int(update_progress/file_size * 100), round(update_progress/1000000, 2), round(file_size/1000000, 2)), 13)
+
+    draw.rect(screen, (150, 150, 150), (size[0] // 4, size[1] // 2 + 65, size[0] // 2, 20))
+
+    screen.blit(status_text, (size[0]//2 - status_text.get_width()//2, size[1] // 2 + 65))
+
+    display.flip()
+
 def software_update():
-    global screen, current_version, current_build, size
+    global screen, current_version, current_build, size, update_progress
 
     display.set_caption("RahCraft Update Service")
 
@@ -43,9 +62,9 @@ def software_update():
     update = None
 
     try:
-        req = urllib.request.Request('https://rahcraft.github.io/rahcraft.txt', headers={'User-Agent': 'Mozilla/5.0'})
+        req = Request('https://rahcraft.github.io/rahcraft.txt', headers={'User-Agent': 'Mozilla/5.0'})
 
-        with urllib.request.urlopen(req) as response:
+        with urlopen(req) as response:
             extracted_file = str(response.read())[2:][:-3].split('\\n')
 
         latest_version = int(extracted_file[0])
@@ -124,15 +143,17 @@ def software_update():
 
                         display.flip()
 
-                        with urllib.request.urlopen(update_location) as update_file, open('update.zip', 'wb') as out_file:
-                            out_file.write(update_file.read())
+                        urlretrieve(url=update_location, filename='update.zip', reporthook=progress)
+
+                        #with urllib.request.urlopen(update_location) as update_file, open('update.zip', 'wb') as out_file:
+                        #    out_file.write(update_file.read())
 
                         with zipfile.ZipFile('update.zip','r') as zip_file:
-                            zip_file.extractall('update')
+                            zip_file.extractall('../update')
 
                         os.remove("update.zip")
 
-                        dir_list = glob.glob('update/*/*')
+                        dir_list = glob.glob('../update/*/*')
 
                         for dir in dir_list:
                             file_name = dir.split('/')[-1]
@@ -141,11 +162,11 @@ def software_update():
 
                             if (user_files_intact and file_name != 'user_data') or not user_files_intact:
                                 if len(file_name.split('.')) == 2:
-                                    copyfile(dir, file_name)
+                                    copyfile(dir, '../' + file_name)
                                 else:
-                                    copytree(dir, file_name)
+                                    copytree(dir, '../' + file_name)
 
-                        rmtree("update")
+                        rmtree("../update")
 
                         current_build, current_version = latest_build, latest_version
 
@@ -1220,6 +1241,7 @@ if __name__ == "__main__":
     token = ''
 
     navigation = 'update'
+    update_progress = 0
 
     font.init()
 

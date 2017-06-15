@@ -14,8 +14,7 @@ class Air:
         self.around = False
 
     def update(self):
-        draw.rect(screen, ((255, 255, 255) if self.around else (25, 25, 185)), self.rect)
-
+        draw.rect(screen, ((240, 240, 240) if self.around else (150, 15, 135)), self.rect)
         self.around = False
 
 
@@ -26,7 +25,6 @@ class Block:
 
     def update(self):
         draw.rect(screen, ((155, 155, 155) if self.around else (50, 255, 150)), self.rect)
-
         self.around = False
 
 
