@@ -3,24 +3,7 @@ from subprocess import Popen, PIPE
 from shlex import split
 import platform
 import json
-
-try:
-    import numpy as np
-
-except ModuleNotFoundError:
-    print("Module Numpy wasn't found")
-    try:
-        if platform.system() == "Windows":
-            Popen(['cmd.exe', 'python -m pip install numpy'])
-            print("Numpy installed successfully")
-        else:
-            bash_command = "pip3 install numpy"
-            Popen(split(bash_command), stdout=PIPE)
-            print("Numpy installed successfully")
-    except:
-        print("Failed to install numpy")
-        quit()
-
+import numpy as np
 
 block_data = json.load(open("data/block.json"))
 block_lookup = {}
@@ -42,6 +25,25 @@ def generate_tree(bx, by, world):
 
     return world
 
+def generate_cactus(bx, by, world):
+    height = randint(2, 4)
+
+    for y in range(height):
+        world[bx][by - y] = block_lookup["Cactus"]
+
+    return world
+
+
+def generate_structure(bx, by, world, structure):
+
+    structures = {'tree':generate_tree,
+                  'cactus':generate_cactus}
+
+    return structures[structure](bx, by, world)
+
+
+
+
 
 
 
@@ -59,7 +61,7 @@ def generate_world(world_seed, biome_min, biome_max, w, h):
     # Create a blank map (2D list filled with '0' strings
     world = [[0 for y in range(h)] for x in range(w)]
     # Generates the random values for the terrain construction
-    terrain = [randrange(10) + 40 for _ in range(w)]
+    terrain = [randrange(20) + 40 for _ in range(w)]
 
     biomes = []
     for __ in range(w//biome_min):
@@ -77,15 +79,15 @@ def generate_world(world_seed, biome_min, biome_max, w, h):
     # Counter that changes dynamically to check through all blocks in the terrain list
     cur_pos = 0
     # Runs through all the generated numbers in a while loop
-    while cur_pos < len(terrain):
+    while cur_pos < w:
 
         # print(".", end="")
 
         # Check to see if terrain gap is too large
 
-        if abs(terrain[cur_pos] - terrain[cur_pos - 1]) > max_height:  # if terrain gap is larger than threshhold (too big)
+        if abs(terrain[cur_pos] - terrain[cur_pos - 1]) > biome_data[str(biomes[cur_pos])]["maxh"]:  # if terrain gap is larger than threshhold (too big)
 
-            for n in range(randint(min_x, max_x)):
+            for n in range(randint(biome_data[str(str(biomes[cur_pos]))]["minx"], biome_data[str(str(biomes[cur_pos]))]["maxx"])):
                 # Insert a new value into the terrain list between the values that are too far apart
                 terrain.insert(cur_pos, (terrain[cur_pos] + terrain[cur_pos - 1]) // 2)
 
@@ -105,7 +107,7 @@ def generate_world(world_seed, biome_min, biome_max, w, h):
                     world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["top"]]
 
                     if randint(0, 10) == 0 and x + 10 < w:
-                        world = generate_tree(x, y - 1, world)
+                        world = generate_structure(x, y - 1, world, choice(biome_data[biomes[x]]["structure"]))
 
                 elif y - terrain[x] < randint(3, 8):
                     world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["middle"]]

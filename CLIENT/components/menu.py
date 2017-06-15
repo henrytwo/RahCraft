@@ -2,7 +2,6 @@ from pygame import *
 import time as t
 import json
 import math
-
 import components.rahma as rah
 
 button_hover = image.load("textures/menu/button_hover.png")

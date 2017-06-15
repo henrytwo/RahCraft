@@ -8,7 +8,6 @@ from multiprocessing import *
 from copy import deepcopy
 import json
 
-
 from subprocess import Popen, PIPE
 from shlex import split
 import platform

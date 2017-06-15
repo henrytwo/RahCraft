@@ -1013,7 +1013,6 @@ def game(surf, username, token, host, port, size, music_enable):
             elif using_furnace:
                 surf.blit(tint, (0, 0))
 
-                time
                 furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
                 '''
                 if current_tick % 5 == 0:

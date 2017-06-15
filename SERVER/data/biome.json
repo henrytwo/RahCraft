@@ -1,10 +1,9 @@
 {
     "0":{
         "name":"plains",
-        "minv":1,
-        "maxv":1,
-        "minh":1,
-        "maxh":5,
+        "minx":5,
+        "maxx":20,
+        "maxh":1,
         "layer":{
                  "top":"Grass",
                  "middle":"Dirt",
@@ -14,15 +13,26 @@
     },
     "1":{
         "name":"desert",
-        "minv":1,
-        "maxv":1,
-        "minh":1,
-        "maxh":5,
+        "minx":5,
+        "maxx":30,
+        "maxh":1,
         "layer":{
                  "top":"Sand",
                  "middle":"Sandstone",
                  "lower":"Stone"
                 },
         "structure":["cactus"]
+    },
+    "2":{
+        "name":"hills",
+        "minx":10,
+        "maxx":20,
+        "maxh":5,
+        "layer":{
+                 "top":"Grass",
+                 "middle":"Dirt",
+                 "lower":"Stone"
+                },
+        "structure":["tree"]
     }
 }
