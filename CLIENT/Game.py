@@ -230,7 +230,7 @@ def game(surf, username, token, host, port, size, music_enable):
     item_lib = create_item_dictionary(block_properties, tool_properties, item_properties)
     rah.rahprint(item_lib)
     breaking_animation = [
-        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (20, 20)).convert_alpha() for i
+        transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (block_size, block_size)).convert_alpha() for i
         in range(10)]
 
     health_texture = {"none":image.load("textures/gui/icons/heart_none.png"),
@@ -483,6 +483,8 @@ def game(surf, username, token, host, port, size, music_enable):
 
     sky_diming = False
 
+    star_list = [[randint(0, size[0]), randint(0, size[1])] for star in range(size[0]//10)]
+
     try:
         while True:
             release = False
@@ -604,6 +606,8 @@ def game(surf, username, token, host, port, size, music_enable):
                     inventory_object = menu.Inventory(0, 0, size[0], size[1])
                     hotbar_rect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
                     crafting_object = menu.Crafting(size[0], size[1])
+
+                    star_list = [[randint(0, size[0]), randint(0, size[1])] for star in range(size[0] // 10)]
 
                     tint = Surface(size)
                     tint.fill((0, 0, 0))
@@ -795,10 +799,19 @@ def game(surf, username, token, host, port, size, music_enable):
 
             for y in range(size[1]):
                 r = min(max(int(((y_offset // block_size) / world_size_y) * 20 - int(255 * sky_tick / 24000)), 0), 255)
-                g = min(max(int(((y_offset // block_size)/world_size_y) * 60 - int(255 * sky_tick/24000)), 0),255)
-                b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(500 * sky_tick/24000)), 0),255)
+                g = min(max(int(((y_offset // block_size)/world_size_y) * 200 - int(255 * sky_tick/24000)), 0),255)
+                b = min(max(int(((y_offset // block_size)/world_size_y) * 300 - int(255 * sky_tick/24000)), 0),255)
 
                 draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
+
+            if sky_tick < 18000 or sky_tick > 6000:
+                for star in star_list:
+                    draw.circle(surf, (255, 255, 255), (int(star[0]), star[1]), randint(1,2))
+
+                    star[0] += 0.05
+
+                    if star[0] > size[0]:
+                        star[0] = 0
 
             # surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
