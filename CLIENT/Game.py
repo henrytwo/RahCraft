@@ -453,8 +453,16 @@ def game(surf, username, token, host, port, size):
 
     block_step = None
 
-    music_object = mixer.Sound('sound/music/menu.ogg')
-    music_object.play(-1, 0)
+    music_list = [mixer.Sound('sound/music/bg%i.wav' % song) for song in range(1, choice([5,5,5,5,5,5,5,5,5,6]))]
+
+    shuffle(music_list)
+
+    music_object = mixer.Sound(music_list[0])
+
+    music_list.append(music_list[0])
+    del music_list[0]
+
+    music_object.play(1, 0)
 
     # Crafting/other gui stuffz
     # =====================================================================
@@ -491,6 +499,15 @@ def game(surf, username, token, host, port, size):
 
     try:
         while True:
+
+            # if not music_object.get_busy():
+            #     music_object = mixer.Sound(music_list[0])
+            #
+            #     music_list.append(music_list[0])
+            #     del music_list[0]
+            #
+            #     music_object.play(1, 0)
+
             release = False
             on_tick = False
             block_broken = False
@@ -663,7 +680,10 @@ def game(surf, username, token, host, port, size):
                             x_offset, y_offset = int(current_x * block_size), int(current_y * block_size)
                             local_player.rect.x, local_player.rect.y = x_offset + size[0] // 2 + block_size // 2, y_offset + size[1] // 2 + block_size // 2
 
-                            select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
+                            if hotbar_items[hotbar_slot][0] != 0:
+                                select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
+                            else:
+                                select_texture = None
                             local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties, select_texture)
 
                     elif remote_username in remote_players:
@@ -830,7 +850,10 @@ def game(surf, username, token, host, port, size):
             except:
                 pass
 
-            select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
+            if hotbar_items[hotbar_slot][0] != 0:
+                select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
+            else:
+                select_texture = None
             local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
                                 block_properties, select_texture)
 
