@@ -60,7 +60,7 @@ class Slider:
         draw.rect(surf, (200, 200, 200), self.rect, 1)
 
         if self.rect.collidepoint(mx, my):
-            mouse_state =  'hover'
+            mouse_state = 'hover'
             if m_press[0]:
                 self.pos = (mx - self.rect.x)/self.rect.w
 

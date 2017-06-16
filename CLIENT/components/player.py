@@ -160,7 +160,7 @@ class Player:
 
         return surrounding_blocks
 
-    def update(self, surf, x_offset, y_offset, fly, ui, block_clip, world, block_size, block_properties):
+    def update(self, surf, x_offset, y_offset, fly, ui, block_clip, world, block_size, block_properties, selected_texture):
         collision_blocks = self.detect(world, block_size, block_clip, block_properties)
 
         if not ui:
@@ -185,6 +185,11 @@ class Player:
 
         surf.blit(self.texture['head'], (self.rect.x - x_offset + self.rect.w//2 - (self.texture['head'].get_width() * 1.1)//2, self.rect.y - y_offset - int(self.frame)))
         surf.blit(self.texture['body'], (self.rect.x - x_offset + self.rect.w//2 - self.texture['body'].get_width()//2, self.rect.y - y_offset + self.rect.h - self.texture['body'].get_height()))
+
+        surf.blit(selected_texture, (0,0))
+
+        surf.blit(selected_texture, (self.rect.x + self.rect.w - selected_texture.get_width(), self.rect.y + self.rect.h//2 - selected_texture.get_height()//2))
+
 
 class RemotePlayer:
     def __init__(self, username, x, y, w, h):

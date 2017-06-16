@@ -136,7 +136,7 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):
     return inventory, hotbar
 
 
-def game(surf, username, token, host, port, size, music_enable):
+def game(surf, username, token, host, port, size):
     def quit_game():
         send_queue.put(((9,), SERVERADDRESS))
         time.wait(50)
@@ -425,7 +425,7 @@ def game(surf, username, token, host, port, size, music_enable):
     inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
     hotbar_rect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
-    hotbar_slot = 1
+    hotbar_slot = 0
 
     INVENTORY_KEYS = {str(x) for x in range(1, 10)}
 
@@ -451,6 +451,9 @@ def game(surf, username, token, host, port, size, music_enable):
             sound[stype][block] = local_sounds
 
     block_step = None
+
+    music_object = mixer.Sound('sound/music/menu.ogg')
+    music_object.play(-1, 0)
 
     # Crafting/other gui stuffz
     # =====================================================================
@@ -659,7 +662,8 @@ def game(surf, username, token, host, port, size, music_enable):
                             x_offset, y_offset = int(current_x * block_size), int(current_y * block_size)
                             local_player.rect.x, local_player.rect.y = x_offset + size[0] // 2 + block_size // 2, y_offset + size[1] // 2 + block_size // 2
 
-                            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties)
+                            select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
+                            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties, select_texture)
 
                     elif remote_username in remote_players:
                         remote_players[remote_username].calculate_velocity((int(current_x * block_size), int(current_y * block_size)), tick_per_frame)
@@ -825,7 +829,9 @@ def game(surf, username, token, host, port, size, music_enable):
             except:
                 pass
 
-            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties)
+            select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
+            local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
+                                block_properties, select_texture)
 
             under_block = (offset_clip.x, y_offset // block_size + 1)
 

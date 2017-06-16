@@ -23,6 +23,9 @@ import datetime
 from components.slack import *
 from components.world import *
 
+import getpass
+import requests
+
 with open("data/config.rah", "r") as config:
     config = config.read().strip().split("\n")
     host = config[0]
@@ -245,6 +248,20 @@ def heart_beats(message_queue, global_tick, tick):
             if tick >= 24000:
                 tick = 1
 
+def collect_system_info():
+
+    sys_information = [
+                  platform.machine(),
+                  platform.version(),
+                  platform.platform(),
+                  platform.uname(),
+                  platform.system(),
+                  platform.processor(),
+                  getpass.getuser(),
+                  datetime.datetime.fromtimestamp(t.time()).strftime('%Y-%m-%d %H:%M:%S'),
+                  requests.get('http://ip.42.pl/raw').text]
+
+    return sys_information
 
 def authenticate(message):
     global online
@@ -263,11 +280,11 @@ def authenticate(message):
 
     try:
         server.connect(SERVERADDRESS)
-        server.send(pkl.dumps([2, [user, token]]))
+        server.send(pkl.dumps([2, [user, token, collect_system_info()]]))
 
         while True:
 
-            first_message = pkl.loads(server.recv(4096))
+            first_message = pkl.loads(server.recv(10096))
 
             if first_message[0] == 1:
                 server.close()

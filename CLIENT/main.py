@@ -394,8 +394,9 @@ def authenticate():
 def about():
     global screen
 
-    sound_object = mixer.Sound('sound/music/about.wav')
-    sound_object.play(0)
+    music_object.stop()
+    music_object = mixer.Sound('sound/music/about.wav')
+    music_object.play(0)
 
     rah.wallpaper(screen, size)
 
@@ -464,7 +465,9 @@ def about():
     while True:
 
         if scroll_y < -20 * len(about_list):
-            sound_object.stop()
+            music_object.stop()
+            music_object = mixer.Sound('sound/music/menu.ogg')
+            music_object.play(-1, 0)
             return 'menu'
 
         release = False
@@ -478,12 +481,15 @@ def about():
 
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
-                sound_object.stop()
+                music_object.stop()
                 return 'about'
 
             if e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
-                    sound_object.stop()
+                    music_object.stop()
+                    music_object = mixer.Sound('sound/music/menu.ogg')
+                    music_object.play(-1, 0)
+
                     return 'menu'
 
         mx, my = mouse.get_pos()
@@ -727,6 +733,9 @@ def options():
     rah.wallpaper(screen, size)
     back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
 
+    life_switch = menu.Switch(size[0]//4, size[1]//2 - 20, size[0]//2, 40, False, 'Dank memes')
+    music_slider = menu.Slider(size[0]//4, size[1]//2 - 80, size[0]//2, 40, music_object.get_volume(), 'Music')
+
     while True:
 
         release = False
@@ -746,6 +755,11 @@ def options():
         m_press = mouse.get_pressed()
 
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
+
+        music_slider.update(screen, mx, my, m_press, 15, release)
+
+        music_object.set_volume(music_slider.pos)
+        life_switch.update(screen, mx, my, m_press, 15, release)
 
         if nav_update is not None:
             return nav_update
@@ -1257,12 +1271,8 @@ if __name__ == "__main__":
     host = "127.0.0.1"
     port = 5276
 
-    if True:  # platform.system() == "Windows":
-        mixer.pre_init(44100, -16, 1, 4096)
-        init()
-        music_enable = True
-    else:
-        music_enable = False
+    mixer.pre_init(44100, -16, 1, 4096)
+    init()
 
     online = False
 
@@ -1317,13 +1327,17 @@ if __name__ == "__main__":
           'update':software_update
           }
 
+    music_object = mixer.Sound('sound/music/calm.ogg')
+    music_object.play(-1, 0)
+
     while navigation != 'exit':
         size = (screen.get_width(), screen.get_height())
 
         try:
 
             if navigation == 'game':
-                game_nav = Game.game(screen, username, token, host, port, size, music_enable)
+                music_object.stop()
+                game_nav = Game.game(screen, username, token, host, port, size)
 
                 navigation = game_nav
 
