@@ -15,6 +15,7 @@ import json
 
 import numpy as np
 from math import *
+from copy import deepcopy
 
 import time as ti
 from pygame import *
@@ -1031,11 +1032,11 @@ def game(surf, username, token, host, port, size):
                     send_queue.put((changed+[chest_location[0], chest_location[1]], SERVERADDRESS))
 
             elif using_furnace:
+                furnace_old = deepcopy(current_furnace)
                 surf.blit(tint, (0, 0))
-
                 furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
 
-                if current_tick % 5 == 0:
+                if current_furnace != [] and current_furnace != furnace_old:
                     send_queue.put(((8, 'furnace', furnace_location[0], furnace_location[1], current_furnace), SERVERADDRESS))
 
             elif inventory_visible:

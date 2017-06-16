@@ -929,9 +929,12 @@ class Furnace:
         fuel_burned = 0
 
         if str(smelted[0][0]) in self.recipes and str(smelted[1][0]) in self.fuel:
-            if smelted[2][0] == 0 or smelted[2][1] == self.recipes[str(smelted[0][0])]['result']:
-                max_smelt = min(smelted[1][1] * self.fuel[str(smelted[1][0])]['duration']//self.SMELT_TIME, smelted[0][1], abs(item_lib[smelted[0][0]][2] - smelted[2][1]))
-                fuel_burned = smelted[1][1] - ((10 * (smelted[0][1] - 1) // self.fuel[str(smelted[1][0])]['duration']) + 1)
+            if smelted[2][0] == 0 or smelted[2][0] == self.recipes[str(smelted[0][0])]['result']:
+                max_smelt = min((smelted[1][1] * self.fuel[str(smelted[1][0])]['duration'])//self.SMELT_TIME, smelted[0][1], item_lib[smelted[0][0]][2] - smelted[2][1])
+                fuel_burned = smelted[1][1] - ((10 * (max_smelt - 1) // self.fuel[str(smelted[1][0])]['duration']) + 1)
+
+        if smelted[1][1] - fuel_burned < 0:
+            print(smelted, (smelted[1][1] * self.fuel[str(smelted[1][0])]['duration'])//self.SMELT_TIME, smelted[0][1], item_lib[smelted[0][0]][2] - smelted[2][1], smelted[1][1] - ((10 * (smelted[0][1] - 1) // self.fuel[str(smelted[1][0])]['duration']) + 1))
 
         return max_smelt, fuel_burned
 
@@ -939,7 +942,6 @@ class Furnace:
         # smelted = item, fuel, result
         if len(smelted) > 0:
             surf.blit(self.graphic, (self.x, self.y))
-            print(smelted)
             items_smelted, fuel_burned = self.calculate(smelted, item_lib)
             if items_smelted > 0:
                 smelted[0][1] -= items_smelted

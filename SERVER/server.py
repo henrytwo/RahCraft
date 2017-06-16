@@ -175,7 +175,7 @@ def logger(log_queue):
             data_file.flush()
 
 def rahprint(text):
-    print_enable = True
+    print_enable = False
 
     if print_enable:
         print(text)
@@ -510,13 +510,19 @@ if __name__ == '__main__':
                                 sendQueue.put(([8, "err"], address))
 
                     elif message[1] == 'furnace':
-                        try:
-                            print(pickled_message, furnaces)
-                            furnaces[(message[2], message[3])][1].append(address)
-                            sendQueue.put(([8, 'furnace', furnace[message[2], message[3]][0]], address))
-                            print('donw')
-                        except:
-                            sendQueue.put(([8, "err"], address))
+                        if message[-1] == 1:
+                            try:
+                                furnaces[(message[2], message[3])][1].append(address)
+                                sendQueue.put(([8, 'furnace', furnaces[message[2], message[3]][0]], address))
+                            except:
+                                print(traceback.format_exc())
+                                sendQueue.put(([8, "err"], address))
+                        else:
+                            try:
+                                furnaces[(message[2], message[3])][1].remove(address)
+                            except:
+                                print(traceback.format_exc())
+                                sendQueue.put(([8, "err"], address))
 
                 elif command == 8:
                     print(pickled_message)
