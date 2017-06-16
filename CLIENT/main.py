@@ -17,6 +17,30 @@ import os
 import glob
 from shutil import copyfile, copy2, rmtree
 
+#Statistics
+import platform
+import datetime
+import requests
+import time as t
+import getpass
+
+def collect_system_info(current_build, current_version):
+
+    sys_information = [
+                  current_version,
+                  current_build,
+                  platform.machine(),
+                  platform.version(),
+                  platform.platform(),
+                  platform.uname(),
+                  platform.system(),
+                  platform.processor(),
+                  getpass.getuser(),
+                  datetime.datetime.fromtimestamp(t.time()).strftime('%Y-%m-%d %H:%M:%S'),
+                  requests.get('http://ip.42.pl/raw').text]
+
+    return sys_information
+
 #https://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
 def copytree(src, dst, symlinks=False, ignore=None):
     if not os.path.exists(dst):
@@ -303,7 +327,7 @@ def login():
 
 
 def authenticate():
-    global username, password, online, token
+    global username, password, online, token, current_build, current_version
 
     rah.wallpaper(screen, size)
     connecting_text = rah.text("Authenticating...", 30)
@@ -323,14 +347,14 @@ def authenticate():
         server.connect(SERVERADDRESS)
 
         if token:
-            server.send(pickle.dumps([1, [username, token]]))
+            server.send(pickle.dumps([1, [username, token], collect_system_info(current_build, current_version)]))
         else:
             credentials = [username, password]
-            server.send(pickle.dumps([0, credentials]))
+            server.send(pickle.dumps([0, credentials, collect_system_info(current_build, current_version)]))
 
         while True:
 
-            first_message = pickle.loads(server.recv(4096))
+            first_message = pickle.loads(server.recv(10096))
 
             if first_message[0] == 1:
 
@@ -911,7 +935,6 @@ def server_picker():
                 return 'information', "\n\n\n\n\nCouldn't delete server shortcut\nPermission denied", 'server_picker'
 
             else:
-                print(nav_update)
                 host, port = nav_update[1], nav_update[2]
                 return nav_update[0]
 
@@ -1217,6 +1240,7 @@ def menu_screen():
 
 
 if __name__ == "__main__":
+
     size = (960, 540)
     screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 

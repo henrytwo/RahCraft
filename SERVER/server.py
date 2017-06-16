@@ -17,6 +17,9 @@ from math import *
 import time
 from random import *
 
+import time
+import datetime
+
 from components.slack import *
 from components.world import *
 
@@ -162,6 +165,12 @@ class World:
     def save(self):
         pkl.dump(self.overworld, open('saves/world.pkl', 'wb'))
 
+def logger(log_queue):
+    with open('data/log.log', 'a+') as data_file:
+        while True:
+            data_file.write(str(log_queue.get()) + '\n')
+            data_file.flush()
+
 def rahprint(text):
     print_enable = True
 
@@ -286,6 +295,8 @@ if __name__ == '__main__':
     sendQueue = Queue()
     messageQueue = Queue()
     commandlineQueue = Queue()
+    log_queue = Queue()
+
     itemLib = {}
     global_tick = Value('l', 0)
     username = set()
@@ -302,6 +313,9 @@ if __name__ == '__main__':
     server.bind((host, port))
 
     rahprint("Server binded to %s:%i" % (host, port))
+
+    log_process = Process(target=logger, args=(log_queue,))
+    log_process.start()
 
     heart_beat = Process(target=heart_beats, args=(messageQueue, global_tick, 0))  # Change the tick stuff later
     heart_beat.start()
@@ -533,6 +547,7 @@ if __name__ == '__main__':
 
                                 time.sleep(5)
 
+                                log_process.terminate()
                                 receiver.terminate()
                                 sender.terminate()
                                 commandline.terminate()
@@ -556,6 +571,7 @@ if __name__ == '__main__':
                                     receiver.terminate()
                                     sender.terminate()
                                     commandline.terminate()
+                                    log_queue.terminate()
                                     server.close()
 
                                     exit()
@@ -832,6 +848,8 @@ if __name__ == '__main__':
 
                     for i in players:
                         sendQueue.put(((10, send_message), i))
+
+                    log_queue.put('[%s]'%datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') +send_message)
 
                     if slack_enable:
                         broadcast(channel, send_message)
