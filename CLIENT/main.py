@@ -394,7 +394,6 @@ def authenticate():
 def about():
     global screen
 
-    music_object.stop()
     music_object = mixer.Sound('sound/music/about.wav')
     music_object.play(0)
 
@@ -466,7 +465,7 @@ def about():
 
         if scroll_y < -20 * len(about_list):
             music_object.stop()
-            music_object = mixer.Sound('sound/music/menu.ogg')
+            music_object = mixer.Sound('sound/menu_music/menu.ogg')
             music_object.play(-1, 0)
             return 'menu'
 
@@ -1327,7 +1326,7 @@ if __name__ == "__main__":
           'update':software_update
           }
 
-    music_object = mixer.Sound('sound/music/calm.ogg')
+    music_object = mixer.Sound('sound/menu_music/menu.ogg')
     music_object.play(-1, 0)
 
     while navigation != 'exit':
@@ -1341,6 +1340,10 @@ if __name__ == "__main__":
 
                 navigation = game_nav
 
+            elif navigation == 'about':
+                music_object.stop()
+                navigation = about()
+
             elif navigation[0] == 'crash':
                 navigation = crash(navigation[1], navigation[2])
 
@@ -1353,8 +1356,6 @@ if __name__ == "__main__":
         except:
             navigation = 'menu'
             crash(traceback.format_exc(), 'menu')
-
-
 
     display.quit()
     raise SystemExit
