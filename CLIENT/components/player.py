@@ -57,7 +57,7 @@ class Player:
         #     'body': transform.scale(body, (int(w * 0.9), int((w * 0.9) / body.get_width() * body.get_height())))
         # }
 
-        self.base_limb = Surface((w // 2, int(h * 16 / 3)), SRCALPHA)
+        self.base_limb = Surface((w // 2, int(h * 3 // 16)), SRCALPHA)
         self.left_limb = self.right_limb = self.base_limb.copy()
 
         self.base_head = Surface((w, w), SRCALPHA)
@@ -95,18 +95,18 @@ class Player:
 
     def animate(self, surf, x_offset, y_offset, x_focus, y_focus):
         if self.angle_front < self.limb_raises[self.state][0]:
-            self.angle_front += 1
-            self.angle_back -= 1
+            self.angle_front += 0.005
+            self.angle_back -= 0.005
 
         elif self.angle_front > self.limb_raises[self.state][0]:
-            self.angle_front -= 1
-            self.angle_back += 1
+            self.angle_front -= 0.005
+            self.angle_back += 0.005
 
         elif self.angle_front == self.limb_raises[self.state][0]:
             self.limb_raises[self.state] = self.limb_raises[self.state][::-1]
 
-        self.left_limb = rah.joint_rotate(self.left_limb, self.angle_front, True)
-        self.right_limb = rah.joint_rotate(self.right_limb, self.angle_back, True)
+        self.left_limb = rah.joint_rotate(self.base_limb, self.angle_front, True)
+        self.right_limb = rah.joint_rotate(self.base_limb, self.angle_back, True)
 
         self.view_angle = atan2(x_focus - self.rect.centerx - x_offset, y_focus - self.rect.centery - y_offset)
 
