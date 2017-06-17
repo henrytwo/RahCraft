@@ -44,6 +44,10 @@ def center(x, y, canvas_w, canvas_h, object_w, object_h):
     return x + canvas_w // 2 - object_w // 2, y + canvas_h // 2 - object_h // 2
 
 
+def point_center(point_x, point_y, object_w, object_h):
+    return point_x - (object_w // 2), point_y - (object_h // 2)
+
+
 def rah(screen):
     if mouse.get_pos()[0] in range(1, 799) and mouse.get_pos()[1] in range(1, 499):
         screen.fill((255, 255, 255))

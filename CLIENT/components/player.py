@@ -77,6 +77,11 @@ class Player:
         self.angle_front = self.angle_back = 90
         self.view_angle = 0
 
+        self.head_pos = self.rect.centerx, self.rect.y + (h // 8)
+        self.neck_pos = self.rect.centerx, self.rect.y + (h // 4)
+        self.centre_pos = self.rect.centerx, self.rect.centery - (h // 16)
+        self.bottom_pos = self.rect.centerx, self.rect.bottom - (h * 8 / 3)
+
     def get_state(self, keys):
         self.state = 'standing'
 
@@ -100,18 +105,25 @@ class Player:
         elif self.angle_front == self.limb_raises[self.state][0]:
             self.limb_raises[self.state] = self.limb_raises[self.state][::-1]
 
-        self.left_limb = rah.joint_rotate(self.left_limb, self.angle_front)
-        self.right_limb = rah.joint_rotate(self.right_limb, self.angle_back)
+        self.left_limb = rah.joint_rotate(self.left_limb, self.angle_front, True)
+        self.right_limb = rah.joint_rotate(self.right_limb, self.angle_back, True)
 
         self.view_angle = atan2(x_focus - self.rect.centerx - x_offset, y_focus - self.rect.centery - y_offset)
 
-        self.head = rah.joint_rotate(self.base_head, self.view_angle)
+        self.head = rah.joint_rotate(self.base_head, self.view_angle, False)
 
-        surf.blit(self.left_limb, ())
-        surf.blit(self.right_limb, ())
-        surf.blit(self.torso, ())
-        surf.blit(self.right_limb, ())
-        surf.blit(self.left_limb, ())
+        surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+                                                   *self.left_limb.get_size()))
+        surf.blit(self.right_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+                                                    *self.right_limb.get_size()))
+        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
+                                               *self.torso.get_size()))
+        surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+                                                    *self.left_limb.get_size()))
+        surf.blit(self.left_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+                                                   *self.left_limb.get_size()))
+        surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
+                                              *self.head.get_size()))
 
     def control(self, keys, fly):
         if fly:
