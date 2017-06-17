@@ -1,22 +1,11 @@
-import os
-import sys
+import os, sys, traceback, platform, glob, socket, pickle, json
 
-import traceback
-import platform
 from subprocess import Popen, PIPE
 from shlex import split
-import glob
-
-import socket
 from multiprocessing import *
-
-import pickle
-import json
-
 import numpy as np
 from math import *
 from copy import deepcopy
-
 import time as ti
 from pygame import *
 from random import *
@@ -94,7 +83,7 @@ def load_items(item_file):
 def create_item_dictionary(*libraries):
     item_lib = {}
 
-    for di in libraries:
+    for item in libraries:
         for item in di:
             item_lib[item] = [di[item]['name'], di[item]['icon'], di[item]['maxstack']]
 
@@ -164,9 +153,6 @@ def game(surf, username, token, host, port, size):
                         surf.blit(breaking_animation[int(percent_broken)],
                                   (x - x_offset % block_size, y - y_offset % block_size))
 
-                        # elif block < 0:
-                        #     draw.rect(surf, (100, 100, 100),
-                        #               (x - x_offset % block_size, y - y_offset % block_size, block_size, block_size))
 
     def render_hotbar(hotbar_slot):
         surf.blit(hotbar, hotbar_rect)
@@ -177,8 +163,7 @@ def game(surf, username, token, host, port, size):
             if hotbar_items[item][1] != 0:
                 surf.blit(item_lib[hotbar_items[item][0]][1], (hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
                 if hotbar_items[item][1] > 1:
-                    surf.blit(rah.text(str(hotbar_items[item][1]), 10),
-                              (hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
+                    surf.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
             if len(hotbar_items[item]) == 3:
                 draw.rect(surf, (0, 0, 0), (hotbar_rect[0] + (32 + 8) * item + 10, size[1] - 10, 24, 2))
@@ -296,7 +281,7 @@ def game(surf, username, token, host, port, size):
         except:
             pass
 
-        clock.tick(30)
+        clock.tick(15)
 
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = first_message[1:]
 
@@ -328,8 +313,7 @@ def game(surf, username, token, host, port, size):
 
         connecting_text = rah.text("Downloading world...", 15)
 
-        surf.blit(connecting_text,
-                  rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
+        surf.blit(connecting_text, rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
         tile_w = size[0]//8
 
@@ -345,8 +329,6 @@ def game(surf, username, token, host, port, size):
 
         try:
             world_msg = message_queue.get_nowait()
-
-            #print(world_msg)
 
             if world_msg[0] == 2:
                 world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
@@ -367,7 +349,7 @@ def game(surf, username, token, host, port, size):
         except:
             pass
 
-        clock.tick(30)
+        clock.tick(15)
 
     # Init Existing Remote Players
     # =====================================================================
@@ -384,7 +366,6 @@ def game(surf, username, token, host, port, size):
     tick_timer = time.set_timer(TICKEVENT, 50)
     current_tick = 0
 
-    # sky = transform.scale(image.load("textures/sky/sky.png"), (5600, 800))
     sun = transform.scale(image.load("textures/sky/sun.png"), (100, 100))
     moon = transform.scale(image.load("textures/sky/moon.png"), (100, 100))
     sky_tick = 1
@@ -404,6 +385,8 @@ def game(surf, username, token, host, port, size):
     inventory_visible = False
     chat_enable = False
     debug = False
+
+    text_height = rah.text("QWERTYRAHMA", 10).get_height()
 
     pause_list = [[0, 'unpause', "Back to game"],
                   [1, 'options', "Options"],
@@ -453,16 +436,6 @@ def game(surf, username, token, host, port, size):
 
     block_step = None
 
-    # music_list = [mixer.Sound('sound/music/bg%i.wav' % song) for song in range(1, choice([5,5,5,5,5,5,5,5,5,6]))]
-    #
-    # shuffle(music_list)
-    #
-    # music_object = mixer.Sound(music_list[0])
-    #
-    # music_list.append(music_list[0])
-    # del music_list[0]
-    #
-    # music_object.play(1, 0)
     music_object = mixer.Sound('sound/music/bg4.wav')
     music_object.play(1, 0)
 
@@ -502,15 +475,6 @@ def game(surf, username, token, host, port, size):
 
     try:
         while True:
-
-            # if not music_object.get_busy():
-            #     music_object = mixer.Sound(music_list[0])
-            #
-            #     music_list.append(music_list[0])
-            #     del music_list[0]
-            #
-            #     music_object.play(1, 0)
-
             release = False
             on_tick = False
             block_broken = False
@@ -524,11 +488,6 @@ def game(surf, username, token, host, port, size):
                 if e.type == QUIT:
                     quit_game()
                     return 'menu'
-
-                    # elif e.type == ACTIVEEVENT:
-                    #     if e.state == 1:
-                    #         paused = True
-                    #
 
                 elif e.type == MOUSEBUTTONDOWN and not paused:
                     if e.button == 1:
@@ -604,10 +563,10 @@ def game(surf, username, token, host, port, size):
                         if e.unicode in INVENTORY_KEYS:
                             hotbar_slot = int(e.unicode) - 1
 
-                        if e.key == K_f:
+                        if e.key == K_f and debug:
                             fly = not fly
 
-                        if e.key == K_r:
+                        if e.key == K_r and debug:
                             local_player.rect.y -= 40
 
                         if e.key == K_e and current_gui == '' or current_gui == 'I':
@@ -808,7 +767,6 @@ def game(surf, username, token, host, port, size):
 
             except:
                 pass
-                #print(traceback.format_exc())
 
             # Adding Sky
             # =======================================================
@@ -843,7 +801,6 @@ def game(surf, username, token, host, port, size):
                     if star[0] > size[0]:
                         star[0] = 0
 
-            # surf.blit(sky, (int(0 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 2 - 400, -200)))
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
             surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
 
@@ -1092,8 +1049,7 @@ def game(surf, username, token, host, port, size):
                                '---------',
                                username] + [player for player in remote_players]
 
-                    tab_back = Surface((200, len(players) * 30 + 10),
-                                       SRCALPHA)
+                    tab_back = Surface((200, len(players) * 30 + 10), SRCALPHA)
 
                     tab_back.fill(Color(75, 75, 75, 150))
 
@@ -1102,8 +1058,6 @@ def game(surf, username, token, host, port, size):
                     for y in range(0, len(players)):
                         about_text = normal_font.render(players[y], True, (255, 255, 255))
                         surf.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
-
-            text_height = rah.text("QWERTYRAHMA", 10).get_height()
 
             while len(chat_list) * text_height > (5 * size[1]) // 8:
                 del chat_list[0]
@@ -1139,15 +1093,3 @@ def game(surf, username, token, host, port, size):
     except:
         quit_game()
         return 'crash', traceback.format_exc(), 'menu'
-
-
-if __name__ == "__main__":
-    host = "127.0.0.1"
-    port = 5276
-
-    size = (800, 500)
-    surf = display.set_mode(size)
-
-    font.init()
-
-    game(surf, "6", host, port, size)

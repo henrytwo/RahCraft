@@ -1,40 +1,32 @@
-import os.path
-import sys
-import traceback
+import os.path, sys, traceback, socket, json, platform, time, datetime
+
 from collections import deque
-import socket
 import pickle as pkl
 from multiprocessing import *
 from copy import deepcopy
-import json
-
 from subprocess import Popen, PIPE
 from shlex import split
-import platform
 import numpy as np
-
 from math import *
-import time
 from random import *
-
 import time as t
-import datetime
-
 from components.slack import *
 from components.world import *
 
 import getpass
 import requests
 
-with open("data/config.rah", "r") as config:
+
+with open("data/config.rah", "r") as config: # Reading server settings from a file so that the settings can be easily modifiable and is saved
     config = config.read().strip().split("\n")
-    host = config[0]
-    port = int(config[1])
-    world_name = config[2]
-    slack_enable = int(config[3])
-    channel = config[4]
-    online = int(config[5])
-    whitelist_enable = int(config[6])
+    host = config[0]  # The ip address that the socket will bind to
+    port = int(config[1])  # The port that the socket will bind to
+    world_name = config[2]  # The name of the world to load
+    slack_enable = int(config[3])  # Slack integration to help with server management
+    channel = config[4]  # Slack channel to broadcast messages
+    online = int(config[5])  # Whether to check login with the auto server or not to prevent cheating
+    whitelist_enable = int(config[6])  # Whitelist to control who can access the server
+
 
 # If world doesn't exist
 if not os.path.isfile('saves/%s.pkl' % world_name):
@@ -46,49 +38,40 @@ if not os.path.isfile('saves/%s.pkl' % world_name):
     with open('saves/%s.pkl' % world_name, 'wb') as file:
         pkl.dump(world, file)
 
-else:
-    world = pkl.load(open('saves/world.pkl', 'rb'))
 
-
+# A player class is used here to store all of the important information about a player
+# Functions are there to provide an easier way to modify player information
 class Player(object):
-    global PlayerData, PlayerUUID, itemLib
+    global PlayerData  # Global variable is user here to help with saving player data
 
-    def __init__(self, player_number, player_username):
+    def __init__(self, player_number, player_username):  # Init function takes in the player number and the username for player lookup
         self.username = player_username
         self.number = player_number
 
-        self.cord, self.spawnCord, self.inventory, self.hotbar, self.health, self.hunger = self.get_player_info()
+        self.cord, self.spawnCord, self.inventory, self.hotbar, self.health, self.hunger = self.get_player_info()  # Getting the the player information using the get_player_info function
 
+    # This function checks if the player has a save available. If there is, the saved data is returned. If player is not in PlayerData, then create a new save file for the player
     def get_player_info(self):
-        try:
+        if self.username in PlayerData:
             return PlayerData[self.username]
-        except KeyError:
+        else:
+            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint, [[[0, 0] for _ in range(9)] for __ in range(3)], [[0, 0] for _ in range(9)], 20, 20]
 
-            PlayerData[self.username] = [world.spawnpoint, world.spawnpoint,
-                                         [[[0, 0] for _ in range(9)] for __ in range(3)],
-                                         [[0, 0] for _ in range(9)], 20, 20]
-
-
-            # rahprint(PlayerData[self.username])
             return PlayerData[self.username]
 
+    # Change the spawn point of the player due to griefing
     def change_spawn(self, spawn_position):
         self.spawnCord = spawn_position[:]
 
+    # Modify the current position of the player to match the positions that the client sent for saving
     def change_location(self, cord_change):
         self.cord = cord_change[:]
 
-        rahprint(self.cord)
+        rahprint(self.cord)  # rahprint function for debugging
 
         return self.cord[0], self.cord[1]
 
-    def change_inventory(self, item, slot, amount):
-        self.inventory[slot][0] = self.itemLib[item]
-        self.inventory[slot][1] += amount
-
-        if self.inventory[slot][1] == 0:
-            self.inventory[slot][0] = 0
-
+    # Change the complete inventory and the hotbar of the player
     def change_inventory_all(self, cinventory, chotbar):
         self.inventory = deepcopy(cinventory)
         self.hotbar = deepcopy(chotbar)
@@ -99,120 +82,106 @@ class Player(object):
         if self.health <= 0:
             self.respawn()
 
-    def update_food(self, food):
-        # self.hunger += self.foodLib[food][0]
-        # self.satura += self.foodLib[food][0]
-
-        pass
-
-    def respawn(self):
-        # self.x = self.spawnx
-        # self.y = self.spawny
-
-        self.inventory = [[0, 0] for _ in range(36)]
-        self.hotbar = [[0, 0] * 2 for _ in range(36)]
-        self.hunger = 20
-        self.health = 20
-        # self.saturation = 10
-
+    # Returns player data for saving
     def save(self):
         return [(self.cord[0], self.cord[1]), self.spawnCord, self.inventory, self.hotbar,
                 self.health, self.hunger]
 
-
+# The world class contains the numpy array of the world and several useful function for easier modification of the world
 class World:
-    def __init__(self, world_name):
-        self.overworld = self.load_world(world_name)
+    def __init__(self, world_name):  # Uses the world name to load the world from the saves
+        self.overworld = pkl.load(open("saves/" + worldn + ".pkl", "rb"))
         self.spawnpoint = self.get_spawnpoint()
 
-    def load_world(self, worldn):
-        return pkl.load(open("saves/" + worldn + ".pkl", "rb"))
-
-    def get_world(self, x, y, size, block_size):
+    def get_world(self, x, y, size, block_size):  # Function to calculate the what blocks to send to the client
 
         width, height = size[0] // block_size, size[1] // block_size
 
         return self.overworld[x - 5:x + width + 5, y - 5:y + height + 5]
 
-    def break_block(self, x, y):
+    def break_block(self, x, y):  # A block is broken so the numpy array needs to be modified
         self.overworld[x, y] = 0
 
-    def place_block(self, x, y, blocktype):
+    def place_block(self, x, y, blocktype):  # A block is placed so the numpy array needs to be modified
         self.overworld[x, y] = blocktype
 
-    def get_spawnpoint(self):
-        x = len(self.overworld) // 2
+    def get_spawnpoint(self):  # This function calculates the spawn point of the world
+        x = len(self.overworld) // 2  # The search begans in the middle of the world and spreads out from there
         spawn_offset = 0
         spawn_found = False
-        search_cords = self.overworld[x, :len(self.overworld[x])]
+        search_cords = self.overworld[x, :len(self.overworld[x])]  # A list of cords to search
 
-        while not spawn_found:
+        while not spawn_found:  # While a vaild spawnpoint is not found
             for y in range(len(search_cords)):
-                if y != 0 and search_cords[y] != 0:
-                    spawn_found = True
-                    x += spawn_offset
-                    y -= 1
+                if y != 0 and search_cords[y] != 0:  # if the spawnpoint is found
+                    spawn_found = True  # Setting spawn_found to true to break the search while loop
+                    x += spawn_offset  # getting the offset + the starting x
+                    y -= 1  # getting the currect y cord
                     break
 
-            if spawn_offset < 0:
+            if spawn_offset < 0:  # These if statements reverses the spawn_offset every loop to search once on the left and once on the right.
                 spawn_offset = abs(spawn_offset)
             elif spawn_offset > 0:
                 spawn_offset = spawn_offset * -1 - 1
             else:
-                spawn_offset -= 1
+                spawn_offset -= 1  # Increase/decrease the offset to increase search range
 
-            search_cords = self.overworld[x + spawn_offset, :len(self.overworld[x + spawn_offset])]
+            search_cords = self.overworld[x + spawn_offset, :len(self.overworld[x + spawn_offset])]  # Getting the cords needed to be searched on the next loop
 
         return x, y
 
-    def save(self):
+    def save(self):  # Saving the world to a file
         pkl.dump(self.overworld, open('saves/world.pkl', 'wb'))
 
+# A function used to write the server log to a file to help with server debugging
 def logger(log_queue):
     with open('data/log.log', 'a+') as data_file:
         while True:
             data_file.write(str(log_queue.get()) + '\n')
-            data_file.flush()
+            data_file.flush()  # Flushing the data so it can be written to the os write queue and be written to the file without calling close
 
+# A useful function for debugging. Print_enable can disable debug printing with ease
 def rahprint(text):
     print_enable = False
 
     if print_enable:
         print(text)
 
+# A sender that sends the messages to the clients using socket io
 def player_sender(send_queue, server):
     rahprint('Sender running...')
 
     while True:
-        tobesent = send_queue.get()
-        try:
-            server.sendto(pkl.dumps(tobesent[0], protocol=4), tobesent[1])
+        tobesent = send_queue.get() # This gets the message needed to be sent from a queue
+        try:  # A try except is used here because socket will return an error if the destination address is not valid
+            server.sendto(pkl.dumps(tobesent[0], protocol=4), tobesent[1])  # Pickles the message to bytes and sends to the address
         except:
             print(tobesent[0])
 
+# A message reciever is used to prevent loss of messages due to socket overload/socket buffer is full
 def receive_message(message_queue, server):
     rahprint('Server is ready for connection!')
-
     while True:
-        try:
-            message = server.recvfrom(1024)
+        try:  # A try except is needed here because the server can sometimes recieve partial packet due to client crash or internet error
+            message = server.recvfrom(1024)  # Recieving messages with a buffer of 1024 bits
+            message_queue.put((pkl.loads(message[0]), message[1]))  # Puts both the message and the address into the message queue because UDP is a connectionless protocol. The only way to identify a client is by address
         except:
             continue
-        message_queue.put((pkl.loads(message[0]), message[1]))
 
-
+# Give items is a function used by the /give command
+# This function helps find a space to put the item
 def give_item(inventory, hotbar, Nitem, quantity):
-    item_location = ''
-    inventory_type = ''
-    for item in range(len(hotbar)):
-        if hotbar[item][1] < 64:
+    item_location = ''  # used to store the first location where the item can be stored
+    inventory_type = ''  # This is used to store the first open slot type (inventory or hotbar)
+    for item in range(len(hotbar)):  # Loop through the hotbar first because the hotbar takes priority
+        if hotbar[item][1] < 64:  # If stacking is possible, stack item and quit
             hotbar[item][1] += quantity
             return inventory, hotbar
-        elif hotbar[item][0] == 0 and inventory_type == '':
+        elif hotbar[item][0] == 0 and inventory_type == '':  # If an open space is found, store the cords and type for later use if not valid stacking spot is found
             item_location = item
             inventory_type = 'hotbar'
 
-    for row in range(len(inventory)):
+    for row in range(len(inventory)):  # Same as above but searches through the inventory instead
         for item in range(len(inventory[row])):
             if inventory[row][item][0] == Nitem and inventory[row][item][1] < 64:
                 inventory[row][item][1] += quantity
@@ -221,12 +190,13 @@ def give_item(inventory, hotbar, Nitem, quantity):
                 item_location = [row, item]
                 inventory_type = 'inventory'
 
-    if inventory_type == 'hotbar':
+    if inventory_type == 'hotbar':  # If no place to stack te inventory is found, place the item(s) in the first open slot found
         hotbar[item_location] = [Nitem, quantity]
     elif inventory_type == 'inventory':
         inventory[item_location[0]][item_location[1]] = [Nitem, quantity]
 
     return inventory, hotbar
+
 
 def commandline_in(commandline_queue, fn):
     rahprint('Ready for input.')
