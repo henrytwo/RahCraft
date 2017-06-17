@@ -109,7 +109,8 @@ class Player:
             else:
                 self.state = 'walking'
 
-    def animate(self, surf, x_offset, y_offset, x_focus, y_focus):
+    def animate(self, surf, x_offset, y_offset, x_focus, y_focus, selected_texture):
+
         if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
                 < round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
             self.angle_front += self.limb_raises[self.state][1]
@@ -142,6 +143,7 @@ class Player:
 
         surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
                                                    *self.left_limb.get_size()))
+
         surf.blit(self.left_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                    *self.left_limb.get_size()))
         surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
@@ -152,6 +154,9 @@ class Player:
                                                     *self.right_limb.get_size()))
         surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                     *self.left_limb.get_size()))
+
+        if selected_texture:
+            surf.blit(selected_texture, rah.point_center(self.neck_pos[0] - x_offset + self.base_limb.get_width() * cos(self.angle_back), self.neck_pos[1] - y_offset + self.base_limb.get_height() * sin(self.angle_back), *selected_texture.get_size()))
 
     def control(self, keys, fly):
         if fly:
@@ -271,7 +276,11 @@ class Player:
             self.control(keys, fly)
 
         self.collide(collision_blocks, fly)
-        self.animate(surf, x_offset, y_offset, *m_pos)
+
+        if selected_texture:
+            selected_texture = transform.scale(selected_texture, (self.rect.w//2, self.rect.w//2))
+
+        self.animate(surf, x_offset, y_offset, *m_pos, selected_texture)
 
         # for block in collision_blocks:
         #     if type(block) is Rect:
@@ -291,10 +300,6 @@ class Player:
         # surf.blit(self.texture['head'], (self.rect.x - x_offset + self.rect.w//2 - (self.texture['head'].get_width() * 1.1)//2, self.rect.y - y_offset - int(self.frame)))
         # surf.blit(self.texture['body'], (self.rect.x - x_offset + self.rect.w//2 - self.texture['body'].get_width()//2, self.rect.y - y_offset + self.rect.h - self.texture['body'].get_height()))
         #
-        # surf.blit(selected_texture, (0,0))
-        #
-        # surf.blit(selected_texture, (self.rect.x + self.rect.w - selected_texture.get_width(), self.rect.y + self.rect.h//2 - selected_texture.get_height()//2))
-
 
 class RemotePlayer:
     def __init__(self, username, x, y, w, h):

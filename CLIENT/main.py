@@ -465,8 +465,8 @@ def about():
 
         if scroll_y < -20 * len(about_list):
             music_object.stop()
-            music_object = mixer.Sound('sound/menu_music/menu.ogg')
-            music_object.play(-1, 0)
+            #music_object = mixer.Sound('sound/menu_music/menu.ogg')
+            #music_object.play(-1, 0)
             return 'menu'
 
         release = False
@@ -486,8 +486,8 @@ def about():
             if e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
                     music_object.stop()
-                    music_object = mixer.Sound('sound/menu_music/menu.ogg')
-                    music_object.play(-1, 0)
+                    #music_object = mixer.Sound('sound/menu_music/menu.ogg')
+                    #music_object.play(-1, 0)
 
                     return 'menu'
 
@@ -1339,10 +1339,6 @@ if __name__ == "__main__":
                 game_nav = Game.game(screen, username, token, host, port, size)
 
                 navigation = game_nav
-
-            elif navigation == 'about':
-                music_object.stop()
-                navigation = about()
 
             elif navigation[0] == 'crash':
                 navigation = crash(navigation[1], navigation[2])
