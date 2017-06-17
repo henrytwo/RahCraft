@@ -453,7 +453,7 @@ def game(surf, username, token, host, port, size):
 
     block_step = None
 
-    music_list = [mixer.Sound('sound/music/bg%i.wav' % song) for song in range(1, choice([5,5,5,5,5,5,5,5,5,6]))]
+    music_list = [mixer.Sound('sound/music/bg4.wav')]#[mixer.Sound('sound/music/bg%i.wav' % song) for song in range(1, choice([5,5,5,5,5,5,5,5,5,6]))]
 
     shuffle(music_list)
 
