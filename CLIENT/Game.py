@@ -843,6 +843,18 @@ def game(surf, username, token, host, port, size):
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
             surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
 
+            draw.rect(surf, (0, 0, 0), (0, (100 * block_size) - y_offset, size[0], size[1]))
+
+            bg_tile = Surface((block_size, block_size))
+            bg_tile.blit(block_properties[9]['texture'], (0,0))
+            bg_tile.set_alpha(200)
+
+
+            for x in range(0, size[0], block_size):
+                for y in range(0, size[1], block_size):
+
+                    surf.blit(bg_tile, (x,y + (100 * block_size) - y_offset))
+
             # Render World
             # =======================================================
             try:
