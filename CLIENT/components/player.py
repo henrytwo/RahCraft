@@ -44,6 +44,10 @@ class Player:
         self.standing = False
         self.sneaking = False
 
+        self.fall_distance = 0
+        self.fall_y = 0
+        self.land_y = 0
+
         self.surrounding_shifts = [(sx, sy) for sy in range(-2, 3) for sx in range(-1, 2)]
 
         # self.frame = 0
@@ -141,6 +145,7 @@ class Player:
 
         self.head = rah.joint_rotate(self.base_head, self.view_angle, False)
 
+
         surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
                                                    *self.left_limb.get_size()))
 
@@ -199,6 +204,7 @@ class Player:
             if (keys[self.controls[2]] or keys[self.controls[4]]) and self.standing:
                 self.vy = self.base_vy
                 self.standing = False
+                self.fall_y = self.actual_y
 
     def collide(self, blocks, fly):
         if self.sneaking and type(blocks[4]) is not Rect:
@@ -235,6 +241,7 @@ class Player:
                 if self.vy >= 0:
                     self.rect.bottom = block.top
                     self.standing = True
+                    self.land_y = self.actual_y
                 elif self.vy < 0:
                     self.rect.top = block.bottom
 
@@ -282,6 +289,8 @@ class Player:
 
         self.animate(surf, x_offset, y_offset, *m_pos, selected_texture)
 
+        print((self.land_y - self.fall_y)//block_size)
+
         # for block in collision_blocks:
         #     if type(block) is Rect:
         #         draw.rect(surf, (200, 200, 200), (block.x - x_offset, block.y - y_offset, *block.size))
@@ -312,10 +321,53 @@ class RemotePlayer:
         self.w = w
         self.h = h
 
+        self.rect = Rect(x, y, w, h)
+
         self.username = username
         self.name_tag = normal_font.render(username, True, (255, 255, 255))
         self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height() + 10), SRCALPHA)
         self.name_back.fill(Color(75, 75, 75, 150))
+
+        self.base_limb = Surface((int(h * 3 / 4), (w // 2)), SRCALPHA)
+        self.base_limb.fill(Color(125, 125, 125, 125))
+        self.base_limb.fill(Color(0, 0, 0, 0), (0, 0, self.base_limb.get_width() // 2, self.base_limb.get_height()))
+        self.base_limb.fill(Color(255, 255, 255, 255), (self.base_limb.get_width() // 2 + 2, 2,
+                                                        self.base_limb.get_width() // 2 - 4,
+                                                        self.base_limb.get_height() - 4))
+
+        self.left_limb = self.base_limb.copy()
+        self.right_limb = self.base_limb.copy()
+
+        self.torso = Surface((w // 2, int(h * 3 / 8)), SRCALPHA)
+        self.torso.fill(Color(125, 125, 125, 125))
+        self.torso.fill(Color(255, 255, 255, 255), (2, 2,
+                                                    self.torso.get_width() - 4,
+                                                    self.torso.get_height() - 4))
+
+        self.base_head = Surface((w, w), SRCALPHA)
+        self.base_head.fill(Color(125, 125, 125, 125))
+        self.base_head.fill(Color(255, 255, 255, 255), (2, 2, w - 4, w - 4))
+        self.head = self.base_head.copy()
+
+        self.limb_raises = {
+            'standing': [[radians(93), radians(87)], 0.008],
+            'walking': [[radians(50), radians(130)], 0.06],
+            'running': [[radians(30), radians(150)], 0.1],
+            'sneaking': [[radians(85), radians(95)], 0.005],
+        }
+
+        self.state = 'standing'
+
+        self.angle_front = self.angle_back = radians(90)
+        self.view_angle = 0
+
+        self.head_pos = self.rect.centerx, self.rect.y + (h // 8)
+        self.neck_pos = self.rect.centerx, self.rect.y + (h // 4)
+        self.centre_pos = self.rect.centerx, self.rect.centery - (h // 16)
+        self.bottom_pos = self.rect.centerx, self.rect.bottom - (h * 8 / 3)
+
+        self.head_bob = 0
+        self.head_bob_dir = -1
 
     def calculate_velocity(self, ncord, fpt):
         self.vy = (ncord[1] - self.y) // fpt
@@ -327,15 +379,65 @@ class RemotePlayer:
         if self.vy == 0 and ncord[1] - self.y != 0:
             self.y = ncord[1]
 
+    def animate(self, surf, x_offset, y_offset):
+
+        if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
+                < round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
+            self.angle_front += self.limb_raises[self.state][1]
+            self.angle_back -= self.limb_raises[self.state][1]
+
+        elif round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
+                > round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
+            self.angle_front -= self.limb_raises[self.state][1]
+            self.angle_back += self.limb_raises[self.state][1]
+
+        else:
+            self.limb_raises[self.state][0] = self.limb_raises[self.state][0][::-1]
+
+        if round(self.head_bob) in [3, -1]:
+            self.head_bob_dir *= -1
+
+        self.head_bob += 0.1 * self.head_bob_dir
+
+        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8) + self.head_bob
+        self.neck_pos = self.rect.centerx, self.rect.y + (self.rect.h // 4)
+        self.centre_pos = self.rect.centerx, self.rect.centery - (self.rect.h // 16)
+        self.bottom_pos = self.rect.centerx, self.rect.bottom - (self.rect.h * 3 // 8)
+
+        self.left_limb = rah.joint_rotate(self.base_limb, self.angle_front, True)
+        self.right_limb = rah.joint_rotate(self.base_limb, self.angle_back, True)
+
+        self.head = rah.joint_rotate(self.base_head, 0, False)
+
+        print(self.neck_pos[0] - x_offset)
+
+        surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+                                                   *self.left_limb.get_size()))
+
+        surf.blit(self.left_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+                                                   *self.left_limb.get_size()))
+        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
+                                               *self.torso.get_size()))
+        surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
+                                              *self.head.get_size()))
+        surf.blit(self.right_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+                                                    *self.right_limb.get_size()))
+        surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+                                                    *self.left_limb.get_size()))
+
+
     def update(self, surf, x_offset, y_offset):
         self.y += self.vy
         self.x += self.vx
 
         draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y - y_offset, self.w, self.h))
+
         surf.blit(self.name_back, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                              self.name_back.get_width(), self.name_back.get_height()))
         surf.blit(self.name_tag, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                             self.name_tag.get_width(), self.name_tag.get_height()))
+
+        self.animate(surf, self.x - x_offset, self.y - y_offset)
 
 # Lighting
 # draw.circle(self.reach_surf, Color(255, 255, 255, (reach * 20 - a) * 2), (reach * 20, reach * 20), a)

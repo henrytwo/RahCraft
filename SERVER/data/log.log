@@ -136,5 +136,69 @@
 [2017-06-17 00:43:20][Rahbot] asd has connected to the game
 [2017-06-17 00:50:10][Rahbot] asd has connected to the game
 [2017-06-17 00:54:45][Rahbot] asd has disconnected from the game
+<<<<<<< HEAD
 [2017-06-17 09:44:02][Rahbot] asd has connected to the game
 [2017-06-17 09:44:56][Rahbot] asd has connected to the game
+=======
+>>>>>>> master
+[2017-06-17 11:11:40][Rahbot] Henry has connected to the game
+[2017-06-17 11:18:58][Rahbot] Henry has connected to the game
+[2017-06-17 11:18:58][Rahbot] Henry has disconnected from the game
+[2017-06-17 12:48:42][Rahbot] Rahbot pardoned Henry
+[2017-06-17 12:48:46][Rahbot] Henry has connected to the game
+[2017-06-17 12:48:46][Rahbot] Henry has disconnected from the game
+[2017-06-17 12:49:07][Rahbot] poi has connected to the game
+[2017-06-17 12:49:08][Rahbot] poi has disconnected from the game
+[2017-06-17 12:49:24][Rahbot] Rahbot pardoned Henry
+[2017-06-17 12:49:28][Rahbot] Henry has connected to the game
+[2017-06-17 12:50:42][Rahbot] Command '' executed by Henry
+[2017-06-17 12:50:58][Rahbot] {('127.0.0.1', 42461): <__main__.Player object at 0x7f51ffc6ee48>}
+[2017-06-17 12:51:19][Rahbot] Command 'players[('127.0.0.1', 42461)].health = 5' executed by Henry
+[2017-06-17 12:51:21][Rahbot] Server synchronized
+[2017-06-17 12:51:49][Rahbot] Command 'players[('127.0.0.1', 42461)].health = 0' executed by Henry
+[2017-06-17 12:51:49][Rahbot] Henry has disconnected from the game
+[2017-06-17 12:58:12][Rahbot] poi has connected to the game
+[2017-06-17 13:00:06][Rahbot] poi has connected to the game
+[2017-06-17 13:00:08][Rahbot] Command not found
+[2017-06-17 13:00:09][Rahbot] Access denied
+[2017-06-17 13:00:16][Rahbot] Rahbot gave asd op
+[2017-06-17 13:00:20][Rahbot] Access denied
+[2017-06-17 13:00:30][Rahbot] Rahbot gave poi op
+[2017-06-17 13:00:33][Rahbot] Server synchronized
+[2017-06-17 13:01:15][Rahbot] poi has connected to the game
+[2017-06-17 13:01:18][Rahbot] Server synchronized
+[2017-06-17 13:01:21][poi] hi
+[2017-06-17 13:01:24][Rahbot] Server synchronized
+[2017-06-17 13:01:32][Rahbot] Command not found
+[2017-06-17 13:01:34][Rahbot] {('127.0.0.1', 45100): <__main__.Player object at 0x7f48ccd83b38>}
+[2017-06-17 13:01:52][Rahbot] Command 'players[('127.0.0.1', 45100)].health = 1' executed by poi
+[2017-06-17 13:01:54][Rahbot] Server synchronized
+[2017-06-17 13:02:52][Rahbot] Command 'players[('127.0.0.1', 45100)].health = 0' executed by poi
+[2017-06-17 13:02:52][Rahbot] poi has disconnected from the game
+[2017-06-17 13:11:33][Rahbot] asd has connected to the game
+[2017-06-17 13:11:49][Rahbot] asd has disconnected from the game
+[2017-06-17 13:11:52][Rahbot] asd has connected to the game
+[2017-06-17 13:12:09][Rahbot] Command not found
+[2017-06-17 13:12:11][Rahbot] Rahbot pardoned poi
+[2017-06-17 13:12:15][Rahbot] poi has connected to the game
+[2017-06-17 13:13:22][Rahbot] pardon asd
+[2017-06-17 13:13:25][Rahbot] Rahbot pardoned poi
+[2017-06-17 13:13:27][Rahbot] poi has connected to the game
+[2017-06-17 13:13:28][Rahbot] poi has disconnected from the game
+[2017-06-17 13:13:39][Rahbot] Rahbot pardoned poi
+[2017-06-17 13:13:41][Rahbot] asd was not found in the ban list
+[2017-06-17 13:13:46][Rahbot] poi has connected to the game
+[2017-06-17 13:13:48][Rahbot] asd has connected to the game
+[2017-06-17 13:14:28][Rahbot] asd has connected to the game
+[2017-06-17 13:14:30][Rahbot] poi has connected to the game
+[2017-06-17 13:15:42][Rahbot] poi has connected to the game
+[2017-06-17 13:15:49][Rahbot] asd has connected to the game
+[2017-06-17 13:17:57][Rahbot] poi has connected to the game
+[2017-06-17 13:18:02][Rahbot] asd has connected to the game
+[2017-06-17 13:59:47][Rahbot] asd has connected to the game
+[2017-06-17 14:01:19][Rahbot] asd has disconnected from the game
+[2017-06-17 14:05:10][Rahbot] asd has connected to the game
+[2017-06-17 14:10:57][Rahbot] asd has connected to the game
+[2017-06-17 14:13:19][Rahbot] asd has disconnected from the game
+[2017-06-17 14:16:09][Rahbot] asd has connected to the game
+[2017-06-17 14:17:13][Rahbot] poi has connected to the game

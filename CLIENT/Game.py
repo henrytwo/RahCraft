@@ -372,8 +372,7 @@ def game(surf, username, token, host, port, size):
     # Init Existing Remote Players
     # =====================================================================
     for Rp in r_players:
-        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 1,
-                                                 2 * block_size - 1)
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], 2 * block_size - 1, block_size)
 
     # Initing Pygame Components
     # =====================================================================
@@ -404,7 +403,7 @@ def game(surf, username, token, host, port, size):
     fly = False
     inventory_visible = False
     chat_enable = False
-    debug = True
+    debug = False
 
     pause_list = [[0, 'unpause', "Back to game"],
                   [1, 'options', "Options"],
@@ -765,7 +764,8 @@ def game(surf, username, token, host, port, size):
 
                     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-                    local_player = player.Player(player_x, player_y, block_size - 5, 2 * block_size - 5, block_size, 5,
+                    local_player = player.Player(player_x, player_y, (2 * block_size - 1) // 4, 2 * block_size - 1,
+                                                 block_size, 5,
                                                  (K_a, K_d, K_w, K_s, K_SPACE))
 
                     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
@@ -853,10 +853,8 @@ def game(surf, username, token, host, port, size):
             bg_tile.blit(block_properties[9]['texture'], (0,0))
             bg_tile.set_alpha(200)
 
-
             for x in range(0, size[0], block_size):
                 for y in range(0, size[1], block_size):
-
                     surf.blit(bg_tile, (x,y + (100 * block_size) - y_offset))
 
             # Render World
@@ -918,7 +916,7 @@ def game(surf, username, token, host, port, size):
                             if current_breaking[3] >= block_properties[current_breaking[0]]['hardness']:
                                 block_broken = True
 
-                                rah.load_sound(sound['step'][block_properties[world[hover_x, hover_y]]['sound']])
+                            rah.load_sound(sound['step'][block_properties[world[hover_x, hover_y]]['sound']])
 
                         else:
                             breaking_block = False

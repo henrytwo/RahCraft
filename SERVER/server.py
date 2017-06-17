@@ -190,7 +190,6 @@ def player_sender(send_queue, server):
         except:
             print(tobesent[0])
 
-
 def receive_message(message_queue, server):
     rahprint('Server is ready for connection!')
 
@@ -326,6 +325,7 @@ if __name__ == '__main__':
 
     chests = {}
     furnaces = {}
+    entities = {}
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
     server.bind((host, port))
@@ -366,6 +366,26 @@ if __name__ == '__main__':
 
 
     while True:
+        for player in players:
+            if players[player].health <= 0:
+                ban_message = "You have died. Game over, man, it's game over!"
+
+                ban[players[player].username] = {"message": ban_message}
+
+                with open('data/ban.json', 'w') as ban_data:
+                    json.dump(ban, ban_data, indent=4, sort_keys=True)
+
+                send_message = "%s was banned for dying" % players[player].username
+
+                sendQueue.put(((11, '\n\n\nDisconnected from server\n\n%s' % ban_message), player))
+
+                if send_message[0] != '[':
+                        send_message = '[%s] '%username_dict[('127.0.0.1', 0)] + send_message
+
+                for i in players:
+                    sendQueue.put(((10, send_message), i))
+
+
         pickled_message = messageQueue.get()
         message, address = pickled_message
         command = message[0]
