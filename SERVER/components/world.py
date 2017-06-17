@@ -41,12 +41,6 @@ def generate_structure(bx, by, world, structure):
 
     return structures[structure](bx, by, world)
 
-
-
-
-
-
-
 # ----- Game World Construction Function
 def generate_world(world_seed, biome_min, biome_max, w, h):
     """ Creates a world object randomly generated using a user-inputted seed. """
