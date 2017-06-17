@@ -99,12 +99,4 @@ def text(text, size):
 
 def joint_rotate(surf, angle, on_end):
     new_surf = surf.copy()
-    new_surf.fill(Color(125, 125, 125, 125))
-    if on_end:
-        new_surf.fill(Color(0, 0, 0, 0), (0, 0, surf.get_width() // 2, surf.get_height() // 2))
-        new_surf.fill(Color(255, 255, 255, 255), (surf.get_width() // 2 + 2, surf.get_height() // 2 + 2,
-                                                  surf.get_width() // 2 - 4, surf.get_height() // 2 - 4))
-    else:
-        new_surf.fill(Color(255, 255, 255, 255), (0, 0, surf.get_width() // 2 - 4, surf.get_height() // 2 - 4))
-
     return transform.rotate(new_surf, -degrees(angle))

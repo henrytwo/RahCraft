@@ -57,24 +57,37 @@ class Player:
         #     'body': transform.scale(body, (int(w * 0.9), int((w * 0.9) / body.get_width() * body.get_height())))
         # }
 
-        self.base_limb = Surface((w // 2, int(h * 3 // 16)), SRCALPHA)
-        self.left_limb = self.right_limb = self.base_limb.copy()
+        self.base_limb = Surface((int(h * 3 / 4), (w // 2)), SRCALPHA)
+        self.base_limb.fill(Color(125, 125, 125, 125))
+        self.base_limb.fill(Color(0, 0, 0, 0), (0, 0, self.base_limb.get_width() // 2, self.base_limb.get_height()))
+        self.base_limb.fill(Color(255, 255, 255, 255), (self.base_limb.get_width() // 2 + 2, 2,
+                                                        self.base_limb.get_width() // 2 - 4,
+                                                        self.base_limb.get_height() - 4))
+
+        self.left_limb = self.base_limb.copy()
+        self.right_limb = self.base_limb.copy()
+
+        self.torso = Surface((w // 2, int(h * 3 / 8)), SRCALPHA)
+        self.torso.fill(Color(125, 125, 125, 125))
+        self.torso.fill(Color(255, 255, 255, 255), (2, 2,
+                                                    self.torso.get_width() - 4,
+                                                    self.torso.get_height() - 4))
 
         self.base_head = Surface((w, w), SRCALPHA)
+        self.base_head.fill(Color(125, 125, 125, 125))
+        self.base_head.fill(Color(255, 255, 255, 255), (2, 2, w - 4, w - 4))
         self.head = self.base_head.copy()
 
-        self.torso = self.base_limb.copy()
-
         self.limb_raises = {
-            'standing': [80, 100],
-            'walking': [50, 130],
-            'running': [30, 150],
-            'sneaking': [85, 95],
+            'standing': [[radians(93), radians(87)], 0.008],
+            'walking': [[radians(50), radians(130)], 0.06],
+            'running': [[radians(30), radians(150)], 0.1],
+            'sneaking': [[radians(85), radians(95)], 0.005],
         }
 
         self.state = 'standing'
 
-        self.angle_front = self.angle_back = 90
+        self.angle_front = self.angle_back = radians(90)
         self.view_angle = 0
 
         self.head_pos = self.rect.centerx, self.rect.y + (h // 8)
@@ -85,7 +98,7 @@ class Player:
     def get_state(self, keys):
         self.state = 'standing'
 
-        if True in [keys[self.controls[i]] for i in [0, 1]]:
+        if True in [keys[self.controls[i]] for i in [0, 1]] and self.vx != 0:
             if keys[K_LCTRL]:
                 self.state = 'running'
             elif keys[K_LSHIFT]:
@@ -93,22 +106,31 @@ class Player:
             else:
                 self.state = 'walking'
 
+        print(self.state)
+
     def animate(self, surf, x_offset, y_offset, x_focus, y_focus):
-        if self.angle_front < self.limb_raises[self.state][0]:
-            self.angle_front += 0.005
-            self.angle_back -= 0.005
+        if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
+                < round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
+            self.angle_front += self.limb_raises[self.state][1]
+            self.angle_back -= self.limb_raises[self.state][1]
 
-        elif self.angle_front > self.limb_raises[self.state][0]:
-            self.angle_front -= 0.005
-            self.angle_back += 0.005
+        elif round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
+                > round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
+            self.angle_front -= self.limb_raises[self.state][1]
+            self.angle_back += self.limb_raises[self.state][1]
 
-        elif self.angle_front == self.limb_raises[self.state][0]:
-            self.limb_raises[self.state] = self.limb_raises[self.state][::-1]
+        else:
+            self.limb_raises[self.state][0] = self.limb_raises[self.state][0][::-1]
+
+        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8)
+        self.neck_pos = self.rect.centerx, self.rect.y + (self.rect.h // 4)
+        self.centre_pos = self.rect.centerx, self.rect.centery - (self.rect.h // 16)
+        self.bottom_pos = self.rect.centerx, self.rect.bottom - (self.rect.h * 3 // 8)
 
         self.left_limb = rah.joint_rotate(self.base_limb, self.angle_front, True)
         self.right_limb = rah.joint_rotate(self.base_limb, self.angle_back, True)
 
-        self.view_angle = atan2(x_focus - self.rect.centerx - x_offset, y_focus - self.rect.centery - y_offset)
+        self.view_angle = atan2(y_focus - (self.head_pos[1] - y_offset), x_focus - (self.head_pos[0] - x_offset))
 
         self.head = rah.joint_rotate(self.base_head, self.view_angle, False)
 
