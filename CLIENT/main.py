@@ -394,7 +394,7 @@ def authenticate():
 def about():
     global screen
 
-    music_object = mixer.Sound('sound/music/about.wav')
+    music_object = mixer.Sound('sound/menu_music/about.wav')
     music_object.play(0)
 
     rah.wallpaper(screen, size)
@@ -486,7 +486,7 @@ def about():
             if e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
                     music_object.stop()
-                    music_object = mixer.Sound('sound/music/menu.ogg')
+                    music_object = mixer.Sound('sound/menu_music/menu.ogg')
                     music_object.play(-1, 0)
 
                     return 'menu'
