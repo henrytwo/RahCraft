@@ -5,6 +5,7 @@ from shlex import split
 import time as t
 from pygame import *
 from random import *
+from math import *
 
 
 def install_modules():
@@ -90,3 +91,16 @@ def text(text, size):
     text_surface_final.blit(text_surface, (0, 0))
 
     return text_surface_final
+
+
+def joint_rotate(surf, angle, on_end):
+    new_surf = surf.copy()
+    new_surf.fill(Color(125, 125, 125, 125))
+    if on_end:
+        new_surf.fill(Color(0, 0, 0, 0), (0, 0, surf.get_width() // 2, surf.get_height() // 2))
+        new_surf.fill(Color(255, 255, 255, 255), (surf.get_width() // 2 + 2, surf.get_height() // 2 + 2,
+                                                  surf.get_width() // 2 - 4, surf.get_height() // 2 - 4))
+    else:
+        new_surf.fill(Color(255, 255, 255, 255), (0, 0, surf.get_width() // 2 - 4, surf.get_height() // 2 - 4))
+
+    return transform.rotate(new_surf, -degrees(angle))

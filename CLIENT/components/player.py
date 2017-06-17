@@ -1,4 +1,5 @@
 from pygame import *
+from math import *
 import numpy
 
 import components.rahma as rah
@@ -43,17 +44,74 @@ class Player:
         self.standing = False
         self.sneaking = False
 
-        self.frame = 0
-        self.frame_additive = 0.5
-
         self.surrounding_shifts = [(sx, sy) for sy in range(-2, 3) for sx in range(-1, 2)]
 
-        head = image.load('textures/player_head.png')
-        body = image.load('textures/player_body.png')
+        # self.frame = 0
+        # self.frame_additive = 0.5
+        #
+        # head = image.load('textures/player_head.png')
+        # body = image.load('textures/player_body.png')
+        #
+        # self.texture = {
+        #     'head': transform.scale(head, (int(w * 0.5), int((w * 0.5) / head.get_width() * head.get_height()))),
+        #     'body': transform.scale(body, (int(w * 0.9), int((w * 0.9) / body.get_width() * body.get_height())))
+        # }
 
-        self.texture = {'head':transform.scale(head, (int(w * 0.5), int((w * 0.5)/head.get_width() * head.get_height()))),
-                        'body':transform.scale(body, (int(w * 0.9), int((w * 0.9)/body.get_width() * body.get_height())))}
+        self.base_limb = Surface((w // 2, int(h * 16 / 3)), SRCALPHA)
+        self.left_limb = self.right_limb = self.base_limb.copy()
 
+        self.base_head = Surface((w, w), SRCALPHA)
+        self.head = self.base_head.copy()
+
+        self.torso = self.base_limb.copy()
+
+        self.limb_raises = {
+            'standing': [80, 100],
+            'walking': [50, 130],
+            'running': [30, 150],
+            'sneaking': [85, 95],
+        }
+
+        self.state = 'standing'
+
+        self.angle_front = self.angle_back = 90
+        self.view_angle = 0
+
+    def get_state(self, keys):
+        self.state = 'standing'
+
+        if True in [keys[self.controls[i]] for i in [0, 1]]:
+            if keys[K_LCTRL]:
+                self.state = 'running'
+            elif keys[K_LSHIFT]:
+                self.state = 'sneaking'
+            else:
+                self.state = 'walking'
+
+    def animate(self, surf, x_offset, y_offset, x_focus, y_focus):
+        if self.angle_front < self.limb_raises[self.state][0]:
+            self.angle_front += 1
+            self.angle_back -= 1
+
+        elif self.angle_front > self.limb_raises[self.state][0]:
+            self.angle_front -= 1
+            self.angle_back += 1
+
+        elif self.angle_front == self.limb_raises[self.state][0]:
+            self.limb_raises[self.state] = self.limb_raises[self.state][::-1]
+
+        self.left_limb = rah.joint_rotate(self.left_limb, self.angle_front)
+        self.right_limb = rah.joint_rotate(self.right_limb, self.angle_back)
+
+        self.view_angle = atan2(x_focus - self.rect.centerx - x_offset, y_focus - self.rect.centery - y_offset)
+
+        self.head = rah.joint_rotate(self.base_head, self.view_angle)
+
+        surf.blit(self.left_limb, ())
+        surf.blit(self.right_limb, ())
+        surf.blit(self.torso, ())
+        surf.blit(self.right_limb, ())
+        surf.blit(self.left_limb, ())
 
     def control(self, keys, fly):
         if fly:
@@ -160,13 +218,20 @@ class Player:
 
         return surrounding_blocks
 
-    def update(self, surf, x_offset, y_offset, fly, ui, block_clip, world, block_size, block_properties, selected_texture):
+    def update(self, surf, x_offset, y_offset, fly, ui, block_clip, world, block_size, block_properties,
+               selected_texture):
+
+        keys = key.get_pressed()
+        m_pos = mouse.get_pos()
+
         collision_blocks = self.detect(world, block_size, block_clip, block_properties)
 
         if not ui:
-            self.control(key.get_pressed(), fly)
+            self.get_state(keys)
+            self.control(keys, fly)
 
         self.collide(collision_blocks, fly)
+        self.animate(surf, x_offset, y_offset, *m_pos)
 
         # for block in collision_blocks:
         #     if type(block) is Rect:
@@ -176,19 +241,19 @@ class Player:
         #     surf.blit(index_font.render("{0}".format(collision_blocks.index(block)), True, (0, 0, 0)),
         #               (block[0] - x_offset, block[1] - y_offset))
 
-        #draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
+        # draw.rect(surf, (255, 255, 255), (self.rect.x - x_offset, self.rect.y - y_offset, self.rect.w, self.rect.h))
 
-        self.frame += self.frame_additive
-
-        if self.frame <-5 or self.frame > 5:
-            self.frame_additive *= -1
-
-        surf.blit(self.texture['head'], (self.rect.x - x_offset + self.rect.w//2 - (self.texture['head'].get_width() * 1.1)//2, self.rect.y - y_offset - int(self.frame)))
-        surf.blit(self.texture['body'], (self.rect.x - x_offset + self.rect.w//2 - self.texture['body'].get_width()//2, self.rect.y - y_offset + self.rect.h - self.texture['body'].get_height()))
-
-        surf.blit(selected_texture, (0,0))
-
-        surf.blit(selected_texture, (self.rect.x + self.rect.w - selected_texture.get_width(), self.rect.y + self.rect.h//2 - selected_texture.get_height()//2))
+        # self.frame += self.frame_additive
+        #
+        # if self.frame <-5 or self.frame > 5:
+        #     self.frame_additive *= -1
+        #
+        # surf.blit(self.texture['head'], (self.rect.x - x_offset + self.rect.w//2 - (self.texture['head'].get_width() * 1.1)//2, self.rect.y - y_offset - int(self.frame)))
+        # surf.blit(self.texture['body'], (self.rect.x - x_offset + self.rect.w//2 - self.texture['body'].get_width()//2, self.rect.y - y_offset + self.rect.h - self.texture['body'].get_height()))
+        #
+        # surf.blit(selected_texture, (0,0))
+        #
+        # surf.blit(selected_texture, (self.rect.x + self.rect.w - selected_texture.get_width(), self.rect.y + self.rect.h//2 - selected_texture.get_height()//2))
 
 
 class RemotePlayer:
