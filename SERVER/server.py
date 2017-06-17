@@ -1,3 +1,9 @@
+#RAHCRAFT
+#COPYRIGHT 2017 (C) RAHMISH EMPIRE, MINISTRY OF RAHCRAFT DEVELOPMENT
+#DEVELOPED BY RYAN ZHANG, HENRY TU, SYED SAFWAAN
+
+#server.py
+
 import os.path, sys, traceback, socket, json, platform, time, datetime
 
 from collections import deque
@@ -341,10 +347,10 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
     while True:
 
-        kill_list = []
+        kill_list = [] #List of users to be kicked for death
 
-        for player in players:
-            if players[player].health <= 0:
+        for player in players: #Iterates through all users
+            if players[player].health <= 0: #Checks health and kicks user if health <= 0
                 kick_message = "RAHDEATH:GG, You died!"
 
                 kill_list.append(player)
@@ -359,7 +365,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                 for i in players:  # Broadcast message to all players for player disconnect
                     sendQueue.put(((10, send_message), i))
 
-        for kill_player in kill_list:
+        for kill_player in kill_list: #Removes the players in another function so that list index does not mess up
             playerNDisconnect.append(players[kill_player].number)
             username.remove(players[kill_player].username)
 
@@ -642,7 +648,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                     if len(message_list) > 2:  # kick with custom messages
                                         kick_message = ' '.join(message_list[2:])
                                     else:
-                                        kick_message = ''  # no message/ defualt message
+                                        kick_message = ''  # no message/ default message
 
                                     for player in players:  # Search for the player
                                         if players[player].username == kick_name:
@@ -875,17 +881,17 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                 send_message = str(players)
 
                             else:
-                                send_message = "Command not found"  # The command recieved is not found
+                                send_message = "Command not found"  # The command received is not found
 
-                        else:  # Not an admin
+                        else:  # Not an admin or player is not recognized
                             send_message = "Access denied"
 
                     else:
-                        user_sending = username_dict[address]  # normal chat, get hte user sending the message
+                        user_sending = username_dict[address]  # normal chat, get the user sending the message
 
                         send_message = '[%s] %s' % (user_sending, message[1])  # Get the message eto be sent
 
-                    if send_message[0] != '[': # if something breaks
+                    if send_message[0] != '[': # If no player name is found, it must be run by the server
                         send_message = '[%s] ' % username_dict[('127.0.0.1', 0)] + send_message
 
                     for i in players:  # send all players the chat message
@@ -956,8 +962,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                     rahprint('[Server] %s has responded to heartbeat' % message[1])  # debugging message
 
             else:
-                sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAccess denied'), address))  # The player is not an admin and is trying to run admin commands
-
+                sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAccess denied'), address))  # The player is not recognized and is rejected for security purposes
 
         except:
             sendQueue.put(((11, '\n\n\nDisconnected from server'), address))  # Disconnect if player sends faulty data
