@@ -670,6 +670,48 @@ def information(message, previous):
         display.update()
 
 
+def death(message):
+    global screen
+
+    tint = Surface(size)
+    tint.fill((50, 0, 0))
+    tint.set_alpha(99)
+
+    screen.blit(tint, (0,0))
+
+    buttons = [menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, 'game', "Respawn"),
+               menu.Button(size[0] // 4, size[1] - 150, size[0] // 2, 40, 'menu', "Rage quit")]
+
+    while True:
+        release = False
+
+        for e in event.get():
+            if e.type == QUIT:
+                return 'exit'
+
+            if e.type == MOUSEBUTTONUP and e.button == 1:
+                release = True
+
+            if e.type == VIDEORESIZE:
+                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                return 'information', message, previous
+
+        mx, my = mouse.get_pos()
+        m_press = mouse.get_pressed()
+
+        kill_text = rah.text(message, 40)
+        screen.blit(kill_text, rah.center(0, 0, *size, *kill_text.get_size()))
+
+        for button in buttons:
+
+            nav_update = button.update(screen, mx, my, m_press, 15, release)
+
+            if nav_update is not None:
+                return nav_update
+
+        display.update()
+
+
 def assistance():
     global screen
 
@@ -1323,7 +1365,8 @@ if __name__ == "__main__":
           'information': information,
           'auth': authenticate,
           'reject': reject,
-          'update':software_update
+          'update':software_update,
+          'death':death
           }
 
     music_object = mixer.Sound('sound/menu_music/menu.ogg')
@@ -1345,6 +1388,9 @@ if __name__ == "__main__":
 
             elif navigation[0] == 'information':
                 navigation = information(navigation[1], navigation[2])
+
+            elif navigation[0] == 'death':
+                navigation = death(navigation[1])
 
             else:
                 navigation = UI[navigation]()

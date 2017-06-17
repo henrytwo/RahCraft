@@ -83,7 +83,7 @@ def load_items(item_file):
 def create_item_dictionary(*libraries):
     item_lib = {}
 
-    for item in libraries:
+    for di in libraries:
         for item in di:
             item_lib[item] = [di[item]['name'], di[item]['icon'], di[item]['maxstack']]
 
@@ -703,7 +703,12 @@ def game(surf, username, token, host, port, size):
 
                 elif command == 11:
                     quit_game()
-                    return 'information', message[0], 'menu'
+
+                    if message[0][:9] == 'RAHDEATH:':
+                        return 'death', message[0][9:]
+
+                    else:
+                        return 'information', message[0], 'menu'
 
                 elif command == 12:
                     # Health
@@ -825,10 +830,17 @@ def game(surf, username, token, host, port, size):
                 select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
             else:
                 select_texture = None
+
             local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
                                 block_properties, select_texture)
 
-            under_block = (offset_clip.x, y_offset // block_size + 1)
+            if local_player.fall_distance > 10:
+                health -= (local_player.fall_distance//4)
+
+                send_queue.put(((12, health), SERVERADDRESS))
+                local_player.fall_distance = 0
+
+            under_block = ((x_offset + size[0]//2)//block_size, (y_offset + size[1]//2)//block_size)
 
             if world[under_block] > 0 and block_step != under_block:
                 rah.load_sound(sound['step'][block_properties[world[under_block]]['sound']])

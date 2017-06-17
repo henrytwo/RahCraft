@@ -76,12 +76,6 @@ class Player(object):
         self.inventory = deepcopy(cinventory)
         self.hotbar = deepcopy(chotbar)
 
-    def take_damage(self, damage):
-        self.health -= damage
-
-        if self.health <= 0:
-            self.respawn()
-
     # Returns player data for saving
     def save(self):
         return [(self.cord[0], self.cord[1]), self.spawnCord, self.inventory, self.hotbar,
@@ -90,7 +84,7 @@ class Player(object):
 # The world class contains the numpy array of the world and several useful function for easier modification of the world
 class World:
     def __init__(self, world_name):  # Uses the world name to load the world from the saves
-        self.overworld = pkl.load(open("saves/" + worldn + ".pkl", "rb"))
+        self.overworld = pkl.load(open("saves/" + world_name + ".pkl", "rb"))
         self.spawnpoint = self.get_spawnpoint()
 
     def get_world(self, x, y, size, block_size):  # Function to calculate the what blocks to send to the client
@@ -336,18 +330,18 @@ if __name__ == '__main__':
 
 
     while True:
+
+        kill_list = []
+
         for player in players:
             if players[player].health <= 0:
-                ban_message = "You have died. Game over, man, it's game over!"
+                kick_message = "RAHDEATH:GG, You died!"
 
-                ban[players[player].username] = {"message": ban_message}
+                kill_list.append(player)
 
-                with open('data/ban.json', 'w') as ban_data:
-                    json.dump(ban, ban_data, indent=4, sort_keys=True)
+                send_message = "%s died" % players[player].username
 
-                send_message = "%s was banned for dying" % players[player].username
-
-                sendQueue.put(((11, '\n\n\nDisconnected from server\n\n%s' % ban_message), player))
+                sendQueue.put(((11, '%s' % kick_message), player))
 
                 if send_message[0] != '[':
                         send_message = '[%s] '%username_dict[('127.0.0.1', 0)] + send_message
@@ -355,6 +349,12 @@ if __name__ == '__main__':
                 for i in players:
                     sendQueue.put(((10, send_message), i))
 
+        for kill_player in kill_list:
+            playerNDisconnect.append(players[kill_player].number)
+            username.remove(players[kill_player].username)
+
+            del PlayerData[players[kill_player].username]
+            del players[kill_player]
 
         pickled_message = messageQueue.get()
         message, address = pickled_message
@@ -648,8 +648,22 @@ if __name__ == '__main__':
 
                                     for player in players:
                                         if players[player].username == kick_name:
-                                            sendQueue.put(((11, '\n\n\nDisconnected from server by %s\n\n%s'%(username_dict[address], kick_message)), player))
-                                            send_message = '%s was disconnected from the server by %s'%(kick_name, username_dict[address])
+
+                                            sendQueue.put(((11, '\n\n\nDisconnected from server by %s\n\n%s' % (
+                                            username_dict[address], kick_message)), player))
+                                            send_message = '%s was disconnected from the server by %s' % (
+                                            kick_name, username_dict[address])
+
+                                            playerNDisconnect.append(players[player].number)
+                                            PlayerData[players[player].username] = players[player].save()
+                                            offPlayer = players[player].username
+                                            username.remove(offPlayer)
+
+                                            del players[player]
+                                            del username_dict[player]
+
+
+                                            break
 
                                     if not send_message:
                                         send_message = 'Player %s not found'%kick_name
@@ -672,6 +686,15 @@ if __name__ == '__main__':
                                             sendQueue.put(((1, players[player].username, x, y, True), i))
 
                                 send_message = '%s teleported %s to %s %s' % (executor, command_receiver, x, y)
+
+                            elif message[1].lower()[:4] == '/msg':
+
+                                message_list = message[1].split(' ')
+                                executor = username_dict[address]
+                                command_receiver = message_list[1]
+
+                                private_send_message = [''.join(message_list[2:]), command_receiver]
+
 
                             elif message[1].lower()[:3] == '/op':
 
@@ -730,8 +753,16 @@ if __name__ == '__main__':
 
                                     for player in players:
                                         if players[player].username == command_receiver:
-                                            sendQueue.put(((11, '\n\n\nDisconnected from server\n\n%s'%ban_message), player))
+                                            sendQueue.put(
+                                                ((11, '\n\n\nDisconnected from server\n\n%s' % ban_message), player))
 
+                                    playerNDisconnect.append(players[player].number)
+                                    PlayerData[players[player].username] = players[player].save()
+                                    offPlayer = players[player].username
+                                    username.remove(offPlayer)
+
+                                    del players[player]
+                                    del username_dict[player]
 
                                 else:
                                     send_message = "Invalid parameters"
@@ -871,12 +902,12 @@ if __name__ == '__main__':
                 elif command == 12:
                     #Health
                     # Data: [12, <cordx>, <cordy>]
-                    players[address].health = message[0]
+                    players[address].health = message[1]
 
                 elif command == 13:
                     #Hunger
                     # Data: [13, <cordx>, <cordy>]
-                    players[address].hunger = message[0]
+                    players[address].hunger = message[1]
 
                 elif command == 14:
                     #Complete sync

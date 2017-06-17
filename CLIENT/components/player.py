@@ -45,8 +45,6 @@ class Player:
         self.sneaking = False
 
         self.fall_distance = 0
-        self.fall_y = 0
-        self.land_y = 0
 
         self.surrounding_shifts = [(sx, sy) for sy in range(-2, 3) for sx in range(-1, 2)]
 
@@ -204,7 +202,6 @@ class Player:
             if (keys[self.controls[2]] or keys[self.controls[4]]) and self.standing:
                 self.vy = self.base_vy
                 self.standing = False
-                self.fall_y = self.actual_y
 
     def collide(self, blocks, fly):
         if self.sneaking and type(blocks[4]) is not Rect:
@@ -241,14 +238,16 @@ class Player:
                 if self.vy >= 0:
                     self.rect.bottom = block.top
                     self.standing = True
-                    self.land_y = self.actual_y
+
                 elif self.vy < 0:
                     self.rect.top = block.bottom
 
                 self.actual_y = self.rect.y
+                self.fall_distance = self.vy
                 self.vy = 0
 
         if fly:
+            self.fall_distance = self.vy
             self.vy = 0
         else:
             self.vy += self.vy_inc if self.vy + self.vy_inc < self.max_vy else 0
@@ -288,8 +287,6 @@ class Player:
             selected_texture = transform.scale(selected_texture, (self.rect.w//2, self.rect.w//2))
 
         self.animate(surf, x_offset, y_offset, *m_pos, selected_texture)
-
-        print((self.land_y - self.fall_y)//block_size)
 
         # for block in collision_blocks:
         #     if type(block) is Rect:
