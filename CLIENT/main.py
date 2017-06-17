@@ -1,3 +1,9 @@
+#RAHCRAFT
+#COPYRIGHT 2017 (C) RAHMISH EMPIRE, MINISTRY OF RAHCRAFT DEVELOPMENT
+#DEVELOPED BY RYAN ZHANG, HENRY TU, SYED SAFWAAN
+
+#main.py
+
 from pygame import *
 import pickle
 import socket
@@ -24,8 +30,8 @@ import requests
 import time as t
 import getpass
 
+#Function for collecting system info for analytics
 def collect_system_info(current_build, current_version):
-
     sys_information = [
                   current_version,
                   current_build,
@@ -41,53 +47,77 @@ def collect_system_info(current_build, current_version):
 
     return sys_information
 
+#Copy a directory for software updates
+#Courtesy of:
 #https://stackoverflow.com/questions/1868714/how-do-i-copy-an-entire-directory-of-files-into-an-existing-directory-using-pyth
 def copytree(src, dst, symlinks=False, ignore=None):
+
+    #If the directory doesn't exist, make it
     if not os.path.exists(dst):
         os.makedirs(dst)
+
+    #Copy all folders int he directory
     for item in os.listdir(src):
         s = os.path.join(src, item)
         d = os.path.join(dst, item)
+
+        #If it is another directory
         if os.path.isdir(s):
+
+            #Run the function recursively
             copytree(s, d, symlinks, ignore)
         else:
+            #Copy the file
             if not os.path.exists(d) or os.stat(s).st_mtime - os.stat(d).st_mtime > 1:
                 copy2(s, d)
 
+#Get progress of a file downloaded from the internet
+#Courtesy of:
 #http://www.dreamincode.net/forums/topic/258621-console-progress-for-download-over-http/
 def progress(block_no, block_size, file_size):
 
-    global update_progress
+    global update_progress #Using a global variable to keep track of progress easier
 
-    update_progress += block_size
+    update_progress += block_size #Updates var with amount of file downloaded
 
+    #Draws progress bar
     draw.rect(screen, (0, 0, 0), (size[0] // 4, size[1] // 2 + 50, size[0] // 2, 10))
-
     draw.rect(screen, (0, 255, 0), (size[0] // 4, size[1] // 2 + 50, int((size[0] // 2) * update_progress/file_size), 10))
 
+    #Progress text
     status_text = rah.text("%s%% (%iMB/%iMB)"%(int(update_progress/file_size * 100), round(update_progress/1000000, 2), round(file_size/1000000, 2)), 13)
 
+    #Fills region of screen so that text can be updated
     draw.rect(screen, (150, 150, 150), (size[0] // 4, size[1] // 2 + 65, size[0] // 2, 20))
 
+    #Blits status text
     screen.blit(status_text, (size[0]//2 - status_text.get_width()//2, size[1] // 2 + 65))
 
+    #Updates screen
     display.flip()
 
+#Function for updating the game software
 def software_update():
-    global screen, current_version, current_build, size, update_progress
+    global screen, current_version, current_build, size, update_progress #Global variables to make modifying values easier
 
     display.set_caption("RahCraft Update Service")
 
+    #Sets background
     rah.wallpaper(screen, size)
 
+    #Main caption
     title_text = rah.text("Welcome to RahCraft! Let's get you up to date", 20)
     screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 50))
 
+    #Sets update to null value since user hasn't decided on whether or not to proceed
     update = None
 
+    #Try to connect to update server
     try:
+        #Reads a text file on website to look for latest version
         req = Request('https://rahcraft.github.io/rahcraft.txt', headers={'User-Agent': 'Mozilla/5.0'})
 
+        #Splits the file into its components
         with urlopen(req) as response:
             extracted_file = str(response.read())[2:][:-3].split('\\n')
 
@@ -95,10 +125,13 @@ def software_update():
         latest_build = extracted_file[1]
         update_location = extracted_file[2]
 
+        #If the current version is out of date
         if current_version < latest_version:
 
+            #Set captions
             update_text = rah.text("Good news! RahCraft v%s is now available!" % latest_build, 18)
 
+            #Draws the 'window'
             draw.rect(screen, (0, 0, 0),
                       (size[0] // 2 - max((update_text.get_width() + 20)//2, size[0]//4 + 20), size[1] // 2 - 90, max(update_text.get_width() + 20, size[0]//2 + 40), 200))
 
@@ -108,13 +141,14 @@ def software_update():
             screen.blit(update_text,
                         (size[0] // 2 - update_text.get_width() // 2, size[1] // 2 - update_text.get_height() - 50))
 
+            #Create the buttons
             exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
-
             update_button = menu.Button(size[0] // 4, size[1] // 2 - 20, size[0] // 2, 40, 'do_update', 'Update now')
             skip_button = menu.Button(size[0] // 4, size[1] // 2 + 30, size[0] // 2, 40, 'skip_update', 'Skip')
 
             while True:
 
+                #Mouse state
                 release = False
 
                 for e in event.get():
@@ -124,6 +158,7 @@ def software_update():
                     if e.type == MOUSEBUTTONUP and e.button == 1:
                         release = True
 
+                    #If the screen is resized, call function again to redraw everything
                     if e.type == VIDEORESIZE:
                         screen = display.set_mode((e.w, e.h), RESIZABLE)
                         return 'update'
@@ -131,139 +166,160 @@ def software_update():
                 mx, my = mouse.get_pos()
                 m_press = mouse.get_pressed()
 
+                #Skip update
                 if skip_button.update(screen, mx, my, m_press, 15, release):
-                    update = 'no'
 
-                if update_button.update(screen, mx, my, m_press, 15, release):
-                    update = 'yes'
+                    return 'login'
 
-                if exit_button.update(screen, mx, my, m_press, 15, release):
+                #Proceed with update
+                elif update_button.update(screen, mx, my, m_press, 15, release):
+
+                    #Draws background
+                    rah.wallpaper(screen, size)
+
+                    #Changes captions
+                    update_text = rah.text("Downloading updates", 18)
+                    subupdate_text = rah.text("This shouldn't take long...", 18)
+
+                    #Draws windows
+                    draw.rect(screen, (0, 0, 0),
+                              (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                               size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                    draw.rect(screen, (150, 150, 150),
+                              (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
+                               size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+
+                    #Blit text
+                    screen.blit(update_text,
+                                (size[0] // 2 - update_text.get_width() // 2,
+                                 size[1] // 2 - update_text.get_height()))
+
+                    screen.blit(subupdate_text,
+                                (size[0] // 2 - subupdate_text.get_width() // 2,
+                                 size[1] // 2 - subupdate_text.get_height() + 30))
+
+                    #Update screen
+                    display.flip()
+
+                    #Downloads the latest version of the game while calling the progress function so progress is kept track
+                    urlretrieve(url=update_location, filename='update.zip', reporthook=progress)
+
+                    #Extracts the update in root project directory
+                    with zipfile.ZipFile('update.zip','r') as zip_file:
+                        zip_file.extractall('../update')
+
+                    #Deletes the zip to save space
+                    os.remove("update.zip")
+
+                    #Indexes folder for directories and files
+                    dir_list = glob.glob('../update/*/*')
+
+                    #Iterates through each directory
+                    for dir in dir_list:
+                        file_name = dir.split('/')[-1] #Gets the last portion of full file location (file name)
+
+                        #Checks if user files exists
+                        #These files are usually not touched in a software update since they contain personal information
+                        user_files_intact = os.path.isfile('user_data/servers.json') and os.path.isfile('user_data/session.json')
+
+                        #Copy user files ONLY if they don't exist, otherwise copy as normal
+                        if (user_files_intact and file_name != 'user_data') or not user_files_intact:
+
+                            #Checks if file name contains a period, indicating it is a file not directory
+                            if len(file_name.split('.')) == 2:
+                                copyfile(dir, '../' + file_name) #Copies file with function
+                            else:
+                                copytree(dir, '../' + file_name) #Copies directory with function
+
+                    rmtree("../update") #Deltes the update directory to save space
+
+                    #Updates version variables
+                    current_build, current_version = latest_build, latest_version
+
+                    #Updates version file
+                    with open('data/ver.rah', 'w') as version_file:
+                        version_file.write('%s\n%s'%(current_version, current_build))
+
+                    #Confirms update is completed
+                    return ['information','\n\n\nRahCraft has updated successfully\nPlease restart game to apply changes','exit']
+
+                #Exit the program
+                elif exit_button.update(screen, mx, my, m_press, 15, release):
                     return 'exit'
 
-                if update:
-
-                    if update == 'yes':
-
-                        rah.wallpaper(screen, size)
-
-                        update_text = rah.text("Downloading updates", 18)
-                        subupdate_text = rah.text("This shouldn't take long...", 18)
-
-                        draw.rect(screen, (0, 0, 0),
-                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
-                                   size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
-
-                        draw.rect(screen, (150, 150, 150),
-                                  (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20),
-                                   size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
-
-                        screen.blit(update_text,
-                                    (size[0] // 2 - update_text.get_width() // 2,
-                                     size[1] // 2 - update_text.get_height()))
-
-                        screen.blit(subupdate_text,
-                                    (size[0] // 2 - subupdate_text.get_width() // 2,
-                                     size[1] // 2 - subupdate_text.get_height() + 30))
-
-                        display.flip()
-
-                        urlretrieve(url=update_location, filename='update.zip', reporthook=progress)
-
-                        #with urllib.request.urlopen(update_location) as update_file, open('update.zip', 'wb') as out_file:
-                        #    out_file.write(update_file.read())
-
-                        with zipfile.ZipFile('update.zip','r') as zip_file:
-                            zip_file.extractall('../update')
-
-                        os.remove("update.zip")
-
-                        dir_list = glob.glob('../update/*/*')
-
-                        for dir in dir_list:
-                            file_name = dir.split('/')[-1]
-
-                            user_files_intact = os.path.isfile('user_data/servers.json') and os.path.isfile('user_data/session.json')
-
-                            if (user_files_intact and file_name != 'user_data') or not user_files_intact:
-                                if len(file_name.split('.')) == 2:
-                                    copyfile(dir, '../' + file_name)
-                                else:
-                                    copytree(dir, '../' + file_name)
-
-                        rmtree("../update")
-
-                        current_build, current_version = latest_build, latest_version
-
-                        with open('data/ver.rah', 'w') as version_file:
-                            version_file.write('%s\n%s'%(current_version, current_build))
-
-                        return ['information','\n\n\nRahCraft has updated successfully\nPlease restart game to apply changes','exit']
-
-                    elif update == 'no':
-                        return 'login'
 
                 display.update()
 
         else:
+            #No software update is needed, proceed to game
             return 'login'
 
     except:
+        #If something went wrong and update could not be completed
         print(traceback.format_exc())
         return ['information', '\n\n\n\n\nUnable to perform update software','login']
 
-
+#This function logs the user into the game
 def login():
     display.set_caption("RahCraft Authentication Service")
 
-    global username, password, host, port, token, screen
+    global username, password, host, port, token, screen #Global var used to make modifying easier
 
+    #Function to hash a given string
     def hash_creds(target):
         return hashlib.sha512(target.encode('utf-8')).hexdigest()
 
-    clock = time.Clock()
-
+    #Draws background
     rah.wallpaper(screen, size)
 
+    #Sets title
     title_text = rah.text('Welcome to RahCraft! Login to continue', 20)
     screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 50))
 
-    try:
+    try: #Try and except since the state of session file is known
         with open('user_data/session.json', 'r') as session_file:
 
+            #Load the session info
             session = json.load(session_file)
 
+            #If the session has content
             if session['name'] and session['token']:
+
+                #Loads into memory
                 token = session['token']
                 username = session['name']
 
+                #Attempt to authenticate with token
                 return 'auth'
 
-    except ValueError:
-
+    except ValueError: #If not valid json or does not exist
+        #Create empty session file
         with open('user_data/session.json', 'w') as session_file:
             json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
-    #test = menu.Switch(20, 20, 100, 40, False, 'Test')
-    #test1 = menu.Toggle(20, 65, 100, 40, False, 'Test')
-    #test2 = menu.Slider(20, 110, 400, 40, False, 'Test')
-
+    #Resets credential vars
     username, password = '', ''
 
+    #Field accepting entry
     field_selected = 'Username'
 
+    #List with field objects
     fields = {'Username': [menu.TextBox(size[0] // 4, size[1] // 2 - 100, size[0] // 2, 40, 'Username'), username],
               'Password': [menu.TextBox(size[0] // 4, size[1] // 2 - 30, size[0] // 2, 40, 'Password'), password]}
 
+    #Button objects
     exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
-
     auth_button = menu.Button(size[0] // 4, size[1] // 2 + 50, size[0] // 2, 40, 'auth', 'Login')
     signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup','Need an account? Signup here')
 
     while True:
 
+        #Resets mouse vars
         click = False
         release = False
 
+        #Var to pass the event to text field
         pass_event = None
 
         for e in event.get():
@@ -280,19 +336,23 @@ def login():
                 release = True
 
             if e.type == KEYDOWN:
+                #Shift enter to bypass auth
                 if key.get_mods() & KMOD_CTRL and key.get_mods() & KMOD_SHIFT:
                     if e.key == K_RETURN and username:
                         return 'menu'
 
+                #Enter to auth with credentials
                 elif e.key == K_RETURN and username and password:
                     return 'auth'
 
+                #Tab to alternate between fields
                 if e.key == K_TAB:
                     if field_selected == 'Username':
                         field_selected = 'Password'
                     else:
                         field_selected = 'Username'
 
+            #If resize, recall the function to redraw
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
                 return 'login'
@@ -300,35 +360,41 @@ def login():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Get values from textfields
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
+        #Draws and updates textfields
         for field in fields:
             fields[field][0].draw(screen, field_selected)
 
             if fields[field][0].rect.collidepoint(mx, my) and click:
                 field_selected = field
 
+        #Create account, redirect to website
         if signup_button.update(screen, mx, my, m_press, 15, release):
             webbrowser.open('http://rahmish.com/join.php')
 
+        #Authenticate with credentials
         nav_update = auth_button.update(screen, mx, my, m_press, 15, release)
         if nav_update and username:
             return nav_update
 
+        #Exit game
         nav_update = exit_button.update(screen, mx, my, m_press, 15, release)
         if nav_update:
             return nav_update
 
+        #Hash password and set as var for security + match server
         username, password = fields['Username'][1], hash_creds(
             hash_creds(fields['Password'][1]) + hash_creds(fields['Username'][1]))
 
-        clock.tick(120)
         display.update()
 
-
+#Function to get auth token from server using credentials
 def authenticate():
-    global username, password, online, token, current_build, current_version
+    global username, password, online, token, current_build, current_version #Global vars to edit easier
 
+    #Background
     rah.wallpaper(screen, size)
     connecting_text = rah.text("Authenticating...", 30)
     screen.blit(connecting_text,
@@ -336,58 +402,78 @@ def authenticate():
 
     display.update()
 
+    #Address of authentication server hardcoded
     host, port = 'rahmish.com', 1111
 
-    socket.setdefaulttimeout(10)
-    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    SERVERADDRESS = (host, port)
-    socket.setdefaulttimeout(None)
+    socket.setdefaulttimeout(10) #Timeout incase server is not accessible
+    server = socket.socket(socket.AF_INET, socket.SOCK_STREAM) #Start TCP server
+    SERVERADDRESS = (host, port) #Binds to AUTH server
+    socket.setdefaulttimeout(None) #Resets timeout to not affect other connections
 
-    try:
-        server.connect(SERVERADDRESS)
+    try: #Try except incase connection fails
+        server.connect(SERVERADDRESS) #Connects to auth server
 
-        if token:
+        if token: #If token is being used
+
+            #Send token with system information for analytics
             server.send(pickle.dumps([1, [username, token], collect_system_info(current_build, current_version)]))
+
         else:
+            #Sends credentials and sys infromation for analyics
             credentials = [username, password]
             server.send(pickle.dumps([0, credentials, collect_system_info(current_build, current_version)]))
 
         while True:
 
+            #Receive message from server
             first_message = pickle.loads(server.recv(10096))
 
+            #If connection approved
             if first_message[0] == 1:
 
+                #If token is being used
                 if token:
+                    #Confirm username and token
                     token = first_message[1][1]
                     username = first_message[1][0]
 
                 else:
+                    #Get the token from server
                     token = str(first_message[1])
 
+                #Write the new token to file for future use
                 with open('user_data/session.json', 'w') as session_file:
                     json.dump({"token": "%s" % token, "name": "%s" % username}, session_file, indent=4, sort_keys=True)
 
+                #Flags client as online
                 online = True
+
+                #Closes connection and proceeds to menu
                 server.close()
                 return 'menu'
 
+            #If rejected
             else:
                 server.close()
 
+                #Clears fields
                 username = ''
                 token = ''
 
+                #Resets file
                 with open('user_data/session.json', 'w') as session_file:
                     json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
                 return 'reject'
-    except:
+
+    except: #If something goes wrong
         server.close()
 
+        #Clears session
         with open('user_data/session.json', 'w') as session_file:
             json.dump({"token": "", "name": ""}, session_file, indent=4, sort_keys=True)
 
+        #Displays message
         return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n\n\nVisit rahmish.com/status.php for help', "login"
 
 

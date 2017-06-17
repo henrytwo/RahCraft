@@ -1,3 +1,9 @@
+#RAHCRAFT
+#COPYRIGHT 2017 (C) RAHMISH EMPIRE, MINISTRY OF RAHCRAFT DEVELOPMENT
+#DEVELOPED BY RYAN ZHANG, HENRY TU, SYED SAFWAAN
+
+#game.py
+
 import os, sys, traceback, platform, glob, socket, pickle, json
 
 from subprocess import Popen, PIPE
