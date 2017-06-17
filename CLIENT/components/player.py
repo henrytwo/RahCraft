@@ -95,6 +95,9 @@ class Player:
         self.centre_pos = self.rect.centerx, self.rect.centery - (h // 16)
         self.bottom_pos = self.rect.centerx, self.rect.bottom - (h * 8 / 3)
 
+        self.head_bob = 0
+        self.head_bob_dir = -1
+
     def get_state(self, keys):
         self.state = 'standing'
 
@@ -105,8 +108,6 @@ class Player:
                 self.state = 'sneaking'
             else:
                 self.state = 'walking'
-
-        print(self.state)
 
     def animate(self, surf, x_offset, y_offset, x_focus, y_focus):
         if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
@@ -122,7 +123,12 @@ class Player:
         else:
             self.limb_raises[self.state][0] = self.limb_raises[self.state][0][::-1]
 
-        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8)
+        if round(self.head_bob) in [3, -1]:
+            self.head_bob_dir *= -1
+
+        self.head_bob += 0.1 * self.head_bob_dir
+
+        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8) + self.head_bob
         self.neck_pos = self.rect.centerx, self.rect.y + (self.rect.h // 4)
         self.centre_pos = self.rect.centerx, self.rect.centery - (self.rect.h // 16)
         self.bottom_pos = self.rect.centerx, self.rect.bottom - (self.rect.h * 3 // 8)
@@ -136,16 +142,16 @@ class Player:
 
         surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
                                                    *self.left_limb.get_size()))
-        surf.blit(self.right_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
-                                                    *self.right_limb.get_size()))
-        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
-                                               *self.torso.get_size()))
-        surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
-                                                    *self.left_limb.get_size()))
         surf.blit(self.left_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                    *self.left_limb.get_size()))
+        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
+                                               *self.torso.get_size()))
         surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
                                               *self.head.get_size()))
+        surf.blit(self.right_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+                                                    *self.right_limb.get_size()))
+        surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+                                                    *self.left_limb.get_size()))
 
     def control(self, keys, fly):
         if fly:
