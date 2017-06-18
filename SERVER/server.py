@@ -445,7 +445,8 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                     x, y = players[address].change_location((message[1], message[2]))
 
                     for i in players:
-                        sendQueue.put(((1, username_dict[address], x, y, False), i))  # Broadcast movement
+                        if i != address:
+                            sendQueue.put(((1, username_dict[address], x, y, False), i))  # Broadcast movement
 
                 elif command == 2:
                     # Render world
