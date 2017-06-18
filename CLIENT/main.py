@@ -534,10 +534,15 @@ def about():
                   '',
                   '',
                   'Honourable mentions:',
-                  'Mr. McKenzie',
-                  'Mr. Macanovik',
-                  'Her Majesty Rahma Gillan',
-                  'Comrade Lenin',
+                  'Mr. McKenzie and Mr. Macanovik (Comp Sci gods)',
+                  'Her Majesty Rahma Gillan (Dear Leader)',
+                  'Dr J Bruce White (Motivation)',
+                  'Adam Mehdi (Math Getterer)',
+                  'Edward Snowden (Security Expert)',
+                  'Vahnessa Vuong (Meme maker)',
+                  'Megan Yang (Kpop person)',
+                  'The Lord himself, Weith Kong (God)',
+                  'Comrade Vladimir Lenin (Rolemodel)',
                   '',
                   '',
                   '',
@@ -558,7 +563,22 @@ def about():
                   "       ,####'     ##################!'    #####     ",
                   "     ,####'            #######              !####!  ",
                   "    ####'                                      #####",
-                  '    ~##                                          ##~']
+                  '    ~##                                          ##~',
+                  '',
+                  '%rah%',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  'Rah save the Queen!',
+                  '']
     scroll_y = size[1]
 
     #Imports and resizes Keith
@@ -566,6 +586,8 @@ def about():
     keith_surface = Surface(size)
     keith_surface.blit(keith_meme, (0, 0))
     keith_surface.set_alpha(1) #Makes him transparent for meme effect
+
+    rahma_meme = image.load('textures/rahma.png')
 
     #Clock to maintain frame rate
     clock = time.Clock()
@@ -605,8 +627,13 @@ def about():
 
         #Draws all the text
         for y in range(0, len(about_list)):
-            about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20 + scroll_y))
+
+            if about_list[y] != '%rah%':
+                about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+                screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20 + scroll_y))
+
+            else:
+                screen.blit(rahma_meme, (size[0]//2 - rahma_meme.get_width()//2, 50 + y * 20 + scroll_y))
 
         #Scrolls screen
         scroll_y -= 1
@@ -806,6 +833,18 @@ def death(message):
     buttons = [menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, 'game', "Respawn"),
                menu.Button(size[0] // 4, size[1] - 150, size[0] // 2, 40, 'menu', "Rage quit")]
 
+    #Load the graphics first so there is no delay for sound
+    kill_text = rah.text(message, 40)
+    screen.blit(kill_text, rah.center(0, 0, *size, *kill_text.get_size()))
+
+    display.flip()
+
+    #Sound effects
+    rah.load_sound(['sound/random/classic_hurt.ogg'])
+
+    sound_object = mixer.Sound('sound/sadviolin.ogg')
+    sound_object.play(0)
+
     while True:
         release = False
 
@@ -818,7 +857,7 @@ def death(message):
 
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
-                return 'information', message, previous
+                return 'death', message
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
@@ -831,6 +870,8 @@ def death(message):
             nav_update = button.update(screen, mx, my, m_press, 15, release)
 
             if nav_update is not None:
+                sound_object.stop()
+
                 return nav_update
 
         display.update()
@@ -1523,5 +1564,6 @@ if __name__ == "__main__":
             navigation = 'menu'
             crash(traceback.format_exc(), 'menu')
 
+    mixer.music.stop()
     display.quit()
     raise SystemExit

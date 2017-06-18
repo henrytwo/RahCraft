@@ -706,7 +706,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                 message_list = message[1].split(' ')
                                 executor = username_dict[address]
 
-                                if len(message_list) > 2:
+                                if len(message_list) > 1:
                                     command_receiver = message_list[1]
                                 else:
                                     command_receiver = executor
