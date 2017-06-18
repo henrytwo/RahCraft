@@ -143,7 +143,6 @@ class Player:
 
         self.head = rah.joint_rotate(self.base_head, self.view_angle, False)
 
-
         surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
                                                    *self.left_limb.get_size()))
 
