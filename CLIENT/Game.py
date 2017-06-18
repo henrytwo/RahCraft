@@ -382,6 +382,7 @@ def game(surf, username, token, host, port, size):
     # =====================================================================
     block_request = set()
     render_request = set()
+    old_location = [local_player.rect.x, local_player.rect.y]
 
     # Initing Pausing/Inventories
     # =====================================================================
@@ -616,15 +617,15 @@ def game(surf, username, token, host, port, size):
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
-            block_clip = (
-                local_player.rect.centerx // block_size * block_size, local_player.rect.centery // block_size * block_size)
+            block_clip = (local_player.rect.centerx // block_size * block_size, local_player.rect.centery // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
             if inventory_updated:
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
 
-            if current_tick % 2 == 0:
+            if current_tick % 2 == 0 and [local_player.rect.x, local_player.rect.y] != old_location:
+                old_location = [local_player.rect.x, local_player.rect.y]
                 send_queue.put(((1, local_player.rect.x / block_size, local_player.rect.y / block_size), SERVERADDRESS))
 
             displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
