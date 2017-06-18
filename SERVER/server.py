@@ -813,7 +813,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                         private_send_message = ["%s was not found in the ban list" % (command_receiver), 'RahBot', players[player].username]
 
                                 else:
-                                    private_send_message = ["Invalid parameters",'RahBot', command_receiver]
+                                    private_send_message = ["Invalid parameters",'RahBot', players[player].username]
 
 
                             elif message[1].lower()[:10] == '/whitelist':  # allow a person to join the server
