@@ -483,17 +483,20 @@ def authenticate():
         #Displays message
         return "information", '\n\n\n\n\nUnable to connect to authentication servers\nTry again later\n\n\nVisit rahmish.com/status.php for help', "login"
 
-
+#Function for the about screen
 def about():
-    global screen
+    global screen #Global variable so that screen object can be modified if resized
 
+    #Starts playing keith music
     music_object = mixer.Sound('sound/menu_music/about.wav')
     music_object.play(0)
 
+    #Starts the backgound
     rah.wallpaper(screen, size)
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
+    #Contents of about screen
     about_list = ['RahCraft',
                   '',
                   '',
@@ -518,13 +521,24 @@ def about():
                   'If the implementation is easy to explain, it may be a good idea.',
                   'Namespaces are one honking great idea -- let\'s do more of those!',
                   '',
+                  '',
+                  '',
                   'rahmish.com',
                   '',
                   'RahCraft (C) Rahmish Empire, All Rahs Reserved',
                   '',
                   'Developed by: Henry Tu, Ryan Zhang, Syed Safwaan',
                   'ICS3U 2017',
+                  '',
                   'Vincent Massey Secondary School',
+                  '',
+                  '',
+                  'Honourable mentions:',
+                  'Mr. McKenzie',
+                  'Mr. Macanovik',
+                  'Her Majesty Rahma Gillan',
+                  'Comrade Lenin',
+                  '',
                   '',
                   '',
                   '                 !#########       #                 ',
@@ -547,71 +561,73 @@ def about():
                   '    ~##                                          ##~']
     scroll_y = size[1]
 
+    #Imports and resizes Keith
     keith_meme = transform.scale(image.load('textures/keith.png'), (size))
     keith_surface = Surface(size)
     keith_surface.blit(keith_meme, (0, 0))
-    keith_surface.set_alpha(1)
+    keith_surface.set_alpha(1) #Makes him transparent for meme effect
 
+    #Clock to maintain frame rate
     clock = time.Clock()
 
     while True:
 
+        #If all contents of about screen are off screen, exit
         if scroll_y < -20 * len(about_list):
             music_object.stop()
-            #music_object = mixer.Sound('sound/menu_music/menu.ogg')
-            #music_object.play(-1, 0)
             return 'menu'
-
-        release = False
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
 
-            if e.type == MOUSEBUTTONUP and e.button == 1:
-                release = True
-
+            #If window is resized, call function again to redraw
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
                 music_object.stop()
                 return 'about'
 
+            #Escape key to skip
             if e.type == KEYDOWN:
                 if e.key == K_ESCAPE:
                     music_object.stop()
-                    #music_object = mixer.Sound('sound/menu_music/menu.ogg')
-                    #music_object.play(-1, 0)
 
                     return 'menu'
 
-        mx, my = mouse.get_pos()
-        m_press = mouse.get_pressed()
-
+        #Wall paper
         rah.wallpaper(screen, size)
 
+        #Keith
         screen.blit(keith_surface, (0,0))
 
+        #Changes alpha
         keith_surface.set_alpha(100 * (scroll_y/(-20 * len(about_list))))
 
+        #Draws all the text
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
             screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20 + scroll_y))
 
+        #Scrolls screen
         scroll_y -= 1
 
+        #Updates display
         display.update()
         clock.tick(30)
 
-
+#Function if credentials are rejected by authentication server
 def reject():
-    global screen
+    global screen #Global variable to make resizing easier
 
+    #Background
     rah.wallpaper(screen, size)
 
+    #Creates button object
     back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'login', "Back")
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
+    #Text contents
     auth_list = ['',
                  '',
                  '',
@@ -632,15 +648,18 @@ def reject():
                  ]
 
     while True:
+        #Mouse state
         release = False
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
 
+            #Updates mouse state
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            #Recall function on resize to redraw everything
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
                 return 'reject'
@@ -648,22 +667,24 @@ def reject():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Draws text on screen
         for y in range(0, len(auth_list)):
             about_text = normal_font.render(auth_list[y], True, (255, 255, 255))
             screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
 
+        #Updates buttons
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
+        #Redirects if needed
         if nav_update is not None:
             return nav_update
 
+        #Updates screen
         display.update()
 
-
+#Function to display a formatted crash screen instead of stopping entire program
 def crash(error, previous):
     global screen
-
-    # rah.wallpaper(screen, size)
 
     tint = Surface(size)
     tint.fill((0, 0, 255))
