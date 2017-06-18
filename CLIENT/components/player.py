@@ -366,6 +366,17 @@ class RemotePlayer:
         self.head_bob = 0
         self.head_bob_dir = -1
 
+    def calculate_velocity(self, ncord, fpt):
+        self.target = ncord[:]
+        self.vy = (ncord[1] - self.y) // fpt
+        self.vx = (ncord[0] - self.x) // fpt
+
+        if self.vx == 0 and ncord[0] - self.x != 0:
+            self.x = ncord[0]
+
+        if self.vy == 0 and ncord[1] - self.y != 0:
+            self.y = ncord[1]
+
     def get_state(self):
         if self.vx == 0:
             self.state = 'standing'
@@ -375,7 +386,7 @@ class RemotePlayer:
             self.state = 'walking'
         else:
             self.state = 'sneaking'
-    
+
     def animate(self, surf, x_offset, y_offset):
         if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
                 < round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
@@ -417,17 +428,6 @@ class RemotePlayer:
         surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                     *self.left_limb.get_size()))
 
-    def calculate_velocity(self, ncord, fpt):
-        self.target = ncord[:]
-        self.vy = (ncord[1] - self.y) // fpt
-        self.vx = (ncord[0] - self.x) // fpt
-
-        if self.vx == 0 and ncord[0] - self.x != 0:
-            self.x = ncord[0]
-
-        if self.vy == 0 and ncord[1] - self.y != 0:
-            self.y = ncord[1]
-
     def update(self, surf, x_offset, y_offset):
         if self.vy > 0 and self.y + self.vy < self.target[1]:
             self.y += self.vy
@@ -453,9 +453,7 @@ class RemotePlayer:
                                              self.name_back.get_width(), self.name_back.get_height()))
         surf.blit(self.name_tag, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                             self.name_tag.get_width(), self.name_tag.get_height()))
-        # self.animate(surf, x_offset, y_offset)
-
-        # self.animate(surf, self.x - x_offset, self.y - y_offset)
+        self.animate(surf, self.x - x_offset, self.y - y_offset)
 
 # Lighting
 # draw.circle(self.reach_surf, Color(255, 255, 255, (reach * 20 - a) * 2), (reach * 20, reach * 20), a)
