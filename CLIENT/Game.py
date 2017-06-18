@@ -445,6 +445,7 @@ def game(surf, username, token, host, port, size):
     music_object = mixer.Sound('sound/music/bg4.wav')
     music_object.play(1, 0)
 
+    damage_list = glob.glob('sound/damage/*.ogg')
 
     # Crafting/other gui stuffz
     # =====================================================================
@@ -845,6 +846,10 @@ def game(surf, username, token, host, port, size):
 
                 send_queue.put(((12, health), SERVERADDRESS))
                 local_player.fall_distance = 0
+
+                rah.load_sound(damage_list)
+
+                rah.load_sound(['sound/random/classic_hurt.ogg'])
 
             under_block = ((x_offset + size[0]//2)//block_size, (y_offset + size[1]//2)//block_size)
 
