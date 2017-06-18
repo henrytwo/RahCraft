@@ -91,75 +91,6 @@ class Player:
         self.head_bob = 0
         self.head_bob_dir = -1
 
-    def get_state(self, keys):
-        self.state = 'standing'
-
-        if True in [keys[self.controls[i]] for i in [0, 1]] and self.vx != 0:
-            if keys[K_LCTRL]:
-                self.state = 'running'
-            elif keys[K_LSHIFT]:
-                self.state = 'sneaking'
-            else:
-                self.state = 'walking'
-
-    def animate(self, surf, x_offset, y_offset, x_focus, y_focus, selected_texture):
-
-        if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
-                < round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
-            self.angle_front += self.limb_raises[self.state][1]
-            self.angle_back -= self.limb_raises[self.state][1]
-
-        elif round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
-                > round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
-            self.angle_front -= self.limb_raises[self.state][1]
-            self.angle_back += self.limb_raises[self.state][1]
-
-        else:
-            self.limb_raises[self.state][0] = self.limb_raises[self.state][0][::-1]
-
-        if round(self.head_bob) in [3, -1]:
-            self.head_bob_dir *= -1
-
-        self.head_bob += 0.1 * self.head_bob_dir
-
-        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8) + self.head_bob
-        self.neck_pos = self.rect.centerx, self.rect.y + (self.rect.h // 4)
-        self.centre_pos = self.rect.centerx, self.rect.centery - (self.rect.h // 16)
-        self.bottom_pos = self.rect.centerx, self.rect.bottom - (self.rect.h * 3 // 8)
-
-        self.left_limb = rah.joint_rotate(self.base_limb, self.angle_front, True)
-        self.right_limb = rah.joint_rotate(self.base_limb, self.angle_back, True)
-
-        self.view_angle = atan2(y_focus - (self.head_pos[1] - y_offset), x_focus - (self.head_pos[0] - x_offset))
-
-        self.head = rah.joint_rotate(self.base_head, self.view_angle, False)
-
-        surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
-                                                   *self.left_limb.get_size()))
-
-        surf.blit(self.left_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
-                                                   *self.left_limb.get_size()))
-        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
-                                               *self.torso.get_size()))
-        surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
-                                              *self.head.get_size()))
-        if selected_texture:
-            if self.pointing == 1:
-                held_angle = self.angle_back - 45
-            else:
-                held_angle = self.angle_front - 45
-            held_texture = transform.flip(rah.joint_rotate(transform.smoothscale(selected_texture, (30, 30)),
-                                                           held_angle, False), self.facing, False)
-            surf.blit(held_texture, rah.point_center(
-                self.bottom_pos[0] - x_offset + (10 * self.pointing) + self.base_limb.get_width() // 2 * cos(self.angle_back),
-                self.bottom_pos[1] - y_offset - 5 - self.base_limb.get_height() // 2 * sin(self.angle_back),
-                *held_texture.get_size()))
-
-        surf.blit(self.right_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
-                                                    *self.right_limb.get_size()))
-        surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
-                                                    *self.left_limb.get_size()))
-
     def control(self, keys, fly):
         if fly:
             if keys[self.controls[0]]:
@@ -272,6 +203,74 @@ class Player:
 
         return surrounding_blocks
 
+    def get_state(self, keys):
+        self.state = 'standing'
+
+        if self.dir != 0 and self.vx != 0:
+            if keys[K_LCTRL]:
+                self.state = 'running'
+            elif keys[K_LSHIFT]:
+                self.state = 'sneaking'
+            else:
+                self.state = 'walking'
+
+    def animate(self, surf, x_offset, y_offset, x_focus, y_focus, selected_texture):
+        if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
+                < round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
+            self.angle_front += self.limb_raises[self.state][1]
+            self.angle_back -= self.limb_raises[self.state][1]
+
+        elif round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
+                > round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
+            self.angle_front -= self.limb_raises[self.state][1]
+            self.angle_back += self.limb_raises[self.state][1]
+
+        else:
+            self.limb_raises[self.state][0] = self.limb_raises[self.state][0][::-1]
+
+        if round(self.head_bob) in [3, -1]:
+            self.head_bob_dir *= -1
+
+        self.head_bob += 0.1 * self.head_bob_dir
+
+        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8) + self.head_bob
+        self.neck_pos = self.rect.centerx, self.rect.y + (self.rect.h // 4)
+        self.centre_pos = self.rect.centerx, self.rect.centery - (self.rect.h // 16)
+        self.bottom_pos = self.rect.centerx, self.rect.bottom - (self.rect.h * 3 // 8)
+
+        self.left_limb = rah.joint_rotate(self.base_limb, self.angle_front, True)
+        self.right_limb = rah.joint_rotate(self.base_limb, self.angle_back, True)
+
+        self.view_angle = atan2(y_focus - (self.head_pos[1] - y_offset), x_focus - (self.head_pos[0] - x_offset))
+
+        self.head = rah.joint_rotate(self.base_head, self.view_angle, False)
+
+        surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+                                                   *self.left_limb.get_size()))
+
+        surf.blit(self.left_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+                                                   *self.left_limb.get_size()))
+        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
+                                               *self.torso.get_size()))
+        surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
+                                              *self.head.get_size()))
+        if selected_texture:
+            if self.pointing == 1:
+                held_angle = self.angle_back - 45
+            else:
+                held_angle = self.angle_front - 45
+            held_texture = transform.flip(rah.joint_rotate(transform.smoothscale(selected_texture, (30, 30)),
+                                                           held_angle, False), self.facing, False)
+            surf.blit(held_texture, rah.point_center(
+                self.bottom_pos[0] - x_offset + (10 * self.pointing) + self.base_limb.get_width() // 2 * cos(self.angle_back),
+                self.bottom_pos[1] - y_offset - 5 - self.base_limb.get_height() // 2 * sin(self.angle_back),
+                *held_texture.get_size()))
+
+        surf.blit(self.right_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+                                                    *self.right_limb.get_size()))
+        surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+                                                    *self.left_limb.get_size()))
+
     def update(self, surf, x_offset, y_offset, fly, ui, block_clip, world, block_size, block_properties,
                selected_texture):
 
@@ -329,7 +328,7 @@ class RemotePlayer:
         self.base_limb = Surface((int(h * 3 / 4), (w // 2)), SRCALPHA)
         self.base_limb.fill(Color(125, 125, 125, 125))
         self.base_limb.fill(Color(0, 0, 0, 0), (0, 0, self.base_limb.get_width() // 2, self.base_limb.get_height()))
-        self.base_limb.fill(Color(255, 255, 255, 255), (self.base_limb.get_width() // 2 + 2, 2,
+        self.base_limb.fill(Color(200, 200, 200, 255), (self.base_limb.get_width() // 2 + 2, 2,
                                                         self.base_limb.get_width() // 2 - 4,
                                                         self.base_limb.get_height() - 4))
 
@@ -338,13 +337,13 @@ class RemotePlayer:
 
         self.torso = Surface((w // 2, int(h * 3 / 8)), SRCALPHA)
         self.torso.fill(Color(125, 125, 125, 125))
-        self.torso.fill(Color(255, 255, 255, 255), (2, 2,
+        self.torso.fill(Color(200, 200, 200, 200), (2, 2,
                                                     self.torso.get_width() - 4,
                                                     self.torso.get_height() - 4))
 
         self.base_head = Surface((w, w), SRCALPHA)
         self.base_head.fill(Color(125, 125, 125, 125))
-        self.base_head.fill(Color(255, 255, 255, 255), (2, 2, w - 4, w - 4))
+        self.base_head.fill(Color(200, 200, 200, 255), (2, 2, w - 4, w - 4))
         self.head = self.base_head.copy()
 
         self.limb_raises = {
@@ -367,19 +366,17 @@ class RemotePlayer:
         self.head_bob = 0
         self.head_bob_dir = -1
 
-    def calculate_velocity(self, ncord, fpt):
-        self.target = ncord[:]
-        self.vy = (ncord[1] - self.y) // fpt
-        self.vx = (ncord[0] - self.x) // fpt
-
-        if self.vx == 0 and ncord[0] - self.x != 0:
-            self.x = ncord[0]
-
-        if self.vy == 0 and ncord[1] - self.y != 0:
-            self.y = ncord[1]
-
+    def get_state(self):
+        if self.vx == 0:
+            self.state = 'standing'
+        elif self.vx > (self.h // 10):
+            self.state = 'running'
+        elif self.vx > 1:
+            self.state = 'walking'
+        else:
+            self.state = 'sneaking'
+    
     def animate(self, surf, x_offset, y_offset):
-
         if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
                 < round(self.limb_raises[self.state][0][0], int(str(self.limb_raises[self.state][1]).find('.'))):
             self.angle_front += self.limb_raises[self.state][1]
@@ -406,10 +403,6 @@ class RemotePlayer:
         self.left_limb = rah.joint_rotate(self.base_limb, self.angle_front, True)
         self.right_limb = rah.joint_rotate(self.base_limb, self.angle_back, True)
 
-        self.head = rah.joint_rotate(self.base_head, 0, False)
-
-        print(self.neck_pos[0] - x_offset)
-
         surf.blit(self.left_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
                                                    *self.left_limb.get_size()))
 
@@ -423,6 +416,17 @@ class RemotePlayer:
                                                     *self.right_limb.get_size()))
         surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                     *self.left_limb.get_size()))
+
+    def calculate_velocity(self, ncord, fpt):
+        self.target = ncord[:]
+        self.vy = (ncord[1] - self.y) // fpt
+        self.vx = (ncord[0] - self.x) // fpt
+
+        if self.vx == 0 and ncord[0] - self.x != 0:
+            self.x = ncord[0]
+
+        if self.vy == 0 and ncord[1] - self.y != 0:
+            self.y = ncord[1]
 
     def update(self, surf, x_offset, y_offset):
         if self.vy > 0 and self.y + self.vy < self.target[1]:
@@ -441,14 +445,17 @@ class RemotePlayer:
             self.vx = 0
             self.x = self.target[0]
 
-        draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y - y_offset, self.w, self.h))
+        self.rect = Rect(self.x, self.y, self.w, self.h)
+
+        draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y + 10 - y_offset, self.w, self.h))
 
         surf.blit(self.name_back, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                              self.name_back.get_width(), self.name_back.get_height()))
         surf.blit(self.name_tag, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                             self.name_tag.get_width(), self.name_tag.get_height()))
+        # self.animate(surf, x_offset, y_offset)
 
-        self.animate(surf, self.x - x_offset, self.y - y_offset)
+        # self.animate(surf, self.x - x_offset, self.y - y_offset)
 
 # Lighting
 # draw.circle(self.reach_surf, Color(255, 255, 255, (reach * 20 - a) * 2), (reach * 20, reach * 20), a)
