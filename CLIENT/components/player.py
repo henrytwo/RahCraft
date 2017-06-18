@@ -260,9 +260,7 @@ class Player:
                 block_clip[1] - y_shift * block_size) // block_size]
 
             if block_id == -1 or block_properties[block_id]['collision'] == 'collide':
-                surrounding_blocks.append(
-                    Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size,
-                         block_size))
+                surrounding_blocks.append(Rect(block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size, block_size, block_size))
             else:
                 surrounding_blocks.append((block_clip[0] - x_shift * block_size, block_clip[1] - y_shift * block_size,
                                            block_size, block_size))
@@ -319,6 +317,7 @@ class RemotePlayer:
         self.h = h
 
         self.rect = Rect(x, y, w, h)
+        self.target = [x, y]
 
         self.username = username
         self.name_tag = normal_font.render(username, True, (255, 255, 255))
@@ -367,6 +366,7 @@ class RemotePlayer:
         self.head_bob_dir = -1
 
     def calculate_velocity(self, ncord, fpt):
+        self.target = ncord[:]
         self.vy = (ncord[1] - self.y) // fpt
         self.vx = (ncord[0] - self.x) // fpt
 
@@ -422,10 +422,22 @@ class RemotePlayer:
         surf.blit(self.right_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                     *self.left_limb.get_size()))
 
-
     def update(self, surf, x_offset, y_offset):
-        self.y += self.vy
-        self.x += self.vx
+        if self.vy > 0 and self.y + self.vy < self.target[1]:
+            self.y += self.vy
+        elif self.vy < 0 and self.y + self.vy > self.target[1]:
+            self.y += self.vy
+        else:
+            self.vy = 0
+            self.y = self.target[1]
+
+        if self.vx > 0 and self.x + self.vx < self.target[0]:
+            self.x += self.vx
+        elif self.vx < 0 and self.x + self.vx > self.target[0]:
+            self.x += self.vx
+        else:
+            self.vx = 0
+            self.x = self.target[0]
 
         draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y - y_offset, self.w, self.h))
 
