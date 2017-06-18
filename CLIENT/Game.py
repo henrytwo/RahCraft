@@ -843,7 +843,7 @@ def game(surf, username, token, host, port, size):
                                 block_properties, select_texture)
 
             if local_player.fall_distance > 10:
-                health -= (local_player.fall_distance//4)
+                health -= (local_player.fall_distance//10)
 
                 send_queue.put(((12, health), SERVERADDRESS))
                 local_player.fall_distance = 0

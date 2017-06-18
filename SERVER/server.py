@@ -878,12 +878,12 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                 send_message = "Server synchronized"
 
                             elif message[1].lower()[:5] == '/list':  # sends a list of player
-                                send_message = str(players)
+                                send_message = ''.join([str([players[player].username, player]) for player in players])
 
                             else:
                                 send_message = "Command not found"  # The command received is not found
 
-                        else:  # Not an admin or player is not recognized
+                        else:  # Not an admin
                             send_message = "Access denied"
 
                     else:

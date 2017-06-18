@@ -327,13 +327,20 @@
 [2017-06-17 22:41:34][Rahbot] asd has connected to the game
 [2017-06-17 22:42:30][Rahbot] asd has connected to the game
 [2017-06-17 22:43:22][Rahbot] asd has disconnected from the game
-[2017-06-18 10:07:40][Rahbot] asd has connected to the game
-[2017-06-18 10:07:40][Rahbot] Henry has connected to the game
-[2017-06-18 10:27:46][Rahbot] asd has disconnected from the game
-[2017-06-18 10:28:26][Rahbot] poi has connected to the game
-[2017-06-18 10:28:27][Rahbot] asd has connected to the game
-[2017-06-18 10:28:51][Rahbot] asd has disconnected from the game
-[2017-06-18 10:28:54][Rahbot] poi has disconnected from the game
-[2017-06-18 11:31:18][Rahbot] poi has connected to the game
-[2017-06-18 11:31:34][Rahbot] asd has connected to the game
-[2017-06-18 11:37:31][Rahbot] asd has disconnected from the game
+[2017-06-17 23:53:58][Rahbot] Henry has connected to the game
+[2017-06-17 23:53:59][Rahbot] Henry has disconnected from the game
+[2017-06-17 23:55:46][Rahbot] Henry has connected to the game
+[2017-06-17 23:55:49][Rahbot] Henry has disconnected from the game
+[2017-06-18 00:09:01][Rahbot] poi has connected to the game
+[2017-06-18 00:09:05][Rahbot] Henry has connected to the game
+[2017-06-18 00:11:14][Rahbot] Henry has connected to the game
+[2017-06-18 00:12:16][Rahbot] poi has connected to the game
+[2017-06-18 00:13:09][Rahbot] {('127.0.0.1', 50933): <__main__.Player object at 0x7fb986109908>, ('127.0.0.1', 58513): <__main__.Player object at 0x7fb9861097f0>}
+[2017-06-18 00:13:29][Rahbot] Command 'players[('127.0.0.1', 58513)].health = 0' executed by poi
+[2017-06-18 00:13:33][Rahbot] poi has connected to the game
+[2017-06-18 10:44:42][Rahbot] Henry has connected to the game
+[2017-06-18 10:44:44][Rahbot] Henry has disconnected from the game
+[2017-06-18 10:45:04][Rahbot] Henry has connected to the game
+[2017-06-18 10:45:05]['Henry', ('127.0.0.1', 42324)]
+[2017-06-18 10:45:43][Rahbot] Henry has connected to the game
+[2017-06-18 10:46:21][Rahbot] Henry has disconnected from the game
