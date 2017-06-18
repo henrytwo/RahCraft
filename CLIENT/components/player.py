@@ -308,7 +308,7 @@ class Player:
 
 
 class RemotePlayer:
-    def __init__(self, username, x, y, w, h):
+    def __init__(self, username, x, y, h, w):
         self.x = x
         self.y = y
 
@@ -440,8 +440,6 @@ class RemotePlayer:
         else:
             self.vx = 0
             self.x = self.target[0]
-
-        draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y - y_offset, self.w, self.h))
 
         surf.blit(self.name_back, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                              self.name_back.get_width(), self.name_back.get_height()))

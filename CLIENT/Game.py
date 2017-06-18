@@ -660,7 +660,7 @@ def game(surf, username, token, host, port, size):
                         remote_players[remote_username].calculate_velocity((int(current_x * block_size), int(current_y * block_size)), tick_per_frame)
 
                     else:
-                        remote_players[remote_username] = player.RemotePlayer(remote_username, int(current_x * block_size), int(current_y * block_size), block_size - 5, 2 * block_size - 5)
+                        remote_players[remote_username] = player.RemotePlayer(remote_username, int(current_x * block_size), int(current_y * block_size), 2 * block_size - 1, block_size)
 
                 elif command == 2:
                     chunk_position_x, chunk_position_y, world_chunk = message
