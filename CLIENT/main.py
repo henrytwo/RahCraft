@@ -684,18 +684,21 @@ def reject():
 
 #Function to display a formatted crash screen instead of stopping entire program
 def crash(error, previous):
-    global screen
+    global screen #Global variable to make resizing easier
 
+    #Blue tint
     tint = Surface(size)
     tint.fill((0, 0, 255))
     tint.set_alpha(99)
-
     screen.blit(tint, (0, 0))
 
+    #Creates button object
     back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Return")
 
+    #Converts the traceback to list
     error_message = list(map(str, error.split('\n')))
 
+    #Joins the error message from traceback
     about_list = ['',
                   '',
                   ':( Whoops, something went wrong',
@@ -712,15 +715,17 @@ def crash(error, previous):
                                            '']
 
     while True:
-        release = False
+        release = False #Mouse state
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
 
+            #Update mouse state
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            #Recall function on resize
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
                 return 'crash', error, previous
@@ -728,43 +733,45 @@ def crash(error, previous):
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Draws text
         for y in range(0, len(about_list)):
             about_text = rah.text(about_list[y], 15)
             screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 10 + y * 20))
 
+        #Update button
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
+        #Changes page is necessary
         if nav_update is not None:
             return nav_update
 
         display.update()
 
-
+#Displays information in a formatted page (Much like crash)
 def information(message, previous):
     global screen
 
+    #Background
     rah.wallpaper(screen, size)
 
-    # tint = Surface(size)
-    # tint.fill((0, 0, 255))
-    # tint.set_alpha(99)
-
-    # screen.blit(tint, (0,0))
-
+    #Creates button object
     back_button = menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, previous, "Okay")
 
+    #Converts the message string into a list
     message_list = list(map(str, message.split('\n')))
 
     while True:
-        release = False
+        release = False #MOuse state
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
 
+            #Update mouse state
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            #Update display if resized
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
                 return 'information', message, previous
@@ -772,12 +779,15 @@ def information(message, previous):
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Draws text
         for y in range(0, len(message_list)):
             about_text = rah.text(message_list[y], 15)
             screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 10 + y * 20))
 
+        #Update button
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
+        #Update page
         if nav_update is not None:
             return nav_update
 
