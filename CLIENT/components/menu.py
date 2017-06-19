@@ -561,10 +561,10 @@ class ScrollingMenu:
     def __init__(self, button_param, x, y, w):
         # button_list <row>, <func>, <title>, <host>, <port>
 
-        row_num = max([button[0] for button in button_param])
-
+        #Width of button group
         group_w = 400
 
+        #Location of button group on canvas
         group_x = x + w // 2 - group_w // 2
         group_y = 50
 
