@@ -831,16 +831,18 @@ def information(message, previous):
 
         display.update()
 
-
+#When the player dies
 def death(message):
     global screen
 
+    #Draws a red tint for death effect
     tint = Surface(size)
     tint.fill((50, 0, 0))
     tint.set_alpha(99)
 
     screen.blit(tint, (0, 0))
 
+    #Button params
     buttons = [menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, 'game', "Respawn"),
                menu.Button(size[0] // 4, size[1] - 150, size[0] // 2, 40, 'menu', "Rage quit")]
 
@@ -852,12 +854,11 @@ def death(message):
 
     # Sound effects
     rah.load_sound(['sound/random/classic_hurt.ogg'])
-
     sound_object = mixer.Sound('sound/sadviolin.ogg')
     sound_object.play(0)
 
     while True:
-        release = False
+        release = False #Mouse state
 
         for e in event.get():
             if e.type == QUIT:
@@ -866,20 +867,23 @@ def death(message):
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
-            if e.type == VIDEORESIZE:
+            if e.type == VIDEORESIZE: #Resize screen
                 screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'death', message
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Displays death message given by server
         kill_text = rah.text(message, 40)
         screen.blit(kill_text, rah.center(0, 0, *size, *kill_text.get_size()))
 
+        #Updates buttons
         for button in buttons:
 
             nav_update = button.update(screen, mx, my, m_press, 15, release)
 
+            #Execute function if button pressed
             if nav_update is not None:
                 sound_object.stop()
 
@@ -887,13 +891,17 @@ def death(message):
 
         display.update()
 
-
+#Help screen
 def assistance():
-    global screen
+    global screen #Global screen to make resizing easier
 
+    #Background
     rah.wallpaper(screen, size)
+
+    #Button object
     back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
 
+    #Font and help page contents
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
     about_list = ['HELP',
@@ -902,7 +910,7 @@ def assistance():
                   'SO YOU WANNA PLAY DIS GAME HUH?',
                   'WELL ITS RLLY EZ ACTUALLY',
                   'LEGIT',
-                  'YOU TAKE UR FAT FINGERS',
+                  'YOU TAKE UR FINGERS',
                   'PRESS DOWN',
                   'ON UR KEYBOARD',
                   'AND UR DONE.',
@@ -912,19 +920,24 @@ def assistance():
                   'THATS RIGHT',
                   'ANYWAYS, GOD SAVE THE QUEEN',
                   'LONG LIVE THE RAHMISH EMPIRE',
+                  '',
+                  '',
+                  'Actally just goto rahmish.com 4 help',
                   '']
 
     while True:
 
-        release = False
+        release = False #Mouse state
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
 
+            #Updates mouse
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            #Update screen
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'assistance'
@@ -932,38 +945,45 @@ def assistance():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Draws about screen contents
         for y in range(0, len(about_list)):
             about_text = normal_font.render(about_list[y], True, (255, 255, 255))
             screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
 
+        #Updates button
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
 
+        #Execute function if any
         if nav_update is not None:
             return nav_update
 
         display.update()
 
-
+#Options screen
 def options():
-    global screen
+    global screen #Global screen to make resizing easier
 
+    #Background
     rah.wallpaper(screen, size)
-    back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
 
+    #UI Objects
+    back_button = menu.Button(size[0] // 4, size[1] - 130, size[0] // 2, 40, 'menu', "Back")
     life_switch = menu.Switch(size[0] // 4, size[1] // 2 - 20, size[0] // 2, 40, False, 'Dank memes')
     music_slider = menu.Slider(size[0] // 4, size[1] // 2 - 80, size[0] // 2, 40, music_object.get_volume(), 'Music')
 
     while True:
 
-        release = False
+        release = False #Resets mouse state
 
         for e in event.get():
             if e.type == QUIT:
                 return 'exit'
 
+            #Mouse update
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            #Resize
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'assistance'
@@ -971,30 +991,31 @@ def options():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Updates UI buttons
         nav_update = back_button.update(screen, mx, my, m_press, 15, release)
-
         music_slider.update(screen, mx, my, m_press, 15, release)
-
         music_object.set_volume(music_slider.pos)
         life_switch.update(screen, mx, my, m_press, 15, release)
 
+        #Execute functions if any
         if nav_update is not None:
             return nav_update
 
         display.update()
 
-
+#Receive messages from server for ping
 def receive_message(message_queue, server):
     rah.rahprint('Ready to receive command...')
 
-    while True:
+    while True: #Listen for server response and put in queue
         msg = server.recvfrom(163840)
         message_queue.put(pickle.loads(msg[0]))
 
-
+#Display message while waiting for server to ping back
 def status_screen(status, size, screen):
     rah.wallpaper(screen, size)
 
+    #Display text
     connecting_text = rah.text("Updating servers...", 30)
     screen.blit(connecting_text,
                 rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
@@ -1004,29 +1025,36 @@ def status_screen(status, size, screen):
 
     display.flip()
 
-
+#Server picking screen
 def server_picker():
-    global screen, host, port
+    global screen, host, port #Global vars making changing easier
 
     status_screen('Indexing servers', size, screen)
 
+    #Loads list of server from json file
     with open('user_data/servers.json', 'r') as servers:
         server_dict = json.load(servers)
 
+    #Creates server list based on json data
     server_list = []
 
     for server in server_dict:
         server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], '', 501])
 
+    #Starts socket server to ping servers
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
+    #Message queue for responses
     message_queue = Queue()
 
+    #Servers server process
     receiver = Process(target=receive_message, args=(message_queue, server))
     receiver.start()
 
+    #Updates screen
     status_screen('Pinging servers', size, screen)
 
+    #Pings each server
     for server_info in server_list:
         try:
             SERVERADDRESS = (server_info[2], int(server_info[3]))
@@ -1035,25 +1063,35 @@ def server_picker():
         except:
             pass
 
+    #Resets background
     rah.wallpaper(screen, size)
 
+    #Updates message
     connecting_text = rah.text("Updating servers...", 30)
     screen.blit(connecting_text,
                 rah.center(0, 0, size[0], size[1], connecting_text.get_width(), connecting_text.get_height()))
 
+    #Clock to limit frame rate
     clock = time.Clock()
 
+    #Progress bar back
     draw.rect(screen, (0, 0, 0), (size[0] // 4, size[1] // 2 + 50, size[0] // 2, 10))
 
+    #Listens for 500 loop cycles
     for check_cycle in range(500):
 
+        #Increments bar
         draw.rect(screen, (0, 255, 0), (size[0] // 4, size[1] // 2 + 50, (size[0] // 2) * (check_cycle / 500), 10))
         display.flip()
 
         try:
+            #Checks queue for print
             message = message_queue.get_nowait()
 
+            #If response is code 102 <Server pning>
             if message[0] == 102:
+
+                #Updates server button with ping
                 for server_info in server_list:
                     if server_info[2:4] == list(message[2:4]):
                         server_info[4] = message[1]
@@ -1064,23 +1102,29 @@ def server_picker():
 
         clock.tick(500)
 
+    #Kills ping process
     receiver.terminate()
 
+    #Creates scrolling menu object
     server_menu = menu.ScrollingMenu(server_list, 0, 0, size[0])
 
+    #Button objects
     button_list = [
         menu.Button((size[0] * 7) // 9 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'custom_server_picker',
                     'Direct Connect'),
         menu.Button(size[0] // 2 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'add_server', 'Add Server'),
         menu.Button((size[0] * 2) // 9 - size[0] // 8, size[1] - 60, size[0] // 4, 40, 'menu', 'Back')]
 
+    #Page location
     y_offset = 50
     percent_visible = 0
 
     while True:
 
+        #Resets wallpaper
         rah.wallpaper(screen, size)
 
+        #Reset mouse state
         release = False
         right_release = False
 
@@ -1089,16 +1133,19 @@ def server_picker():
             if e.type == QUIT:
                 return 'exit'
 
+            #Update mouse
             if e.type == MOUSEBUTTONUP:
                 if e.button == 1:
                     release = True
                 elif e.button == 3:
                     right_release = True
 
+            #Resize
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'server_picker'
 
+            #Mouse scroll
             if e.type == MOUSEBUTTONDOWN:
 
                 if e.button == 4:
@@ -1109,6 +1156,7 @@ def server_picker():
 
                     y_offset -= 40
 
+            #Refresh key
             if e.type == KEYDOWN:
                 if e.key == K_r:
                     return 'server_picker'
@@ -1118,10 +1166,13 @@ def server_picker():
 
         # Scrolling menu----------------------------------------------------
 
+        #Amount of screen dedicated to buttons
         page_h = size[1] - 80
 
+        #Height of each button
         button_h = 75
 
+        #Limits button Y values to stay on screen
         if (button_h * len(server_list)) > page_h:
             if y_offset < -button_h * (len(server_list) + 1 - page_h // button_h):
                 y_offset = -button_h * (len(server_list) + 1 - page_h // button_h)
@@ -1130,6 +1181,7 @@ def server_picker():
         else:
             y_offset = 50
 
+        #Scroll bar calculations
         scroll_pos = int((y_offset / (-button_h * len(server_list))) * page_h)
         percent_visible = page_h / (len(server_list) * button_h)
 
@@ -1138,43 +1190,55 @@ def server_picker():
         draw.rect(screen, (100, 100, 100), bar_rect)
         draw.rect(screen, (230, 230, 230), (size[0] - 18, scroll_pos, 14, (percent_visible * page_h)))
 
+        #Update scroll pos if scroll bar clicked
         if bar_rect.collidepoint(mx, my) and m_press[0] == 1:
             y_offset = int((my - (percent_visible * page_h) // 2) / page_h * -button_h * len(server_list))
 
         # ---------------------------------------------------------------------
 
+        #If server button is clicked
         nav_update = server_menu.update(screen, release, right_release, mx, my, m_press, y_offset, size)
 
         if nav_update:
+
+            #If server is to be deleted
             if nav_update[0] == 'remove':
 
+                #Loads server file
                 server_update = json.load(open('user_data/servers.json'))
 
+                #Locates server to be removed
                 for server in server_update:
                     if server_update[server]['name'] == nav_update[1] and server_update[server]['host'] == nav_update[
                         2] and server_update[server]['port'] == nav_update[3]:
                         destroy_index = server
                         break
 
+                #Deletes server
                 del server_update[destroy_index]
 
+                #Updates data file
                 with open('user_data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
                 return 'server_picker'
 
+            #Presents error message
             elif nav_update[0] == 'remove fail':
                 return 'information', "\n\n\n\n\nCouldn't delete server shortcut\nPermission denied", 'server_picker'
 
             else:
+                #Updates host and port, then redirects for later processing
                 host, port = nav_update[1], nav_update[2]
                 return nav_update[0]
 
+        #Server menu bar
         server_bar = Surface((size[0], 80))
         server_bar.fill((200, 200, 200))
         server_bar.set_alpha(90)
         screen.blit(server_bar, (0, size[1] - 80))
 
+        #Updates buttons
         for button in button_list:
             nav_update = button.update(screen, mx, my, m_press, 15, release)
 
@@ -1183,50 +1247,58 @@ def server_picker():
 
         display.update()
 
-
+#Direct connect to server
 def custom_server_picker():
     global host, port, screen
 
     rah.wallpaper(screen, size)
 
+    #Button params
     buttons = [[0, 'game', "Connect"],
                [0, 'server_picker', "Back"]]
 
+    #Menu button object
     ip_menu = menu.Menu(buttons, 0, size[1] // 2, size[0], size[1] // 2)
 
     field_selected = 'Host'
 
+    #Field list for tabbing
     field_list = ['Port', 'Host']
 
+    #Field objects
     fields = {'Host': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Host'), host],
               'Port': [menu.TextBox(size[0] // 4, size[1] // 4 + 80, size[0] // 2, 40, 'Port'), port]}
 
     while True:
 
-        release = False
-
-        pass_event = None
+        release = False #Reset mouse state
+        pass_event = None #Reset key state
 
         for e in event.get():
 
-            pass_event = e
+            pass_event = e #Passes the event to text field for processing
 
             if e.type == QUIT:
                 return 'exit'
 
+            #Update mouse
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
-            if e.type == KEYDOWN:
+            if e.type == KEYDOWN: #Key pressed
+
+                #Enter key -> Checks if info is valid
                 if e.key == K_RETURN and host and port:
                     host, port = fields['Host'][1], int(fields['Port'][1])
                     return 'game'
 
+                #Tab to change field
                 if e.key == K_TAB:
                     field_list.insert(0, field_list[-1])
                     del field_list[-1]
                     field_selected = field_list[0]
 
+            #Resize
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'custom_server_adder'
@@ -1234,10 +1306,12 @@ def custom_server_picker():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Update buttons
         nav_update = ip_menu.update(screen, release, mx, my, m_press)
 
+        #If button clicked, run function
         if nav_update:
-
+            #If checks if host and port are valid before proceeding to game
             if nav_update == 'game' and host and port:
                 host, port = fields['Host'][1], int(fields['Port'][1])
                 return nav_update
@@ -1245,81 +1319,94 @@ def custom_server_picker():
             else:
                 return nav_update
 
+        #Updates text fields
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
+            #Draws text fields
             fields[field][0].draw(screen, field_selected)
 
+            #Changes field if clicked
             if fields[field][0].rect.collidepoint(mx, my) and release:
                 field_selected = field
 
         display.update()
 
-
+#Function to add server
 def server_adder():
     global screen
 
-    clock = time.Clock()
-
+    #Background
     rah.wallpaper(screen, size)
 
+    #Create button object
     buttons = [[0, 'server_picker', "Add"],
                [0, 'server_picker', "Back"]]
-
     ip_menu = menu.Menu(buttons, 0, size[1] // 2, size[0], size[1] // 2)
 
+    #Resets params
     name, host, port = '', '', None
 
-    field_list = ['Name', 'Port', 'Host']
-
-    field_selected = 'Name'
-
+    #Field object
+    field_list = ['Name', 'Port', 'Host'] #Possible tab fields
+    field_selected = 'Name' #Selected field
     fields = {'Name': [menu.TextBox(size[0] // 4, size[1] // 4, size[0] // 2, 40, 'Name'), name],
               'Host': [menu.TextBox(size[0] // 4, size[1] // 4 + 70, size[0] // 2, 40, 'Host'), host],
               'Port': [menu.TextBox(size[0] // 4, size[1] // 4 + 140, size[0] // 2, 40, 'Port'), port]}
 
     while True:
 
-        release = False
-
-        pass_event = None
+        release = False #Reset mouse state
+        pass_event = None #Reset event
 
         for e in event.get():
 
-            pass_event = e
+            pass_event = e #Pass event to field
 
             if e.type == QUIT:
                 return 'exit'
 
+            #Mouse released
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
+            #Key is pressed
             if e.type == KEYDOWN:
+
+                #Enter key
                 if e.key == K_RETURN and fields['Name'][1] and fields['Host'][1] and fields['Port'][1]:
 
+                    #Check if port is an integer
                     if not fields['Port'][1].isdigit():
                         return 'information', "\n\n\n\n\nCouldn't add server\nInvalid entry for port", 'add_server'
 
+                    #Loads server file
                     server_update = json.load(open('user_data/servers.json'))
 
+                    #Checks if entry already exists
                     for server in server_update:
                         if server_update[server]['name'] == fields['Name'][1]:
                             return 'information', "\n\n\n\n\nCouldn't add server\nName conflicts with previous entry", 'add_server'
 
+                    #Gets params from fields
                     name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
 
+                    #Adds server to json
                     server_update.update({str(len(server_update)): {"name": name, "host": host, "port": port}})
 
+                    #Writes json to file
                     with open('user_data/servers.json', 'w') as servers:
                         json.dump(server_update, servers, indent=4, sort_keys=True)
 
                     return 'server_picker'
 
+                #Tab between fields
                 if e.key == K_TAB:
                     field_list.insert(0, field_list[-1])
                     del field_list[-1]
                     field_selected = field_list[0]
 
+            #Resize
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'add_server'
@@ -1327,10 +1414,13 @@ def server_adder():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Button update
         nav_update = ip_menu.update(screen, release, mx, my, m_press)
 
+        #If function to be called
         if nav_update:
 
+            #Same process as before to add server
             if nav_update == 'server_picker' and fields['Name'][1] and fields['Host'][1] and fields['Port'][1]:
 
                 if not fields['Port'][1].is_digit():
@@ -1354,6 +1444,7 @@ def server_adder():
             else:
                 return nav_update
 
+        #Update text fields
         fields[field_selected][1] = fields[field_selected][0].update(pass_event)
 
         for field in fields:
@@ -1364,19 +1455,18 @@ def server_adder():
 
         display.update()
 
-
+#Main menu
 def menu_screen():
-    global current_version
 
+    global username, token, screen, current_version #Global for easier editing
+
+    #MOTD position
     rotation = 10
     rotation_v = 1
 
     display.set_caption("RahCraft")
 
-    global username, online, token, screen
-
-    clock = time.Clock()
-
+    #Params of buttons
     menu_list = [[0, 'server_picker', "Connect to server"],
                  [1, 'options', "Options"],
                  [2, 'about', "About"],
@@ -1384,11 +1474,14 @@ def menu_screen():
                  [3, 'exit', "Exit"],
                  [4, 'logout', "Logout"]]
 
+    #Create menu object
     main_menu = menu.Menu(menu_list, 0, 0, size[0], size[1])
 
+    #Loads files with splaces and chooses one
     with open('data/splashes.txt') as splashes:
         motd = choice(splashes.read().strip().split('\n'))
 
+    #Blits logo and UI elements
     logo = transform.scale(image.load("textures/menu/logo.png"), (size[0] // 3, int(size[0] // 3 * 51 / 301)))
 
     minecraft_font = font.Font("fonts/minecraft.ttf", 20)
@@ -1401,6 +1494,7 @@ def menu_screen():
 
     while True:
 
+        #Resets wallpaper and graphics
         rah.wallpaper(screen, size)
 
         text_surface_final = Surface((text_surface.get_width() + 4, text_surface.get_height() + 4), SRCALPHA)
@@ -1409,15 +1503,19 @@ def menu_screen():
         text_surface_final.blit(text_shadow, (2, 2))
         text_surface_final.blit(text_surface, (0, 0))
 
+        #Rotates MOTD
         rotation += rotation_v
 
+        #Reverses direction if limit hit
         if rotation < 0 or rotation > 10:
             rotation_v *= -1
 
+        #Blits MOTD
         text_surface_final = transform.rotate(text_surface_final, rotation)
-
         screen.blit(text_surface_final, (size[0] // 2 - text_surface_final.get_width() // 2 + 100, size[1] // 2 - 170))
 
+
+        #Renders all text elements
         normal_font = font.Font("fonts/minecraft.ttf", 14)
 
         version_text = normal_font.render("RahCraft v%s" % current_build, True, (255, 255, 255))
@@ -1429,7 +1527,7 @@ def menu_screen():
         user_text = normal_font.render("Logged in as: %s" % username, True, (255, 255, 255))
         screen.blit(user_text, (20, 20))
 
-        if online:
+        if token:
             user_text = normal_font.render("AUTH ID: %s" % token, True, (255, 255, 255))
             screen.blit(user_text, (20, 50))
 
@@ -1439,12 +1537,11 @@ def menu_screen():
             if e.type == QUIT:
                 return 'exit'
 
+            #Mouse update
             if e.type == MOUSEBUTTONUP and e.button == 1:
                 release = True
 
-            if e.type == KEYDOWN and e.key == K_ESCAPE:
-                return 'login'
-
+            #Resize
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((max(e.w, 657), max(e.h, 505)), DOUBLEBUF + RESIZABLE)
                 return 'menu'
@@ -1452,13 +1549,19 @@ def menu_screen():
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
 
+        #Update buttons
         nav_update = main_menu.update(screen, release, mx, my, m_press)
 
+        #If button pressed
         if nav_update:
+            #Logout
             if nav_update == 'logout':
+
+                #Clear session
                 username = ''
                 token = ''
 
+                #Erases session file
                 with open('user_data/session.json', 'w') as session_file:
                     session_file.write('')
 
@@ -1473,35 +1576,40 @@ def menu_screen():
 
 if __name__ == "__main__":
 
+    #Sets up display
     size = (960, 540)
     screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 
+    #Sets caption and icon
     display.set_caption("RahCraft")
     display.set_icon(transform.scale(image.load('textures/gui/icon.png'), (32, 32)))
 
+    #Sets background
     rah.rah_screen(screen)
 
+    #Software version
     with open('data/ver.rah') as version_file:
         version_components = version_file.read().strip().split('\n')
 
     current_version, current_build = int(version_components[0]), version_components[1]
 
+    #Default host and port incase something breaks
     host = "127.0.0.1"
     port = 5276
 
+    #Inits stuff
     mixer.pre_init(44100, -16, 1, 4096)
+    font.init()
     init()
 
-    online = False
-
+    #Default params
     username = ''
     token = ''
 
     navigation = 'update'
     update_progress = 0
 
-    font.init()
-
+    #Cursor
     click_cursor = ["      ..                ",
                     "     .XX.               ",
                     "     .XX.               ",
@@ -1527,9 +1635,11 @@ if __name__ == "__main__":
                     "     .XXXXXXXXX.        ",
                     "     ...........        "]
 
+    #Compiles cursor
     click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
     mouse.set_cursor(*cursors.tri_left)
 
+    #List of possible functions
     UI = {'login': login,
           'menu': menu_screen,
           'about': about,
@@ -1546,10 +1656,14 @@ if __name__ == "__main__":
           'death': death
           }
 
+    #Starts to play music
     music_object = mixer.Sound('sound/menu_music/menu.ogg')
     music_object.play(-1, 0)
 
+    #Ends program when 'exit' is requested
     while navigation != 'exit':
+
+        #Ensures display is within min size to prevent overlap
         size = (screen.get_width(), screen.get_height())
 
         screen_update = False
@@ -1566,7 +1680,7 @@ if __name__ == "__main__":
             screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 
         try:
-
+            #Handles each function depending on their required params since no params can be passed in dictionary
             if navigation == 'game':
                 music_object.stop()
                 game_nav = Game.game(screen, username, token, host, port, size)
@@ -1587,8 +1701,11 @@ if __name__ == "__main__":
 
         except:
             navigation = 'menu'
+
+            #Prints error if any
             crash(traceback.format_exc(), 'menu')
 
+    #Closes game and terminates pygame
     mixer.music.stop()
     display.quit()
     raise SystemExit

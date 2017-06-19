@@ -117,76 +117,101 @@ class Slider:
         text_surf = rah.text(self.text, size)
         surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
 
-
+#Toggle button
 class Toggle:
     def __init__(self, x, y, w, h, state, text):
+
+        #Properties
         self.rect = Rect(x, y, w, h)
         self.text = text
         self.state = state
 
+        #Texture
         self.texture = {'idle': transform.scale(button_idle, (w, h)),
                         'press': transform.scale(button_pressed, (w, h))}
 
+    #Draws button
     def draw_button(self, surf, type, size):
 
+        #Dras texture depending on button state
         surf.blit(self.texture[type], (self.rect.x, self.rect.y))
 
+        #Button label
         text_surf = rah.text(self.text, size)
         surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
 
+    #Updates button
     def update(self, surf, mx, my, m_press, size, release):
 
-        if self.rect.collidepoint(mx, my):
-            if release:
-                mouse.set_cursor(*cursors.tri_left)
+        #If mouse click
+        if self.rect.collidepoint(mx, my) and release:
 
-                rah.load_sound(['sound/random/click.ogg'])
+            #Update cursor
+            mouse.set_cursor(*cursors.tri_left)
 
-                self.state = not self.state
+            #Click sound
+            rah.load_sound(['sound/random/click.ogg'])
 
+            #Toggle state
+            self.state = not self.state
+
+        #Draw texture based on state
         if self.state:
             self.draw_button(surf, 'press', size)
         else:
             self.draw_button(surf, 'idle', size)
 
-
+#Sliding switch
 class Switch:
     def __init__(self, x, y, w, h, state, text):
+
+        #Button properies
         self.rect = Rect(x, y, w, h)
         self.text = text
         self.state = state
 
+        #Slider position an direction
         self.slider_x = 0
         self.slider_v = 0
 
         slider_w = self.rect.w // 2 - 5
         slider_h = self.rect.h - 6
 
+        #Texture
         self.texture = {'hover': transform.scale(button_hover, (slider_w, slider_h)),
                         'idle': transform.scale(button_idle, (slider_w, slider_h))}
 
+    #Draw button
     def draw_button(self, surf, offset, type, size):
+
+        #Draw outline
         draw.rect(surf, (200, 200, 200), self.rect)
         draw.rect(surf, (20, 20, 20), (self.rect.x + 2, self.rect.y + 2, self.rect.w - 4, self.rect.h - 4))
 
+        #Draw slider
         surf.blit(self.texture[type], (self.rect.x + 3 + offset, self.rect.y + 3))
 
+        #Draws label
         text_surf = rah.text(self.text, size)
         surf.blit(text_surf, rah.center(self.rect.x + 3 + offset, self.rect.y + 3, *self.texture['idle'].get_size(), \
                                         text_surf.get_width(), text_surf.get_height()))
 
+    #Move button on
     def turn_on(self):
         self.state = True
-        self.slider_v = 15
+        self.slider_v = 15 #Changes velocity
 
+    #Move button off
     def turn_off(self):
         self.state = False
-        self.slider_v = -15
+        self.slider_v = -15 #Changes velocity
 
+    #Updates button
     def update(self, surf, mx, my, m_press, size, release):
-
+        #Moves slider
         self.slider_x += self.slider_v
 
+        #Stops slider from flying off
         if self.slider_x <= 0 or self.slider_x > self.rect.w // 2:
             self.slider_v = 0
 
@@ -196,25 +221,33 @@ class Switch:
         elif self.slider_x > self.rect.w // 2:
             self.slider_x = self.rect.w // 2
 
+        #Mouse hovers over switch
         if self.rect.collidepoint(mx, my):
 
+            #Mouse click
             if release:
+
+                #Change mouse cursor
                 mouse.set_cursor(*cursors.tri_left)
 
+                #Click sound
                 rah.load_sound(['sound/random/click.ogg'])
 
+                #Toggle state
                 if self.state:
                     self.turn_off()
                 else:
                     self.turn_on()
 
             else:
+                #Button hover
                 self.draw_button(surf, self.slider_x, 'hover', size)
 
         else:
+            #Button idle
             self.draw_button(surf, self.slider_x, 'idle', size)
 
-
+#Hover cursor
 click_cursor = ["      ..                ",
                 "     .XX.               ",
                 "     .XX.               ",
@@ -239,96 +272,99 @@ click_cursor = ["      ..                ",
                 "     .XXXXXXXXX.        ",
                 "     .XXXXXXXXX.        ",
                 "     ...........        "]
-
+#Compile cursor
 click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
-
+#Class to format buttons given their row
 class Menu:
     def __init__(self, button_param, x, y, w, h, ):
-        # # button_list <row>, <func>, <text>
-        #
-        # V_SPACE = 5
-        #
-        # BUTTON_W = 400
-        # BUTTON_H = 40
-        #
-        # ROWS = max([button[0] for button in button_param])
-        #
-        # SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
-        # SET_W = BUTTON_W
-        #
-        # X_OFFSET = x + w // 2 - SET_W // 2
-        # Y_OFFSET = y + h // 2 - SET_H // 2
-        #
-        # ROW = 0
-        # FUNCTION = 1
-        # TEXT = 2
-        #
-        # self.button_list = []
-        #
-        # for button_index in range(len(button_param)):
-        #     button_x = X_OFFSET
-        #     button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
-        #
-        #     func = button_param[button_index][FUNCTION]
-        #     text = button_param[button_index][TEXT]
-        #
-        #     self.button_list.append(Button(button_x, button_y, BUTTON_W, BUTTON_H, func, text))
 
+        #Gets the number of rows based on the largest row value
         row_num = max([button_row for button_row, *trash in button_param])
 
+        #Width if all buttons
         group_w = 400
+
+        #Height of group is height of button * number of buttons - padding
         group_h = row_num * 50 - 10
 
+        #Location of button 'group' on canvas
         group_x = x + w // 2 - group_w // 2
         group_y = y + h // 2 - group_h // 2
 
+        #List of button parameters
         self.button_list = []
 
+        #Organize buttons in list based on row number
         sorted_button_param = [[button for button in button_param if button[0] == row] for row in range(row_num + 1)]
 
+        #Creates button object from params in button list
         for button_row in range(len(sorted_button_param)):
+
+            #If there is a button on the row
             if sorted_button_param[button_row]:
+
+                #Button width based on number of buttons sharing the row
                 b_w = int(group_w / len(sorted_button_param[button_row]) - 10)
+
+                #Button height
                 b_h = 40
+
+                #Button Y coordinate relative to group orgin
                 b_y = group_y + ((b_h + 10) * button_row)
 
+                #Construct individual buttons on each row
                 for button_index in range(len(sorted_button_param[button_row])):
-                    b_x = group_x + ((b_w + 10) * button_index)
+                    b_x = group_x + ((b_w + 10) * button_index) #Button X Location relative to group origin
 
-                    func = sorted_button_param[button_row][button_index][1]
-                    text = sorted_button_param[button_row][button_index][2]
+                    func = sorted_button_param[button_row][button_index][1] #Button function
+                    text = sorted_button_param[button_row][button_index][2] #Button label
 
+                    #Creates button object
                     self.button_list.append(Button(b_x, b_y, b_w, b_h, func, text))
 
+    #Update button group
     def update(self, surf, release, mx, my, m_press):
-        hover_over_button = False
+        hover_over_button = False #Cursor state
 
+        #Updates each button
         for button in self.button_list:
             nav_update = button.update(surf, mx, my, m_press, 15, release)
 
+            #If button returns function, execute
             if nav_update is not None:
                 return nav_update
 
+            #If hover over button
             if button.rect.collidepoint(mx, my):
                 hover_over_button = True
 
+        #Change cursor
         if hover_over_button:
             mouse.set_cursor(*click_cursor_data)
 
         else:
             mouse.set_cursor(*cursors.tri_left)
 
-
+#Textfield
 class TextBox:
     def __init__(self, x, y, w, h, label):
+
+        #Intitializes properties
         self.rect = Rect(x, y, w, h)
+
+        #Contents of field
         self.content = ""
+
+        # Label on textbox
         self.font = font.Font("fonts/minecraft.ttf", 14)
         self.label = self.font.render(label, True, (255, 255, 255))
         self.name = label
+
+        #Width of a single character to determine max char count
         self.charwidth = self.font.render("X", True, (255, 255, 255)).get_width()
 
+        #Legal characters
         self.allowed = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
                         't', 'u', 'v', 'w', 'x', 'y', 'z', 'A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L',
                         'M', 'N', 'O', 'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'A', 'Y', 'Z', '0', '1', '2', '3', '4',
@@ -336,13 +372,18 @@ class TextBox:
                         '/', ' ', ':', ';', '<', '=', '>', '?', '@', '[', ']', '^', '_', '`', '{', '|', '}', '~', "'",
                         "'"]
 
+    #Draw the textbox
     def draw(self, surf, selected):
 
+        #Draw label
         surf.blit(self.label, (self.rect.x, self.rect.y - self.label.get_height() - 2))
 
+        #Draw the text box
         draw.rect(surf, (0, 0, 0), self.rect)
         draw.rect(surf, (151, 151, 151), self.rect, 2)
 
+        #Draw stars if field is password
+        #Otherwise, draw field content
         if self.name == 'Password':
             text = '*' * len(self.content)
         else:
@@ -350,15 +391,21 @@ class TextBox:
 
         surf.blit(self.font.render(text, True, (255, 255, 255)), (self.rect.x + 10, self.rect.y + 15))
 
+        #Draw highlight if field is selected
         if selected == self.name:
             draw.rect(surf, (255, 255, 255), self.rect, 2)
 
+    #Updates field
     def update(self, e):
 
+        #If key down
         if e and e.type == KEYDOWN:
+
+            #If key is valid, add to field content
             if e.unicode in self.allowed and len(self.content) < self.rect.w // self.charwidth - 1:
                 self.content += e.unicode
 
+            #Delete character
             elif e.key == K_BACKSPACE:
                 try:
                     self.content = self.content[:-1]
@@ -367,9 +414,11 @@ class TextBox:
 
         return self.content
 
-
+#Large button for displaying servers
 class ServerButton:
     def __init__(self, x, y, w, h, title, host, port, motd, strength):
+
+        #Button properties
         self.rect = Rect(x, y, w, h)
         self.title = title
         self.host = host
@@ -377,63 +426,94 @@ class ServerButton:
         self.motd = motd
         self.strength = strength
 
+        #List of hardcoded servers that should be kept intact
         self.do_not_destroy = ['Rahmish Imperial', 'Localhost']
 
+    #Draws the button outline
     def draw_button(self, surf, inner, outer):
         draw.rect(surf, outer, self.rect)
         draw.rect(surf, inner, (self.rect.x + 2, self.rect.y + 2, self.rect.w - 4, self.rect.h - 4))
 
+    #Button states
+    #Button highlight
     def highlight(self, surf):
         self.draw_button(surf, (40, 40, 40), (250, 250, 250))
 
+    #Button pressed
     def mouse_down(self, surf):
         self.draw_button(surf, (10, 10, 10), (250, 250, 250))
 
+    #Button idle
     def idle(self, surf):
         self.draw_button(surf, (20, 20, 20), (250, 250, 250))
 
+    #Update button state
     def update(self, surf, mx, my, m_press, release, right_release, size):
+
+        #If cursor in contact with button
         if self.rect.collidepoint(mx, my):
+
+            #If mouse is down
             if m_press[0]:
                 self.mouse_down(surf)
 
+            #If mouse is released and not on 'menu strip'
             elif release and my < size[1] - 80:
+                #Change mouse cursor
                 mouse.set_cursor(*cursors.tri_left)
 
+                #Play click sound
                 rah.load_sound(['sound/random/click.ogg'])
 
+                #Start the game function
                 return ['game', self.host, self.port]
 
-
+            #If right click (Delete server)
             elif right_release and my < size[1] - 80:
+
+                #If button is not on do not destroy list
                 if self.title not in self.do_not_destroy:
                     return ['remove', self.title, self.host, self.port]
                 else:
                     return ['remove fail']
 
             else:
+                #Button is being hovered
                 self.highlight(surf)
         else:
+            #Button is sitting idle
             self.idle(surf)
 
+        #Server title
         title_text_surf = rah.text(self.title, 20)
         surf.blit(title_text_surf, (self.rect.x + 10, self.rect.y + 10))
 
+        #Server ip and port
         connection_text_surf = rah.text("%s:%i" % (self.host, self.port), 15)
         surf.blit(connection_text_surf, (self.rect.x + 10, self.rect.y + 50))
 
+        #Server MOTD
         motd_text_surf = rah.text("%s" % (self.motd), 12)
         surf.blit(motd_text_surf, (self.rect.x + 10, self.rect.y + 34))
 
+        #Special tag if server is verified to be Rahmish
         if self.host == 'rahmish.com':
             special_text_surf = rah.text("Verified Rahmish Server", 12)
             surf.blit(special_text_surf,
                       (self.rect.x + self.rect.w - special_text_surf.get_width() - 10, self.rect.y + 50))
 
+        #Calculates signal strength based on ping
         signal_strength = self.strength // 100
 
+        #*Signal bars are in reverse strength (5+ [Worse case], 1 [Best case])*
+
+        #Draws 5 bars
         for bar in range(5):
+
+            #Only fill in bars below bar #
             if bar >= signal_strength:
+
+                #If signal is below 3 bars, bars are yellow
                 if signal_strength > 2:
                     colour = (200, 255, 0)
                 else:
@@ -441,30 +521,39 @@ class ServerButton:
             else:
                 colour = (100, 100, 100)
 
+            #Draws bar
             draw.rect(surf, colour, (self.rect.x + self.rect.w - 10 - bar * 5, self.rect.y + 25, 3, - 15 + bar * 2))
 
+            #If there is no signal, draw crss
             if signal_strength >= 5:
                 draw.line(surf, (255, 0, 0), (self.rect.x + self.rect.w - 30, self.rect.y + 10), (self.rect.x + self.rect.w - 15, self.rect.y + 25), 4)
                 draw.line(surf, (255, 0, 0), (self.rect.x + self.rect.w - 30, self.rect.y + 25), (self.rect.x + self.rect.w - 15, self.rect.y + 10), 4)
 
-
+#Menu class, but for server buttons
 class ScrollingMenu:
     def __init__(self, button_param, x, y, w):
         # button_list <row>, <func>, <title>, <host>, <port>
 
+        #Preset button properties
+        #Space between buttons
         V_SPACE = 5
 
+        #Button size
         BUTTON_W = 400
         BUTTON_H = 75
 
+        #Number of button rows
         ROWS = max([button[0] for button in button_param])
 
+        #Size of button set
         SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
         SET_W = BUTTON_W
 
+        #Location of button set on canvas
         X_OFFSET = x + w // 2 - SET_W // 2
         Y_OFFSET = 50
 
+        #List indexes
         ROW = 0
         TITLE = 1
         HOST = 2
@@ -472,9 +561,13 @@ class ScrollingMenu:
         MOTD = 4
         STRENGTH = 5
 
+        #Button list
         self.button_list = []
 
+        #Create button object based on params in button list
         for button_index in range(len(button_param)):
+
+            #Extracts button params from list
             button_x = X_OFFSET
             button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
 
@@ -484,25 +577,36 @@ class ScrollingMenu:
             motd = button_param[button_index][MOTD]
             strength = int(button_param[button_index][STRENGTH])
 
+            #Creates object
             self.button_list.append(ServerButton(button_x, button_y, BUTTON_W, BUTTON_H, title, host, port, motd, strength))
 
+    #Updates entire group
     def update(self, surf, release, right_release, mx, my, m_press, y_offset, size):
 
+        #Updates cursor
         click_cursor_data = ((24, 24), (7, 1), *cursors.compile(click_cursor))
 
+        #Resets cursor state
         hover_over_button = False
 
+        #Update buttons
         for button in self.button_list:
+
+            #Update the button
             nav_update = button.update(surf, mx, my, m_press, release, right_release, size)
 
+            #Update button Y location if necessary based on scroll
             button.rect.y = y_offset + self.button_list.index(button) * (button.rect.h + 5)
 
+            #If button is clicked, run function
             if nav_update is not None:
                 return nav_update
 
+            #If cursor over button
             if button.rect.collidepoint(mx, my):
                 hover_over_button = True
 
+        #Change cursor state
         if hover_over_button:
             mouse.set_cursor(*click_cursor_data)
 
