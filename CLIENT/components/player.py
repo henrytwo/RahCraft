@@ -12,7 +12,7 @@ from pygame import *  # to allow use of graphics
 from math import *  # to allow use of trigomometric functions
 
 # Game modules to import
-import components.rahma as rah  # to allow use of general convenience functions
+import CLIENT.components.rahma as rah  # to allow use of general convenience functions
 
 # Initlalization of modules
 font.init()  # allowing use of fonts
@@ -477,7 +477,6 @@ class Player:
         # Check to see if any menu is active in game
 
         if ui:  # if a menu is active
-
             # Stop player from moving at all
             self.state = "standing"  # player is standing
             self.dir = 0  # player has no direction

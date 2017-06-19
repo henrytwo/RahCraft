@@ -17,9 +17,9 @@ import time as ti
 from pygame import *
 from random import *
 
-import components.rahma as rah  # Group made packages required for the game to function
-import components.player as player
-import components.menu as menu
+import CLIENT.components.rahma as rah  # Group made packages required for the game to function
+import CLIENT.components.player as player
+import CLIENT.components.menu as menu
 
 
 # The sender gets messages from the send queue and sends it to the server for processing

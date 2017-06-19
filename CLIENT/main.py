@@ -11,9 +11,9 @@ import socket
 import hashlib
 import traceback
 
-import components.rahma as rah
-import components.menu as menu
-import Game as Game
+import CLIENT.components.rahma as rah
+import CLIENT.components.menu as menu
+import CLIENT.Game as Game
 import webbrowser
 import json
 from random import *
