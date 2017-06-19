@@ -641,8 +641,6 @@ class ScrollingMenu:
             mouse.set_cursor(*cursors.tri_left)
 
 
-#
-
 class Inventory:
     def __init__(self, w,
                  h):  # Init function declares all of the variables and loads all of the graphics. w and h are the width and height of the screen
