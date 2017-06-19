@@ -414,7 +414,7 @@ def game(surf, username, token, host, port, size):
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    inventory_object = menu.Inventory(0, 0, size[0], size[1])
+    inventory_object = menu.Inventory(size[0], size[1])
 
     hotbar_rect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
     hotbar_slot = 0
