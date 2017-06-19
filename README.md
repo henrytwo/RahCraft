@@ -3,7 +3,7 @@
 This is a 2D Minecraft clone developed in Python using the Pygame module.
 (Basically Terraria)
 
-Features:r<br />
+Features:<br />
 -LAN or WAN multiplayer<br />
 -Random terrain generation based on seed<br />
 -Server and Client can authenticate with server<br />
