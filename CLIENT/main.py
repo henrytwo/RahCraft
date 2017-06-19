@@ -1474,7 +1474,7 @@ if __name__ == "__main__":
     display.set_caption("RahCraft")
     display.set_icon(transform.scale(image.load('textures/gui/icon.png'), (32, 32)))
 
-    rah.rah(screen)
+    rah.rah_screen(screen)
 
     with open('data/ver.rah') as version_file:
         version_components = version_file.read().strip().split('\n')
