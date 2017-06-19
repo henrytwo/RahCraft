@@ -483,6 +483,7 @@ class Player:
             self.state = "standing"  # player is standing
             self.dir = 0  # player has no direction
             self.vx *= self.friction  # slow down the player's velocity using friction
+
         else:  # if no menus are active
 
             # Collect user input for controls and states data
