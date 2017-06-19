@@ -497,63 +497,101 @@ class Player:
 
 class RemotePlayer:
     def __init__(self, username, x, y, w, h):
-        self.x = x
-        self.y = y
 
-        self.vx = 0
-        self.vy = 0
+        """ Initalizes the main player. """
 
-        self.w = w
-        self.h = h
+        # - Player Positional Attributes
+        # These attributes help with positioning the player.
 
+        # Positional attributes
+        self.x = x  # x-pos
+        self.y = y  # y-pos
+
+        # Velocity attributes
+        self.vx = 0  # x-velocity
+        self.vy = 0  # y-velocity
+
+        # Size attributes
+        self.w = w  # width
+        self.h = h  # height
+
+        # Rect and target
         self.rect = Rect(x, y, w, h)
         self.target = [x, y]
 
-        self.username = username
-        self.name_tag = normal_font.render(username, True, (255, 255, 255))
-        self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height() + 10), SRCALPHA)
-        self.name_back.fill(Color(75, 75, 75, 150))
+        # Name tag attributes
+        self.username = username  # player username
+        self.name_tag = normal_font.render(username, True, (255, 255, 255))  # name tag text
+        self.name_back = Surface((self.name_tag.get_width() + 10, self.name_tag.get_height() + 10),
+                                 SRCALPHA)  # surface for name tag
+        self.name_back.fill(Color(75, 75, 75, 150))  # fill the surface with transparent grey
 
-        self.base_limb = Surface((int(h * 3 / 4), (w // 2)), SRCALPHA)
-        self.base_limb.fill(Color(125, 125, 125, 125))
-        self.base_limb.fill(Color(0, 0, 0, 0),
-                            (0, 0, self.base_limb.get_width() // 2, self.base_limb.get_height()))
-        self.base_limb.fill(Color(200, 200, 200, 255), (self.base_limb.get_width() // 2 + 2, 2,
-                                                        self.base_limb.get_width() // 2 - 4,
-                                                        self.base_limb.get_height() - 4))
+        # - Player Sprite & Body Attributes
+        # These attributes help create the player's sprite.
 
-        self.back_limb = self.base_limb.copy()
-        self.front_limb = self.base_limb.copy()
+        # Base limb of player
 
-        self.torso = Surface((w // 2, int(h * 3 / 8)), SRCALPHA)
-        self.torso.fill(Color(125, 125, 125, 125))
-        self.torso.fill(Color(200, 200, 200, 200), (2, 2,
+        # In order to make the limbs swivel around a joint, the limbs are twice their normal length, and one half
+        # of the surface is transparent. Since the surfaces rotate around their centre, an illusion of joint movement
+        # is gven.
+
+        self.base_limb = Surface((int(h * 3 / 4), (w // 2)), SRCALPHA)  # create the surface
+        self.base_limb.fill(Color(125, 125, 125, 125))  # fill the background with a light grey
+        self.base_limb.fill(Color(0, 0, 0, 0), (
+            0, 0, self.base_limb.get_width() // 2, self.base_limb.get_height()))  # make half transparent
+        self.base_limb.fill(Color(255, 255, 255, 255),
+                            (self.base_limb.get_width() // 2 + 2, 2,  # fill the inner area with white
+                             self.base_limb.get_width() // 2 - 4,
+                             self.base_limb.get_height() - 4))
+
+        # Actual limbs in use (base is used for rotation, is never changed)
+        self.back_limb = self.base_limb.copy()  # back limbs (far side of player)
+        self.front_limb = self.base_limb.copy()  # front limbs  (close side of player)
+
+        # Torso of player
+        self.torso = Surface((w // 2, int(h * 3 / 8)), SRCALPHA)  # create the surface
+        self.torso.fill(Color(125, 125, 125, 125))  # fill surface with a light grey
+        self.torso.fill(Color(255, 255, 255, 255), (2, 2,  # fill the inner area with white
                                                     self.torso.get_width() - 4,
                                                     self.torso.get_height() - 4))
 
-        self.base_head = Surface((w, w), SRCALPHA)
-        self.base_head.fill(Color(125, 125, 125, 125))
-        self.base_head.fill(Color(200, 200, 200, 255), (2, 2, w - 4, w - 4))
+        # Base head of player
+        self.base_head = Surface((w, w), SRCALPHA)  # create the surface
+        self.base_head.fill(Color(125, 125, 125, 125))  # fill surface with a light grey
+        self.base_head.fill(Color(255, 255, 255, 255), (2, 2, w - 4, w - 4))  # fill inner area with white
+
+        # Actual head in use (base is used for rotation, is never changed)
         self.head = self.base_head.copy()
 
+        # - Player Body State Attributes
+        # These attributes are used to define what state the player is in and how to animate based on that.
+
+        # Dictionary to hold states
+        # The keys are strings, and the values are lists containing maximum angles and movement increment
         self.limb_raises = {
-            'standing': [[radians(93), radians(87)], 0.008],
-            'walking': [[radians(50), radians(130)], 0.06],
-            'running': [[radians(30), radians(150)], 0.1],
-            'sneaking': [[radians(85), radians(95)], 0.005],
+            'standing': [[radians(95), radians(85)], 0.005],  # standing state
+            'walking': [[radians(50), radians(130)], 0.06],  # walking state
+            'running': [[radians(30), radians(150)], 0.1],  # running state
+            'sneaking': [[radians(85), radians(95)], 0.005],  # sneaking state
         }
 
-        self.state = 'standing'
+        # State attribute (changes based on conditions)
+        self.state = 'standing'  # default state is standing
 
-        self.angle_front = self.angle_back = radians(90)
+        # Angle attributes to rotate the limbs and head
+        self.angle_back = radians(90)  # back arm angle
+        self.angle_front = radians(90)  # front arm angle
+        self.view_angle = 0  # head angle
 
+        # Positional tuples to place limbs and body parts
         self.head_pos = self.rect.centerx, self.rect.y + (h // 8)
         self.neck_pos = self.rect.centerx, self.rect.y + (h // 4)
         self.centre_pos = self.rect.centerx, self.rect.centery - (h // 16)
         self.bottom_pos = self.rect.centerx, self.rect.bottom - (h * 8 / 3)
 
-        self.head_bob = 0
-        self.head_bob_dir = -1
+        # Attributes to control head bobbing
+        self.head_bob = 0  # additive to player y-value
+        self.head_bob_dir = -1  # direction head is bobbing (+ is down, - is up)
 
     def calculate_velocity(self, ncord, fpt):
         self.target = ncord[:]
@@ -579,46 +617,70 @@ class RemotePlayer:
         print(self.state)
 
     def animate(self, surf, x_offset, y_offset):
-        if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
-                < round(self.limb_raises[self.state][0][0],
-                        int(str(self.limb_raises[self.state][1]).find('.'))):
-            self.angle_front += self.limb_raises[self.state][1]
-            self.angle_back -= self.limb_raises[self.state][1]
 
-        elif round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
-                > round(self.limb_raises[self.state][0][0],
-                        int(str(self.limb_raises[self.state][1]).find('.'))):
-            self.angle_front -= self.limb_raises[self.state][1]
-            self.angle_back += self.limb_raises[self.state][1]
+        """ Animates the player using current player state. """
 
-        else:
+        # Define angles for logic (current angle of limb, limit angle specified in the limb raises dict)
+        current_angle = round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.')))
+        limit_angle = round(self.limb_raises[self.state][0][0],
+                            int(str(self.limb_raises[self.state][1]).find('.')))
+
+        # Check to see how current angle should change
+
+        if current_angle < limit_angle:  # if current angle is less that the limit angle
+            self.angle_front += self.limb_raises[self.state][1]  # increase the current angle
+            self.angle_back -= self.limb_raises[self.state][1]  # decrease the back angle
+
+        elif current_angle > limit_angle:  # if the current anl=gle is greater than the limit angle
+            self.angle_front -= self.limb_raises[self.state][1]  # decrease the current angle
+            self.angle_back += self.limb_raises[self.state][1]  # increase the back angle
+
+        else:  # if the current angle is the same as the limit angle
+
+            # Switch the limit angles so arm swing back the other way.
             self.limb_raises[self.state][0] = self.limb_raises[self.state][0][::-1]
 
-        if round(self.head_bob) in [3, -1]:
-            self.head_bob_dir *= -1
+        # Check to see if head bob needs to change direction
+        if round(self.head_bob) in [3, -1]:  # if the head additive is at one of the limits
+            self.head_bob_dir *= -1  # reverse bob direction
 
+        # Move head depending on bob direction and size
         self.head_bob += 0.1 * self.head_bob_dir
 
-        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8) + self.head_bob
-        self.neck_pos = self.rect.centerx, self.rect.y + (self.rect.h // 4)
-        self.centre_pos = self.rect.centerx, self.rect.centery - (self.rect.h // 16)
-        self.bottom_pos = self.rect.centerx, self.rect.bottom - (self.rect.h * 3 // 8)
+        # Create positional tuples to place limbs on
+        self.head_pos = self.rect.centerx, self.rect.y + (self.rect.h // 8) + self.head_bob  # for head
+        self.neck_pos = self.rect.centerx, self.rect.y + (self.rect.h // 4)  # for arms
+        self.centre_pos = self.rect.centerx, self.rect.centery - (self.rect.h // 16)  # for torso
+        self.bottom_pos = self.rect.centerx, self.rect.bottom - (self.rect.h * 3 // 8)  # for legs
 
-        self.back_limb = rah.joint_rotate(self.base_limb, self.angle_front)
-        self.front_limb = rah.joint_rotate(self.base_limb, self.angle_back)
+        # Recreate the back and front limbs for the current frame, using the rah rotation function
+        self.back_limb = rah.joint_rotate(self.base_limb, self.angle_back)  # back limb
+        self.front_limb = rah.joint_rotate(self.base_limb, self.angle_front)  # front limb
 
-        surf.blit(self.back_limb, rah.point_center(self.bottom_pos[0], self.bottom_pos[1],
+        # Blit all the limbs and body parts onto the screen
+
+        # Back leg
+        surf.blit(self.back_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
                                                    *self.back_limb.get_size()))
 
-        surf.blit(self.back_limb, rah.point_center(self.neck_pos[0], self.neck_pos[1],
+        # Back arm
+        surf.blit(self.back_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                    *self.back_limb.get_size()))
-        surf.blit(self.torso, rah.point_center(self.centre_pos[0], self.centre_pos[1],
+
+        # Torso
+        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
                                                *self.torso.get_size()))
-        surf.blit(self.head, rah.point_center(self.head_pos[0], self.head_pos[1],
+
+        # Head
+        surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
                                               *self.head.get_size()))
-        surf.blit(self.front_limb, rah.point_center(self.bottom_pos[0], self.bottom_pos[1],
+
+        # Front leg
+        surf.blit(self.front_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
                                                     *self.front_limb.get_size()))
-        surf.blit(self.front_limb, rah.point_center(self.neck_pos[0], self.neck_pos[1],
+
+        # Front arm
+        surf.blit(self.front_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
                                                     *self.back_limb.get_size()))
 
     def update(self, surf, x_offset, y_offset):
