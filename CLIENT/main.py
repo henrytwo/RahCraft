@@ -922,7 +922,7 @@ def assistance():
                   'LONG LIVE THE RAHMISH EMPIRE',
                   '',
                   '',
-                  'Actally just goto rahmish.com 4 help',
+                  'Actually just goto rahmish.com 4 help',
                   '']
 
     while True:
