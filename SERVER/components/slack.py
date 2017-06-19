@@ -1,7 +1,8 @@
 from slacker import Slacker
 
+#Configures slack with slack token
 def config_slack():
-    try:
+    try: #Try except incase connection fails
         global slack
 
         with open('data/slack.rah') as token:
@@ -9,7 +10,7 @@ def config_slack():
     except:
         pass
 
-
+#Print message + send to slack
 def broadcast(channel, message):
     print(message)
     try:

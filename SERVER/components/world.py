@@ -1,23 +1,32 @@
+#world.py
+#Generates a random world based on given seed
+
 from random import *
-from subprocess import Popen, PIPE
-from shlex import split
-import platform
 import json
 import numpy as np
 
+#Import biomes
 block_data = json.load(open("data/block.json"))
+
+#Biome dictionary
 block_lookup = {}
+
+#Creates dictionary to get block id from name
 for block in block_data:
     block_lookup[block_data[block]['name']] = int(block)
 
+#Loads biome json
 biome_data = json.load(open("data/biome.json"))
 
+#Generate tree given position
 def generate_tree(bx, by, world):
     height = randint(4, 6)
 
+    #Random tree height
     for y in range(height):
         world[bx][by - y] = block_lookup["WoodN"]
 
+    #Generate leaves
     for x in range(randint(3, 5)):
         for y in range(randint(2, 4)):
             world[bx - x // 2][by - y - height] = block_lookup["LeavesN"]
@@ -25,29 +34,30 @@ def generate_tree(bx, by, world):
 
     return world
 
+#Generate cactus
 def generate_cactus(bx, by, world):
+    #Gets random height
     height = randint(2, 4)
 
+    #Changes those blocks to cactus
     for y in range(height):
         world[bx][by - y] = block_lookup["Cactus"]
 
     return world
 
-
+#Generate structure (tree or cactus)
 def generate_structure(bx, by, world, structure):
 
+    #Gets the structure function based on given string
     structures = {'tree':generate_tree,
                   'cactus':generate_cactus}
 
+    #Returns new world with structures
     return structures[structure](bx, by, world)
 
 # ----- Game World Construction Function
 def generate_world(world_seed, biome_min, biome_max, w, h):
     """ Creates a world object randomly generated using a user-inputted seed. """
-
-    max_height = 1
-    min_x = 3
-    max_x = 10
 
     # Set the initial seed for the random module (random.seed())
     seed(world_seed)
@@ -57,13 +67,20 @@ def generate_world(world_seed, biome_min, biome_max, w, h):
     # Generates the random values for the terrain construction
     terrain = [randrange(20) + 40 for _ in range(w)]
 
+    #Empty biome map
     biomes = []
+
+    #Generates biomes
     for __ in range(w//biome_min):
+
+        #Biome at cursor
         biome_select = choice(list(biome_data))
 
+        #Biomes size
         for _ in range(randint(biome_min, biome_max)):
             biomes.append(biome_select)
 
+        #World size met
         if len(biomes) >= w:
             biomes = biomes[:w] #Truncate selection
             break
@@ -97,18 +114,25 @@ def generate_world(world_seed, biome_min, biome_max, w, h):
 
             # Generates structures
             if y > terrain[x]:
+
+                #Top layer
                 if y - terrain[x] == 1:
+
+                    #Sets the layer with block specified in biome config
                     world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["top"]]
 
                     if randint(0, 10) == 0 and x + 10 < w:
                         world = generate_structure(x, y - 1, world, choice(biome_data[biomes[x]]["structure"]))
 
+                #Middle layer
                 elif y - terrain[x] < randint(3, 8):
                     world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["middle"]]
 
+                #Base
                 else:
                     world[x][y] = block_lookup[biome_data[biomes[x]]["layer"]["lower"]]
 
+                #Generate ores
                 # Coal
                 if 10 + terrain[x] > y > 5 + terrain[x] and randint(0, 200) == 0:
                     for cluster in range(randint(3, 10)):
@@ -135,7 +159,6 @@ def generate_world(world_seed, biome_min, biome_max, w, h):
                     world[x][y] = block_lookup["Bed Rock"]
 
     # Last edit, adding extras to the top of the world to prevent problems
-
     world = [[0] * 40 + x for x in world]
 
     # Return the world object for use
