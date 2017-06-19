@@ -831,7 +831,7 @@ def game(surf, username, token, host, port, size):
             bg_tile.set_alpha(200)
 
             for x in range(0, size[0], block_size):
-                for y in range(0, size[1], block_size):
+                for y in range(0, 70 * block_size, block_size):
                     surf.blit(bg_tile, (x,y + (100 * block_size) - y_offset))
 
             # Render World

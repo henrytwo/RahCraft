@@ -1,77 +1,119 @@
+# RAHCRAFT
+# COPYRIGHT 2017 (C) RAHMISH EMPIRE, MINISTRY OF RAHCRAFT DEVELOPMENT
+# DEVELOPED BY RYAN ZHANG, HENRY TU, SYED SAFWAAN
+
+#menu.py
+#UI elements
+
 from pygame import *
-import time as t
 import json
-import math
 import components.rahma as rah
 
+#Loads standard UI elements (Button states)
 button_hover = image.load("textures/menu/button_hover.png")
 button_pressed = image.load("textures/menu/button_pressed.png")
 button_idle = image.load("textures/menu/button_idle.png")
 
+#Button class
 class Button:
-    def __init__(self, x, y, w, h, func, text):
-        self.rect = Rect(x, y, w, h)
-        self.text = text
-        self.func = func
 
+    #Creates a button given size, function, and label
+    def __init__(self, x, y, w, h, func, text):
+        self.rect = Rect(x, y, w, h) #Creates rect
+        self.text = text #Button Label
+        self.func = func #Function after button is clicked
+
+        #Button textures
         self.hover_img = transform.scale(button_hover, (w, h))
         self.press_img = transform.scale(button_pressed, (w, h))
         self.idle_img = transform.scale(button_idle, (w, h))
 
+    #Mouse hover
     def highlight(self, surf):
         surf.blit(self.hover_img, self.rect)
 
+    #Mouse click
     def mouse_down(self, surf):
         surf.blit(self.press_img, self.rect)
 
+    #Mouse not on button
     def idle(self, surf):
         surf.blit(self.idle_img, self.rect)
 
+    #Update button state
     def update(self, surf, mx, my, m_press, size, release):
+
+        #Button in contact with cursor
         if self.rect.collidepoint(mx, my):
+
+            #Mouse button down
             if m_press[0]:
                 self.mouse_down(surf)
 
+            #Mouse released over button
             elif release:
+                #Click cursor
                 mouse.set_cursor(*cursors.tri_left)
 
+                #Click sound
                 rah.load_sound(['sound/random/click.ogg'])
+
+                #Executes function
                 return self.func
 
             else:
+                #Highlight button
                 self.highlight(surf)
         else:
+            #Draw idle button
             self.idle(surf)
 
+        #Draws button text
         text_surf = rah.text(self.text, size)
         surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
 
+#Slider with range from 0-100
 class Slider:
     def __init__(self, x, y, w, h, position, text):
+
+        #Creates properties
         self.rect = Rect(x, y, w, h)
         self.text = text
         self.pos = position
 
+        #Tectures
         self.texture = {'hover':transform.scale(button_hover, (20, h - 3)),
                         'idle':transform.scale(button_idle, (20, h - 3))}
 
+    #Update slider
     def update(self, surf, mx, my, m_press, size, release):
+
+        #Outline slider
         draw.rect(surf, (0, 0, 0), self.rect)
         draw.rect(surf, (200, 200, 200), self.rect, 1)
 
+        #Mouse is over slider
         if self.rect.collidepoint(mx, my):
+
+            #Change mouse state
             mouse_state = 'hover'
+
+            #Mouse is mouse is down, update cursor position
             if m_press[0]:
                 self.pos = (mx - self.rect.x)/self.rect.w
 
+            #Play click sound
             if release:
                 rah.load_sound(['sound/random/click.ogg'])
 
         else:
+            #Change mouse state
             mouse_state = 'idle'
 
+        #Draws indicator
         surf.blit(self.texture[mouse_state], (self.rect.x + min(max(self.pos, ((self.texture[mouse_state].get_width() + 2)//2)/self.rect.w), 1 - ((self.texture[mouse_state].get_width() + 3)//2)/self.rect.w) * self.rect.w - self.texture[mouse_state].get_width()//2, self.rect.y + 1))
 
+        #Draws label
         text_surf = rah.text(self.text, size)
         surf.blit(text_surf, rah.center(*self.rect, text_surf.get_width(), text_surf.get_height()))
 
@@ -469,11 +511,7 @@ class ScrollingMenu:
         else:
             mouse.set_cursor(*cursors.tri_left)
 
-
-class Window:
-    def __init__(self, x, y, w, h):
-        pass
-
+#
 
 class Inventory:
     def __init__(self, x, y, w, h):

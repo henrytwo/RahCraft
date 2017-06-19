@@ -3,6 +3,7 @@
 # DEVELOPED BY RYAN ZHANG, HENRY TU, SYED SAFWAAN
 
 # main.py
+#Main game file
 
 from pygame import *
 import pickle
