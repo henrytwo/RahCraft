@@ -361,8 +361,6 @@ class RemotePlayer:
             self.vx = 0
             self.x = self.target[0]
 
-        #draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y - y_offset, self.w, self.h))
-
         self.frame += self.frame_additive
 
         if self.frame <-5 or self.frame > 5:

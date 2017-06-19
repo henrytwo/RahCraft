@@ -589,8 +589,10 @@ def game(surf, username, token, host, port, size):
                                 current_gui = ''
 
                 elif e.type == VIDEORESIZE:
-                    surf = display.set_mode((e.w, e.h), RESIZABLE)
-                    size = ((e.w, e.h))
+                    rw, rh = max(e.w, 657), max(e.h, 505)
+
+                    surf = display.set_mode((rw, rh), RESIZABLE)
+                    size = ((rw, rh))
 
                     chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
                     pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])

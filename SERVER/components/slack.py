@@ -1,6 +1,5 @@
 from slacker import Slacker
 
-
 def config_slack():
     try:
         global slack
