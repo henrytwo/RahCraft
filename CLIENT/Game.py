@@ -300,7 +300,7 @@ def game(surf, username, token, host, port, size):
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-    local_player = player.Player(player_x, player_y, (2 * block_size - 1) // 4, 2 * block_size - 1, block_size, 5,
+    local_player = player.Player(player_x, player_y, (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1, block_size, 5,
                                  (K_a, K_d, K_w, K_s, K_SPACE))
 
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
@@ -360,7 +360,7 @@ def game(surf, username, token, host, port, size):
     # Init Existing Remote Players
     # =====================================================================
     for Rp in r_players:
-        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], 2 * block_size - 1, block_size)
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 1, 2 * block_size - 1)
 
     # Initing Pygame Components
     # =====================================================================
@@ -660,7 +660,7 @@ def game(surf, username, token, host, port, size):
                         remote_players[remote_username].calculate_velocity((int(current_x * block_size), int(current_y * block_size)), tick_per_frame)
 
                     else:
-                        remote_players[remote_username] = player.RemotePlayer(remote_username, int(current_x * block_size), int(current_y * block_size), 2 * block_size - 1, block_size)
+                        remote_players[remote_username] = player.RemotePlayer(remote_username, int(current_x * block_size), int(current_y * block_size), block_size - 1, 2 * block_size - 1)
 
                 elif command == 2:
                     chunk_position_x, chunk_position_y, world_chunk = message
@@ -736,7 +736,7 @@ def game(surf, username, token, host, port, size):
 
                     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-                    local_player = player.Player(player_x, player_y, (2 * block_size - 1) // 4, 2 * block_size - 1,
+                    local_player = player.Player(player_x, player_y, (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1,
                                                  block_size, 5,
                                                  (K_a, K_d, K_w, K_s, K_SPACE))
 
@@ -758,8 +758,8 @@ def game(surf, username, token, host, port, size):
                     world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
 
                     for Rp in r_players:
-                        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
-                                                                 2 * block_size - 5)
+                        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 1, 2 * block_size - 1)
+
 
                     for repeat in range(5):
                         send_queue.put(([(101, username), SERVERADDRESS]))

@@ -964,7 +964,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
                     for p in kill_list:  # Loop through the player kill list and kill all players that are inactive
 
-                        send_message = '[Server] %s was disconnected for not responding' % (players[p].username)  # chat message
+                        send_message = '[RahBot] %s was disconnected for not responding' % (players[p].username)  # chat message
 
                         for i in players:
                             sendQueue.put(((10, send_message), i))  # broadcast to all players that player is inactive
@@ -990,7 +990,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                 elif command == 101:  # Heartbeat to check if the player's client is still active
                     if address not in active_players:  # Add player replied to active player if not in already
                         active_players.append(address)
-                    rahprint('[Server] %s has responded to heartbeat' % message[1])  # debugging message
+                    rahprint('[RahBot] %s has responded to heartbeat' % message[1])  # debugging message
 
             else:
                 sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAccess denied'), address))  # The player is not recognized and is rejected for security purposes
