@@ -476,7 +476,7 @@ class Player:
 
         # Check to see if any menu is active in game
 
-        print(bool(ui))
+        # print(bool(ui))
 
         if ui:  # if a menu is active
             # Stop player from moving at all
