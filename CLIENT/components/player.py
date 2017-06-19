@@ -539,7 +539,7 @@ class RemotePlayer:
         self.base_limb.fill(Color(125, 125, 125, 125))  # fill the background with a light grey
         self.base_limb.fill(Color(0, 0, 0, 0), (
             0, 0, self.base_limb.get_width() // 2, self.base_limb.get_height()))  # make half transparent
-        self.base_limb.fill(Color(255, 255, 255, 255),
+        self.base_limb.fill(Color(200, 200, 200, 255),
                             (self.base_limb.get_width() // 2 + 2, 2,  # fill the inner area with white
                              self.base_limb.get_width() // 2 - 4,
                              self.base_limb.get_height() - 4))
@@ -551,14 +551,14 @@ class RemotePlayer:
         # Torso of player
         self.torso = Surface((w // 2, int(h * 3 / 8)), SRCALPHA)  # create the surface
         self.torso.fill(Color(125, 125, 125, 125))  # fill surface with a light grey
-        self.torso.fill(Color(255, 255, 255, 255), (2, 2,  # fill the inner area with white
+        self.torso.fill(Color(200, 200, 200, 255), (2, 2,  # fill the inner area with white
                                                     self.torso.get_width() - 4,
                                                     self.torso.get_height() - 4))
 
         # Base head of player
         self.base_head = Surface((w, w), SRCALPHA)  # create the surface
         self.base_head.fill(Color(125, 125, 125, 125))  # fill surface with a light grey
-        self.base_head.fill(Color(255, 255, 255, 255), (2, 2, w - 4, w - 4))  # fill inner area with white
+        self.base_head.fill(Color(200, 200, 200, 255), (2, 2, w - 4, w - 4))  # fill inner area with white
 
         # Actual head in use (base is used for rotation, is never changed)
         self.head = self.base_head.copy()
@@ -614,7 +614,6 @@ class RemotePlayer:
         else:
             self.state = 'sneaking'
 
-        print(self.state)
 
     def animate(self, surf, x_offset, y_offset):
 
@@ -660,27 +659,27 @@ class RemotePlayer:
         # Blit all the limbs and body parts onto the screen
 
         # Back leg
-        surf.blit(self.back_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+        surf.blit(self.back_limb, rah.point_center(self.bottom_pos[0], self.bottom_pos[1],
                                                    *self.back_limb.get_size()))
 
         # Back arm
-        surf.blit(self.back_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+        surf.blit(self.back_limb, rah.point_center(self.neck_pos[0], self.neck_pos[1],
                                                    *self.back_limb.get_size()))
 
         # Torso
-        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
+        surf.blit(self.torso, rah.point_center(self.centre_pos[0], self.centre_pos[1],
                                                *self.torso.get_size()))
 
         # Head
-        surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
+        surf.blit(self.head, rah.point_center(self.head_pos[0], self.head_pos[1],
                                               *self.head.get_size()))
 
         # Front leg
-        surf.blit(self.front_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+        surf.blit(self.front_limb, rah.point_center(self.bottom_pos[0], self.bottom_pos[1],
                                                     *self.front_limb.get_size()))
 
         # Front arm
-        surf.blit(self.front_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+        surf.blit(self.front_limb, rah.point_center(self.neck_pos[0], self.neck_pos[1],
                                                     *self.back_limb.get_size()))
 
     def update(self, surf, x_offset, y_offset):
