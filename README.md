@@ -14,6 +14,11 @@ Features:<br />
 -Meme filled<br />
 -Rahma themed<br />
 
+Dependencies:<br />
+-Pygame<br />
+-Numpy<br />
+-Slacker<br />
+
 //Readme is WIP
 
 For support, visit rahmish.com
