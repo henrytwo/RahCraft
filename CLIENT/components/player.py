@@ -215,8 +215,6 @@ class Player:
                 # The player is now limited to walk speed
                 self.max_vx = self.max_walk_vx
 
-            print((self.max_vx == self.max_walk_vx), (self.max_vx == self.max_run_vx))
-
             # Check to see what direction the player wants to move in
 
             if keys[self.controls[0]] != keys[self.controls[1]]:  # if player is either moving left XOR right
@@ -548,7 +546,6 @@ class RemotePlayer:
         self.state = 'standing'
 
         self.angle_front = self.angle_back = radians(90)
-        self.view_angle = 0
 
         self.head_pos = self.rect.centerx, self.rect.y + (h // 8)
         self.neck_pos = self.rect.centerx, self.rect.y + (h // 4)
@@ -572,12 +569,14 @@ class RemotePlayer:
     def get_state(self):
         if self.vx == 0:
             self.state = 'standing'
-        elif self.vx > (self.h // 10):
+        elif abs(self.vx) > (self.h // 10):
             self.state = 'running'
-        elif self.vx > 1:
+        elif abs(self.vx) > 1:
             self.state = 'walking'
         else:
             self.state = 'sneaking'
+
+        print(self.state)
 
     def animate(self, surf, x_offset, y_offset):
         if round(self.angle_front, int(str(self.limb_raises[self.state][1]).find('.'))) \
@@ -608,18 +607,18 @@ class RemotePlayer:
         self.back_limb = rah.joint_rotate(self.base_limb, self.angle_front)
         self.front_limb = rah.joint_rotate(self.base_limb, self.angle_back)
 
-        surf.blit(self.back_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+        surf.blit(self.back_limb, rah.point_center(self.bottom_pos[0], self.bottom_pos[1],
                                                    *self.back_limb.get_size()))
 
-        surf.blit(self.back_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+        surf.blit(self.back_limb, rah.point_center(self.neck_pos[0], self.neck_pos[1],
                                                    *self.back_limb.get_size()))
-        surf.blit(self.torso, rah.point_center(self.centre_pos[0] - x_offset, self.centre_pos[1] - y_offset,
+        surf.blit(self.torso, rah.point_center(self.centre_pos[0], self.centre_pos[1],
                                                *self.torso.get_size()))
-        surf.blit(self.head, rah.point_center(self.head_pos[0] - x_offset, self.head_pos[1] - y_offset,
+        surf.blit(self.head, rah.point_center(self.head_pos[0], self.head_pos[1],
                                               *self.head.get_size()))
-        surf.blit(self.front_limb, rah.point_center(self.bottom_pos[0] - x_offset, self.bottom_pos[1] - y_offset,
+        surf.blit(self.front_limb, rah.point_center(self.bottom_pos[0], self.bottom_pos[1],
                                                     *self.front_limb.get_size()))
-        surf.blit(self.front_limb, rah.point_center(self.neck_pos[0] - x_offset, self.neck_pos[1] - y_offset,
+        surf.blit(self.front_limb, rah.point_center(self.neck_pos[0], self.neck_pos[1],
                                                     *self.back_limb.get_size()))
 
     def update(self, surf, x_offset, y_offset):
@@ -639,12 +638,13 @@ class RemotePlayer:
             self.vx = 0
             self.x = self.target[0]
 
-        self.rect = Rect(self.x, self.y, self.w, self.h)
+        self.rect = Rect(self.x - x_offset, self.y - y_offset, self.w, self.h)
 
-        draw.rect(surf, (125, 125, 125), (self.x - x_offset, self.y + 10 - y_offset, self.w, self.h))
+        # draw.rect(surf, (125, 125, 125), self.rect)
 
         surf.blit(self.name_back, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                              self.name_back.get_width(), self.name_back.get_height()))
         surf.blit(self.name_tag, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                             self.name_tag.get_width(), self.name_tag.get_height()))
+        self.get_state()
         self.animate(surf, self.x - x_offset, self.y - y_offset)
