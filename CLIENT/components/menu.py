@@ -13,7 +13,7 @@ Main UI Developer: Henry Tu & Syed Safwaan
 
 from pygame import *
 import json
-import CLIENT.components.rahma as rah
+import components.rahma as rah
 
 # Loads standard UI elements (Button states)
 button_hover = image.load("textures/menu/button_hover.png")
