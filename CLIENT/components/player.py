@@ -12,7 +12,7 @@ from pygame import *  # to allow use of graphics
 from math import *  # to allow use of trigomometric functions
 
 # Game modules to import
-import components.rahma as rah  # to allow use of general convenience functions
+import CLIENT.components.rahma as rah  # to allow use of general convenience functions
 
 # Initlalization of modules
 font.init()  # allowing use of fonts
@@ -219,12 +219,12 @@ class Player:
 
             if keys[self.controls[0]] != keys[self.controls[1]]:  # if player is either moving left XOR right
                 if keys[self.controls[0]] and (
-                        abs(self.vx) < self.max_vx or self.vx > 0):  # if player is hitting left and is moving left
+                                abs(self.vx) < self.max_vx or self.vx > 0):  # if player is hitting left and is moving left
                     self.dir = -1  # player is moving left
                     self.flipped = 1  # player is facing left (flipped)
                     self.pointing = -1  # player is pointing left
                 if keys[self.controls[1]] and (
-                        self.vx < self.max_vx or self.vx < 0):  # if player is hitting right and is moving right
+                                self.vx < self.max_vx or self.vx < 0):  # if player is hitting right and is moving right
                     self.dir = 1  # player is moving right
                     self.flipped = 0  # player is facing right (not flipped)
                     self.pointing = 1  # player is pointing right
@@ -476,11 +476,14 @@ class Player:
 
         # Check to see if any menu is active in game
 
-        if ui:  # if a menu is active
+        print(bool(ui))
 
+        if ui:  # if a menu is active
             # Stop player from moving at all
             self.state = "standing"  # player is standing
             self.dir = 0  # player has no direction
+            self.vx *= self.friction  # slow down the player's velocity using friction
+
         else:  # if no menus are active
 
             # Collect user input for controls and states data
@@ -596,8 +599,8 @@ class RemotePlayer:
     # Player interpolation to smooth out remote player movement since the player cords every 2 ticks or 100ms
     def calculate_velocity(self, ncord, fpt):
         self.target = ncord[:]  # Gets a backup cords
-        self.vy = (ncord[1] - self.y) // fpt   # Calculates the the amount in the y axis to move each frame
-        self.vx = (ncord[0] - self.x) // fpt   # Calculates the same for x
+        self.vy = (ncord[1] - self.y) // fpt  # Calculates the the amount in the y axis to move each frame
+        self.vx = (ncord[0] - self.x) // fpt  # Calculates the same for x
 
         if self.vx == 0 and ncord[0] - self.x != 0:  # Checking if the distance between move per frame is less than 0
             self.x = ncord[0]  # Set the current x to the actual x for pixel perfect movement
@@ -614,7 +617,6 @@ class RemotePlayer:
             self.state = 'walking'
         else:
             self.state = 'sneaking'
-
 
     def animate(self, surf, x_offset, y_offset):
 

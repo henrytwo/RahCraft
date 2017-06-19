@@ -17,9 +17,9 @@ import time as ti
 from pygame import *
 from random import *
 
-import components.rahma as rah  # Group made packages required for the game to function
-import components.player as player
-import components.menu as menu
+import CLIENT.components.rahma as rah  # Group made packages required for the game to function
+import CLIENT.components.player as player
+import CLIENT.components.menu as menu
 
 
 # The sender gets messages from the send queue and sends it to the server for processing
@@ -675,7 +675,7 @@ def game(surf, username, token, host, port, size):
                     # Redraws elements
                     chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
                     pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
-                    inventory_object = menu.Inventory(0, 0, size[0], size[1])
+                    inventory_object = menu.Inventory(size[0], size[1])
                     hotbar_rect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
                     crafting_object = menu.Crafting(size[0], size[1])
                     furnace_object = menu.Crafting(size[0], size[1])
@@ -1005,24 +1005,24 @@ def game(surf, username, token, host, port, size):
             mb = mouse.get_pressed()
             mx, my = mouse.get_pos()
 
-            #Block mouse is currently over
+            # Block mouse is currently over
             hover_x, hover_y = ((mx + x_offset) // block_size, (my + y_offset) // block_size)
 
-            #Cord of snapped block
+            # Cord of snapped block
             block_clip_cord = (block_clip[0] // block_size, block_clip[1] // block_size)
 
-            #If no GUI is being used
+            # If no GUI is being used
             if not current_gui:
 
-                #Left click release
+                # Left click release
                 if mb[0] == 0:
                     current_breaking = []
                     breaking_block = False
 
-                #Left click down
+                # Left click down
                 elif mb[0] == 1:
 
-                    #Makes block break request
+                    # Makes block break request
                     if not breaking_block and world[hover_x, hover_y] > 0 and (
                             hover_x, hover_y) not in block_request and hypot(hover_x - block_clip_cord[0],
                                                                              hover_y - block_clip_cord[1]) <= reach:
@@ -1030,147 +1030,146 @@ def game(surf, username, token, host, port, size):
                         # Flags block breaking
                         breaking_block = True
 
-                        #Gets block breaking
+                        # Gets block breaking
                         current_breaking = [world[hover_x, hover_y], hover_x, hover_y, 1]
 
-                        #Breaks block if enough time
+                        # Breaks block if enough time
                         if current_breaking[3] >= block_properties[current_breaking[0]]['hardness']:
                             block_broken = True
 
-                    #If increments the block breaking
+                    # If increments the block breaking
                     elif breaking_block and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
 
-                        #If mouse is over the block being broken
+                        # If mouse is over the block being broken
                         if hover_x == current_breaking[1] and hover_y == current_breaking[2]:
 
-                            #If the tool selected is the best one for the block
+                            # If the tool selected is the best one for the block
                             if hotbar_items[hotbar_slot][0] in tool_properties:
 
-                                #Get current tool
+                                # Get current tool
                                 current_tool = hotbar_items[hotbar_slot][0]
 
-                                #Compares tool to ideal tool for block
+                                # Compares tool to ideal tool for block
                                 if tool_properties[current_tool]['type'] == \
                                         block_properties[world[hover_x, hover_y]]['tool']:
 
-                                    #Gives bonus if correct tool
+                                    # Gives bonus if correct tool
                                     current_breaking[3] += tool_properties[current_tool]['bonus']
                                 else:
-                                    #Gives tool standard speed
+                                    # Gives tool standard speed
                                     current_breaking[3] += tool_properties[current_tool]['speed']
                             else:
-                                #Standard slow breaking
+                                # Standard slow breaking
                                 current_breaking[3] += 1
 
-                            #If block is broken
+                            # If block is broken
                             if current_breaking[3] >= block_properties[current_breaking[0]]['hardness']:
                                 block_broken = True
 
-                            #Play punching sound
+                            # Play punching sound
                             rah.load_sound(sound['step'][block_properties[world[hover_x, hover_y]]['sound']])
 
                         else:
-                            #If block is released before it's broken
+                            # If block is released before it's broken
                             breaking_block = False
                             current_breaking = []
 
-                    #When block is broken
+                    # When block is broken
                     if block_broken:
 
-                        #Play destroy sound
+                        # Play destroy sound
                         rah.load_sound(sound['dig'][block_properties[world[hover_x, hover_y]]['sound']])
 
-                        #Updates tool durability
+                        # Updates tool durability
                         if hotbar_items[hotbar_slot][0] in tool_properties:
                             if len(hotbar_items[hotbar_slot]) == 2:
                                 hotbar_items[hotbar_slot].append(
                                     tool_properties[hotbar_items[hotbar_slot][0]]['durability'])
                             else:
-                                #Increments durability
+                                # Increments durability
                                 hotbar_items[hotbar_slot][2] -= 1
 
-                                #Removes item if it is dead
+                                # Removes item if it is dead
                                 if hotbar_items[hotbar_slot][2] == 0:
                                     hotbar_items[hotbar_slot] = [0, 0]
 
-                        #If the block requires a certain block for an item drop
+                        # If the block requires a certain block for an item drop
                         if block_properties[world[hover_x, hover_y]]['tool-required']:
 
-                            #If item in hand is a tool
+                            # If item in hand is a tool
                             if hotbar_items[hotbar_slot][0] in tool_properties:
                                 current_tool = hotbar_items[hotbar_slot][0]
 
-                                #If tool type matches required
+                                # If tool type matches required
                                 if tool_properties[current_tool]['type'] == block_properties[world[hover_x, hover_y]][
                                     'tool']:
-
-                                    #Add block to inventory
+                                    # Add block to inventory
                                     inventory_items, hotbar_items = pickup_item(inventory_items, hotbar_items,
                                                                                 block_properties[
                                                                                     world[hover_x, hover_y]]['drop'],
                                                                                 item_lib)
                         else:
-                            #Add block to inventory
+                            # Add block to inventory
                             inventory_items, hotbar_items = pickup_item(inventory_items, hotbar_items,
                                                                         block_properties[world[hover_x, hover_y]][
                                                                             'drop'], item_lib)
 
-                        #Indicates inventory has been updated to sync with server
+                        # Indicates inventory has been updated to sync with server
                         inventory_updated = True
 
-                        #Request to break block from server
+                        # Request to break block from server
                         block_request.add((hover_x, hover_y))
                         send_queue.put(((3, hover_x, hover_y), SERVERADDRESS))
 
-                        #Resets values
+                        # Resets values
                         current_breaking = []
                         breaking_block = False
 
-                #If left click and in range of mouse
+                # If left click and in range of mouse
                 if mb[2] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
 
-                    #Select crafting table
+                    # Select crafting table
                     if world[hover_x, hover_y] == 10 and current_gui == '':
                         crafting = True
                         current_gui = 'C'
 
-                    #Select chest
+                    # Select chest
                     elif world[hover_x, hover_y] == 17 and current_gui == '':
                         using_chest = True
                         current_gui = 'Ch'
                         chest_location = [hover_x, hover_y]
                         send_queue.put(((7, 'chest', hover_x, hover_y, 1), SERVERADDRESS))
 
-                    #Select furnace
+                    # Select furnace
                     elif world[hover_x, hover_y] == 18 and current_gui == '':
                         using_furnace = True
                         current_gui = 'F'
                         furnace_location = [hover_x, hover_y]
 
-                        #Tells server furnace is being interacted with
+                        # Tells server furnace is being interacted with
                         send_queue.put(((7, 'furnace', hover_x, hover_y, 1), SERVERADDRESS))
 
 
-                    #Place block
+                    # Place block
                     elif world[hover_x, hover_y] == 0 and sum(get_neighbours(hover_x, hover_y)) > 0 and (
                             hover_x, hover_y) not in block_request and on_tick and hotbar_items[hotbar_slot][1] != 0 and hotbar_items[hotbar_slot][
                         0] in block_properties and hotbar_items[hotbar_slot][1] > 0:
 
-                        #Asks server to place block
+                        # Asks server to place block
                         block_request.add((hover_x, hover_y))
                         send_queue.put(
                             ((4, hover_x, hover_y, hotbar_items[hotbar_slot][0], hotbar_slot), SERVERADDRESS))
 
-                        #Block sound
+                        # Block sound
                         hover_sound = block_properties[hotbar_items[hotbar_slot][0]]
                         if hover_sound['sound'] != 'nothing':
                             rah.load_sound(sound['dig'][hover_sound['sound']])
 
-                #Middle click to get block
+                # Middle click to get block
                 if debug and mb[1] == 1 and hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     hotbar_items[hotbar_slot] = [world[hover_x, hover_y], 1]
 
-                #Highlight cursor if in reach
+                # Highlight cursor if in reach
                 if hypot(hover_x - block_clip_cord[0], hover_y - block_clip_cord[1]) <= reach:
                     surf.blit(highlight_good, ((mx + x_offset) // block_size * block_size - x_offset,
                                                (my + y_offset) // block_size * block_size - y_offset))
@@ -1178,39 +1177,38 @@ def game(surf, username, token, host, port, size):
                     surf.blit(highlight_bad, ((mx + x_offset) // block_size * block_size - x_offset,
                                               (my + y_offset) // block_size * block_size - y_offset))
 
-            #Update remote players
+            # Update remote players
             for remote in remote_players:
                 remote_players[remote].update(surf, x_offset, y_offset)
 
             # ====================Inventory/hotbar========================
 
-            #Size of heat icon
+            # Size of heat icon
             HEART_SIZE = 15
 
-            #Renders hearts
+            # Renders hearts
             for heart_index in range(0, 20, 2):
 
-                #Get heart location based on heart #
+                # Get heart location based on heart #
                 heart_x = heart_index // 2 * (HEART_SIZE + 1)
                 surf.blit(transform.scale(health_texture['none'], (HEART_SIZE + 1, HEART_SIZE + 1)), (hotbar_rect[0] + heart_x - 1, hotbar_rect[1] - HEART_SIZE - 6))
 
-
                 if heart_index < health - 2:
 
-                    #Empty heart
+                    # Empty heart
                     surf.blit(transform.scale(health_texture['full'], (HEART_SIZE, HEART_SIZE)),
                               (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
 
-                #Atleast one heart
+                # Atleast one heart
                 elif heart_index <= health - 1:
 
-                    #Decides full or half heart
+                    # Decides full or half heart
                     if (health - heart_index) % 2 == 0:
                         heart_texture = health_texture['full']
                     else:
                         heart_texture = health_texture['half']
 
-                    #Blits the heart
+                    # Blits the heart
                     surf.blit(transform.scale(heart_texture, (HEART_SIZE, HEART_SIZE)),
                               (hotbar_rect[0] + heart_x, hotbar_rect[1] - HEART_SIZE - 5))
 
@@ -1238,26 +1236,26 @@ def game(surf, username, token, host, port, size):
                               (hotbar_rect[0] + hotbar.get_width() - 10 * HUNGER_SIZE + hunger_x - 10, hotbar_rect[1] - HUNGER_SIZE - 5))
             '''
 
-            #Renders hotbar
+            # Renders hotbar
             render_hotbar(hotbar_slot)
 
             # ===================Pausing====================================
             if paused:
 
-                #Background tint
+                # Background tint
                 surf.blit(tint, (0, 0))
 
-                #Caption
+                # Caption
                 text_surface = rah.text('Game Paused', 20)
                 surf.blit(text_surface, (size[0] // 2 - text_surface.get_width() // 2, 50))
 
-                #Creates menu class
+                # Creates menu class
                 nav_update = pause_menu.update(surf, release, mx, my, mb)
 
-                #Updates if button is clicked
+                # Updates if button is clicked
                 if nav_update:
 
-                    #If back button is clicked
+                    # If back button is clicked
                     if nav_update == 'unpause':
                         paused = False
                     elif nav_update == 'menu':
@@ -1266,78 +1264,78 @@ def game(surf, username, token, host, port, size):
                     else:
                         return nav_update
 
-            #Chest UI
+            # Chest UI
             elif using_chest:
 
-                #Update chests
+                # Update chests
                 surf.blit(tint, (0, 0))
                 changed = chest_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_chest, item_lib)
 
                 if changed != [0, 0]:
                     send_queue.put((changed + [chest_location[0], chest_location[1]], SERVERADDRESS))
 
-            #Furnace UI
+            # Furnace UI
             elif using_furnace:
 
                 furnace_old = deepcopy(current_furnace)
                 surf.blit(tint, (0, 0))
 
-                #Updates furnace
+                # Updates furnace
                 furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
 
-                #Syncs furnace with server
+                # Syncs furnace with server
                 if current_furnace != [] and current_furnace != furnace_old:
                     send_queue.put(((8, 'furnace', furnace_location[0], furnace_location[1], current_furnace), SERVERADDRESS))
 
-            #Inventory
+            # Inventory
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
 
-                #Updates inventory object
+                # Updates inventory object
                 inventory_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
-            #Crafting
+            # Crafting
             elif crafting:
                 surf.blit(tint, (0, 0))
 
-                #Updates crafting object
+                # Updates crafting object
                 crafting_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
-            #Tab player menu
+            # Tab player menu
             if not paused:
                 if key.get_pressed()[K_TAB]:
 
-                    #Formats text in list
+                    # Formats text in list
                     players = ['RahCraft',
                                '---------',
                                username] + [player for player in remote_players]
 
-                    #Tab menu tint
+                    # Tab menu tint
                     tab_back = Surface((200, len(players) * 30 + 10), SRCALPHA)
                     tab_back.fill(Color(75, 75, 75, 150))
                     surf.blit(tab_back, (size[0] // 2 - 100, 40))
 
-                    #Draws text
+                    # Draws text
                     for y in range(0, len(players)):
                         about_text = normal_font.render(players[y], True, (255, 255, 255))
                         surf.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20))
 
-            #Clears chat if it goes off screen
+            # Clears chat if it goes off screen
             while len(chat_list) * text_height > (5 * size[1]) // 8:
                 del chat_list[0]
 
-            #Blits chat twxt
+            # Blits chat twxt
             for line in range(len(chat_list)):
                 surf.blit(rah.text(chat_list[line], 10), (20, line * (text_height + 3)))
 
-            #Updates chatbox object
+            # Updates chatbox object
             if chat_enable:
                 chat_content = chat.update(pass_event)
                 chat.draw(surf, '')
 
-            #Debug menu
+            # Debug menu
             if debug:
-                #Debug stats
+                # Debug stats
                 debug_list = ["%s" % build,
                               "FPS: %i" % round(clock.get_fps(), 2),
                               "X:%i Y:%i" % (offset_clip.x, y_offset // block_size),
@@ -1349,17 +1347,17 @@ def game(surf, username, token, host, port, size):
                               "Time: %s" % sky_tick,
                               "Token: %s" % token[0:10]]
 
-                #Blits the stats
+                # Blits the stats
                 for y in range(len(debug_list)):
                     about_text = rah.text(debug_list[y], 15)
                     surf.blit(about_text, (size[0] - about_text.get_width() - 10, 10 + y * 20))
 
-            #Lock frame rate and update screen
+            # Lock frame rate and update screen
             clock.tick(120)
             display.set_caption("RahCraft // FPS - {0}".format(clock.get_fps()))
             display.update()
 
     except:
-        #If an error occurs, return error and quit game
+        # If an error occurs, return error and quit game
         quit_game()
         return 'crash', traceback.format_exc(), 'menu'
