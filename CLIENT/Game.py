@@ -136,8 +136,10 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):  # This function helps find
 
     return inventory, hotbar
 
-
+#Game function
 def game(surf, username, token, host, port, size):
+
+    #Terminates processes when game quits to close connections
     def quit_game():
         music_object.stop()
         send_queue.put(((9,), SERVERADDRESS))
@@ -146,9 +148,11 @@ def game(surf, username, token, host, port, size):
         receiver.terminate()
         commandline.terminate()
 
+    #Gets blocks surrounding the player
     def get_neighbours(x, y):
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
+    #Renders the blocks in the world
     def render_world():
         for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
             for y in range(0, size[1] + block_size + 1, block_size):
