@@ -593,13 +593,14 @@ class RemotePlayer:
         self.head_bob = 0  # additive to player y-value
         self.head_bob_dir = -1  # direction head is bobbing (+ is down, - is up)
 
+    # Player interpolation to smooth out remote player movement since the player cords every 2 ticks or 100ms
     def calculate_velocity(self, ncord, fpt):
-        self.target = ncord[:]
-        self.vy = (ncord[1] - self.y) // fpt
-        self.vx = (ncord[0] - self.x) // fpt
+        self.target = ncord[:]  # Gets a backup cords
+        self.vy = (ncord[1] - self.y) // fpt   # Calculates the the amount in the y axis to move each frame
+        self.vx = (ncord[0] - self.x) // fpt   # Calculates the same for x
 
-        if self.vx == 0 and ncord[0] - self.x != 0:
-            self.x = ncord[0]
+        if self.vx == 0 and ncord[0] - self.x != 0:  # Checking if the distance between move per frame is less than 0
+            self.x = ncord[0]  # Set the current x to the actual x for pixel perfect movement
 
         if self.vy == 0 and ncord[1] - self.y != 0:
             self.y = ncord[1]
@@ -684,13 +685,13 @@ class RemotePlayer:
                                                     *self.back_limb.get_size()))
 
     def update(self, surf, x_offset, y_offset):
-        if self.vy > 0 and self.y + self.vy < self.target[1]:
+        if self.vy > 0 and self.y + self.vy < self.target[1]:  # Checking when to stop the player's motion because the target cord is reached.
             self.y += self.vy
-        elif self.vy < 0 and self.y + self.vy > self.target[1]:
+        elif self.vy < 0 and self.y + self.vy > self.target[1]:  # If not still not reached
             self.y += self.vy
-        else:
-            self.vy = 0
-            self.y = self.target[1]
+        else:  # If adding vy goes over the target
+            self.vy = 0  # Reset vy
+            self.y = self.target[1]  # Set to resting cord
 
         if self.vx > 0 and self.x + self.vx < self.target[0]:
             self.x += self.vx
@@ -701,8 +702,6 @@ class RemotePlayer:
             self.x = self.target[0]
 
         self.rect = Rect(self.x - x_offset, self.y - y_offset, self.w, self.h)
-
-        # draw.rect(surf, (125, 125, 125), self.rect)
 
         surf.blit(self.name_back, rah.center(self.x - x_offset, self.y - 40 - y_offset, 20, 20,
                                              self.name_back.get_width(), self.name_back.get_height()))
