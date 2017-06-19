@@ -26,4 +26,4 @@ Ryan Zhang<br />
 Syed Safwaan<br />
 Copyright 2017 (C) Rahmish Empire, All Rahs Reserved
 
-*ALL HAIL QUEEN RAHMA*
+**ALL HAIL QUEEN RAHMA**
