@@ -16,13 +16,12 @@ Features:
 
 //Readme is WIP
 
-rahmish.com
-
+For support, visit rahmish.com
+<br />
 Project completed in ~2 months for class project (ICS3U)
-
+<br />
 Developed by:
-Henry Tu
-Ryan Zhang
-Syed Safwaan
-
+Henry Tu<br />
+Ryan Zhang<br />
+Syed Safwaan<br />
 Copyright 2017 (C) Rahmish Empire, All Rahs Reserved
