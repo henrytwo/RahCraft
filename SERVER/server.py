@@ -682,8 +682,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                             break
 
                                     if not send_message:
-                                        private_send_message = ['Player %s not found' % kick_name, 'RahBot',
-                                                                username_dict[player]]
+                                        private_send_message = ['Player %s not found' % kick_name, 'RahBot', username_dict[player]]
 
                                 else:  # No parameter
                                     private_send_message = ["Invalid parameters", 'RahBot', username_dict[player]]
@@ -700,8 +699,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                         x, y = players[player].change_location((list(map(int, message_list[2:4]))))  # Change the location of the player
 
                                         for i in players:
-                                            sendQueue.put(((1, username_dict[player], x, y, True),
-                                                           i))  # Broadcast the player's new location so clients can update the remote players
+                                            sendQueue.put(((1, username_dict[player], x, y, True), i))  # Broadcast the player's new location so clients can update the remote players
 
                                 send_message = '%s teleported %s to %s %s' % (executor, command_receiver, x, y)  # Chat message
 
@@ -825,8 +823,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
                                     else:
 
-                                        private_send_message = ["%s was not found in the ban list" % (command_receiver),
-                                                                'RahBot', username_dict[player]]
+                                        private_send_message = ["%s was not found in the ban list" % (command_receiver), 'RahBot', username_dict[player]]
 
                                 else:
                                     private_send_message = ["Invalid parameters", 'RahBot', username_dict[player]]
@@ -916,17 +913,14 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                 private_send_message = ["Server synchronized", 'RahBot', username_dict[address]]
 
                             elif message[1].lower()[:5] == '/list':  # sends a list of player
-                                private_send_message = [
-                                    ''.join([str([username_dict[player], player]) for player in players]), 'RahBot',
-                                    username_dict[address]]
+                                private_send_message = [''.join([str([username_dict[player], player]) for player in players]), 'RahBot',
+                                                        username_dict[address]]
 
                             else:
-                                private_send_message = ["Command not found", 'RahBot',
-                                                        username_dict[address]]  # The command received is not found
+                                private_send_message = ["Command not found", 'RahBot', username_dict[address]]  # The command received is not found
 
                         else:  # Not an admin
-                            private_send_message = ["BOIII You don't have permission to do that smh", 'RahBot',
-                                                    username_dict[address]]
+                            private_send_message = ["BOIII You don't have permission to do that smh", 'RahBot', username_dict[address]]
 
                     else:
                         user_sending = username_dict[address]  # normal chat, get the user sending the message
@@ -946,8 +940,8 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                     if private_send_message:
                         for player in players:
                             if username_dict[player] == private_send_message[2]:
-                                pm = '[%s -> %s] ' % (private_send_message[1], private_send_message[2]) + \
-                                     private_send_message[0]
+
+                                pm = '[%s -> %s] ' % (private_send_message[1], private_send_message[2]) + private_send_message[0]
 
                                 sendQueue.put(((10, pm), player))
 
@@ -956,6 +950,8 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                 log_queue.put('[%s]' % datetime.datetime.fromtimestamp(time.time()).strftime(
                                     '%Y-%m-%d %H:%M:%S') + pm)  # put something in log file
                                 break
+
+
 
                     if slack_enable:
                         broadcast(channel, send_message)
