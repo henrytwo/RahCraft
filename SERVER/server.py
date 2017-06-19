@@ -194,7 +194,7 @@ def give_item(inventory, hotbar, Nitem, quantity):
                 item_location = [row, item]
                 inventory_type = 'inventory'
 
-    if inventory_type == 'hotbar':  # If no place to stack te inventory is found, place the item(s) in the first open slot found
+    if inventory_type == 'hotbar':  # If no place to stack the inventory is found, place the item(s) in the first open slot found
         hotbar[item_location] = [Nitem, quantity]
     elif inventory_type == 'inventory':
         inventory[item_location[0]][item_location[1]] = [Nitem, quantity]

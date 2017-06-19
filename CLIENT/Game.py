@@ -4,44 +4,49 @@
 
 #game.py
 
-import os, sys, traceback, platform, glob, socket, pickle, json
+import os, sys, traceback, platform, glob, socket, pickle, json  # Libraries required for the proper operation of the game
 
 from subprocess import Popen, PIPE
 from shlex import split
-from multiprocessing import *
-import numpy as np
+from multiprocessing import *  # Multiprocessing for help with sending and receiving data
+import numpy as np  # Numpy used to decode the numpy array that the server sends
 from math import *
-from copy import deepcopy
+from copy import deepcopy  # Obtain the ability to duplicate multi dimensional lists
 import time as ti
 from pygame import *
 from random import *
 
-import components.rahma as rah
+import components.rahma as rah  # Group made packages required for the game to function
 import components.player as player
 import components.menu as menu
 
+# The sender gets messages from the send queue and sends it to the server for processing
+# This multiprocessing is needed to handle delay due to upload speed
 def player_sender(send_queue, server):
     rah.rahprint('Sender running...')
 
     while True:
-        tobesent = send_queue.get()
-        server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])
+        tobesent = send_queue.get()  # Get message from queue
+        server.sendto(pickle.dumps(tobesent[0], protocol=4), tobesent[1])  # Send a pickled message/message in bytes to server
 
+# Receiving messages from the server.
+# Multiprocessing is needed becauase a extremely fast loop is needed to accept the data to prevent data lost
 
 def receive_message(message_queue, server):
     rah.rahprint('Ready to receive command...')
 
     while True:
-        msg = server.recvfrom(163840)
-        message_queue.put(pickle.loads(msg[0]))
+        msg = server.recvfrom(163840)  # Recieving data from server
+        message_queue.put(pickle.loads(msg[0]))  # Puts the data in a queue for processing
 
 
+# Loads the blocks that can be placed in the world
 def load_blocks(block_file, block_size):
-    blocks = {}
+    blocks = {}  # A place where all of the blocks will be stored
 
-    block_data = json.load(open("data/" + block_file))
+    block_data = json.load(open("data/" + block_file))  # Loads the data file
 
-    for block in block_data:
+    for block in block_data:  # Loops through the data extracting data and loading the images
         blocks[int(block)] = {'name': block_data[block]['name'],
                               'texture':transform.scale(image.load("textures/blocks/" + block_data[block]['texture']).convert_alpha(), (block_size, block_size)),
                               'hardness':block_data[block]['hardness'],
@@ -55,13 +60,13 @@ def load_blocks(block_file, block_size):
 
     return blocks
 
-
+# Same as the block loading function but for tools.
 def load_tools(tool_file):
     tools = {}
 
     tool_data = json.load(open("data/" + tool_file))
 
-    for tool in tool_data:
+    for tool in tool_data:  # Run through the tools file using a loop load images
         tools[int(tool)] = {'name': tool_data[tool]['name'],
                             'icon': transform.scale(image.load("textures/items/" + tool_data[tool]['icon']).convert_alpha(), (32, 32)),
                             'bonus': tool_data[tool]['bonus'],
@@ -72,11 +77,11 @@ def load_tools(tool_file):
 
     return tools
 
-
+# Creating a dictionary of items for later processing
 def load_items(item_file):
     items = {}
 
-    item_data = json.load(open("data/" + item_file))
+    item_data = json.load(open("data/" + item_file))  # Loads json
 
     for item in item_data:
         items[int(item)] = {'name': item_data[item]['name'],
@@ -86,36 +91,36 @@ def load_items(item_file):
     return items
 
 
-def create_item_dictionary(*libraries):
+def create_item_dictionary(*libraries):  # Creating a central item library inventory rendering
     item_lib = {}
 
-    for di in libraries:
+    for di in libraries:  # Loop through each of the inventory provided and pick out the needed values for inventory to operate
         for item in di:
             item_lib[item] = [di[item]['name'], di[item]['icon'], di[item]['maxstack']]
 
     return item_lib
 
 
-def commandline_in(commandline_queue, fn, address, chat_queue):
-    rah.rahprint('Ready for input.')
-    sys.stdin = os.fdopen(fn)
+def commandline_in(commandline_queue, fn, address, chat_queue):  # Chat
+    rah.rahprint('Ready for input.')  # Smalling debugging function
+    sys.stdin = os.fdopen(fn)  # Opens the input stream
 
-    while True:
+    while True:  # Waits for input
         commandline_queue.put(((10, chat_queue.get()), address))
 
 
-def pickup_item(inventory, hotbar, Nitem, item_lib):
-    item_location = ''
-    inventory_type = ''
-    for item in range(len(hotbar)):
-        if hotbar[item][0] == Nitem and hotbar[item][1] < item_lib[hotbar[item][0]][2]:
+def pickup_item(inventory, hotbar, Nitem, item_lib):  # This function helps find a space to put the item
+    item_location = ''  # used to store the first location where the item can be stored
+    inventory_type = ''  # This is used to store the first open slot type (inventory or hotbar)
+    for item in range(len(hotbar)):  # Loop through the hotbar first because the hotbar takes priority
+        if hotbar[item][0] == Nitem and hotbar[item][1] < item_lib[hotbar[item][0]][2]:  # If stacking is possible, stack item and quit
             hotbar[item][1] += 1
             return inventory, hotbar
-        elif hotbar[item][0] == 0 and inventory_type == '':
+        elif hotbar[item][0] == 0 and inventory_type == '':   # If an open space is found, store the cords and type for later use if not valid stacking spot is found
             item_location = item
             inventory_type = 'hotbar'
 
-    for row in range(len(inventory)):
+    for row in range(len(inventory)):    # Same as above but searches through the inventory instead
         for item in range(len(inventory[row])):
             if inventory[row][item][0] == Nitem and inventory[row][item][1] < item_lib[inventory[row][item][0]][2]:
                 inventory[row][item][1] += 1
@@ -124,7 +129,7 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):
                 item_location = [row, item]
                 inventory_type = 'inventory'
 
-    if inventory_type == 'hotbar':
+    if inventory_type == 'hotbar':  # If no place to stack the inventory is found, place the item(s) in the first open slot found
         hotbar[item_location] = [Nitem, 1]
     elif inventory_type == 'inventory':
         inventory[item_location[0]][item_location[1]] = [Nitem, 1]
