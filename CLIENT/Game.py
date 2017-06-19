@@ -16,9 +16,9 @@ import time as ti
 from pygame import *
 from random import *
 
-import CLIENT.components.rahma as rah
-import CLIENT.components.player as player
-import CLIENT.components.menu as menu
+import components.rahma as rah
+import components.player as player
+import components.menu as menu
 
 def player_sender(send_queue, server):
     rah.rahprint('Sender running...')
@@ -300,7 +300,7 @@ def game(surf, username, token, host, port, size):
 
     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-    local_player = player.Player(player_x, player_y, (2 * block_size - 1) // 4, 2 * block_size - 1, block_size,
+    local_player = player.Player(player_x, player_y, (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1, block_size, 5,
                                  (K_a, K_d, K_w, K_s, K_SPACE))
 
     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
@@ -360,7 +360,7 @@ def game(surf, username, token, host, port, size):
     # Init Existing Remote Players
     # =====================================================================
     for Rp in r_players:
-        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], 2 * block_size - 1, block_size)
+        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 1, 2 * block_size - 1)
 
     # Initing Pygame Components
     # =====================================================================
@@ -413,7 +413,7 @@ def game(surf, username, token, host, port, size):
 
     normal_font = font.Font("fonts/minecraft.ttf", 14)
 
-    inventory_object = menu.Inventory(size[0], size[1])
+    inventory_object = menu.Inventory(0, 0, size[0], size[1])
 
     hotbar_rect = (size[0] // 2 - hotbar.get_width() // 2, size[1] - hotbar.get_height())
     hotbar_slot = 0
@@ -660,7 +660,7 @@ def game(surf, username, token, host, port, size):
                         remote_players[remote_username].calculate_velocity((int(current_x * block_size), int(current_y * block_size)), tick_per_frame)
 
                     else:
-                        remote_players[remote_username] = player.RemotePlayer(remote_username, int(current_x * block_size), int(current_y * block_size), 2 * block_size - 1, block_size)
+                        remote_players[remote_username] = player.RemotePlayer(remote_username, int(current_x * block_size), int(current_y * block_size), block_size - 1, 2 * block_size - 1)
 
                 elif command == 2:
                     chunk_position_x, chunk_position_y, world_chunk = message
@@ -736,8 +736,9 @@ def game(surf, username, token, host, port, size):
 
                     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
-                    local_player = player.Player(player_x, player_y, (2 * block_size - 1) // 4, 2 * block_size - 1,
-                                                 block_size, (K_a, K_d, K_w, K_s, K_SPACE))
+                    local_player = player.Player(player_x, player_y, (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1,
+                                                 block_size, 5,
+                                                 (K_a, K_d, K_w, K_s, K_SPACE))
 
                     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
                     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
@@ -757,8 +758,8 @@ def game(surf, username, token, host, port, size):
                     world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
 
                     for Rp in r_players:
-                        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 5,
-                                                                 2 * block_size - 5)
+                        remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1], block_size - 1, 2 * block_size - 1)
+
 
                     for repeat in range(5):
                         send_queue.put(([(101, username), SERVERADDRESS]))
@@ -841,7 +842,7 @@ def game(surf, username, token, host, port, size):
             local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
                                 block_properties, select_texture)
 
-            if local_player.fall_distance > 15:
+            if local_player.fall_distance > 10:
                 health -= (local_player.fall_distance//10)
 
                 send_queue.put(((12, health), SERVERADDRESS))
@@ -1043,7 +1044,7 @@ def game(surf, username, token, host, port, size):
 
             elif using_chest:
                 surf.blit(tint, (0, 0))
-                changed = chest_object.update(surf, mx, my, l_click, r_click, inventory_items, hotbar_items, current_chest, item_lib)
+                changed = chest_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_chest, item_lib)
 
                 if changed != [0, 0]:
                     send_queue.put((changed+[chest_location[0], chest_location[1]], SERVERADDRESS))
@@ -1051,18 +1052,18 @@ def game(surf, username, token, host, port, size):
             elif using_furnace:
                 furnace_old = deepcopy(current_furnace)
                 surf.blit(tint, (0, 0))
-                furnace_object.update(surf, mx, my, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
+                furnace_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, current_furnace, item_lib)
 
                 if current_furnace != [] and current_furnace != furnace_old:
                     send_queue.put(((8, 'furnace', furnace_location[0], furnace_location[1], current_furnace), SERVERADDRESS))
 
             elif inventory_visible:
                 surf.blit(tint, (0, 0))
-                inventory_object.update(surf, mx, my, l_click, r_click, inventory_items, hotbar_items, item_lib)
+                inventory_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
             elif crafting:
                 surf.blit(tint, (0, 0))
-                crafting_object.update(surf, mx, my, l_click, r_click, inventory_items, hotbar_items, item_lib)
+                crafting_object.update(surf, mx, my, mb, l_click, r_click, inventory_items, hotbar_items, item_lib)
 
 
             if not paused:

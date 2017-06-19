@@ -1,8 +1,8 @@
-#RAHCRAFT
-#COPYRIGHT 2017 (C) RAHMISH EMPIRE, MINISTRY OF RAHCRAFT DEVELOPMENT
-#DEVELOPED BY RYAN ZHANG, HENRY TU, SYED SAFWAAN
+# RAHCRAFT
+# COPYRIGHT 2017 (C) RAHMISH EMPIRE, MINISTRY OF RAHCRAFT DEVELOPMENT
+# DEVELOPED BY RYAN ZHANG, HENRY TU, SYED SAFWAAN
 
-#server.py
+# server.py
 
 import os.path, sys, traceback, socket, json, platform, time, datetime
 
@@ -287,7 +287,11 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
     playerNDisconnect = deque([])  # A double ended queue to store the player numbers that are used but the player disconnected
     move = ''
 
-    PlayerData = {}  # Player data library of all the saved players
+    if os.path.isfile('saves/%s-playerData.pkl' % world_name):
+        PlayerData = pkl.load(open('saves/%s-playerData.pkl' % world_name, 'rb'))  # Player data library of all the saved players
+    else:
+        PlayerData = {}
+        pkl.dump(PlayerData, open('saves/%s-playerData.pkl' % world_name, 'wb'))
 
     sendQueue = Queue()  # Multiprocessing queue as a buffer and a way to communicate between processes
     messageQueue = Queue()
@@ -302,9 +306,12 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
     world = World(world_name)  # Creating a new world object to load the world
 
-    chests = {}  # Extra world/block inventories are stored in a dictionary
-    furnaces = {}
-    entities = {}
+    if os.path.isfile('saves/%s-blockData.pkl' % world_name):
+        chests, furnaces = pkl.load(open('saves/%s-blockData.pkl' % world_name, 'rb'))  # Extra world/block inventories are stored in a dictionary
+    else:
+        chests = {}  # Extra world/block inventories are stored in a dictionary
+        furnaces = {}
+        pkl.dump([chests, furnaces], open('saves/%s-blockData.pkl' % world_name, 'wb'))
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # Start a UDP socket for game server
     server.bind((host, port))  # Binding server to port and server address to listen for messages
@@ -344,13 +351,12 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
     with open('data/ban.json') as ban_file:
         ban = json.load(ban_file)
 
-
     while True:
 
-        kill_list = [] #List of users to be kicked for death
+        kill_list = []  # List of users to be kicked for death
 
-        for player in players: #Iterates through all users
-            if players[player].health <= 0: #Checks health and kicks user if health <= 0
+        for player in players:  # Iterates through all users
+            if players[player].health <= 0:  # Checks health and kicks user if health <= 0
                 kick_message = "RAHDEATH:GG, You died!"
 
                 kill_list.append(player)
@@ -360,12 +366,12 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                 sendQueue.put(((11, '%s' % kick_message), player))
 
                 if send_message[0] != '[':
-                        send_message = '[%s] '%username_dict[('127.0.0.1', 0)] + send_message
+                    send_message = '[%s] ' % username_dict[('127.0.0.1', 0)] + send_message
 
                 for i in players:  # Broadcast message to all players for player disconnect
                     sendQueue.put(((10, send_message), i))
 
-        for kill_player in kill_list: #Removes the players in another function so that list index does not mess up
+        for kill_player in kill_list:  # Removes the players in another function so that list index does not mess up
             playerNDisconnect.append(players[kill_player].number)
             username.remove(players[kill_player].username)
 
@@ -509,7 +515,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                             else:
                                 sendQueue.put(([8, "err"], address))  # Error has occured
                         else:
-                            if(message[2], message[3]) in chests:  # Closing chest
+                            if (message[2], message[3]) in chests:  # Closing chest
                                 chests[(message[2], message[3])][1].remove(address)  # Remove player from players who are usig this chest to stop updating the player on the chests's inventory
                             else:
                                 sendQueue.put(([8, "err"], address))
@@ -531,7 +537,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
                 elif command == 8:  # Update the storage of the storage block
                     if message[1] == 'chest':  # If the block is a chest
-                        if chests[(message[5], message[6])][0][message[2]][message[3]] != message[4]: # If the inventory provided is not equal to the one in library, update the storage
+                        if chests[(message[5], message[6])][0][message[2]][message[3]] != message[4]:  # If the inventory provided is not equal to the one in library, update the storage
                             chests[(message[5], message[6])][0][message[2]][message[3]] = message[4]
                             for i in chests[(message[5], message[6])][1]:
                                 sendQueue.put(((8, 'chest', chests[(message[5], message[6])][0]), i))  # Transmit the storage to anyone who is currently using the chest
@@ -580,7 +586,11 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                 heart_beat.terminate()
                                 server.close()  # Close socket
                                 world.save()  # Save the world
-                                break # Stop the while loop
+                                chests = {location: [chests[location][0], []] for location in chests}
+                                furnaces = {location: [furnaces[location][0], []] for location in furnaces}
+                                pkl.dump([chests, furnaces], open('saves/%s-blockData.pkl' % world_name, 'wb'))
+                                pkl.dump(PlayerData, open('saves/%s-playerData.pkl' % world_name, 'wb'))
+                                break  # Stop the while loop
 
                             elif message[1].lower() == "/delworld":  # Delete the world
                                 send_message = "<Rahmish Empire> CONFIRM: DELETE WORLD? THIS CHANGE IS PERMANENT (y/n) [n]: "
@@ -591,7 +601,9 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                     in_put = messageQueue.get()
 
                                 if in_put[0][1] == 'y':  # If the user confirms deletion, Shutdown server, remote world, close socket, terminate all processes
-                                    os.remove("saves/world.pkl")
+                                    os.remove("saves/%s.pkl" %world_name)
+                                    os.remove("saves/%s-blockData.pkl" % world_name)
+                                    os.remove("saves/%s-playerData.pkl" % world_name)
                                     send_message = "World deleted successfully\nServer will shutdown"
                                     receiver.terminate()
                                     sender.terminate()
@@ -632,7 +644,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                 command_receiver = message_list[1]  # Who is getting the items
                                 item, quantity = message_list[2], message_list[3]  # What the item id is and how much of that item
 
-                                for player in players: # Search for the player and give the person the items
+                                for player in players:  # Search for the player and give the person the items
                                     if players[player].username == command_receiver:
                                         players[player].inventory, players[player].hotbar = give_item(players[player].inventory, players[player].hotbar, int(item), int(quantity))  # Change the player's inventoy
 
@@ -654,11 +666,10 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
                                     for player in players:  # Search for the player
                                         if players[player].username == kick_name:
-
                                             sendQueue.put(((11, '\n\n\nDisconnected from server by %s\n\n%s' % (
-                                            username_dict[address], kick_message)), player))
+                                                username_dict[address], kick_message)), player))
                                             send_message = '%s was disconnected from the server by %s' % (
-                                            kick_name, username_dict[address])
+                                                kick_name, username_dict[address])
 
                                             playerNDisconnect.append(players[player].number)
                                             PlayerData[players[player].username] = players[player].save()
@@ -668,11 +679,10 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                             del players[player]
                                             del username_dict[player]
 
-
                                             break
 
                                     if not send_message:
-                                        private_send_message = ['Player %s not found'%kick_name, 'RahBot', players[player].username]
+                                        private_send_message = ['Player %s not found' % kick_name, 'RahBot', players[player].username]
 
                                 else:  # No parameter
                                     private_send_message = ["Invalid parameters", 'RahBot', players[player].username]
@@ -749,7 +759,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                     else:
                                         private_send_message = [
                                             'Unknown subcommand %s' % message_list[1], 'RahBot',
-                                            players[address].username] # Something other than add or remove is given
+                                            players[address].username]  # Something other than add or remove is given
 
                                 else:
                                     private_send_message = ['No parameters given', 'RahBot', players[address].username]
@@ -813,7 +823,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                         private_send_message = ["%s was not found in the ban list" % (command_receiver), 'RahBot', players[player].username]
 
                                 else:
-                                    private_send_message = ["Invalid parameters",'RahBot', players[player].username]
+                                    private_send_message = ["Invalid parameters", 'RahBot', players[player].username]
 
 
                             elif message[1].lower()[:10] == '/whitelist':  # allow a person to join the server
@@ -844,7 +854,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                                 config_file.write(line + '\n')
 
 
-                                elif len(message_list) == 3: # Something other than toggle is added
+                                elif len(message_list) == 3:  # Something other than toggle is added
 
                                     executor = username_dict[address]
                                     command_receiver = message_list[2]
@@ -904,10 +914,10 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                                         players[address].username]
 
                             else:
-                                private_send_message = ["Command not found", 'RahBot',players[address].username]  # The command received is not found
+                                private_send_message = ["Command not found", 'RahBot', players[address].username]  # The command received is not found
 
                         else:  # Not an admin
-                            private_send_message = ["BOIII You don't have permission to do that smh", 'RahBot',players[address].username]
+                            private_send_message = ["BOIII You don't have permission to do that smh", 'RahBot', players[address].username]
 
                     else:
                         user_sending = username_dict[address]  # normal chat, get the user sending the message
@@ -915,7 +925,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                         send_message = '[%s] %s' % (user_sending, message[1])  # Get the message eto be sent
 
                     if send_message:
-                        if send_message[0] != '[': # If no player name is found, it must be run by the server
+                        if send_message[0] != '[':  # If no player name is found, it must be run by the server
                             send_message = '[%s] ' % username_dict[('127.0.0.1', 0)] + send_message
 
                         for i in players:  # send all players the chat message
@@ -924,11 +934,10 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                     if private_send_message:
                         for player in players:
                             if players[player].username == private_send_message[2]:
-                                sendQueue.put(((10, '[%s -> %s] '%(private_send_message[1], private_send_message[2])+private_send_message[0]), player))
+                                sendQueue.put(((10, '[%s -> %s] ' % (private_send_message[1], private_send_message[2]) + private_send_message[0]), player))
                                 break
 
-
-                    log_queue.put('[%s]' % datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + send_message) # put something in log file
+                    log_queue.put('[%s]' % datetime.datetime.fromtimestamp(time.time()).strftime('%Y-%m-%d %H:%M:%S') + send_message)  # put something in log file
 
                     if slack_enable:
                         broadcast(channel, send_message)
@@ -964,7 +973,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
                     for p in kill_list:  # Loop through the player kill list and kill all players that are inactive
 
-                        send_message = '[Server] %s was disconnected for not responding' % (players[p].username)  # chat message
+                        send_message = '[RahBot] %s was disconnected for not responding' % (players[p].username)  # chat message
 
                         for i in players:
                             sendQueue.put(((10, send_message), i))  # broadcast to all players that player is inactive
@@ -990,7 +999,7 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                 elif command == 101:  # Heartbeat to check if the player's client is still active
                     if address not in active_players:  # Add player replied to active player if not in already
                         active_players.append(address)
-                    rahprint('[Server] %s has responded to heartbeat' % message[1])  # debugging message
+                    rahprint('[RahBot] %s has responded to heartbeat' % message[1])  # debugging message
 
             else:
                 sendQueue.put(((11, '\n\n\nDisconnected from server\n\nAccess denied'), address))  # The player is not recognized and is rejected for security purposes

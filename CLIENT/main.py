@@ -83,12 +83,10 @@ def progress(block_no, block_size, file_size):
 
     # Draws progress bar
     draw.rect(screen, (0, 0, 0), (size[0] // 4, (size[1] // 2) + 50, size[0] // 2, 10))
-    draw.rect(screen, (0, 255, 0),
-              (size[0] // 4, (size[1] // 2) + 50, int((size[0] // 2) * update_progress / file_size), 10))
+    draw.rect(screen, (0, 255, 0), (size[0] // 4, (size[1] // 2) + 50, int((size[0] // 2) * update_progress / file_size), 10))
 
     # Progress text
-    status_text = rah.text("%s%% (%iMB/%iMB)" % (
-        int(update_progress / file_size * 100), round(update_progress / 1000000, 2), round(file_size / 1000000, 2)), 13)
+    status_text = rah.text("%s%% (%iMB/%iMB)" % (int(update_progress / file_size * 100), round(update_progress / 1000000, 2), round(file_size / 1000000, 2)), 13)
 
     # Fills region of screen so that text can be updated
     draw.rect(screen, (150, 150, 150), (size[0] // 4, size[1] // 2 + 65, size[0] // 2, 20))
@@ -137,12 +135,10 @@ def software_update():
 
             # Draws the 'window'
             draw.rect(screen, (0, 0, 0),
-                      (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20), size[1] // 2 - 90,
-                       max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+                      (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20), size[1] // 2 - 90, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
 
             draw.rect(screen, (150, 150, 150),
-                      (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20), size[1] // 2 - 100,
-                       max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
+                      (size[0] // 2 - max((update_text.get_width() + 20) // 2, size[0] // 4 + 20), size[1] // 2 - 100, max(update_text.get_width() + 20, size[0] // 2 + 40), 200))
 
             screen.blit(update_text,
                         (size[0] // 2 - update_text.get_width() // 2, size[1] // 2 - update_text.get_height() - 50))
@@ -234,8 +230,7 @@ def software_update():
 
                         # Checks if user files exists
                         # These files are usually not touched in a software update since they contain personal information
-                        user_files_intact = os.path.isfile('user_data/servers.json') and os.path.isfile(
-                            'user_data/session.json')
+                        user_files_intact = os.path.isfile('user_data/servers.json') and os.path.isfile('user_data/session.json')
 
                         # Copy user files ONLY if they don't exist, otherwise copy as normal
                         if (user_files_intact and file_name != 'user_data') or not user_files_intact:
@@ -256,8 +251,7 @@ def software_update():
                         version_file.write('%s\n%s' % (current_version, current_build))
 
                     # Confirms update is completed
-                    return ['information',
-                            '\n\n\nRahCraft has updated successfully\nPlease restart game to apply changes', 'exit']
+                    return ['information', '\n\n\nRahCraft has updated successfully\nPlease restart game to apply changes', 'exit']
 
                 # Exit the program
                 elif exit_button.update(screen, mx, my, m_press, 15, release):
@@ -325,8 +319,7 @@ def login():
     # Button objects
     exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
     auth_button = menu.Button(size[0] // 4, size[1] // 2 + 50, size[0] // 2, 40, 'auth', 'Login')
-    signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup',
-                                'Need an account? Signup here')
+    signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup', 'Need an account? Signup here')
 
     while True:
 
@@ -544,10 +537,15 @@ def about():
                   '',
                   '',
                   'Honourable mentions:',
-                  'Mr. McKenzie',
-                  'Mr. Macanovik',
-                  'Her Majesty Rahma Gillan',
-                  'Comrade Lenin',
+                  'Mr. McKenzie and Mr. Macanovik (Comp Sci gods)',
+                  'Her Majesty Rahma Gillan (Dear Leader)',
+                  'Dr J Bruce White (Motivation)',
+                  'Adam Mehdi (Math Getterer)',
+                  'Edward Snowden (Security Expert)',
+                  'Vahnessa Vuong (Meme maker)',
+                  'Megan Yang (Kpop person)',
+                  'The Lord himself, Weith Kong (God)',
+                  'Comrade Vladimir Lenin (Rolemodel)',
                   '',
                   '',
                   '',
@@ -568,7 +566,22 @@ def about():
                   "       ,####'     ##################!'    #####     ",
                   "     ,####'            #######              !####!  ",
                   "    ####'                                      #####",
-                  '    ~##                                          ##~']
+                  '    ~##                                          ##~',
+                  '',
+                  '%rah%',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  '',
+                  'Rah save the Queen!',
+                  '']
     scroll_y = size[1]
 
     # Imports and resizes Keith
@@ -576,6 +589,8 @@ def about():
     keith_surface = Surface(size)
     keith_surface.blit(keith_meme, (0, 0))
     keith_surface.set_alpha(1)  # Makes him transparent for meme effect
+
+    rahma_meme = image.load('textures/rahma.png')
 
     # Clock to maintain frame rate
     clock = time.Clock()
@@ -615,8 +630,13 @@ def about():
 
         # Draws all the text
         for y in range(0, len(about_list)):
-            about_text = normal_font.render(about_list[y], True, (255, 255, 255))
-            screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20 + scroll_y))
+
+            if about_list[y] != '%rah%':
+                about_text = normal_font.render(about_list[y], True, (255, 255, 255))
+                screen.blit(about_text, (size[0] // 2 - about_text.get_width() // 2, 50 + y * 20 + scroll_y))
+
+            else:
+                screen.blit(rahma_meme, (size[0] // 2 - rahma_meme.get_width() // 2, 50 + y * 20 + scroll_y))
 
         # Scrolls screen
         scroll_y -= 1
@@ -819,6 +839,18 @@ def death(message):
     buttons = [menu.Button(size[0] // 4, size[1] - 200, size[0] // 2, 40, 'game', "Respawn"),
                menu.Button(size[0] // 4, size[1] - 150, size[0] // 2, 40, 'menu', "Rage quit")]
 
+    # Load the graphics first so there is no delay for sound
+    kill_text = rah.text(message, 40)
+    screen.blit(kill_text, rah.center(0, 0, *size, *kill_text.get_size()))
+
+    display.flip()
+
+    # Sound effects
+    rah.load_sound(['sound/random/classic_hurt.ogg'])
+
+    sound_object = mixer.Sound('sound/sadviolin.ogg')
+    sound_object.play(0)
+
     while True:
         release = False
 
@@ -831,7 +863,7 @@ def death(message):
 
             if e.type == VIDEORESIZE:
                 screen = display.set_mode((e.w, e.h), RESIZABLE)
-                return 'information', message, previous
+                return 'death', message
 
         mx, my = mouse.get_pos()
         m_press = mouse.get_pressed()
@@ -844,6 +876,8 @@ def death(message):
             nav_update = button.update(screen, mx, my, m_press, 15, release)
 
             if nav_update is not None:
+                sound_object.stop()
+
                 return nav_update
 
         display.update()
@@ -977,9 +1011,7 @@ def server_picker():
     server_list = []
 
     for server in server_dict:
-        server_list.append(
-            [int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], '',
-             501])
+        server_list.append([int(server), server_dict[server]['name'], server_dict[server]['host'], server_dict[server]['port'], '', 501])
 
     server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
 
@@ -1539,5 +1571,6 @@ if __name__ == "__main__":
             navigation = 'menu'
             crash(traceback.format_exc(), 'menu')
 
+    mixer.music.stop()
     display.quit()
     raise SystemExit
