@@ -436,9 +436,9 @@ def game(surf, username, token, host, port, size):
 
     for stype in sound_types:  # Iterating through every sound type loading it
 
-        sound_list = glob.glob('sound/%s/*.ogg' % stype)
+        sound_list = glob.glob('sound/%s/*.ogg' % stype) #Searches directories for sounds
 
-        sound_blocks = [sound.replace('\\', '/').split("/")[-1][:-5] for sound in sound_list]
+        sound_blocks = [sound.replace('\\', '/').split("/")[-1][:-5] for sound in sound_list] #Changes slash direction (Windows and Linux differs)
 
         for block in sound_blocks:  # loading the different block sounds
             local_sounds = []
@@ -449,7 +449,7 @@ def game(surf, username, token, host, port, size):
 
             sound[stype][block] = local_sounds
 
-    block_step = None
+    block_step = None #Sound of block currently below user
 
     music_object = mixer.Sound('sound/music/bg4.wav')  # play some background music
     music_object.play(1, 0)
@@ -463,14 +463,12 @@ def game(surf, username, token, host, port, size):
     chest_object = menu.Chest(size[0], size[1])
     furnace_object = menu.Furnace(size[0], size[1])
 
-    crafting = False
+    crafting = False #UI states
     using_chest = False
     using_furnace = False
 
     current_gui = ''  # A var to define which inventory is being used
-    current_chest = []
-    chest_location = []
-
+    current_chest = [] #Current interactive block selected
     current_furnace = []
     chest_location = []
 
@@ -489,11 +487,13 @@ def game(surf, username, token, host, port, size):
     #======================================================================
     sky_diming = False
 
-    star_list = [[randint(0, size[0]), randint(0, size[1])] for star in range(size[0]//10)]
+    star_list = [[randint(0, size[0]), randint(0, size[1])] for _ in range(size[0]//10)]
 
     # Main game loop
     try:
         while True:
+
+            #Resets values
             release = False
             on_tick = False
             block_broken = False
@@ -533,19 +533,23 @@ def game(surf, username, token, host, port, size):
 
                 elif e.type == KEYDOWN:
 
+                    #Debug menu
                     if e.key == K_F3:
                         debug = not debug
 
+                    #Chat
                     if (e.key == K_SLASH or e.key == K_t) and not current_gui:
                         chat_enable = True
                         current_gui = 'CH'
 
+                    #Send chat message
                     if chat_enable and e.key == K_RETURN:
                         chat_queue.put(chat_content)
                         chat.content = ''
                         chat_enable = False
                         current_gui = ''
 
+                    #Escape from GUI
                     if e.key == K_ESCAPE:
                         if current_gui == 'C':
                             inventory_updated = True
@@ -578,16 +582,22 @@ def game(surf, username, token, host, port, size):
                             else:
                                 current_gui = ''
 
+                    #Keyboard shortcuts
                     elif not paused and current_gui != 'CH':
+
+                        #Hotbar
                         if e.unicode in INVENTORY_KEYS:
                             hotbar_slot = int(e.unicode) - 1
 
+                        #Fly
                         if e.key == K_f and debug:
                             fly = not fly
 
+                        #Nudge player up (Incase they get stuck)
                         if e.key == K_r and debug:
                             local_player.rect.y -= 40
 
+                        #Open inventory
                         if e.key == K_e and current_gui == '' or current_gui == 'I':
                             if current_gui == 'I':
                                 inventory_updated = True
@@ -599,12 +609,16 @@ def game(surf, username, token, host, port, size):
                             else:
                                 current_gui = ''
 
+                #Resize window
                 elif e.type == VIDEORESIZE:
+
+                    #Limits window size
                     rw, rh = max(e.w, 657), max(e.h, 505)
 
                     surf = display.set_mode((rw, rh), RESIZABLE)
                     size = ((rw, rh))
 
+                    #Redraws elements
                     chat = menu.TextBox(20, size[1] - 120, size[0] - 50, 40, '')
                     pause_menu = menu.Menu(pause_list, 0, 0, size[0], size[1])
                     inventory_object = menu.Inventory(0, 0, size[0], size[1])
@@ -618,6 +632,7 @@ def game(surf, username, token, host, port, size):
                     tint.fill((0, 0, 0))
                     tint.set_alpha(99)
 
+                #Game tick counter
                 elif e.type == TICKEVENT:
                     event.clear(TICKEVENT)
                     tick_timer = time.set_timer(TICKEVENT, 50)
@@ -627,37 +642,48 @@ def game(surf, username, token, host, port, size):
                     if current_tick == 20:
                         current_tick = 0
 
+            #Gets player's location in the world based on their pixel location and block size
             x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
             y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
+            #Gets the player's snapped block location
             block_clip = (local_player.rect.centerx // block_size * block_size, local_player.rect.centery // block_size * block_size)
             offset_clip = Rect((x_offset // block_size, y_offset // block_size, 0, 0))
 
+            #Tell server inventory has been modified
             if inventory_updated:
                 send_queue.put(([(5, inventory_items, hotbar_items), SERVERADDRESS]))
                 inventory_updated = False
 
+            #Player movement
             if current_tick % 2 == 0 and [local_player.rect.x, local_player.rect.y] != old_location:
                 old_location = [local_player.rect.x, local_player.rect.y]
                 send_queue.put(((1, local_player.rect.x / block_size, local_player.rect.y / block_size), SERVERADDRESS))
 
+            #Sets the section of the world player can currently view
             displaying_world = world[offset_clip.x:offset_clip.x + size[0] // block_size + 5,
                                offset_clip.y:offset_clip.y + size[1] // block_size + 5]
+
+            #Update cost = number of unloaded blocks on screen
             update_cost = displaying_world.flatten()
             update_cost = np.count_nonzero(update_cost == -1)
 
+            #If there are unloaded blocks, request for chucks to be sent
             if update_cost > 0 and on_tick and (offset_clip.x, offset_clip.y) not in render_request:
                 send_queue.put([[2, offset_clip.x, offset_clip.y, size, block_size], SERVERADDRESS])
                 render_request.add((offset_clip.x, offset_clip.y))
             # ===================Decode Message======================
 
             try:
+                #Message from server
                 server_message = message_queue.get_nowait()
                 command, message = server_message[0], server_message[1:]
 
+                #Update remote player location
                 if command == 1:
                     remote_username, current_x, current_y, tp = message
 
+                    #If player's location has been update (For teleportation)
                     if remote_username == username:
                         if tp:
                             x_offset, y_offset = int(current_x * block_size), int(current_y * block_size)
@@ -667,11 +693,14 @@ def game(surf, username, token, host, port, size):
                                 select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
                             else:
                                 select_texture = None
+
                             local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size, block_properties, select_texture)
 
+                    #Modify remote player object
                     elif remote_username in remote_players:
                         remote_players[remote_username].calculate_velocity((int(current_x * block_size), int(current_y * block_size)), tick_per_frame)
 
+                    #Create remote player object
                     else:
                         remote_players[remote_username] = player.RemotePlayer(remote_username,
                                                                               int(current_x * block_size),
@@ -679,14 +708,21 @@ def game(surf, username, token, host, port, size):
                                                                               (2 * block_size - 1 - 1) // 4,
                                                                               2 * block_size - 1 - 1)
 
+                #Chunks
                 elif command == 2:
+
+                    #Chunk location + Contents
                     chunk_position_x, chunk_position_y, world_chunk = message
+
+                    #Updates local copy of world
                     world[chunk_position_x - 5:chunk_position_x + size[0] // block_size + 5,
                     chunk_position_y - 5:chunk_position_y + size[1] // block_size + 5] = np.array(world_chunk, copy=True)
 
+                    #Remove chunk from list of requested chunks
                     if (chunk_position_x, chunk_position_y) in render_request:
                         render_request.remove((chunk_position_x, chunk_position_y))
 
+                #Break block
                 elif command == 3:
                     pos_x, pos_y = message
                     world[pos_x, pos_y] = 0
@@ -694,6 +730,7 @@ def game(surf, username, token, host, port, size):
                     if (pos_x, pos_y) in block_request:
                         block_request.remove((pos_x, pos_y))
 
+                #Place block
                 elif command == 4:
                     pos_x, pos_y, block = message
                     world[pos_x, pos_y] = block
@@ -701,6 +738,7 @@ def game(surf, username, token, host, port, size):
                     if (pos_x, pos_y) in block_request:
                         block_request.remove((pos_x, pos_y))
 
+                #Inventory updates
                 elif command == 6:
                     slot, meta_data = message
                     hotbar_items[slot] = meta_data[:]
@@ -709,6 +747,7 @@ def game(surf, username, token, host, port, size):
                     slot, meta_data = message
                     inventory_items[slot] = meta_data[:]
 
+                #Interactive block updates
                 elif command == 8:
                     if message[0] != "err":
                         storage_type, storage = message
@@ -718,14 +757,17 @@ def game(surf, username, token, host, port, size):
                         elif storage_type == 'furnace':
                             current_furnace = storage
 
+                #Delete remote player
                 elif command == 9:
                     remote_username = message[0]
 
                     del remote_players[remote_username]
 
+                #Chat
                 elif command == 10:
                     chat_list.append(message[0])
 
+                #Get kicked from game
                 elif command == 11:
                     quit_game()
 
@@ -746,45 +788,57 @@ def game(surf, username, token, host, port, size):
                 elif command == 14:
 
                     # Complete sync
+                    # #Incase something goes terribly wrong, server and resync all player parameters
                     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = message[0:]
 
+                    #Updates player location
                     player_x = int(float(player_x_) * block_size)
                     player_y = int(float(player_y_) * block_size)
 
+                    #Updates world
                     world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
 
+                    #Recreates player object
                     local_player = player.Player(player_x, player_y, (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1,
                                                  block_size, (K_a, K_d, K_w, K_s, K_SPACE))
 
+                    #Resets camera location
                     x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
                     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
+                    #Resets remote players
                     remote_players = {}
 
+                    #Requests for world again
                     send_queue.put(
                         [[2, x_offset // block_size, y_offset // block_size, size, block_size], SERVERADDRESS])
 
+                    #Waiting for server to respond with world
                     while True:
                         world_msg = message_queue.get()
                         rah.rahprint(world_msg)
                         if world_msg[0] == 2:
                             break
 
+                    #Updates local copy of world
                     world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
                     world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
 
+                    #Creates remote player objects
                     for Rp in r_players:
                         remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1],
                                                                  (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1)
 
-
+                    #Broadcasts ping to refesh session
                     for repeat in range(5):
                         send_queue.put(([(101, username), SERVERADDRESS]))
 
+                #Inventory update
                 elif command == 15:
                     hotbar_items = message[0]
                     inventory_items = message[1]
 
+                #Game tick sync
                 elif command == 100:
                     send_time, tick = message
 
@@ -796,6 +850,7 @@ def game(surf, username, token, host, port, size):
                         send_queue.put(([(101, username), SERVERADDRESS]))
 
             except:
+                #Nothing in queue
                 pass
 
             # Adding Sky
@@ -806,6 +861,7 @@ def game(surf, username, token, host, port, size):
                 else:
                     sky_tick -= 1
 
+            #Sky changes direction (Sun rise or sun set)
             if sky_tick > 12000:
                 sky_diming = True
                 sky_tick = sky_tick - (sky_tick-12000)
@@ -815,6 +871,7 @@ def game(surf, username, token, host, port, size):
 
                 rah.rahprint("Reset")
 
+            #Renders sky
             for y in range(size[1]):
                 r = min(max(int(((y_offset // block_size) / world_size_y) * 20 - int(255 * sky_tick / 24000)), 0), 255)
                 g = min(max(int(((y_offset // block_size)/world_size_y) * 200 - int(255 * sky_tick/24000)), 0),255)
@@ -822,7 +879,8 @@ def game(surf, username, token, host, port, size):
 
                 draw.line(surf, (r, g, b), (0, y), (size[0], y), 1)
 
-            if sky_tick < 18000 or sky_tick > 6000:
+            #Draws stars during the day time
+            if sky_tick < 6000 or sky_tick > 0:
                 for star in star_list:
                     draw.circle(surf, (255, 255, 255), (int(star[0]), star[1]), randint(1,2))
 
@@ -831,11 +889,13 @@ def game(surf, username, token, host, port, size):
                     if star[0] > size[0]:
                         star[0] = 0
 
+            #Draws sun and moon
             surf.blit(sun, (int(5600 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
             surf.blit(moon, (int(2800 - 4800 * (sky_tick % 24000) / 24000), max(y_offset // 50 + 50, -200)))
 
             draw.rect(surf, (0, 0, 0), (0, (100 * block_size) - y_offset, size[0], size[1]))
 
+            #Cave tiles
             bg_tile = Surface((block_size, block_size))
             bg_tile.blit(block_properties[9]['texture'], (0,0))
             bg_tile.set_alpha(200)
@@ -851,26 +911,36 @@ def game(surf, username, token, host, port, size):
             except:
                 pass
 
+            #Block player currently is holding
             if hotbar_items[hotbar_slot][0] != 0:
                 select_texture = item_lib[hotbar_items[hotbar_slot][0]][1]
             else:
                 select_texture = None
 
+            #Updates player object
             local_player.update(surf, x_offset, y_offset, fly, current_gui, block_clip, world, block_size,
                                 block_properties, select_texture)
 
+            #Tells server if fall damage occured
             if local_player.fall_distance > 10:
+
+                #Reduces health
                 health -= (local_player.fall_distance//10)
 
+                #Sends damage to server
                 send_queue.put(((12, health), SERVERADDRESS))
+
+                #Resets fall distance
                 local_player.fall_distance = 0
 
+                #Plays fall sound
                 rah.load_sound(damage_list)
-
                 rah.load_sound(['sound/random/classic_hurt.ogg'])
 
+            #Gets block below player to play block sound
             under_block = ((x_offset + size[0]//2)//block_size, (y_offset + size[1]//2)//block_size)
 
+            #Plays sound of block under player
             if world[under_block] > 0 and block_step != under_block:
                 rah.load_sound(sound['step'][block_properties[world[under_block]]['sound']])
 
