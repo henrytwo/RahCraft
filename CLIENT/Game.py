@@ -136,56 +136,55 @@ def pickup_item(inventory, hotbar, Nitem, item_lib):  # This function helps find
 
     return inventory, hotbar
 
-#Game function
+# Main game function
 def game(surf, username, token, host, port, size):
-
-    #Terminates processes when game quits to close connections
-    def quit_game():
-        music_object.stop()
+    def quit_game():  # A function that quits all of the processes, sends the quit command to the server and stops the music
+        music_object.stop()  # Stop music
         send_queue.put(((9,), SERVERADDRESS))
-        time.wait(50)
+        time.wait(50)  # Waits for the server to process and broadcast the info to other players
         sender.terminate()
         receiver.terminate()
         commandline.terminate()
 
     #Gets blocks surrounding the player
     def get_neighbours(x, y):
+        """Gets the neighbouring blocks"""
         return [world[x + 1, y], world[x - 1, y], world[x, y + 1], world[x, y - 1]]
 
     #Renders the blocks in the world
     def render_world():
-        for x in range(0, size[0] + block_size + 1, block_size):  # Render blocks
+        """Rendering the world and the block breaking animation"""
+        for x in range(0, size[0] + block_size + 1, block_size):  # Render and area of the world using a for loop since the world is in a 2d array
             for y in range(0, size[1] + block_size + 1, block_size):
-                block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]
+                block = world[(x + x_offset) // block_size][(y + y_offset) // block_size]  # Gets the current block
 
-                if len(block_properties) > block > 0:
+                if len(block_properties) > block > 0:  # If the block is not air and is not a unknown block
                     surf.blit(block_properties[block]['texture'],
-                              (x - x_offset % block_size, y - y_offset % block_size))
+                              (x - x_offset % block_size, y - y_offset % block_size))  # Blit texture
 
                     if breaking_block and current_breaking[1] == (x + x_offset) // block_size \
-                            and current_breaking[2] == (y + y_offset) // block_size:
-                        percent_broken = (current_breaking[3] / block_properties[current_breaking[0]]['hardness']) * 10
+                            and current_breaking[2] == (y + y_offset) // block_size:  # Checks if a block is being broken
+                        percent_broken = (current_breaking[3] / block_properties[current_breaking[0]]['hardness']) * 10  # calculate percentage of the block broken
                         surf.blit(breaking_animation[int(percent_broken)],
-                                  (x - x_offset % block_size, y - y_offset % block_size))
+                                  (x - x_offset % block_size, y - y_offset % block_size))  # Blit correct image
 
 
     def render_hotbar(hotbar_slot):
-        surf.blit(hotbar, hotbar_rect)
-        for item in range(9):
-            if Rect(hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6, 32, 32).collidepoint(mx, my) and mb[0]:
-                hotbar_slot = item
-
-            if hotbar_items[item][1] != 0:
-                surf.blit(item_lib[hotbar_items[item][0]][1], (hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
-                if hotbar_items[item][1] > 1:
+        """Renders the hotbar"""
+        surf.blit(hotbar, hotbar_rect)  # draws hotbar graphics
+        for item in range(9):  # Loops through the list drawing each item
+            if hotbar_items[item][1] != 0:  # If the hotbar is not blank
+                surf.blit(item_lib[hotbar_items[item][0]][1], (hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))  # Blit image
+                if hotbar_items[item][1] > 1:  # Add a number if the amount of items in that slot is greater than one
                     surf.blit(rah.text(str(hotbar_items[item][1]), 10), (hotbar_rect[0] + (32 + 8) * item + 6, size[1] - 32 - 6))
 
-            if len(hotbar_items[item]) == 3:
-                draw.rect(surf, (0, 0, 0), (hotbar_rect[0] + (32 + 8) * item + 10, size[1] - 10, 24, 2))
-                draw.rect(surf, (255, 255, 0), (hotbar_rect[0] + (32 + 8) * item + 10, size[1] - 10, int(24 * hotbar_items[item][2] // tool_properties[hotbar_items[item][0]]['durability']), 2))
+            if len(hotbar_items[item]) == 3:  # If an extra meta data is provided
+                draw.rect(surf, (0, 0, 0), (hotbar_rect[0] + (32 + 8) * item + 10, size[1] - 10, 24, 2))  # Creates a bar to display durability
+                draw.rect(surf, (255, 255, 0), (hotbar_rect[0] + (32 + 8) * item + 10, size[1] - 10, int(24 * hotbar_items[item][2] // tool_properties[hotbar_items[item][0]]['durability']), 2))  # Calculate the bar using the max durabilty
 
-        surf.blit(selected, (hotbar_rect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))
+        surf.blit(selected, (hotbar_rect[0] + (32 + 8) * hotbar_slot, size[1] - 32 - 12))  # Blit the slot selected for feed back
 
+        # Blit the block name if the item is not 0
         if hotbar_items[hotbar_slot][0] != 0:
             block_name = rah.text(str(item_lib[hotbar_items[hotbar_slot][0]][0]), 13)
             surf.blit(block_name, (size[0] // 2 - block_name.get_width() // 2, size[1] - 80))
@@ -196,26 +195,27 @@ def game(surf, username, token, host, port, size):
 
     # Setting Up Socket I/O and Multiprocessing
     # =====================================================================
-    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # UDP socket
     SERVERADDRESS = (host, port)
 
-    send_queue = Queue()
+    send_queue = Queue()  # Queues for cross process communication
     message_queue = Queue()
     chat_queue = Queue()
 
+    # Starting processes
     sender = Process(target=player_sender, args=(send_queue, server))
     sender.start()
 
     receiver = Process(target=receive_message, args=(message_queue, server))
     receiver.start()
 
-    fn = sys.stdin.fileno()
+    fn = sys.stdin.fileno()  # Gets the io number for connecting the input stream of the main input to the input stream of the child process
     commandline = Process(target=commandline_in, args=(send_queue, fn, SERVERADDRESS, chat_queue))
     commandline.start()
     cmd_in = ""
 
-    block_size = 50
-    build = 'RahCraft v0.1.1 EVALUATION'
+    block_size = 50  # Set the default block size
+    build = 'RahCraft v0.1.1 EVALUATION'  # A build version for reference
 
     # Chat
     # =====================================================================
@@ -233,36 +233,37 @@ def game(surf, username, token, host, port, size):
     rah.rahprint(item_lib)
     breaking_animation = [
         transform.scale(image.load("textures/blocks/destroy_stage_" + str(i) + ".png"), (block_size, block_size)).convert_alpha() for i
-        in range(10)]
+        in range(10)]  # Loading and transforming the block breaking animations to the correct size
 
     health_texture = {"none":image.load("textures/gui/icons/heart_none.png"),
                       "half": image.load("textures/gui/icons/heart_half.png"),
-                      "full": image.load("textures/gui/icons/heart_full.png")}
+                      "full": image.load("textures/gui/icons/heart_full.png")}  # Loads the required images for health
 
     hunger_texture = {"none":image.load("textures/gui/icons/hunger_none.png"),
                       "half": image.load("textures/gui/icons/hunger_half.png"),
-                      "full": image.load("textures/gui/icons/hunger_full.png")}
+                      "full": image.load("textures/gui/icons/hunger_full.png")}  # Loads the hunger images
 
-    tint = Surface(size)
+    tint = Surface(size)  # A tint surface for effects when opening inventory
     tint.fill((0, 0, 0))
     tint.set_alpha(99)
 
     # Receiving First Messages, Initing World, and Player
     # =====================================================================
 
-    clock = time.Clock()
-    dir = 10
-    slider_x = 0
+    clock = time.Clock()  # Setting pygame.time.Clock() to a simpler name for easier calling
+    dir = 10  # The direction that the loading bar slide moves and the speed
+    slider_x = 0  # The x location of the loading bar
 
-    for cycle in range(1001):
-        try:
-            server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)
+    for cycle in range(1001):  # A for loop is used to prevent the loss of important messages
+        try:  # Try and except is needed here because the server address can be invalid
+            server.sendto(pickle.dumps([0, username, token]), SERVERADDRESS)  # Send first login message to server
         except:
             return 'information', '\n\n\n\n\nUnable to connect to server\nHost or Port invalid', 'server_picker'
 
-        if cycle == 1000:
+        if cycle == 1000:  # Cannot connect to the server
             return 'information', '\n\n\n\n\nUnable to connect to server\nTimed out', 'server_picker'
 
+        # Creating a loading screen while waiting for message from server
         rah.wallpaper(surf, size)
 
         connecting_text = rah.text("Connecting to %s:%i..." % (host, port), 15)
@@ -274,56 +275,57 @@ def game(surf, username, token, host, port, size):
 
         slider_x += dir
 
-        if slider_x <= 0 or slider_x >= size[0]//2 - tile_w:
+        if slider_x <= 0 or slider_x >= size[0]//2 - tile_w:  # Change the direction of the slider if the reaches the end
             dir *= -1
 
         draw.rect(surf, (0,0,0), (size[0]//4, size[1]//2 + 40, size[0]//2, 10))
         draw.rect(surf, (0, 255, 0), (size[0]//4 + slider_x, size[1]//2 + 40, tile_w,10))
 
-        display.update()
+        display.update()  # Update the pygame window to show changes
 
-        try:
-            first_message = message_queue.get_nowait()
+        try:  # The queue may be empty
+            first_message = message_queue.get_nowait()  # Get the first message
 
-            if first_message[0] == 400 or not first_message[1:]:
-                sender.terminate()
+            if first_message[0] == 400 or not first_message[1:]:  # Message returned with a failure
+                sender.terminate()  # End the game
                 receiver.terminate()
                 commandline.terminate()
                 return 'information', first_message[1], 'server_picker'
-            elif first_message[0] == 0:
+            elif first_message[0] == 0:  # If login is successful
                 break
 
         except:
             pass
 
-        clock.tick(15)
+        clock.tick(15)  # set a frame rate to prevent client from overloading the server
 
+    # Retreving information from the message
     world_size_x, world_size_y, player_x_, player_y_, hotbar_items, inventory_items, r_players, health, hunger = first_message[1:]
 
     rah.rahprint("player done")
 
-    reach = 5
+    reach = 5  # The max number of blocks that the user can reach
 
-    player_x = int(float(player_x_) * block_size)
+    player_x = int(float(player_x_) * block_size)  # Calculates the actural pixel location of the player
     player_y = int(float(player_y_) * block_size)
 
-    world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])
+    world = np.array([[-1] * (world_size_y + 40) for _ in range(world_size_x)])  # Creates a blank world with some to spare for world loading
 
     local_player = player.Player(player_x, player_y, (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1, block_size,
-                                 (K_a, K_d, K_w, K_s, K_SPACE))
+                                 (K_a, K_d, K_w, K_s, K_SPACE))  # Creating local player
 
-    x_offset = local_player.rect.x - size[0] // 2 + block_size // 2
+    x_offset = local_player.rect.x - size[0] // 2 + block_size // 2  # Getting a offset of the part of the world to get
     y_offset = local_player.rect.y - size[1] // 2 + block_size // 2
 
     remote_players = {}
     x, y = 0, 0
 
-    for cycle in range(1001):
+    for cycle in range(1001):  # Important message again. Requesting world from the server. For loop prevents data loss by sending it multiple times
         if cycle == 1000:
             return 'information', '\n\n\n\n\nServer took too long to respond\nTimed out', 'server_picker'
 
         send_queue.put([[2, x_offset // block_size, y_offset // block_size, size, block_size], SERVERADDRESS])
-
+        # Loading screen with animations like above
         rah.wallpaper(surf, size)
 
         connecting_text = rah.text("Downloading world...", 15)
@@ -345,20 +347,20 @@ def game(surf, username, token, host, port, size):
         try:
             world_msg = message_queue.get_nowait()
 
-            if world_msg[0] == 2:
+            if world_msg[0] == 2:  # Message correctly recieved
                 world[world_msg[1] - 5:world_msg[1] + size[0] // block_size + 5,
                 world_msg[2] - 5:world_msg[2] + size[1] // block_size + 5] = np.array(world_msg[3], copy=True)
 
                 break
 
-            elif world_msg[0] == 100:
-                send_time, tick = world_msg[1:]
+            elif world_msg[0] == 100:  # Heartbeat
+                send_time, tick = world_msg[1:]  # Sets the tick
 
                 tick_offset = (round(ti.time(), 3) - send_time) * 20
 
                 sky_tick = tick_offset + tick
 
-                for repeat in range(3):
+                for repeat in range(3):  # Reply stating that his player is active
                     send_queue.put(([(101, username), SERVERADDRESS]))
 
         except:
@@ -371,10 +373,6 @@ def game(surf, username, token, host, port, size):
     for Rp in r_players:
         remote_players[Rp] = player.RemotePlayer(Rp, r_players[Rp][0], r_players[Rp][1],
                                                  (2 * block_size - 1 - 1) // 4, 2 * block_size - 1 - 1)
-
-    # Initing Pygame Components
-    # =====================================================================
-    clock = time.Clock()
 
     # Initing Ticks and Sky
     # =====================================================================
@@ -436,13 +434,13 @@ def game(surf, username, token, host, port, size):
 
     sound = {sound_type: {} for sound_type in sound_types}
 
-    for stype in sound_types:
+    for stype in sound_types:  # Iterating through every sound type loading it
 
         sound_list = glob.glob('sound/%s/*.ogg' % stype)
 
         sound_blocks = [sound.replace('\\', '/').split("/")[-1][:-5] for sound in sound_list]
 
-        for block in sound_blocks:
+        for block in sound_blocks:  # loading the different block sounds
             local_sounds = []
 
             for sound_dir in sound_list:
@@ -453,15 +451,15 @@ def game(surf, username, token, host, port, size):
 
     block_step = None
 
-    music_object = mixer.Sound('sound/music/bg4.wav')
+    music_object = mixer.Sound('sound/music/bg4.wav')  # play some background music
     music_object.play(1, 0)
 
-    damage_list = glob.glob('sound/damage/*.ogg')
+    damage_list = glob.glob('sound/damage/*.ogg')  # Getting a list of all the damage sounds
 
     # Crafting/other gui stuffz
     # =====================================================================
 
-    crafting_object = menu.Crafting(size[0], size[1])
+    crafting_object = menu.Crafting(size[0], size[1])  # In game inventory stuff
     chest_object = menu.Chest(size[0], size[1])
     furnace_object = menu.Furnace(size[0], size[1])
 
@@ -469,7 +467,7 @@ def game(surf, username, token, host, port, size):
     using_chest = False
     using_furnace = False
 
-    current_gui = ''
+    current_gui = ''  # A var to define which inventory is being used
     current_chest = []
     chest_location = []
 
@@ -478,19 +476,22 @@ def game(surf, username, token, host, port, size):
 
     # Block highlight
     # =====================================================================
-    highlight_good = Surface((block_size, block_size))
+    highlight_good = Surface((block_size, block_size))  # block is in range of the player's reach
     highlight_good.fill((255, 255, 255))
     highlight_good.set_alpha(50)
 
-    highlight_bad = Surface((block_size, block_size))
+    highlight_bad = Surface((block_size, block_size))  # block is not in range of the player's reach
     highlight_bad.fill((255, 0, 0))
     highlight_bad.set_alpha(90)
     inventory_updated = False
 
+    # Sky and stars
+    #======================================================================
     sky_diming = False
 
     star_list = [[randint(0, size[0]), randint(0, size[1])] for star in range(size[0]//10)]
 
+    # Main game loop
     try:
         while True:
             release = False
