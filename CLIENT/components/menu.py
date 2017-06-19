@@ -304,7 +304,7 @@ class Menu:
         # Gets the number of rows based on the largest row value
         row_num = max([button_row for button_row, *trash in button_param])
 
-        # Width if all buttons
+        # Width of all buttons
         group_w = 400
 
         # Height of group is height of button * number of buttons - padding
@@ -561,51 +561,28 @@ class ScrollingMenu:
     def __init__(self, button_param, x, y, w):
         # button_list <row>, <func>, <title>, <host>, <port>
 
-        # Preset button properties
-        # Space between buttons
-        V_SPACE = 5
+        #Width of button group
+        group_w = 400
 
-        # Button size
-        BUTTON_W = 400
-        BUTTON_H = 75
-
-        # Number of button rows
-        ROWS = max([button[0] for button in button_param])
-
-        # Size of button set
-        SET_H = ROWS * (BUTTON_H + V_SPACE) - V_SPACE
-        SET_W = BUTTON_W
-
-        # Location of button set on canvas
-        X_OFFSET = x + w // 2 - SET_W // 2
-        Y_OFFSET = 50
-
-        # List indexes
-        ROW = 0
-        TITLE = 1
-        HOST = 2
-        PORT = 3
-        MOTD = 4
-        STRENGTH = 5
+        #Location of button group on canvas
+        group_x = x + w // 2 - group_w // 2
+        group_y = 50
 
         # Button list
         self.button_list = []
 
         # Create button object based on params in button list
         for button_index in range(len(button_param)):
-            # Extracts button params from list
-            button_x = X_OFFSET
-            button_y = Y_OFFSET + button_param[button_index][ROW] * (BUTTON_H + V_SPACE)
+            row, title, host, port, motd, strength = button_param[button_index]
+            port, strength = int(port), int(strength)
 
-            title = button_param[button_index][TITLE]
-            host = button_param[button_index][HOST]
-            port = int(button_param[button_index][PORT])
-            motd = button_param[button_index][MOTD]
-            strength = int(button_param[button_index][STRENGTH])
+            # Extracts button params from list
+            button_x = group_x
+            button_y = group_y + row * 80
 
             # Creates object
             self.button_list.append(
-                ServerButton(button_x, button_y, BUTTON_W, BUTTON_H, title, host, port, motd, strength))
+                ServerButton(button_x, button_y, 400, 75, title, host, port, motd, strength))
 
     # Updates entire group
     def update(self, surf, release, right_release, mx, my, m_press, y_offset, size):
