@@ -162,7 +162,7 @@ def software_update():
 
                     # If the screen is resized, call function again to redraw everything
                     if e.type == VIDEORESIZE:
-                        screen = display.set_mode((e.w, e.h), RESIZABLE)
+                        screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                         return 'update'
 
                 mx, my = mouse.get_pos()
@@ -362,7 +362,7 @@ def login():
 
             # If resize, recall the function to redraw
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'login'
 
         mx, my = mouse.get_pos()
@@ -608,7 +608,7 @@ def about():
 
             # If window is resized, call function again to redraw
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 music_object.stop()
                 return 'about'
 
@@ -692,7 +692,11 @@ def reject():
 
             # Recall function on resize to redraw everything
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
+
+                
+
+
                 return 'reject'
 
         mx, my = mouse.get_pos()
@@ -759,7 +763,7 @@ def crash(error, previous):
 
             # Recall function on resize
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'crash', error, previous
 
         mx, my = mouse.get_pos()
@@ -806,7 +810,7 @@ def information(message, previous):
 
             # Update display if resized
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'information', message, previous
 
         mx, my = mouse.get_pos()
@@ -862,7 +866,7 @@ def death(message):
                 release = True
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'death', message
 
         mx, my = mouse.get_pos()
@@ -921,7 +925,7 @@ def assistance():
                 release = True
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'assistance'
 
         mx, my = mouse.get_pos()
@@ -960,7 +964,7 @@ def options():
                 release = True
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'assistance'
 
         mx, my = mouse.get_pos()
@@ -1091,7 +1095,7 @@ def server_picker():
                     right_release = True
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'server_picker'
 
             if e.type == MOUSEBUTTONDOWN:
@@ -1223,7 +1227,7 @@ def custom_server_picker():
                     field_selected = field_list[0]
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'custom_server_adder'
 
         mx, my = mouse.get_pos()
@@ -1316,7 +1320,7 @@ def server_adder():
                     field_selected = field_list[0]
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 500), max(e.h, 400)), DOUBLEBUF + RESIZABLE)
                 return 'add_server'
 
         mx, my = mouse.get_pos()
@@ -1441,7 +1445,7 @@ def menu_screen():
                 return 'login'
 
             if e.type == VIDEORESIZE:
-                screen = display.set_mode((e.w, e.h), RESIZABLE)
+                screen = display.set_mode((max(e.w, 657), max(e.h, 505)), DOUBLEBUF + RESIZABLE)
                 return 'menu'
 
         mx, my = mouse.get_pos()
@@ -1546,6 +1550,14 @@ if __name__ == "__main__":
 
     while navigation != 'exit':
         size = (screen.get_width(), screen.get_height())
+
+        if size[0] < 657:
+            size = (657, size[1])
+
+        if size[1] < 505:
+            size = (size[0], 505)
+            
+        screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 
         try:
 
