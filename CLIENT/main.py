@@ -1551,13 +1551,18 @@ if __name__ == "__main__":
     while navigation != 'exit':
         size = (screen.get_width(), screen.get_height())
 
+        screen_update = False
+
         if size[0] < 657:
             size = (657, size[1])
+            screen_update = True
 
         if size[1] < 505:
             size = (size[0], 505)
-            
-        screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
+            screen_update = True
+
+        if screen_update:
+            screen = display.set_mode(size, DOUBLEBUF + RESIZABLE)
 
         try:
 
