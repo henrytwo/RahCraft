@@ -10,7 +10,6 @@ from pygame import *  # to allow use of graphics
 from random import *  # to allow use of random generators
 from math import *  # to allow use of trigonometric functions
 
-
 # Function to control printing in game code (purely for dev purposes)
 def rahprint(*text):
     """ A general convenience print statement used for debugging. """

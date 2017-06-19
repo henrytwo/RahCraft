@@ -16,8 +16,8 @@ import numpy as np
 from math import *
 from random import *
 import time as t
-from SERVER.components.slack import *
-from SERVER.components.world import *
+from components.slack import *
+from components.world import *
 
 import getpass
 import requests
