@@ -1,4 +1,4 @@
-#RahCraft
+# RahCraft
 
 This is a 2D Minecraft clone developed in Python using the Pygame module.
 (Basically Terraria)
