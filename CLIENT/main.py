@@ -1423,19 +1423,25 @@ def server_adder():
             #Same process as before to add server
             if nav_update == 'server_picker' and fields['Name'][1] and fields['Host'][1] and fields['Port'][1]:
 
-                if not fields['Port'][1].is_digit():
+                # Check if port is an integer
+                if not fields['Port'][1].isdigit():
                     return 'information', "\n\n\n\n\nCouldn't add server\nInvalid entry for port", 'add_server'
 
+                # Loads server file
                 server_update = json.load(open('user_data/servers.json'))
 
+                # Checks if entry already exists
                 for server in server_update:
                     if server_update[server]['name'] == fields['Name'][1]:
                         return 'information', "\n\n\n\n\nCouldn't add server\nName conflicts with previous entry", 'add_server'
 
+                # Gets params from fields
                 name, host, port = fields['Name'][1], fields['Host'][1], int(fields['Port'][1])
 
+                # Adds server to json
                 server_update.update({str(len(server_update)): {"name": name, "host": host, "port": port}})
 
+                # Writes json to file
                 with open('user_data/servers.json', 'w') as servers:
                     json.dump(server_update, servers, indent=4, sort_keys=True)
 
