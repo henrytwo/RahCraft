@@ -1,5 +1,12 @@
 # RahCraft
+<br />
+**IMPORTANT: AUTHENTICATION SERVERS ARE NO LONGER MAINTAINED**
+<br />
+**TO BYPASS AUTHENTICATION, ENTER A USERNAME AND PRESS CTRL + SHIFT + ENTER**
+<br />
+**YOU MUST TURN AUTHENTICATION OFF IN SERVER CONFIGURATION TO JOIN A GAME**
 
+<br />
 This is a 2D Minecraft clone developed in Python using the Pygame module.
 (Basically Terraria)
 
