@@ -16,7 +16,6 @@ import numpy as np
 from math import *
 from random import *
 import time as t
-from components.slack import *
 from components.world import *
 
 import getpass
@@ -27,10 +26,9 @@ with open("data/config.rah", "r") as config:  # Reading server settings from a f
     host = config[0]  # The ip address that the socket will bind to
     port = int(config[1])  # The port that the socket will bind to
     world_name = config[2]  # The name of the world to load
-    slack_enable = int(config[3])  # Slack integration to help with server management
-    channel = config[4]  # Slack channel to broadcast messages
-    online = int(config[5])  # Whether to check login with the auto server or not to prevent cheating
-    whitelist_enable = int(config[6])  # Whitelist to control who can access the server
+    channel = config[3]  # Slack channel to broadcast messages
+    online = int(config[4])  # Whether to check login with the auto server or not to prevent cheating
+    whitelist_enable = int(config[5])  # Whitelist to control who can access the server
 
 # If world doesn't exist
 if not os.path.isfile('saves/%s.pkl' % world_name):
@@ -300,9 +298,6 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
     global_tick = Value('l', 0)  # A multiprocessing shared value to keep track of how many ticks has elapsed
     username = set()
-
-    if slack_enable:
-        config_slack()
 
     world = World(world_name)  # Creating a new world object to load the world
 
@@ -848,7 +843,6 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                             config_list = [host,
                                                            port,
                                                            world_name,
-                                                           slack_enable,
                                                            channel,
                                                            online,
                                                            whitelist_enable]
@@ -951,11 +945,6 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                                     '%Y-%m-%d %H:%M:%S') + pm)  # put something in log file
                                 break
 
-
-
-                    if slack_enable:
-                        broadcast(channel, send_message)
-
                 elif command == 12:
                     # Health
                     # Data: [12, <cordx>, <cordy>]
@@ -992,9 +981,6 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
                         for i in players:
                             sendQueue.put(((10, send_message), i))  # broadcast to all players that player is inactive
 
-                        if slack_enable:  # send on slack if needed
-                            broadcast(channel, send_message)
-
                         playerNDisconnect.append(players[p].number)  # Disconnect player
                         PlayerData[players[p].username] = players[p].save()
                         offPlayer = players[p].username
@@ -1005,8 +991,6 @@ if __name__ == '__main__':  # Used to make sure multiprocessing does not run thi
 
                         for i in players:
                             sendQueue.put(((9, offPlayer), i))
-
-                    broadcast(channel, '[Tick] %s' % message[2])  # send slack message
 
                     active_players = []  # Reset active player
 

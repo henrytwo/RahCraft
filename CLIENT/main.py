@@ -287,6 +287,9 @@ def login():
     title_text = rah.text('Welcome to RahCraft! Login to continue', 20)
     screen.blit(title_text, (size[0] // 2 - title_text.get_width() // 2, size[1] // 4 - title_text.get_height() - 50))
 
+    notice_text = rah.text('Notice: RahCraft is no longer being maintained, so authentication has been bypassed', 15)
+    screen.blit(notice_text, (size[0] // 2 - notice_text.get_width() // 2, size[1] // 4 - notice_text.get_height() - 10))
+
     try:  # Try and except since the state of session file is known
         with open('user_data/session.json', 'r') as session_file:
 
@@ -320,7 +323,7 @@ def login():
     # Button objects
     exit_button = menu.Button(size[0] // 4, size[1] // 2 + 200, size[0] // 2, 40, 'exit', 'Exit game')
     auth_button = menu.Button(size[0] // 4, size[1] // 2 + 50, size[0] // 2, 40, 'auth', 'Login')
-    signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup', 'Need an account? Signup here')
+    signup_button = menu.Button(size[0] // 4, size[1] // 2 + 100, size[0] // 2, 40, 'signup', 'Need an account? Signup here (Deprecated)')
 
     while True:
 
@@ -346,13 +349,12 @@ def login():
 
             if e.type == KEYDOWN:
                 # Shift enter to bypass auth
-                if key.get_mods() & KMOD_CTRL and key.get_mods() & KMOD_SHIFT:
-                    if e.key == K_RETURN and username:
-                        return 'menu'
+                if e.key == K_RETURN and username:
+                    return 'menu'
 
                 # Enter to auth with credentials
-                elif e.key == K_RETURN and username and password:
-                    return 'auth'
+                #elif e.key == K_RETURN and username and password:
+                #    return 'auth'
 
                 # Tab to alternate between fields
                 if e.key == K_TAB:
